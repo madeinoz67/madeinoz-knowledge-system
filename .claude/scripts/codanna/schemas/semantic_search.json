@@ -1,0 +1,134 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Codanna Semantic Search Response (Envelope v1.0.0)",
+  "type": "object",
+  "required": ["type", "status", "code", "exit_code", "message", "data", "meta"],
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": ["result", "error"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["success", "not_found", "error"]
+    },
+    "code": {
+      "type": "string",
+      "enum": ["OK", "NOT_FOUND", "PARSE_ERROR", "INDEX_ERROR", "INVALID_QUERY", "INTERNAL_ERROR"]
+    },
+    "exit_code": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255
+    },
+    "message": {
+      "type": "string"
+    },
+    "hint": {
+      "type": "string"
+    },
+    "data": {
+      "type": ["array", "null"],
+      "items": {
+        "$ref": "#/$defs/searchResultWithContext"
+      }
+    },
+    "error": {
+      "type": "object",
+      "properties": {
+        "suggestions": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "meta": {
+      "$ref": "#/$defs/meta"
+    }
+  },
+  "$defs": {
+    "meta": {
+      "type": "object",
+      "required": ["schema_version"],
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "1.0.0"
+        },
+        "entity_type": {
+          "type": "string"
+        },
+        "count": {
+          "type": "integer"
+        },
+        "query": {
+          "type": "string"
+        },
+        "lang": {
+          "type": "string"
+        },
+        "duration_ms": {
+          "type": "integer"
+        }
+      }
+    },
+    "searchResultWithContext": {
+      "type": "object",
+      "required": ["symbol", "score", "context"],
+      "properties": {
+        "symbol": { "$ref": "#/$defs/symbol" },
+        "score": { "type": "number" },
+        "context": {
+          "type": "object",
+          "required": ["file_path", "relationships"],
+          "properties": {
+            "file_path": { "type": "string" },
+            "relationships": { "$ref": "#/$defs/relationships" }
+          }
+        }
+      }
+    },
+    "symbol": {
+      "type": "object",
+      "required": ["id", "name", "kind", "file_id", "range", "visibility"],
+      "properties": {
+        "id": { "type": "integer" },
+        "name": { "type": "string" },
+        "kind": { "type": "string" },
+        "file_id": { "type": "integer" },
+        "range": { "$ref": "#/$defs/range" },
+        "file_path": { "type": "string" },
+        "signature": { "type": ["string", "null"] },
+        "doc_comment": { "type": ["string", "null"] },
+        "module_path": { "type": ["string", "null"] },
+        "visibility": { "type": "string" },
+        "scope_context": {},
+        "language_id": { "type": ["string", "null"] }
+      }
+    },
+    "range": {
+      "type": "object",
+      "required": ["start_line", "start_column", "end_line", "end_column"],
+      "properties": {
+        "start_line": { "type": "integer" },
+        "start_column": { "type": "integer" },
+        "end_line": { "type": "integer" },
+        "end_column": { "type": "integer" }
+      }
+    },
+    "relationships": {
+      "type": ["object", "null"],
+      "properties": {
+        "implements": { "type": ["array", "null"] },
+        "implemented_by": { "type": ["array", "null"] },
+        "defines": { "type": ["array", "null"] },
+        "calls": { "type": ["array", "null"] },
+        "called_by": { "type": ["array", "null"] },
+        "extends": { "type": ["array", "null"] },
+        "extended_by": { "type": ["array", "null"] },
+        "uses": { "type": ["array", "null"] },
+        "used_by": { "type": ["array", "null"] }
+      }
+    }
+  }
+}

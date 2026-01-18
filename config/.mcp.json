@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "madeinoz-knowledge": {
+      "type": "http",
+      "url": "http://localhost:8000/mcp"
+    }
+  }
+}

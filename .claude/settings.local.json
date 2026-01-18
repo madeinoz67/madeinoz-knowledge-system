@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bun test:*)",
+      "Bash(node:*)",
+      "Bash(cat:*)",
+      "Bash(find:*)",
+      "Bash(tree:*)",
+      "Bash(wc:*)",
+      "mcp__pai-knowledge__add_memory",
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "mcp__madeinoz-knowledge__get_status",
+      "mcp__madeinoz-knowledge__add_memory",
+      "mcp__madeinoz-knowledge__search_memory_facts",
+      "mcp__madeinoz-knowledge__get_episodes",
+      "mcp__madeinoz-knowledge__search_nodes",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_evaluate",
+      "mcp__playwright__browser_close",
+      "mcp__brightdata__scrape_as_markdown",
+      "mcp__web-search-prime__webSearchPrime",
+      "mcp__brightdata__search_engine",
+      "mcp__web-reader__webReader",
+      "mcp__zread__search_doc",
+      "mcp__zread__get_repo_structure",
+      "mcp__zread__read_file",
+      "mcp__madeinoz-knowledge__clear_graph",
+      "mcp__codanna__get_index_info",
+      "mcp__codanna__semantic_search_docs",
+      "mcp__codanna__search_documents",
+      "mcp__codanna__semantic_search_with_context",
+      "mcp__codanna__search_symbols",
+      "mcp__codanna__find_symbol",
+      "mcp__codanna__get_calls",
+      "mcp__codanna__find_callers",
+      "mcp__codanna__analyze_impact"
+    ]
+  }
+}
