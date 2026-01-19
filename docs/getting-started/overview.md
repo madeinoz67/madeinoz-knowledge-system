@@ -1,10 +1,18 @@
-# Madeinoz Knowledge System - User Guide
+---
+title: "Getting Started Overview"
+description: "Introduction to the Madeinoz Knowledge System and how to use your personal AI memory"
+---
+
+# Knowledge System - User Guide
 
 Welcome to the Madeinoz Knowledge System! This guide will help you understand and use your personal knowledge management system.
 
-## What is the Madeinoz Knowledge System?
+!!! info "PAI Pack"
+    This is a **[PAI (Personal AI Infrastructure)](https://github.com/danielmiessler/PAI)** Pack - a modular component that adds persistent memory capabilities to your AI infrastructure. PAI Packs are self-contained modules that can be installed into any PAI-compatible system.
 
-Think of the Madeinoz Knowledge System as your AI's memory. Instead of forgetting what you discussed yesterday or last week, it remembers everything you tell it to remember. It's like having a smart notebook that:
+## What is the Knowledge System?
+
+Think of the Knowledge System as your AI's memory. Instead of forgetting what you discussed yesterday or last week, it remembers everything you tell it to remember. It's like having a smart notebook that:
 
 - Automatically organizes information as you add it
 - Finds connections between different topics
@@ -55,7 +63,8 @@ The system traces the relationships in your knowledge graph and explains how the
 ### Before You Begin
 
 You'll need:
-1. The Madeinoz Knowledge System installed (see [installation guide](installation.md))
+
+1. The Madeinoz Knowledge System installed (see [installation guide](../installation/index.md))
 2. The MCP server running in the background
 3. An OpenAI API key (or similar service)
 
@@ -211,10 +220,10 @@ When you search, the system uses vector similarity to find relevant knowledge, e
 
 Ready to dive deeper? Check out:
 
-- [Installation Guide](installation.md) - Set up the system step by step
-- [Usage Guide](usage.md) - Detailed examples and commands
-- [Concepts Guide](concepts.md) - Deep dive into how the system works
-- [Troubleshooting](troubleshooting.md) - Fix common issues
+- [Installation Guide](../installation/index.md) - Set up the system step by step
+- [Usage Guide](../usage/basic-usage.md) - Detailed examples and commands
+- [Concepts Guide](../concepts/knowledge-graph.md) - Deep dive into how the system works
+- [Troubleshooting](../troubleshooting/common-issues.md) - Fix common issues
 
 ## Getting Help
 
@@ -222,8 +231,8 @@ If something isn't working:
 
 1. Check if the MCP server is running: `bun run src/server/status.ts`
 2. Look at the logs: `bun run src/server/logs.ts`
-3. Read the [troubleshooting guide](troubleshooting.md)
-4. Review the main [README](../README.md) for technical details
+3. Read the [troubleshooting guide](../troubleshooting/common-issues.md)
+4. Review the [Architecture](../concepts/architecture.md) for technical details
 
 ## Tips for Success
 

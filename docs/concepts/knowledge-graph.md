@@ -1,3 +1,8 @@
+---
+title: "Knowledge Graph Concepts"
+description: "Understanding how knowledge graphs work, core concepts, and how information flows through the system"
+---
+
 # Key Concepts
 
 This guide explains how the Madeinoz Knowledge System works under the hood. Understanding these concepts will help you use the system more effectively.
@@ -9,6 +14,7 @@ This guide explains how the Madeinoz Knowledge System works under the hood. Unde
 Think of a traditional note-taking app like a filing cabinet with folders. You put notes in folders, and later you search for the folder you need.
 
 A knowledge graph is different. It's more like a mind map where:
+
 - **Nodes** are the concepts (Podman, Docker, containers)
 - **Edges** are the relationships (Podman is similar to Docker)
 - **Paths** connect related concepts across multiple hops
@@ -121,6 +127,7 @@ Facts connect entities and give your knowledge structure. They're also called "r
 | **Purpose** | X for Y | "entity extraction" → used for → "knowledge graph" |
 
 **Example Facts:**
+
 ```
 Podman → [is alternative to] → Docker
 Podman → [property: daemonless] → (no daemon required)
@@ -133,6 +140,7 @@ Neo4j → [is backend for] → Graphiti
 Groups let you organize knowledge into separate namespaces, like having multiple notebooks.
 
 **Default Group:**
+
 Everything goes into the "main" group unless you specify otherwise.
 
 **Use Cases:**
@@ -142,6 +150,7 @@ Everything goes into the "main" group unless you specify otherwise.
 - **projects**: Project-specific knowledge
 
 **Isolation:**
+
 Groups don't share entities - "Docker" in your work group is separate from "Docker" in your personal group.
 
 ### 5. Embeddings
@@ -149,6 +158,7 @@ Groups don't share entities - "Docker" in your work group is separate from "Dock
 This is the "magic" that makes semantic search work.
 
 **What They Are:**
+
 When you add knowledge, the system converts your text into a vector (a list of numbers). Similar concepts have similar vectors.
 
 **Example:**
@@ -234,43 +244,60 @@ You can search for "container tools" and find results about "Docker" and "Podman
 
 ### Component Stack
 
-```
-┌─────────────────────────────────────┐
-│   You (Natural Language)            │
-│   "Remember this..."                │
-└────────────┬────────────────────────┘
-             │
-             ▼
-┌─────────────────────────────────────┐
-│   PAI Skill (Intent Recognition)    │
-│   - Routes to workflows              │
-│   - Manages conversation flow        │
-└────────────┬────────────────────────┘
-             │
-             ▼
-┌─────────────────────────────────────┐
-│   MCP Server (API Layer)            │
-│   - HTTP endpoint                    │
-│   - Tool definitions                 │
-│   - Request/response handling        │
-└────────────┬────────────────────────┘
-             │
-             ▼
-┌─────────────────────────────────────┐
-│   Graphiti (Knowledge Processing)   │
-│   - LLM entity extraction            │
-│   - Relationship mapping             │
-│   - Vector embedding creation        │
-└────────────┬────────────────────────┘
-             │
-             ▼
-┌─────────────────────────────────────┐
-│   Neo4j (Graph Database)            │
-│   - Stores entities as nodes         │
-│   - Stores relationships as edges    │
-│   - Handles vector search            │
-│   - Manages indices                  │
-└─────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph User_Interface[User Interface]
+        USER[You - Natural Language Input]
+    end
+
+    subgraph Intent_Layer[Intent Layer]
+        SKILL[PAI Skill]
+        ROUTE[Intent Recognition]
+        FLOW[Conversation Flow Manager]
+    end
+
+    subgraph API_Layer[API Layer]
+        MCP[MCP Server]
+        HTTP[HTTP Endpoint]
+        TOOLS[Tool Definitions]
+        REQ[Request/Response Handler]
+    end
+
+    subgraph Processing_Layer[Processing Layer]
+        GRAPHITI[Graphiti]
+        EXTRACT[LLM Entity Extraction]
+        RELMAP[Relationship Mapping]
+        EMBED[Vector Embedding Creation]
+    end
+
+    subgraph Storage_Layer[Storage Layer]
+        NEO4J[(Neo4j)]
+        NODES[Entities as Nodes]
+        EDGES[Relationships as Edges]
+        VECTOR[Vector Search]
+        INDEX[Index Management]
+    end
+
+    USER --> SKILL
+    SKILL --> ROUTE
+    SKILL --> FLOW
+    ROUTE --> MCP
+    MCP --> HTTP
+    MCP --> TOOLS
+    MCP --> REQ
+    REQ --> GRAPHITI
+    GRAPHITI --> EXTRACT
+    GRAPHITI --> RELMAP
+    GRAPHITI --> EMBED
+    EMBED --> NEO4J
+    NEO4J --> NODES
+    NEO4J --> EDGES
+    NEO4J --> VECTOR
+    NEO4J --> INDEX
+
+    style USER fill:#4a90d9,color:#fff
+    style GRAPHITI fill:#28a745,color:#fff
+    style NEO4J fill:#6f42c1,color:#fff
 ```
 
 ### Data Flow
@@ -306,33 +333,64 @@ The knowledge system uses LLMs at multiple stages. Understanding this helps you 
 
 When you say "remember this," an LLM analyzes your text to extract structure:
 
-```
-Your Input: "Podman is faster than Docker for starting containers
-             because it doesn't require a daemon process"
-                              ↓
-                    LLM Analysis (GPT-4)
-                              ↓
-┌─────────────────────────────────────────────────────────────────┐
-│ Entity Extraction:                                              │
-│   • Podman (Tool) - container management tool                   │
-│   • Docker (Tool) - container platform                          │
-│   • daemon process (Concept) - background service               │
-│   • container startup (Procedure) - launching containers        │
-│                                                                 │
-│ Relationship Mapping:                                           │
-│   • Podman → [faster than] → Docker                            │
-│   • Podman → [does not require] → daemon process               │
-│   • Docker → [requires] → daemon process                        │
-│   • Both → [used for] → container startup                       │
-│                                                                 │
-│ Entity Classification:                                          │
-│   • Determines entity types (Tool, Concept, Procedure, etc.)    │
-│   • Assigns confidence scores                                   │
-│   • Identifies temporal markers                                 │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph Input_Stage[Input]
+        INPUT[Your Natural Language Input]
+    end
+
+    subgraph LLM_Processing[LLM Processing]
+        LLM[GPT-4 / GPT-4o-mini]
+    end
+
+    subgraph Entity_Extraction[Entity Extraction]
+        E1[Podman - Tool]
+        E2[Docker - Tool]
+        E3[daemon process - Concept]
+        E4[container startup - Procedure]
+    end
+
+    subgraph Relationship_Mapping[Relationship Mapping]
+        R1[Podman faster than Docker]
+        R2[Podman does not require daemon]
+        R3[Docker requires daemon]
+        R4[Both used for container startup]
+    end
+
+    subgraph Classification_Stage[Classification]
+        C1[Entity Types]
+        C2[Confidence Scores]
+        C3[Temporal Markers]
+    end
+
+    INPUT --> LLM
+    LLM --> E1
+    LLM --> E2
+    LLM --> E3
+    LLM --> E4
+    E1 --> R1
+    E2 --> R1
+    E1 --> R2
+    E3 --> R2
+    E2 --> R3
+    E3 --> R3
+    E1 --> R4
+    E2 --> R4
+    E4 --> R4
+    R1 --> C1
+    R2 --> C2
+    R3 --> C3
+
+    style INPUT fill:#4a90d9,color:#fff
+    style LLM fill:#28a745,color:#fff
+    style E1 fill:#17a2b8,color:#fff
+    style E2 fill:#17a2b8,color:#fff
+    style E3 fill:#ffc107,color:#000
+    style E4 fill:#fd7e14,color:#fff
 ```
 
 **What the LLM does:**
+
 1. **Identifies entities** - Recognizes "things" in your text (people, tools, concepts)
 2. **Classifies types** - Determines if something is a Procedure, Preference, etc.
 3. **Extracts relationships** - Understands how entities connect
@@ -340,6 +398,7 @@ Your Input: "Podman is faster than Docker for starting containers
 5. **Handles ambiguity** - Makes intelligent choices about unclear text
 
 **Why this matters:**
+
 - Better LLM = better entity extraction
 - `gpt-4o` extracts more nuanced relationships than `gpt-4o-mini`
 - Cost tradeoff: ~$0.01/capture (gpt-4o-mini) vs ~$0.03/capture (gpt-4o)
@@ -370,6 +429,7 @@ Similarity scores:
 ```
 
 **What the embedding model does:**
+
 1. **Converts text to vectors** - Creates numeric representations
 2. **Captures meaning** - Similar concepts have similar vectors
 3. **Enables fuzzy matching** - Find "Docker alternatives" even if you never said "alternatives"
@@ -392,6 +452,7 @@ Your Query: "What container tools do I know about?"
 ```
 
 **2. Result Synthesis (optional):**
+
 After retrieval, an LLM can synthesize results into a coherent answer.
 
 ### Model Configuration
@@ -423,6 +484,7 @@ MADEINOZ_KNOWLEDGE_MODEL_NAME=gpt-4o-mini
 | Search query embedding | text-embedding-3-small | ~$0.0001 per search |
 
 **Monthly estimates:**
+
 - Light use (50 captures, 200 searches): ~$0.50-1.00
 - Moderate use (200 captures, 500 searches): ~$2.00-5.00
 - Heavy use (500+ captures): ~$5.00-15.00
@@ -625,6 +687,6 @@ No cross-group queries (by design - keeps work and personal separate).
 
 Now that you understand the concepts:
 
-- Return to the [Usage Guide](usage.md) with deeper understanding
-- Check [Troubleshooting](troubleshooting.md) if you have issues
-- Explore the technical [README](/Users/seaton/.config/pai/Packs/madeinoz-knowledge-system/README.md) for implementation details
+- Return to the Usage Guide with deeper understanding
+- Check Troubleshooting if you have issues
+- Explore the technical README for implementation details

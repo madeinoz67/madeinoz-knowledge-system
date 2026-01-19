@@ -1,0 +1,95 @@
+# Contract: MkDocs Material Configuration
+# Feature: 002-mkdocs-documentation
+# Version: 1.0.0
+#
+# This file serves as the contract for the mkdocs.yml configuration.
+# Implementation MUST match this structure.
+
+site_name: Madeinoz Knowledge System
+site_description: Personal knowledge management system powered by Graphiti knowledge graph
+site_author: madeinoz67
+site_url: https://madeinoz67.github.io/madeinoz-knowledge-system/
+
+repo_name: madeinoz67/madeinoz-knowledge-system
+repo_url: https://github.com/madeinoz67/madeinoz-knowledge-system
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: deep purple
+      accent: purple
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: deep purple
+      accent: purple
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.tabs.link
+  logo: assets/logo.png
+  favicon: assets/favicon.ico
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Overview: getting-started/overview.md
+    - Quick Reference: getting-started/quick-reference.md
+  - Installation:
+    - Guide: installation/index.md
+    - Requirements: installation/requirements.md
+    - Verification: installation/verification.md
+  - Usage:
+    - Basic Usage: usage/basic-usage.md
+    - Advanced: usage/advanced.md
+  - Concepts:
+    - Architecture: concepts/architecture.md
+    - Knowledge Graph: concepts/knowledge-graph.md
+  - Troubleshooting:
+    - Common Issues: troubleshooting/common-issues.md
+  - Reference:
+    - CLI: reference/cli.md
+    - Configuration: reference/configuration.md
+    - Model Guide: reference/model-guide.md
+    - Benchmarks: reference/benchmarks.md
+
+plugins:
+  - search
+  - offline
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - toc:
+      permalink: true
+  - tables
+  - attr_list
+  - md_in_html
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/madeinoz67/madeinoz-knowledge-system

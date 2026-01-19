@@ -1,3 +1,8 @@
+---
+title: "Quick Reference Card"
+description: "One-page reference guide for common commands and configurations in the Madeinoz Knowledge System"
+---
+
 # Quick Reference Card
 
 One-page reference for the Madeinoz Knowledge System.
@@ -102,6 +107,7 @@ MADEINOZ_KNOWLEDGE_GROUP_ID=main
 The system automatically extracts:
 
 **Core Types:**
+
 - **Person** - Individual people
 - **Organization** - Companies, teams
 - **Location** - Places, servers
@@ -113,6 +119,7 @@ The system automatically extracts:
 - **Document** - Files, articles
 
 **Memory-Derived Types (from PAI Memory sync):**
+
 - **Learning** - Knowledge from learning sessions
 - **Research** - Findings from research
 - **Decision** - Architectural/strategic choices
@@ -147,6 +154,7 @@ Use these types to filter searches: "Find my procedures about X"
 | **Search** | text-embedding-3-small | Convert query to vector for matching |
 
 **Cost per operation:**
+
 - Capture: ~$0.01 (gpt-4o-mini) or ~$0.03 (gpt-4o)
 - Search: ~$0.0001
 
@@ -157,6 +165,7 @@ Use these types to filter searches: "Find my procedures about X"
 - **Cache clears automatically** after TTL expires
 
 **If new knowledge doesn't appear in search:**
+
 - Wait 5 minutes for cache refresh, **or**
 - Ask a slightly different question
 
@@ -177,18 +186,21 @@ curl http://localhost:8000/sse
 ```
 
 ### Issue: Poor extraction
+
 - Add more detail to your captures
 - Use explicit relationships
 - Consider upgrading to gpt-4o model
 - Provide 50+ words of context
 
 ### Issue: No search results
+
 - Try broader search terms
 - Check if knowledge was captured
 - Verify you're in the right group
 - Review recent additions
 
 ### Issue: Rate limits
+
 - Reduce SEMAPHORE_LIMIT in config
 - Use gpt-4o-mini instead of gpt-4o
 - Check your API tier
@@ -196,33 +208,40 @@ curl http://localhost:8000/sse
 ## Best Practices
 
 1. **Be Specific**
-   - Bad: "Remember Docker"
-   - Good: "Remember that Docker requires a daemon process running as root"
+
+       - Bad: "Remember Docker"
+       - Good: "Remember that Docker requires a daemon process running as root"
 
 2. **Add Context**
-   - Bad: "Remember that config"
-   - Good: "Remember my VS Code config: 2-space tabs, auto-save enabled"
+
+       - Bad: "Remember that config"
+       - Good: "Remember my VS Code config: 2-space tabs, auto-save enabled"
 
 3. **State Relationships**
-   - Bad: "Remember Podman and Docker"
-   - Good: "Remember that Podman is an alternative to Docker"
+
+       - Bad: "Remember Podman and Docker"
+       - Good: "Remember that Podman is an alternative to Docker"
 
 4. **Review Regularly**
-   - Weekly: "What did I learn this week?"
-   - Monthly: Review knowledge graph status
+
+       - Weekly: "What did I learn this week?"
+       - Monthly: Review knowledge graph status
 
 5. **Capture Immediately**
-   - Don't wait to remember details
-   - Capture while context is fresh
+
+       - Don't wait to remember details
+       - Capture while context is fresh
 
 ## Costs
 
 Typical monthly costs (gpt-4o-mini):
+
 - Light use: $0.50-1.00
 - Moderate use: $1.00-3.00
 - Heavy use: $3.00-10.00
 
 Per operation:
+
 - Capture: ~$0.01
 - Search: ~$0.0001
 - Embedding: ~$0.0001
@@ -237,9 +256,11 @@ Per operation:
 ## File Locations
 
 **Configuration:**
+
 - `$PAI_DIR/.env` (defaults to `~/.claude/.env`) - All configuration
 
 **Pack Directory:**
+
 ```
 ~/.config/pai/Packs/madeinoz-knowledge-system/
 ├── config/.env.example      # Configuration template (reference only)
@@ -254,7 +275,7 @@ Per operation:
 │   └── workflows/*.md      # Workflow definitions
 ├── src/hooks/               # Integration hooks
 └── docs/                    # User documentation
-    ├── README.md           # Overview
+    ├── getting-started/    # Getting started guides
     ├── installation.md     # Setup guide
     ├── usage.md            # How-to guide
     ├── concepts.md         # Deep dive
@@ -264,6 +285,7 @@ Per operation:
 ## Keyboard Shortcuts
 
 When editing config:
+
 - `Ctrl+O` - Save file
 - `Enter` - Confirm filename
 - `Ctrl+X` - Exit editor
@@ -285,14 +307,17 @@ Commands are the same, the system auto-detects which to use.
 PAI Memory System syncs automatically:
 
 **Auto-sync on session start:**
+
 Learnings and research automatically sync from `~/.claude/MEMORY/` to knowledge graph.
 
 **Manual sync:**
+
 ```bash
 bun run src/hooks/sync-memory-to-knowledge.ts
 ```
 
 **Check what will sync:**
+
 ```bash
 bun run src/hooks/sync-memory-to-knowledge.ts --dry-run
 ```
@@ -309,6 +334,7 @@ podman exec madeinoz-knowledge-neo4j neo4j-admin database dump neo4j --to-stdout
 ```
 
 **Docker:**
+
 ```bash
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
 mkdir -p backups
@@ -316,6 +342,7 @@ docker exec madeinoz-knowledge-neo4j neo4j-admin database dump neo4j --to-stdout
 ```
 
 **Verify:**
+
 ```bash
 podman exec madeinoz-knowledge-neo4j cypher-shell -u neo4j -p password "MATCH (n) RETURN count(n)"
 ```
@@ -323,6 +350,7 @@ podman exec madeinoz-knowledge-neo4j cypher-shell -u neo4j -p password "MATCH (n
 ### FalkorDB Backend
 
 **Podman:**
+
 ```bash
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
 mkdir -p backups
@@ -331,6 +359,7 @@ podman cp madeinoz-knowledge-falkordb:/data/dump.rdb ./backups/knowledge-backup.
 ```
 
 **Docker:**
+
 ```bash
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
 mkdir -p backups
@@ -339,12 +368,13 @@ docker cp madeinoz-knowledge-falkordb:/data/dump.rdb ./backups/knowledge-backup.
 ```
 
 **Verify:**
+
 ```bash
 podman exec madeinoz-knowledge-falkordb redis-cli DBSIZE
 podman exec madeinoz-knowledge-falkordb redis-cli GRAPH.LIST
 ```
 
-See [usage.md#backup-and-restore](usage.md#backup-and-restore) for detailed instructions.
+See the [Backup & Restore Guide](../usage/backup-restore.md) for detailed instructions.
 
 ## Common Errors
 
@@ -366,9 +396,9 @@ See [usage.md#backup-and-restore](usage.md#backup-and-restore) for detailed inst
 ## Getting Help
 
 1. Check logs: `bun run src/server/logs.ts`
-2. Read [troubleshooting.md](troubleshooting.md)
-3. Review [concepts.md](concepts.md)
-4. Check main [README](../README.md)
+2. Read the [Troubleshooting Guide](../troubleshooting/common-issues.md)
+3. Review the [Knowledge Graph Concepts](../concepts/knowledge-graph.md)
+4. Check the [Architecture](../concepts/architecture.md)
 
 ## Version Info
 

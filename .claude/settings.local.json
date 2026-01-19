@@ -35,7 +35,12 @@
       "mcp__codanna__find_symbol",
       "mcp__codanna__get_calls",
       "mcp__codanna__find_callers",
-      "mcp__codanna__analyze_impact"
+      "mcp__codanna__analyze_impact",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_resize",
+      "mcp__playwright__browser_console_messages",
+      "mcp__playwright__browser_press_key"
     ]
   }
 }

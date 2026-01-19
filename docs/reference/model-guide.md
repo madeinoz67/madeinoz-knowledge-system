@@ -1,3 +1,8 @@
+---
+title: "Ollama Model Compatibility Guide"
+description: "LLM and embedding model compatibility for Ollama with the Madeinoz Knowledge System"
+---
+
 # Ollama Model Compatibility Guide
 
 This guide documents which Ollama models work with the Madeinoz Knowledge System for entity extraction and embeddings.

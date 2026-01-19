@@ -36,6 +36,8 @@ keywords: [knowledge, graph, memory, semantic search, entity extraction, relatio
 
 > Persistent personal knowledge management system powered by Graphiti knowledge graph with FalkorDB or Neo4j backend - automatically extracts entities, relationships, and temporal context from conversations, documents, and ideas
 
+📚 **[View Full Documentation](https://madeinoz67.github.io/madeinoz-knowledge-system/)** - Browse the complete docs online
+
 > **FOR AI AGENTS:** This is a PAI Pack - a complete, self-contained module for the PAI (Personal AI Infrastructure) system. When installing this pack:
 > 1. Read the entire README first to understand what you're installing
 > 2. Follow INSTALL.md step-by-step - do NOT skip or simplify steps

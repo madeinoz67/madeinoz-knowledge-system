@@ -1,246 +1,141 @@
-# Documentation Index
+---
+title: Madeinoz Knowledge System
+description: Persistent personal knowledge management system powered by Graphiti knowledge graph with FalkorDB or Neo4j backend
+---
 
-Quick navigation for the Madeinoz Knowledge System user documentation.
+# Madeinoz Knowledge System
 
-## Getting Started
+<p align="center"><img src="assets/logo.png" alt="Madeinoz Knowledge System" width="200"></p>
 
-Start here if you're new to the system:
+> Persistent personal knowledge management system powered by Graphiti knowledge graph - automatically extracts entities, relationships, and temporal context from conversations, documents, and ideas.
 
-1. **[Overview and Quick Start](README.md)** - What the system does and your first steps
-2. **[Installation Guide](installation.md)** - Step-by-step setup instructions
-3. **[Usage Guide](usage.md)** - How to use all features with examples
+## What It Does
 
-## Deep Dive
+The Madeinoz Knowledge System transforms your AI conversations into a permanent, searchable knowledge base:
 
-For understanding how everything works:
+- **Automatically Learns**: Extracts entities and relationships as you work
+- **Connects Concepts**: Maps how ideas relate over time
+- **Semantic Search**: Finds relevant knowledge using natural language
+- **Builds Context**: Compounds knowledge across sessions
+- **Never Forgets**: Persistent storage with temporal tracking
 
-4. **[Key Concepts](concepts.md)** - Understanding episodes, entities, facts, and graphs
-5. **[Troubleshooting](troubleshooting.md)** - Fix common issues
+**Core principle**: Work normally, knowledge handles itself.
 
-## Documentation Structure
+## Quick Start
 
-### README.md (Start Here)
-- What is the Madeinoz Knowledge System?
-- What can you do with it?
-- Quick start tutorial
-- Common use cases
-- Key concepts overview
-- Tips for success
+New to the system? Follow this path:
 
-**Read this if:** You're new and want to understand what this system does.
+1. **[Overview](getting-started/overview.md)** - What the system does and your first steps (5 min)
+2. **[Installation Guide](installation/index.md)** - Step-by-step setup instructions (15 min)
+3. **[Basic Usage](usage/basic-usage.md)** - How to capture and search knowledge (10 min)
+4. **[Quick Reference](getting-started/quick-reference.md)** - Commands at a glance
 
-### installation.md
-- Prerequisites and requirements
-- Step-by-step installation
-- Configuration options
-- Starting and stopping the server
-- Verification steps
-- Optional features
+**Total time to get started: 30 minutes**
 
-**Read this if:** You need to install or set up the system.
+## Documentation Sections
 
-### usage.md
-- Capturing knowledge (all methods)
-- Searching your knowledge base
-- Finding connections between concepts
-- Reviewing recent additions
-- Managing your knowledge
-- Advanced usage patterns
-- Best practices and tips
+### Getting Started
 
-**Read this if:** You want to know how to use specific features.
+Start here if you're new:
 
-### concepts.md
-- What is a knowledge graph?
-- Episodes, entities, facts explained
-- Groups and organization
-- How knowledge flows through the system
-- Technical architecture
-- Embeddings and semantic search
-- Design decisions and trade-offs
-- Limitations and performance
+- **[Overview](getting-started/overview.md)** - What the system does and quick start
+- **[Quick Reference](getting-started/quick-reference.md)** - Commands and natural language triggers
 
-**Read this if:** You want to understand how the system works internally.
+### Installation
 
-### troubleshooting.md
-- Quick diagnostics
-- Common problems and solutions
-- Error messages explained
-- Performance issues
-- API and cost management
-- Diagnostic commands
-- Getting help
+Set up the system:
 
-**Read this if:** Something isn't working correctly.
+- **[Installation Guide](installation/index.md)** - Complete setup instructions
+- **[Requirements](installation/requirements.md)** - Prerequisites and dependencies
+- **[Verification](installation/verification.md)** - Confirm everything works
 
-## By Topic
+### Usage
 
-### Installation and Setup
-- [Prerequisites](installation.md#what-youll-need)
-- [Getting an API Key](installation.md#step-1-get-your-api-key)
-- [Installing Podman](installation.md#step-2-check-if-you-have-podman)
-- [Configuring the System](installation.md#step-5-configure-your-api-key)
-- [Starting the Server](installation.md#step-6-start-the-knowledge-system)
-- [Memory Sync Setup](installation.md#step-9-install-memory-sync-hook-optional-but-recommended)
+Learn how to use the system:
 
-### Basic Usage
-- [Capturing Knowledge](usage.md#capturing-knowledge)
-- [Searching](usage.md#searching-knowledge)
-- [Finding Connections](usage.md#finding-connections)
-- [Recent Additions](usage.md#reviewing-your-knowledge)
-- [Getting Status](usage.md#getting-system-status)
+- **[Basic Usage](usage/basic-usage.md)** - Capturing and searching knowledge
+- **[Advanced Usage](usage/advanced.md)** - Bulk import, backup, multiple graphs
 
-### Advanced Features
-- [Bulk Import](usage.md#bulk-import)
-- [Backup and Restore](usage.md#backup-and-restore)
-- [Multiple Knowledge Graphs](usage.md#working-with-multiple-knowledge-graphs)
-- [Memory System Integration](usage.md#integration-with-other-pai-systems)
-- [Custom Models](installation.md#using-a-different-ai-model)
+### Concepts
 
-### Understanding the System
-- [What is a Knowledge Graph?](concepts.md#the-knowledge-graph)
-- [Episodes Explained](concepts.md#1-episodes)
-- [Entity Types](concepts.md#2-entities)
-- [Relationships](concepts.md#3-facts-relationships)
-- [How Search Works](concepts.md#searching-knowledge)
-- [Vector Embeddings](concepts.md#5-embeddings)
+Understand how it works:
+
+- **[Architecture](concepts/architecture.md)** - System design and components
+- **[Knowledge Graph](concepts/knowledge-graph.md)** - Episodes, entities, facts explained
 
 ### Troubleshooting
-- [Connection Issues](troubleshooting.md#cannot-connect-to-server-or-connection-refused)
-- [API Key Problems](troubleshooting.md#api-key-not-configured-or-invalid-api-key)
-- [Poor Extraction Quality](troubleshooting.md#no-entities-extracted-or-poor-extraction-quality)
-- [Server Won't Start](troubleshooting.md#container-wont-start)
-- [Search Issues](troubleshooting.md#search-returns-no-results)
-- [Rate Limits](troubleshooting.md#rate-limit-exceeded-or-api-errors)
 
-## Quick Reference
+Fix common issues:
 
-### Common Commands
+- **[Common Issues](troubleshooting/common-issues.md)** - Solutions to frequent problems
 
-**Server Management:**
+### Reference
+
+Detailed specifications:
+
+- **[CLI Reference](reference/cli.md)** - Command-line interface
+- **[Configuration](reference/configuration.md)** - Environment variables and settings
+- **[Model Guide](reference/model-guide.md)** - Ollama and LLM configuration
+- **[Benchmarks](reference/benchmarks.md)** - Model performance comparisons
+
+## Natural Language Commands
+
+The system responds to natural conversation:
+
+| Say This | System Does |
+|----------|-------------|
+| "Remember that..." | Captures knowledge with entity extraction |
+| "What do I know about X?" | Searches knowledge base semantically |
+| "How are X and Y related?" | Finds relationships between concepts |
+| "What did I learn recently?" | Shows recent knowledge additions |
+| "Knowledge status" | Displays system health and statistics |
+
+## Database Backends
+
+Two graph database options:
+
+| Backend | Best For | Web UI |
+|---------|----------|--------|
+| **Neo4j** (default) | CTI/OSINT data, rich queries | [localhost:7474](http://localhost:7474) |
+| **FalkorDB** | Simple setup, lower resources | [localhost:3000](http://localhost:3000) |
+
+## Common Commands
+
+### Server Management
+
 ```bash
 # Check status
-bun run src/server/status.ts
+bun run status
 
 # Start server
-bun run src/server/start.ts
+bun run start
 
 # Stop server
-bun run src/server/stop.ts
+bun run stop
 
 # View logs
-bun run src/server/logs.ts
+bun run logs
 ```
 
-**Memory Sync:**
+### Memory Sync
+
 ```bash
 # Manual sync
 bun run src/hooks/sync-memory-to-knowledge.ts
 
 # Dry run (see what would sync)
 bun run src/hooks/sync-memory-to-knowledge.ts --dry-run
-
-# Verbose output
-bun run src/hooks/sync-memory-to-knowledge.ts --verbose
 ```
-
-**Backup and Restore - Neo4j (Default):**
-```bash
-# Podman
-podman exec madeinoz-knowledge-neo4j neo4j-admin database dump neo4j --to-stdout > backups/knowledge-backup.dump
-podman volume export madeinoz-knowledge-neo4j-data > backups/volume-backup.tar
-
-# Docker
-docker exec madeinoz-knowledge-neo4j neo4j-admin database dump neo4j --to-stdout > backups/knowledge-backup.dump
-```
-
-**Backup and Restore - FalkorDB Backend:**
-```bash
-# Podman
-podman exec madeinoz-knowledge-falkordb redis-cli BGSAVE
-podman cp madeinoz-knowledge-falkordb:/data/dump.rdb ./backups/knowledge-backup.rdb
-podman volume export madeinoz-knowledge-data > backups/volume-backup.tar
-
-# Docker
-docker exec madeinoz-knowledge-falkordb redis-cli BGSAVE
-docker cp madeinoz-knowledge-falkordb:/data/dump.rdb ./backups/knowledge-backup.rdb
-```
-
-### Natural Language Commands
-
-**Capture:**
-- "Remember that..."
-- "Store this..."
-- "Add to my knowledge..."
-
-**Search:**
-- "What do I know about X?"
-- "Search my knowledge for X"
-- "Find information about X"
-
-**Relationships:**
-- "How are X and Y related?"
-- "What's the connection between X and Y?"
-
-**Recent:**
-- "What did I learn recently?"
-- "Show me recent knowledge"
-
-**Status:**
-- "Knowledge graph status"
-- "Show me stats"
-
-## File Locations
-
-**Configuration:**
-- All config: `$PAI_DIR/.env` (defaults to `~/.claude/.env`)
-- MCP settings: `~/.claude.json`
-- Config template: `config/.env.example` (reference only)
-
-**Server Scripts:**
-- Run: `src/server/run.ts`
-- Start: `src/server/start.ts`
-- Stop: `src/server/stop.ts`
-- Status: `src/server/status.ts`
-- Logs: `src/server/logs.ts`
-
-**Skills and Workflows:**
-- Main skill: `src/skills/SKILL.md`
-- Workflows: `src/skills/workflows/*.md`
-- Tools: `src/skills/tools/*.md`
-
-**Hooks:**
-- Sync hook: `src/hooks/sync-memory-to-knowledge.ts`
-- Realtime sync: `src/hooks/sync-learning-realtime.ts`
-- Hook libraries: `src/hooks/lib/*.ts`
-
-## Related Documentation
-
-**Technical Documentation:**
-- [Main README](../README.md) - Technical overview
-- [Installation Instructions](../INSTALL.md) - Detailed installation
-- [Verification Guide](../VERIFY.md) - Installation verification
-
-**External Resources:**
-- [Graphiti Documentation](https://help.getzep.com/graphiti)
-- [Neo4j Documentation](https://neo4j.com/docs/)
-- [FalkorDB Documentation](https://docs.falkordb.com/)
-- [OpenAI API Documentation](https://platform.openai.com/docs)
 
 ## Need Help?
 
-1. Check [Troubleshooting Guide](troubleshooting.md)
-2. Review relevant concept in [Concepts](concepts.md)
-3. Look for examples in [Usage Guide](usage.md)
-4. Check the technical [README](../README.md)
+1. Check the [Troubleshooting Guide](troubleshooting/common-issues.md)
+2. Review [Key Concepts](concepts/knowledge-graph.md)
+3. Look for examples in the [Usage Guide](usage/basic-usage.md)
 
-## Quick Start Path
+## Credits
 
-For fastest setup:
+- **Knowledge graph engine**: [Graphiti](https://github.com/getzep/graphiti) by Zep AI
+- **Graph databases**: [Neo4j](https://neo4j.com/) and [FalkorDB](https://www.falkordb.com/)
+- **Part of**: [Personal AI Infrastructure (PAI)](https://github.com/danielmiessler/PAI)
 
-1. Read [README.md](README.md) - 5 minutes
-2. Follow [installation.md](installation.md#step-by-step-installation) - 15 minutes
-3. Try examples in [usage.md](usage.md#capturing-knowledge) - 10 minutes
-4. Reference [troubleshooting.md](troubleshooting.md) if needed
-
-Total time to get started: 30 minutes

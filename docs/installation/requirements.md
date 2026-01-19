@@ -1,3 +1,8 @@
+---
+title: "Installation Requirements"
+description: "System requirements and prerequisites for Madeinoz Knowledge System installation"
+---
+
 # Installation Guide
 
 This guide will walk you through installing the Madeinoz Knowledge System step by step. Don't worry if you're not a developer - we'll explain everything clearly.
@@ -7,16 +12,19 @@ This guide will walk you through installing the Madeinoz Knowledge System step b
 Before starting, make sure you have:
 
 1. **A computer with:**
-   - macOS, Linux, or Windows with WSL
-   - At least 2GB of free RAM
-   - At least 1GB of disk space
+
+- macOS, Linux, or Windows with WSL
+- At least 2GB of free RAM
+- At least 1GB of disk space
 
 2. **Software installed:**
+
    - Podman or Docker (for running containers)
    - Bun (JavaScript runtime)
    - An OpenAI API key (or compatible service)
 
 3. **Dependent systems:**
+
    - None (PAI Memory System is built-in to Claude Code)
 
 ## What is a Container?
@@ -56,6 +64,7 @@ podman --version
 Install Podman:
 
 **On macOS:**
+
 ```bash
 brew install podman
 podman machine init
@@ -63,6 +72,7 @@ podman machine start
 ```
 
 **On Ubuntu/Debian:**
+
 ```bash
 sudo apt update
 sudo apt install podman
@@ -316,8 +326,8 @@ Lower numbers = slower but less likely to hit rate limits.
 
 Now that everything is installed:
 
-1. Read the [Usage Guide](usage.md) to learn all the commands
-2. Check out [Concepts](concepts.md) to understand how it works
+1. Read the [Usage Guide](../usage/basic-usage.md) to learn all the commands
+2. Check out [Concepts](../concepts/knowledge-graph.md) to understand how it works
 3. Start using it! The more you capture, the more valuable it becomes
 
 ## Troubleshooting
@@ -340,4 +350,4 @@ Now that everything is installed:
 - Try a different model (gpt-4o instead of gpt-4o-mini)
 - Make sure your content has clear concepts and relationships
 
-For more help, see the [Troubleshooting Guide](troubleshooting.md).
+For more help, see the [Troubleshooting Guide](../troubleshooting/common-issues.md).

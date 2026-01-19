@@ -1,3 +1,8 @@
+---
+title: "Troubleshooting Guide"
+description: "Step-by-step solutions for common issues with the Madeinoz Knowledge System, organized by symptom"
+---
+
 # Troubleshooting Guide
 
 This guide helps you fix common issues with the Madeinoz Knowledge System. Problems are organized by symptom with step-by-step solutions.

@@ -71,3 +71,6 @@ credentials/
 .codanna/
 .fastembed_cache/
 
+
+# MkDocs build output
+site/
