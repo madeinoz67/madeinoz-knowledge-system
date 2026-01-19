@@ -37,9 +37,9 @@ Based on comprehensive real-world testing with Graphiti MCP (15 models tested):
 
 | Provider | Model | Cost/1K | Status | Notes |
 |----------|-------|---------|--------|-------|
-| **OpenRouter** (recommended) | Gemini 2.0 Flash | $0.125 | ✅ **BEST VALUE** | Cheapest working model, extracts 8 entities |
+| **OpenRouter** (recommended) | GPT-4o Mini | $0.129 | ✅ **MOST STABLE** | Reliable entity extraction, best balance |
+| **OpenRouter** | Gemini 2.0 Flash | $0.125 | ⚠️ **BEST VALUE** | Cheapest but may have occasional validation errors |
 | **OpenRouter** | Qwen 2.5 72B | $0.126 | ✅ Works | Good quality, slower (30s) |
-| **OpenRouter** | GPT-4o Mini | $0.129 | ✅ Works | Reliable, good balance |
 | **OpenRouter** | Claude 3.5 Haiku | $0.816 | ✅ Works | 6x more expensive |
 | **OpenRouter** | GPT-4o | $2.155 | ✅ **FASTEST** | Best speed (12s) |
 | **OpenRouter** | Grok 3 | $2.163 | ✅ Works | xAI option, 22s |
@@ -143,12 +143,32 @@ The installer guides you through:
 
 Here are the recommended configurations based on **real-world MCP testing** (15 models tested):
 
-#### Option 1: OpenRouter + Ollama (Recommended) ⭐
-**Best value LLM + free local embeddings - Tested & Proven**
+#### Option 1: GPT-4o Mini + Ollama (Recommended) ⭐
+**Most stable LLM + free local embeddings - Proven & Reliable**
 
 | Component | Provider | Model | Cost | Quality |
 |-----------|----------|-------|------|---------|
-| LLM | OpenRouter | google/gemini-2.0-flash-001 | $0.125/1K ops | ✅ Extracts 8 entities |
+| LLM | OpenRouter | openai/gpt-4o-mini | $0.129/1K ops | ✅ Most reliable entity extraction |
+| Embedder | Ollama | mxbai-embed-large | Free | 73.9% quality, 87ms |
+
+```env
+LLM_PROVIDER=openai
+MODEL_NAME=openai/gpt-4o-mini
+OPENAI_API_KEY=sk-or-v1-your-openrouter-key
+OPENAI_BASE_URL=https://openrouter.ai/api/v1
+
+EMBEDDER_PROVIDER=openai
+EMBEDDER_BASE_URL=http://host.docker.internal:11434/v1
+EMBEDDER_MODEL=mxbai-embed-large
+EMBEDDER_DIMENSIONS=1024
+```
+
+#### Option 2: Gemini 2.0 Flash + Ollama (Budget)
+**Best value - cheapest working model, but may have occasional validation errors**
+
+| Component | Provider | Model | Cost | Quality |
+|-----------|----------|-------|------|---------|
+| LLM | OpenRouter | google/gemini-2.0-flash-001 | $0.125/1K ops | ⚠️ Extracts 8 entities but less stable |
 | Embedder | Ollama | mxbai-embed-large | Free | 73.9% quality, 87ms |
 
 ```env
@@ -163,25 +183,8 @@ EMBEDDER_MODEL=mxbai-embed-large
 EMBEDDER_DIMENSIONS=1024
 ```
 
-#### Option 2: GPT-4o Mini + Ollama (Reliable)
-**Proven stable, good balance of cost and quality**
-
-| Component | Provider | Model | Cost | Quality |
-|-----------|----------|-------|------|---------|
-| LLM | OpenRouter | openai/gpt-4o-mini | $0.129/1K ops | ✅ Extracts 7 entities |
-| Embedder | Ollama | mxbai-embed-large | Free | 73.9% quality, 87ms |
-
-```env
-LLM_PROVIDER=openai
-MODEL_NAME=openai/gpt-4o-mini
-OPENAI_API_KEY=sk-or-v1-your-openrouter-key
-OPENAI_BASE_URL=https://openrouter.ai/api/v1
-
-EMBEDDER_PROVIDER=openai
-EMBEDDER_BASE_URL=http://host.docker.internal:11434/v1
-EMBEDDER_MODEL=mxbai-embed-large
-EMBEDDER_DIMENSIONS=1024
-```
+> **Note:** Gemini 2.0 Flash is ~3% cheaper but may occasionally fail with Pydantic validation
+> errors. If you experience validation errors, switch to Option 1 (GPT-4o Mini).
 
 #### Option 3: Full Cloud (Same Provider)
 **Use Together AI for both LLM and embeddings**
@@ -433,40 +436,126 @@ Based on the detection above, follow the appropriate path:
 | **Skill Exists** | Knowledge skill already installed | Backup old skill, compare versions, then replace |
 | **Missing Dependencies** | Podman or Bun not installed | Install dependencies first, then retry |
 
-### Step 0.4: Backup Existing Configuration (If Needed)
+### Step 0.4: Version Detection and Upgrade Check
 
-If conflicts were detected, create a backup before proceeding:
+> **FOR AI AGENTS:** This step determines if an upgrade is needed by comparing the pack version with any existing installation. If versions match, offer to skip unless `--force` is specified.
+
+**Step 0.4.1: Extract Pack Version**
 
 ```bash
-# Create timestamped backup
-BACKUP_DIR="$HOME/.madeinoz-backup/$(date +%Y%m%d-%H%M%S)"
-mkdir -p "$BACKUP_DIR"
-PAI_CHECK="${PAI_DIR:-$HOME/.claude}"
+# Extract version from pack README.md frontmatter
+PACK_DIR="${PACK_DIR:-$(pwd)}"
+PACK_VERSION=$(grep -E "^version:" "$PACK_DIR/README.md" | head -1 | sed 's/version:[[:space:]]*//')
 
-echo "Creating backup at: $BACKUP_DIR"
-
-# Backup existing skill if present
-if [ -d "$PAI_CHECK/skills/Knowledge" ]; then
-  cp -r "$PAI_CHECK/skills/Knowledge" "$BACKUP_DIR/Knowledge"
-  echo "✓ Backed up existing Knowledge skill"
+if [ -z "$PACK_VERSION" ]; then
+    echo "⚠ Warning: Could not extract pack version from README.md"
+    PACK_VERSION="unknown"
 fi
 
-# Backup legacy .env if present (config is now in PAI .env)
-if [ -f "config/.env" ]; then
-  cp config/.env "$BACKUP_DIR/.env.legacy"
-  echo "✓ Backed up legacy .env file (migrate to PAI .env)"
-fi
-
-# Backup container if running
-if podman ps | grep -q "madeinoz-knowledge-graph-mcp"; then
-    podman export madeinoz-knowledge-graph-mcp > "$BACKUP_DIR/madeinoz-container.tar" 2>/dev/null || true
-    echo "✓ Backed up running container (if possible)"
-fi
-
-echo "Backup complete!"
+echo "Pack version: $PACK_VERSION"
 ```
 
-**After completing system analysis, proceed to Step 1.**
+**Step 0.4.2: Detect Existing Installation Version**
+
+```bash
+PAI_CHECK="${PAI_DIR:-$HOME/.claude}"
+EXISTING_VERSION="none"
+
+# Primary: extract version from SKILL.md frontmatter
+SKILL_FILE="$PAI_CHECK/skills/Knowledge/SKILL.md"
+
+if [ -f "$SKILL_FILE" ]; then
+    EXISTING_VERSION=$(grep -E "^version:" "$SKILL_FILE" | head -1 | sed 's/version:[[:space:]]*//')
+    if [ -n "$EXISTING_VERSION" ]; then
+        echo "Existing installation version: $EXISTING_VERSION"
+    else
+        echo "Existing installation found (version unknown - pre-1.2.0)"
+        EXISTING_VERSION="pre-1.2.0"
+    fi
+elif [ -d "$PAI_CHECK/skills/Knowledge" ]; then
+    echo "Existing installation found (no SKILL.md - corrupted install)"
+    EXISTING_VERSION="unknown"
+else
+    echo "No existing installation found"
+fi
+```
+
+**Step 0.4.3: Version Comparison**
+
+```bash
+# Compare versions
+if [ "$EXISTING_VERSION" = "none" ]; then
+    echo "→ Fresh install: proceeding with version $PACK_VERSION"
+    INSTALL_ACTION="install"
+elif [ "$EXISTING_VERSION" = "$PACK_VERSION" ]; then
+    echo "→ Same version ($PACK_VERSION) already installed"
+    if [ "${FORCE_REINSTALL:-false}" = "true" ]; then
+        echo "  --force specified: proceeding with reinstall"
+        INSTALL_ACTION="reinstall"
+    else
+        echo "  Use --force to reinstall, or skip to Step 4 (verification)"
+        INSTALL_ACTION="skip"
+    fi
+else
+    echo "→ Upgrade available: $EXISTING_VERSION → $PACK_VERSION"
+    INSTALL_ACTION="upgrade"
+fi
+
+export INSTALL_ACTION EXISTING_VERSION PACK_VERSION
+```
+
+**Step 0.4.4: Backup Before Upgrade (If Needed)**
+
+Only create backup when upgrading or reinstalling:
+
+```bash
+if [ "$INSTALL_ACTION" = "upgrade" ] || [ "$INSTALL_ACTION" = "reinstall" ]; then
+    # Create timestamped backup
+    BACKUP_DIR="$HOME/.madeinoz-backup/$(date +%Y%m%d-%H%M%S)"
+    mkdir -p "$BACKUP_DIR"
+
+    echo ""
+    echo "Creating backup at: $BACKUP_DIR"
+
+    # Backup existing skill if present
+    if [ -d "$PAI_CHECK/skills/Knowledge" ]; then
+        cp -r "$PAI_CHECK/skills/Knowledge" "$BACKUP_DIR/Knowledge"
+        echo "✓ Backed up existing Knowledge skill (v$EXISTING_VERSION)"
+    fi
+
+    # Backup legacy .env if present (config is now in PAI .env)
+    if [ -f "config/.env" ]; then
+        cp config/.env "$BACKUP_DIR/.env.legacy"
+        echo "✓ Backed up legacy .env file (migrate to PAI .env)"
+    fi
+
+    # Backup container if running
+    if podman ps 2>/dev/null | grep -q "madeinoz-knowledge"; then
+        podman export madeinoz-knowledge-graph-mcp > "$BACKUP_DIR/madeinoz-container.tar" 2>/dev/null || true
+        echo "✓ Backed up running container (if possible)"
+    fi
+
+    # Save backup manifest
+    cat > "$BACKUP_DIR/manifest.json" << EOF
+{
+    "backup_date": "$(date -Iseconds)",
+    "previous_version": "$EXISTING_VERSION",
+    "upgrading_to": "$PACK_VERSION",
+    "action": "$INSTALL_ACTION"
+}
+EOF
+    echo "✓ Created backup manifest"
+
+    echo ""
+    echo "Backup complete! Proceeding with $INSTALL_ACTION..."
+elif [ "$INSTALL_ACTION" = "skip" ]; then
+    echo ""
+    echo "Skipping installation (same version). To verify existing install, jump to Step 4."
+    echo "To force reinstall, set FORCE_REINSTALL=true and re-run."
+fi
+```
+
+**After completing version check and backup, proceed to Step 1.**
 
 ---
 
@@ -541,9 +630,149 @@ echo ""
 echo "PAI Configuration: $PAI_ENV"
 echo ""
 
-# Check if API keys already exist in PAI .env
-echo "Checking for existing API keys..."
+# ============================================================
+# Step 2.1: Detect Existing Environment Variables
+# ============================================================
+echo "Checking for existing MADEINOZ_KNOWLEDGE_* configuration..."
+echo ""
+
+# Source existing PAI .env to detect current values
 source "$PAI_ENV" 2>/dev/null || true
+
+# Track which variables already exist
+EXISTING_VARS=()
+
+# Check each MADEINOZ_KNOWLEDGE_* variable
+check_existing_var() {
+    local var_name="$1"
+    local var_value="${!var_name}"
+    if [ -n "$var_value" ]; then
+        EXISTING_VARS+=("$var_name")
+        # Mask sensitive values (API keys)
+        if [[ "$var_name" == *"API_KEY"* ]] || [[ "$var_name" == *"PASSWORD"* ]]; then
+            echo "  ✓ $var_name = [CONFIGURED - value hidden]"
+        else
+            echo "  ✓ $var_name = $var_value"
+        fi
+        return 0
+    fi
+    return 1
+}
+
+# Check all known MADEINOZ_KNOWLEDGE_* variables
+echo "Existing configuration in PAI .env:"
+HAS_EXISTING=false
+
+check_existing_var "MADEINOZ_KNOWLEDGE_LLM_PROVIDER" && HAS_EXISTING=true
+check_existing_var "MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER" && HAS_EXISTING=true
+check_existing_var "MADEINOZ_KNOWLEDGE_MODEL_NAME" && HAS_EXISTING=true
+check_existing_var "MADEINOZ_KNOWLEDGE_OPENAI_API_KEY" && HAS_EXISTING=true
+check_existing_var "MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL" && HAS_EXISTING=true
+check_existing_var "MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL" && HAS_EXISTING=true
+check_existing_var "MADEINOZ_KNOWLEDGE_EMBEDDER_BASE_URL" && HAS_EXISTING=true
+check_existing_var "MADEINOZ_KNOWLEDGE_DATABASE_TYPE" && HAS_EXISTING=true
+check_existing_var "MADEINOZ_KNOWLEDGE_NEO4J_URI" && HAS_EXISTING=true
+check_existing_var "MADEINOZ_KNOWLEDGE_NEO4J_USER" && HAS_EXISTING=true
+check_existing_var "MADEINOZ_KNOWLEDGE_NEO4J_PASSWORD" && HAS_EXISTING=true
+check_existing_var "MADEINOZ_KNOWLEDGE_FALKORDB_HOST" && HAS_EXISTING=true
+check_existing_var "MADEINOZ_KNOWLEDGE_FALKORDB_PORT" && HAS_EXISTING=true
+check_existing_var "MADEINOZ_KNOWLEDGE_GROUP_ID" && HAS_EXISTING=true
+check_existing_var "MADEINOZ_KNOWLEDGE_SEMAPHORE_LIMIT" && HAS_EXISTING=true
+
+if [ "$HAS_EXISTING" = false ]; then
+    echo "  (none found - fresh installation)"
+fi
+
+echo ""
+
+# Also check legacy (non-prefixed) variables
+echo "Checking for legacy (non-prefixed) API keys..."
+LEGACY_VARS=()
+
+check_legacy_var() {
+    local var_name="$1"
+    local var_value="${!var_name}"
+    if [ -n "$var_value" ]; then
+        LEGACY_VARS+=("$var_name")
+        echo "  ⚠️  $var_name is set (can be migrated to MADEINOZ_KNOWLEDGE_$var_name)"
+        return 0
+    fi
+    return 1
+}
+
+HAS_LEGACY=false
+check_legacy_var "OPENAI_API_KEY" && HAS_LEGACY=true
+check_legacy_var "ANTHROPIC_API_KEY" && HAS_LEGACY=true
+check_legacy_var "GOOGLE_API_KEY" && HAS_LEGACY=true
+check_legacy_var "GROQ_API_KEY" && HAS_LEGACY=true
+check_legacy_var "OPENAI_BASE_URL" && HAS_LEGACY=true
+
+if [ "$HAS_LEGACY" = false ]; then
+    echo "  (none found)"
+fi
+
+echo ""
+
+# ============================================================
+# Step 2.2: Ask User About Existing Configuration
+# ============================================================
+
+PRESERVE_EXISTING=false
+MIGRATE_LEGACY=false
+
+if [ "$HAS_EXISTING" = true ]; then
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "Existing MADEINOZ_KNOWLEDGE_* configuration detected!"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "Options:"
+    echo "  1) Keep existing values (preserve current configuration)"
+    echo "  2) Replace with new defaults (will overwrite)"
+    echo "  3) Merge - keep existing, add only missing variables"
+    echo ""
+    read -p "Choice (1/2/3) [default: 3]: " CONFIG_CHOICE
+    CONFIG_CHOICE="${CONFIG_CHOICE:-3}"
+
+    case "$CONFIG_CHOICE" in
+        1)
+            PRESERVE_EXISTING=true
+            echo "✓ Keeping all existing MADEINOZ_KNOWLEDGE_* values"
+            ;;
+        2)
+            echo "⚠️  Will replace existing values with new defaults"
+            ;;
+        3)
+            PRESERVE_EXISTING=true
+            echo "✓ Merging - keeping existing, adding missing variables"
+            ;;
+    esac
+    echo ""
+fi
+
+if [ "$HAS_LEGACY" = true ]; then
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "Legacy (non-prefixed) API keys detected!"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "These can be migrated to MADEINOZ_KNOWLEDGE_* prefix."
+    echo "Benefits: Isolated configuration per pack, no conflicts."
+    echo ""
+    read -p "Migrate legacy keys to MADEINOZ_KNOWLEDGE_* prefix? (y/N): " MIGRATE_CHOICE
+    if [[ "$MIGRATE_CHOICE" =~ ^[Yy]$ ]]; then
+        MIGRATE_LEGACY=true
+        echo "✓ Will migrate legacy keys"
+    else
+        echo "✓ Legacy keys will remain unchanged (can use as fallback)"
+    fi
+    echo ""
+fi
+
+# ============================================================
+# Step 2.3: Determine Provider Settings
+# ============================================================
+
+# Check if API keys already exist in PAI .env
+echo "Determining provider settings..."
 
 AUTO_CONFIGURED=false
 # Check for MADEINOZ_KNOWLEDGE_* prefixed keys first (preferred)
@@ -588,15 +817,33 @@ echo "  LLM_PROVIDER: $LLM_PROVIDER"
 echo "  EMBEDDER_PROVIDER: $EMBEDDER_PROVIDER"
 echo ""
 
-# Add Madeinoz Knowledge System configuration to PAI .env
+# ============================================================
+# Step 2.4: Add/Update Configuration in PAI .env
+# ============================================================
+
+# Export flags for Python script
+export PRESERVE_EXISTING
+export MIGRATE_LEGACY
+
 echo "Adding Madeinoz Knowledge System configuration to $PAI_ENV..."
 
-# Use Python to safely update the JSON (or .env file)
+# Use Python to safely update the .env file with preserve/migrate logic
 python3 << 'PYTHON_EOF'
 import os
 import re
+import sys
 
-pai_env = os.path.expanduser("${PAI_DIR:-$HOME/.claude}/.env")
+# Get flags from environment
+preserve_existing = os.getenv('PRESERVE_EXISTING', 'false').lower() == 'true'
+migrate_legacy = os.getenv('MIGRATE_LEGACY', 'false').lower() == 'true'
+
+pai_env = os.path.expanduser(os.getenv('PAI_DIR', os.path.expanduser('~/.claude')) + '/.env')
+
+print(f"\nConfiguration mode:")
+print(f"  Preserve existing: {preserve_existing}")
+print(f"  Migrate legacy:    {migrate_legacy}")
+print(f"  Target file:       {pai_env}")
+print("")
 
 # Read existing content
 try:
@@ -604,67 +851,125 @@ try:
         lines = f.readlines()
 except FileNotFoundError:
     lines = []
+    print("  (Creating new .env file)")
 
 # Parse existing variables into a dict for easy checking
 existing_vars = {}
 for line in lines:
-    match = re.match(r'^([A-Z_]+)=(.*)$', line.strip())
+    match = re.match(r'^([A-Z_][A-Z0-9_]*)=(.*)$', line.strip())
     if match:
         existing_vars[match.group(1)] = match.group(2)
 
-# Variables to add (only if not already present) - all use MADEINOZ_KNOWLEDGE_* prefix
-# Note: DATABASE_TYPE defaults to 'neo4j' but can be set to 'falkordb'
-# Note: Defaults to Ollama (free, local, private)
-vars_to_add = {
-    'MADEINOZ_KNOWLEDGE_LLM_PROVIDER': os.getenv('MADEINOZ_KNOWLEDGE_LLM_PROVIDER', os.getenv('LLM_PROVIDER', 'ollama')),
-    'MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER': os.getenv('MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER', os.getenv('EMBEDDER_PROVIDER', 'ollama')),
-    'MADEINOZ_KNOWLEDGE_MODEL_NAME': os.getenv('MADEINOZ_KNOWLEDGE_MODEL_NAME', os.getenv('MODEL_NAME', 'llama3.2')),
-    # Ollama configuration
-    'MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL': os.getenv('MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL', 'http://host.docker.internal:11434/v1'),
-    'MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL': os.getenv('MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL', 'mxbai-embed-large'),
-    # Database backend: 'neo4j' (default) or 'falkordb'
-    'MADEINOZ_KNOWLEDGE_DATABASE_TYPE': os.getenv('MADEINOZ_KNOWLEDGE_DATABASE_TYPE', 'neo4j'),
-    # FalkorDB configuration (used when DATABASE_TYPE=falkordb)
+# Default values for new installations
+# These use sensible defaults (Ollama for free local operation)
+default_vars = {
+    'MADEINOZ_KNOWLEDGE_LLM_PROVIDER': 'ollama',
+    'MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER': 'ollama',
+    'MADEINOZ_KNOWLEDGE_MODEL_NAME': 'llama3.2',
+    'MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL': 'http://host.docker.internal:11434/v1',
+    'MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL': 'mxbai-embed-large',
+    'MADEINOZ_KNOWLEDGE_DATABASE_TYPE': 'neo4j',
     'MADEINOZ_KNOWLEDGE_FALKORDB_HOST': 'madeinoz-knowledge-falkordb',
     'MADEINOZ_KNOWLEDGE_FALKORDB_PORT': '6379',
-    # Neo4j configuration (used when DATABASE_TYPE=neo4j)
     'MADEINOZ_KNOWLEDGE_NEO4J_URI': 'bolt://madeinoz-knowledge-neo4j:7687',
     'MADEINOZ_KNOWLEDGE_NEO4J_USER': 'neo4j',
     'MADEINOZ_KNOWLEDGE_NEO4J_PASSWORD': 'madeinozknowledge',
     'MADEINOZ_KNOWLEDGE_NEO4J_DATABASE': 'neo4j',
-    # Common configuration
     'MADEINOZ_KNOWLEDGE_SEMAPHORE_LIMIT': '10',
     'MADEINOZ_KNOWLEDGE_GROUP_ID': 'main',
     'MADEINOZ_KNOWLEDGE_GRAPHITI_TELEMETRY_ENABLED': 'false',
 }
 
+# Legacy to MADEINOZ_KNOWLEDGE_* migration mapping
+legacy_mapping = {
+    'OPENAI_API_KEY': 'MADEINOZ_KNOWLEDGE_OPENAI_API_KEY',
+    'ANTHROPIC_API_KEY': 'MADEINOZ_KNOWLEDGE_ANTHROPIC_API_KEY',
+    'GOOGLE_API_KEY': 'MADEINOZ_KNOWLEDGE_GOOGLE_API_KEY',
+    'GROQ_API_KEY': 'MADEINOZ_KNOWLEDGE_GROQ_API_KEY',
+    'OPENAI_BASE_URL': 'MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL',
+}
+
+# Track changes for reporting
+preserved_count = 0
+added_count = 0
+migrated_count = 0
+updated_count = 0
+
+# Build final vars_to_write
+vars_to_write = {}
+
+for var_name, default_value in default_vars.items():
+    if var_name in existing_vars:
+        if preserve_existing:
+            # Keep existing value
+            vars_to_write[var_name] = existing_vars[var_name]
+            preserved_count += 1
+            print(f"  ✓ Preserved: {var_name}")
+        else:
+            # Replace with default/new value
+            new_value = os.getenv(var_name, default_value)
+            vars_to_write[var_name] = new_value
+            if existing_vars[var_name] != new_value:
+                updated_count += 1
+                print(f"  → Updated:   {var_name}")
+            else:
+                preserved_count += 1
+    else:
+        # Variable doesn't exist - add it
+        new_value = os.getenv(var_name, default_value)
+        vars_to_write[var_name] = new_value
+        added_count += 1
+        print(f"  + Added:     {var_name}")
+
+# Handle legacy migration
+if migrate_legacy:
+    print("\nMigrating legacy keys:")
+    for legacy_name, new_name in legacy_mapping.items():
+        if legacy_name in existing_vars and new_name not in existing_vars:
+            vars_to_write[new_name] = existing_vars[legacy_name]
+            migrated_count += 1
+            print(f"  → Migrated:  {legacy_name} → {new_name}")
+
 # Write updated content
 with open(pai_env, 'w') as f:
-    # Write existing lines, skip ones we're updating
-    updated_vars = set()
+    # First, write all existing lines, updating MADEINOZ_KNOWLEDGE_* ones as needed
+    written_vars = set()
+    added_header = False
+
     for line in lines:
-        match = re.match(r'^([A-Z_]+)=', line.strip())
+        match = re.match(r'^([A-Z_][A-Z0-9_]*)=', line.strip())
         if match:
             var_name = match.group(1)
-            if var_name in vars_to_add and vars_to_add[var_name] != existing_vars.get(var_name):
-                # Update this line
-                f.write(f"{var_name}={vars_to_add[var_name]}\n")
-                updated_vars.add(var_name)
+            if var_name in vars_to_write:
+                # Write our version of this variable
+                f.write(f"{var_name}={vars_to_write[var_name]}\n")
+                written_vars.add(var_name)
             else:
+                # Keep original line as-is
                 f.write(line)
         else:
+            # Non-variable line (comment, blank, etc.) - keep as-is
             f.write(line)
 
-    # Add new variables
-    for var_name, var_value in vars_to_add.items():
-        if var_name not in existing_vars and var_name not in updated_vars:
-            # Add Madeinoz Knowledge System section header if this is the first var
-            if len(updated_vars) == 0:
-                f.write("\n# Madeinoz Knowledge System Configuration\n")
-            f.write(f"{var_name}={var_value}\n")
-            updated_vars.add(var_name)
+    # Add any new variables that weren't in the original file
+    new_vars = [v for v in vars_to_write.keys() if v not in written_vars]
+    if new_vars:
+        # Add section header if we're adding new MADEINOZ_KNOWLEDGE_* variables
+        f.write("\n# Madeinoz Knowledge System Configuration\n")
+        for var_name in sorted(new_vars):
+            f.write(f"{var_name}={vars_to_write[var_name]}\n")
+            written_vars.add(var_name)
 
-print("✓ Madeinoz Knowledge System configuration added to PAI .env")
+# Summary
+print("\n" + "="*50)
+print("Configuration Summary:")
+print(f"  Preserved: {preserved_count} variables")
+print(f"  Added:     {added_count} variables")
+print(f"  Updated:   {updated_count} variables")
+if migrate_legacy:
+    print(f"  Migrated:  {migrated_count} legacy keys")
+print("="*50)
+print("\n✓ Madeinoz Knowledge System configuration complete")
 PYTHON_EOF
 
 echo ""
@@ -751,6 +1056,11 @@ fi
 If you prefer Docker Compose, use the appropriate compose file for your backend:
 
 ```bash
+# IMPORTANT: Source PAI .env before running docker-compose
+# The ${VAR} substitution in docker-compose reads from HOST environment,
+# NOT from env_file (which loads INTO the container after substitution)
+set -a; source ~/.claude/.env; set +a
+
 # For Neo4j backend (default - includes search-all-groups patch)
 docker compose -f src/server/docker-compose-neo4j.yml up -d
 
@@ -760,6 +1070,11 @@ docker compose -f src/server/docker-compose.yml up -d
 # Check status
 bun run src/skills/tools/status.ts
 ```
+
+> **⚠️ Common Issue:** If the container starts but LLM calls fail with wrong model errors,
+> ensure you've sourced the PAI .env file BEFORE running docker-compose.
+> The env_file directive loads vars into the container, but ${VAR} substitution
+> in docker-compose.yml happens from the HOST shell environment.
 
 **PAI Search Patch (Neo4j only):**
 The Neo4j docker-compose includes a patch that can search across ALL groups when no `group_ids` are specified. This ensures knowledge stored in different groups (e.g., `osint-profiles`, `main`, `research`) is discoverable without explicitly specifying groups in every search.
@@ -797,42 +1112,106 @@ When using Neo4j backend, you can access the Neo4j Browser at http://localhost:7
 
 ---
 
-## Step 4: Install Knowledge Skill
+## Step 4: Install Full Pack and Knowledge Skill
 
-> **FOR AI AGENTS:** This step copies the Knowledge skill to the PAI skills directory.
-> - The skill MUST be copied to `$PAI_DIR/skills/Knowledge` or `~/.claude/skills/Knowledge`
+> **FOR AI AGENTS:** This step installs the COMPLETE pack, not just skills.
+> - **IMPORTANT:** When version changes, ALL files must be replaced (skills, hooks, server, config)
+> - The full pack is installed to `~/.claude/Packs/madeinoz-knowledge-system/`
+> - Skills are copied to `~/.claude/skills/Knowledge/`
+> - Hooks are copied to `~/.claude/hooks/` (Step 9)
 > - Verify the copy succeeded by checking the directory structure
-> - All workflow files must be present after copy
 
-Copy the skill to your Claude skills directory:
+Install the complete pack and skill:
 
 ```bash
 echo ""
-echo "📦 Installing Knowledge Skill"
-echo "=============================="
+echo "📦 Installing Madeinoz Knowledge System Pack"
+echo "============================================="
 echo ""
 
-# Determine PAI skills directory (prioritize $PAI_DIR if set)
-if [[ -n "$PAI_DIR" ]]; then
-    PAI_SKILLS_DIR="$PAI_DIR/skills"
-elif [[ -d "$HOME/.claude" ]]; then
-    PAI_SKILLS_DIR="$HOME/.claude/skills"
+# Determine PAI directory
+PAI_DIR="${PAI_DIR:-$HOME/.claude}"
+
+# Create Packs directory if it doesn't exist
+PACKS_DIR="$PAI_DIR/Packs"
+mkdir -p "$PACKS_DIR"
+
+# Pack installation directory
+PACK_INSTALL_DIR="$PACKS_DIR/madeinoz-knowledge-system"
+
+# Get current pack directory (where we're running from)
+PACK_SOURCE_DIR="$(pwd)"
+
+# Extract versions for comparison
+NEW_VERSION=$(grep -E "^version:" "$PACK_SOURCE_DIR/README.md" | head -1 | sed 's/version:[[:space:]]*//')
+if [[ -f "$PACK_INSTALL_DIR/README.md" ]]; then
+    OLD_VERSION=$(grep -E "^version:" "$PACK_INSTALL_DIR/README.md" | head -1 | sed 's/version:[[:space:]]*//')
+    echo "Existing installation: v$OLD_VERSION"
+    echo "New version: v$NEW_VERSION"
+
+    # Step 4.1: Backup existing installation before replacing
+    # Location follows PAI convention: ~/.claude/MEMORY/Backups/
+    echo ""
+    echo "📁 Creating backup of existing installation..."
+    BACKUP_DIR="$PAI_DIR/MEMORY/Backups/madeinoz-knowledge-system"
+    mkdir -p "$BACKUP_DIR"
+    BACKUP_NAME="backup-v${OLD_VERSION}-$(date +%Y%m%d-%H%M%S)"
+
+    if mv "$PACK_INSTALL_DIR" "$BACKUP_DIR/$BACKUP_NAME" 2>/dev/null; then
+        echo "✓ Backup created: $BACKUP_DIR/$BACKUP_NAME"
+
+        # Keep only last 3 backups (cleanup old ones)
+        BACKUP_COUNT=$(ls -1d "$BACKUP_DIR"/backup-* 2>/dev/null | wc -l | tr -d ' ')
+        if [[ "$BACKUP_COUNT" -gt 3 ]]; then
+            echo "  Cleaning up old backups (keeping last 3)..."
+            ls -1dt "$BACKUP_DIR"/backup-* | tail -n +4 | xargs rm -rf
+        fi
+    else
+        echo "⚠️  Could not create backup (directory may not exist)"
+    fi
+
+    if [[ "$OLD_VERSION" != "$NEW_VERSION" ]]; then
+        echo ""
+        echo "⬆️  Upgrading: v$OLD_VERSION → v$NEW_VERSION"
+    else
+        echo ""
+        echo "🔄 Reinstalling: v$NEW_VERSION (same version)"
+    fi
 else
-    echo "⚠️  PAI directory not found."
-    echo "Creating PAI directory structure at ~/.claude/skills"
-    PAI_SKILLS_DIR="$HOME/.claude/skills"
+    echo "New installation: v$NEW_VERSION"
 fi
+
+# Copy ENTIRE pack to Packs directory
+echo ""
+echo "Installing full pack to: $PACK_INSTALL_DIR"
+cp -r "$PACK_SOURCE_DIR" "$PACK_INSTALL_DIR"
+echo "✓ Full pack installed (includes server, hooks, config)"
+
+# Now copy skills to PAI skills directory
+PAI_SKILLS_DIR="$PAI_DIR/skills"
 mkdir -p "$PAI_SKILLS_DIR"
 
-# Copy entire src/skills directory as Knowledge skill
-echo "Installing Knowledge skill..."
-cp -r src/skills "$PAI_SKILLS_DIR/Knowledge"
+echo ""
+echo "Installing Knowledge skill to: $PAI_SKILLS_DIR/Knowledge"
+rm -rf "$PAI_SKILLS_DIR/Knowledge"
+cp -r "$PACK_INSTALL_DIR/src/skills" "$PAI_SKILLS_DIR/Knowledge"
+
+# Version is tracked in SKILL.md frontmatter
+INSTALLED_VERSION=$(grep -E "^version:" "$PAI_SKILLS_DIR/Knowledge/SKILL.md" | head -1 | sed 's/version:[[:space:]]*//')
+echo "✓ Skill installed: v$INSTALLED_VERSION"
 
 echo ""
-echo "✓ Knowledge skill installed to: $PAI_SKILLS_DIR/Knowledge"
+echo "Installation Summary:"
+echo "  Pack:  $PACK_INSTALL_DIR"
+echo "  Skill: $PAI_SKILLS_DIR/Knowledge"
 echo ""
-echo "Installed structure:"
-ls -la "$PAI_SKILLS_DIR/Knowledge/"
+echo "Installed files:"
+echo "  ├── src/server/    (docker-compose, patches, CLI)"
+echo "  ├── src/skills/    (workflows, tools)"
+echo "  ├── src/hooks/     (memory sync hooks)"
+echo "  └── config/        (.env.example)"
+echo ""
+echo "Run server commands from: $PACK_INSTALL_DIR"
 ```
 
 ---
@@ -1244,7 +1623,7 @@ else
 
     # Create a test script that calls the MCP server with a hyphenated group_id
     cat > /tmp/test_lucene_sanitization.ts << 'EOF'
-import { sanitizeGroupId } from './src/hooks/lib/lucene';
+import { sanitizeGroupId } from './src/server/lib/lucene';
 
 // Test cases with various hyphenated patterns
 const testCases = [
@@ -1278,7 +1657,7 @@ EOF
         echo "  Hyphenated group_ids will be properly escaped in queries"
     else
         echo "⚠️  Lucene sanitization test failed"
-        echo "  Check that src/hooks/lib/lucene.ts exists and exports sanitizeGroupId"
+        echo "  Check that src/server/lib/lucene.ts exists and exports sanitizeGroupId"
     fi
 
     # Clean up test file
@@ -1374,26 +1753,38 @@ echo "🔗 Installing Memory Sync Hook"
 echo "================================"
 echo ""
 
+# Determine PAI directory and installed pack location
+PAI_DIR="${PAI_DIR:-$HOME/.claude}"
+PACK_INSTALL_DIR="$PAI_DIR/Packs/madeinoz-knowledge-system"
+
+# Check if pack is installed (Step 4 must be completed first)
+if [[ ! -d "$PACK_INSTALL_DIR" ]]; then
+    echo "❌ Pack not installed at: $PACK_INSTALL_DIR"
+    echo "   Run Step 4 first to install the full pack."
+    exit 1
+fi
+
+echo "Using installed pack: $PACK_INSTALL_DIR"
+
 # Verify memory system directory exists
-MEMORY_DIR="$HOME/.claude/MEMORY"
+MEMORY_DIR="$PAI_DIR/MEMORY"
 if [ ! -d "$MEMORY_DIR" ]; then
     echo "⚠️  Memory directory not found at: $MEMORY_DIR"
     echo "   The directory will be created when you start using PAI."
-    echo "   The hook can be installed later with: bun run src/server/install.ts"
 fi
 
 echo "✓ Memory directory: $MEMORY_DIR"
 
 # Hooks install to ~/.claude/hooks/ (where Claude Code reads them)
-PAI_HOOKS_DIR="$HOME/.claude/hooks"
+PAI_HOOKS_DIR="$PAI_DIR/hooks"
 mkdir -p "$PAI_HOOKS_DIR/lib"
 
 echo "Installing hook files to: $PAI_HOOKS_DIR"
 
-# Copy hook implementation files
-cp src/hooks/sync-memory-to-knowledge.ts "$PAI_HOOKS_DIR/"
-cp src/hooks/sync-learning-realtime.ts "$PAI_HOOKS_DIR/"
-cp -r src/hooks/lib/* "$PAI_HOOKS_DIR/lib/"
+# Copy hook implementation files FROM INSTALLED PACK
+cp "$PACK_INSTALL_DIR/src/hooks/sync-memory-to-knowledge.ts" "$PAI_HOOKS_DIR/"
+cp "$PACK_INSTALL_DIR/src/hooks/sync-learning-realtime.ts" "$PAI_HOOKS_DIR/"
+cp -r "$PACK_INSTALL_DIR/src/hooks/lib/"* "$PAI_HOOKS_DIR/lib/"
 
 echo "✓ Hook files installed"
 
@@ -1689,7 +2080,7 @@ grep SEMAPHORE_LIMIT "${PAI_DIR:-$HOME/.claude}/.env"
 **Diagnosis:**
 ```bash
 # Check if lucene.ts exists and exports sanitizeGroupId
-cat src/hooks/lib/lucene.ts | grep -A 5 "sanitizeGroupId"
+cat src/server/lib/lucene.ts | grep -A 5 "sanitizeGroupId"
 ```
 
 **Solutions:**

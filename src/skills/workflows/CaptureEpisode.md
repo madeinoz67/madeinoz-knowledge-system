@@ -58,9 +58,24 @@ source_description: "Technical learning about Podman"
 
 ---
 
-## Step 4: Call MCP Tool
+## Step 4: Call Knowledge CLI
 
-**Add episode to knowledge graph:**
+**Use the Knowledge CLI (preferred - 25%+ token savings):**
+
+```bash
+bun run src/server/knowledge.ts add_episode "Episode Title" "Content to store" "Source description"
+```
+
+**Arguments:**
+1. Title (required) - Brief title describing the content
+2. Body (required) - The full content to store in the graph
+3. Source description (optional) - Where this came from
+
+**Options:**
+- `--raw` - Output raw JSON instead of compact format
+- `--metrics` - Display token metrics after operation
+
+**Alternative: Direct MCP Tool Call (for programmatic access):**
 
 > **MCP Tool:** `add_memory` (internally adds an "episode" to the graph)
 

@@ -527,6 +527,72 @@ Clear my knowledge graph
 **Option 3: Add memory limits**
 Edit container configuration to limit memory usage.
 
+### EdgeDuplicate or ExtractedEntities Pydantic Validation Errors
+
+**Symptom:** Container logs show errors like:
+
+```
+3 validation errors for EdgeDuplicate
+duplicate_facts: Field required [type=missing, input_value={'properties': {'duplicat...}]
+contradicted_facts: Field required [type=missing]
+fact_type: Field required [type=missing]
+```
+
+Or similar errors for `ExtractedEntities`, `EntitySummary`, or other Pydantic models.
+
+**Root Cause:**
+
+The LLM returns a JSON schema definition instead of actual field values. This happens because:
+1. Some LLM providers don't fully support structured output/parse API
+2. The `OpenAIGenericClient` uses basic `json_object` mode which is less strict
+3. Complex multi-entity content triggers edge deduplication which is more prone to this error
+
+**Which models are affected:**
+
+| Model | Status | Notes |
+|-------|--------|-------|
+| gpt-4o-mini | ✅ Works | Occasional errors, retry recovers |
+| gpt-4o | ✅ Works | Occasional errors, retry recovers |
+| gemini-2.0-flash | ✅ Works | Occasional errors, retry recovers |
+| claude-3.5-haiku | ⚠️ Auth issues | Requires different API routing |
+| llama/mistral variants | ❌ Fails | Consistent Pydantic errors |
+
+**Solution: Use OpenAIClient for Cloud Providers**
+
+The Madeinoz Knowledge System v1.2.4+ includes a patch that uses `OpenAIClient` (with parse API) for cloud providers instead of `OpenAIGenericClient` (basic json_object mode).
+
+**Verify the patch is active:**
+
+Check container logs after startup:
+```bash
+podman logs madeinoz-knowledge-graph-mcp 2>&1 | grep "Patch v3"
+```
+
+Should show:
+```
+Madeinoz Patch v3: Using OpenAIClient for cloud openrouter
+```
+
+**If errors persist:**
+
+1. **Check your model is supported** - Llama and Mistral models consistently fail
+2. **Errors are expected occasionally** - The built-in retry logic (2 attempts) usually recovers
+3. **Simpler content works better** - Break very complex episodes into smaller chunks
+
+**Tracking:**
+
+This issue is tracked at: https://github.com/getzep/graphiti/issues/912
+
+**Technical Details:**
+
+The fix differentiates between:
+- **Cloud providers** (OpenRouter, Together, etc.) → Use `OpenAIClient` with parse API
+- **Local endpoints** (Ollama) → Use `OpenAIGenericClient` with json_object mode
+
+The parse API provides stricter schema enforcement, which prevents the LLM from returning JSON schema definitions instead of actual values.
+
+**Code reference:** `src/server/patches/factories.py` (Madeinoz Patch v3)
+
 ### "Initialization not complete" Warning
 
 **Symptom:** MCP logs show "Received request before initialization was complete"

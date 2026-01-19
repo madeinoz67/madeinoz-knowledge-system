@@ -6,7 +6,13 @@
  * regular text (like group_ids with hyphens), they must be escaped to avoid
  * syntax errors.
  *
- * ## The Problem
+ * **NOTE:** These sanitization functions are ONLY needed for FalkorDB backend.
+ * When using Neo4j backend, Cypher query language handles special characters
+ * natively and no sanitization is required. The functions in this module
+ * automatically detect the database backend from environment variables and
+ * skip sanitization when using Neo4j.
+ *
+ * ## The Problem (FalkorDB Only)
  *
  * Graphiti's FalkorDB driver has a sanitize() method that replaces special
  * characters with whitespace for fulltext search. However, this sanitization
@@ -16,7 +22,7 @@
  *
  * Example: "madeinoz-threat-intel" → RediSearch interprets as "pai AND NOT threat AND NOT intel"
  *
- * ## Special Characters
+ * ## Special Characters (FalkorDB/Lucene Only)
  *
  * | Character | Lucene Interpretation |
  * |-----------|----------------------|
@@ -52,13 +58,58 @@
  * - Graphiti #1118: Fix forward slash character handling
  *   https://github.com/getzep/graphiti/pull/1118
  *
- * ## Our Workaround
+ * ## Our Workaround (FalkorDB Only)
  *
  * 1. For group_ids: Convert hyphens to underscores (sanitizeGroupId)
  * 2. For search queries: Escape special chars with backslash (sanitizeSearchQuery)
  *
+ * ## Database Backend Detection
+ *
+ * The database backend is detected from environment variables:
+ * - MADEINOZ_KNOWLEDGE_DATABASE_TYPE=neo4j → Neo4j backend (no sanitization)
+ * - MADEINOZ_KNOWLEDGE_DATABASE_TYPE=falkordb → FalkorDB backend (sanitization applied)
+ * - DATABASE_TYPE=neo4j → Neo4j backend (no sanitization)
+ * - DATABASE_TYPE=falkordb → FalkorDB backend (sanitization applied)
+ * - Not set or any other value → Neo4j backend (default, no sanitization applied)
+ *
  * @module lucene
  */
+
+/**
+ * Database backend types supported by the knowledge system
+ */
+export type DatabaseBackend = 'falkordb' | 'neo4j';
+
+/**
+ * Detect the database backend from environment variables
+ *
+ * Checks for:
+ * - MADEINOZ_KNOWLEDGE_DATABASE_TYPE (pack-specific)
+ * - DATABASE_TYPE (container environment)
+ *
+ * @returns The detected database backend, defaults to 'neo4j'
+ */
+export function getDatabaseBackend(): DatabaseBackend {
+  const dbType = (
+    process.env.MADEINOZ_KNOWLEDGE_DATABASE_TYPE ||
+    process.env.DATABASE_TYPE ||
+    'neo4j'
+  ).toLowerCase();
+
+  if (dbType === 'falkordb') {
+    return 'falkordb';
+  }
+  return 'neo4j';
+}
+
+/**
+ * Check if Lucene sanitization is required for the current database backend
+ *
+ * @returns true if using FalkorDB (requires Lucene sanitization), false for Neo4j
+ */
+export function requiresLuceneSanitization(): boolean {
+  return getDatabaseBackend() === 'falkordb';
+}
 
 /**
  * Escape a value for safe use in Lucene queries
@@ -128,26 +179,40 @@ export function needsEscaping(value: string): boolean {
  * This is a convenience function specifically for group_ids, which
  * commonly use hyphens (e.g., "madeinoz-threat-intel", "madeinoz-observability").
  *
- * IMPORTANT: group_ids are validated by Graphiti before reaching RediSearch.
- * The validation only allows alphanumeric characters, dashes, and underscores.
- * However, Graphiti has a bug where it uses unescaped group_ids in RediSearch
- * queries, causing hyphens to be interpreted as negation operators.
+ * **Database Backend Behavior:**
+ * - **FalkorDB**: Converts hyphens to underscores to avoid RediSearch Lucene bug
+ * - **Neo4j**: Returns group_id unchanged (Cypher handles special chars natively)
  *
- * WORKAROUND: This function automatically converts hyphens to underscores
- * to avoid the Graphiti RediSearch bug.
+ * IMPORTANT (FalkorDB Only): group_ids are validated by Graphiti before reaching
+ * RediSearch. The validation only allows alphanumeric characters, dashes, and
+ * underscores. However, Graphiti has a bug where it uses unescaped group_ids in
+ * RediSearch queries, causing hyphens to be interpreted as negation operators.
+ *
+ * WORKAROUND (FalkorDB Only): This function automatically converts hyphens to
+ * underscores to avoid the Graphiti RediSearch bug.
  *
  * @param groupId - The group_id to sanitize
- * @returns The sanitized group_id (hyphens → underscores)
+ * @returns The sanitized group_id (hyphens → underscores for FalkorDB, unchanged for Neo4j)
  *
  * @example
+ * // FalkorDB backend:
  * sanitizeGroupId("madeinoz-threat-intel") // => 'pai_threat_intel'
  * sanitizeGroupId("test_group") // => 'test_group' (unchanged)
- * sanitizeGroupId("invalid@group") // => 'invalid@group' (logs warning)
+ *
+ * // Neo4j backend:
+ * sanitizeGroupId("madeinoz-threat-intel") // => 'madeinoz-threat-intel' (unchanged)
  */
 export function sanitizeGroupId(groupId: string | undefined): string | undefined {
   if (groupId === undefined) {
     return undefined;
   }
+
+  // Check if we're using Neo4j backend - if so, no sanitization needed
+  if (!requiresLuceneSanitization()) {
+    return groupId;
+  }
+
+  // FalkorDB backend: Apply Lucene sanitization
 
   // Validate that group_id contains only allowed characters
   // Graphiti validation: [a-zA-Z0-9_-]
@@ -195,19 +260,31 @@ export function sanitizeGroupIds(groupIds: string[] | undefined): string[] | und
  * entire value in quotes, this function escapes characters in-place to
  * allow for multi-word searches with AND/OR logic between words.
  *
+ * **Database Backend Behavior:**
+ * - **FalkorDB**: Escapes special Lucene characters with backslash
+ * - **Neo4j**: Returns query unchanged (Cypher handles special chars natively)
+ *
  * @param query - The search query to sanitize
  * @returns The sanitized query string
  *
  * @example
+ * // FalkorDB backend:
  * sanitizeSearchQuery("madeinoz-threat-intel") // => 'pai\\-threat\\-intel'
- * sanitizeSearchQuery("user's search") // => "user's search"
+ *
+ * // Neo4j backend:
+ * sanitizeSearchQuery("madeinoz-threat-intel") // => 'madeinoz-threat-intel' (unchanged)
  */
 export function sanitizeSearchQuery(query: string): string {
   if (!query) {
     return "";
   }
 
-  // Escape special Lucene characters with backslash
+  // Check if we're using Neo4j backend - if so, no sanitization needed
+  if (!requiresLuceneSanitization()) {
+    return query;
+  }
+
+  // FalkorDB backend: Escape special Lucene characters with backslash
   // Order matters: escape backslash first, then &&/||, then other characters
   let sanitized = query;
 
@@ -223,4 +300,3 @@ export function sanitizeSearchQuery(query: string): string {
 
   return sanitized;
 }
-

@@ -67,7 +67,21 @@ Running the **SearchKnowledge** workflow from the **MadeinozKnowledgeSystem** sk
 
 ## Step 4: Execute Semantic Search
 
-**Call the MCP tool:**
+**Use the Knowledge CLI (preferred - 30%+ token savings):**
+
+```bash
+bun run src/server/knowledge.ts search_nodes "search query" 10
+```
+
+**Parameters:**
+- First argument (required) - Natural language search query
+- Second argument (optional) - Number of results (default: 5)
+
+**Options:**
+- `--raw` - Output raw JSON instead of compact format
+- `--metrics` - Display token metrics after operation
+
+**Alternative: Direct MCP Tool Call (for programmatic access):**
 
 ```typescript
 search_nodes({
@@ -76,18 +90,14 @@ search_nodes({
 })
 ```
 
-**Parameters:**
-- `query` (required) - Natural language search query
-- `limit` (optional) - Number of results (default: 10)
-- `group_id` (optional) - Filter by specific knowledge namespace
-- `entity` (optional) - Filter by entity type:
-  - `Preference` - User preferences and settings
-  - `Procedure` - How-to guides and processes
-  - `Learning` - Knowledge from learning sessions
-  - `Research` - Findings from research
-  - `Decision` - Architectural and strategic decisions
-  - `Feature` - Feature implementations
-  - `Person`, `Organization`, `Location`, `Concept`, `Event`, `Document`
+**Entity type filters (when using direct MCP):**
+- `Preference` - User preferences and settings
+- `Procedure` - How-to guides and processes
+- `Learning` - Knowledge from learning sessions
+- `Research` - Findings from research
+- `Decision` - Architectural and strategic decisions
+- `Feature` - Feature implementations
+- `Person`, `Organization`, `Location`, `Concept`, `Event`, `Document`
 
 ---
 

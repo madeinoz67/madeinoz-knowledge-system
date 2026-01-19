@@ -10,10 +10,14 @@ import { sanitizeGroupIds, sanitizeGroupId, sanitizeSearchQuery } from "./lucene
 /**
  * MCP tool names (Graphiti MCP server)
  *
- * Note: The Graphiti MCP server uses a hybrid naming convention:
- * - Memory-prefixed: add_memory, search_memory_nodes, search_memory_facts
- * - Episode-based: get_episodes, delete_episode
- * - Entity-based: delete_entity_edge, get_entity_edge
+ * Note: The Graphiti MCP server tools:
+ * - add_memory: Add episodes to the knowledge graph
+ * - search_nodes: Search for entities/nodes
+ * - search_memory_facts: Search for relationships/facts
+ * - get_episodes: Retrieve recent episodes
+ * - delete_episode, delete_entity_edge: Deletion operations
+ * - clear_graph: Clear all data
+ * - get_status: Server health check
  *
  * TypeScript methods use Graphiti-native terminology (Episode, Node, Fact)
  * while calling the actual MCP tool names.
@@ -21,8 +25,8 @@ import { sanitizeGroupIds, sanitizeGroupId, sanitizeSearchQuery } from "./lucene
 export const MCP_TOOLS = {
   // Knowledge capture (adds an "episode" to memory)
   ADD_EPISODE: "add_memory",
-  // Entity search (searches "nodes" in memory)
-  SEARCH_NODES: "search_memory_nodes",
+  // Entity search (searches "nodes")
+  SEARCH_NODES: "search_nodes",
   // Relationship search (searches "facts" in memory)
   SEARCH_FACTS: "search_memory_facts",
   // Episode retrieval
@@ -48,10 +52,11 @@ export interface AddEpisodeParams {
 
 export interface SearchNodesParams {
   query: string;
+  /** Maximum number of nodes to return (maps to max_nodes on server) */
   limit?: number;
   group_ids?: string[];
-  /** Filter by entity type (e.g., "Preference", "Procedure", "Learning", "Research", "Decision") */
-  entity?: string;
+  /** Filter by entity type names (e.g., ["Preference", "Procedure"]) */
+  entity_types?: string[];
 }
 
 export interface SearchFactsParams {
@@ -64,8 +69,12 @@ export interface SearchFactsParams {
 }
 
 export interface GetEpisodesParams {
+  /** Maximum number of episodes to return (maps to max_episodes on server) */
   limit?: number;
+  /** Single group ID (will be converted to group_ids array) */
   group_id?: string;
+  /** Multiple group IDs */
+  group_ids?: string[];
 }
 
 export interface GetStatusParams {
@@ -137,7 +146,7 @@ export interface MCPClientConfig {
 /**
  * Default MCP server URL
  */
-const DEFAULT_BASE_URL = "http://localhost:8000/mcp/";
+const DEFAULT_BASE_URL = "http://localhost:8000/mcp";
 const DEFAULT_TIMEOUT = 30000; // 30 seconds
 
 /**
@@ -204,7 +213,7 @@ export interface MCPClientConfigExtended extends MCPClientConfig {
 }
 
 /**
- * MCP Client class with optional response caching
+ * MCP Client class with session management and optional response caching
  */
 export class MCPClient {
   private baseURL: string;
@@ -212,12 +221,15 @@ export class MCPClient {
   private headers: Record<string, string>;
   private requestId: number;
   private cache: LRUCache<unknown> | null;
+  private sessionId: string | null = null;
+  private initializePromise: Promise<void> | null = null;
 
   constructor(config: MCPClientConfigExtended = {}) {
     this.baseURL = config.baseURL || DEFAULT_BASE_URL;
     this.timeout = config.timeout || DEFAULT_TIMEOUT;
     this.headers = {
       "Content-Type": "application/json",
+      "Accept": "application/json, text/event-stream",
       ...config.headers,
     };
     this.requestId = 1;
@@ -231,6 +243,103 @@ export class MCPClient {
     } else {
       this.cache = null;
     }
+  }
+
+  /**
+   * Initialize MCP session and get session ID
+   */
+  private async initializeSession(): Promise<void> {
+    if (this.sessionId) return;
+    if (this.initializePromise) return this.initializePromise;
+
+    this.initializePromise = (async () => {
+      const request = {
+        jsonrpc: "2.0",
+        id: this.requestId++,
+        method: "initialize",
+        params: {
+          protocolVersion: "2024-11-05",
+          capabilities: {},
+          clientInfo: { name: "mcp-wrapper", version: "1.0.0" },
+        },
+      };
+
+      const response = await fetch(this.baseURL, {
+        method: "POST",
+        headers: this.headers,
+        body: JSON.stringify(request),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to initialize session: HTTP ${response.status}`);
+      }
+
+      // Get session ID from header
+      const sessionId = response.headers.get("Mcp-Session-Id");
+      if (!sessionId) {
+        throw new Error("Server did not return session ID");
+      }
+      this.sessionId = sessionId;
+
+      // Consume the SSE response body
+      await response.text();
+    })();
+
+    await this.initializePromise;
+  }
+
+  /**
+   * Parse SSE response to extract JSON-RPC result
+   */
+  private parseSSEResponse(text: string): unknown {
+    // SSE format: "event: message\ndata: {...}\n\n"
+    const lines = text.split("\n");
+    for (const line of lines) {
+      if (line.startsWith("data: ")) {
+        const jsonStr = line.substring(6);
+        try {
+          const parsed = JSON.parse(jsonStr);
+          // Extract result from the MCP response format
+          if (parsed.result) {
+            // Handle tool call response format
+            if (parsed.result.content && Array.isArray(parsed.result.content)) {
+              // Check for structuredContent first (preferred)
+              if (parsed.result.structuredContent) {
+                const sc = parsed.result.structuredContent;
+                // Unwrap Graphiti's result wrapper if present
+                if (sc.result && typeof sc.result === 'object') {
+                  return sc.result;
+                }
+                return sc;
+              }
+              // Fall back to text content
+              const textContent = parsed.result.content.find((c: { type: string }) => c.type === "text");
+              if (textContent && textContent.text) {
+                try {
+                  const textParsed = JSON.parse(textContent.text);
+                  // Unwrap Graphiti's result wrapper if present
+                  if (textParsed.result && typeof textParsed.result === 'object') {
+                    return textParsed.result;
+                  }
+                  return textParsed;
+                } catch {
+                  return textContent.text;
+                }
+              }
+            }
+            return parsed.result;
+          }
+          if (parsed.error) {
+            throw new Error(parsed.error.message || "Unknown error");
+          }
+          return parsed;
+        } catch (e) {
+          if (e instanceof SyntaxError) continue;
+          throw e;
+        }
+      }
+    }
+    throw new Error("No valid SSE data found in response");
   }
 
   /**
@@ -264,23 +373,29 @@ export class MCPClient {
     toolName: string,
     arguments_: Record<string, unknown>
   ): Promise<MCPClientResponse<T>> {
-    const request: JSONRPCRequest = {
-      jsonrpc: "2.0",
-      id: this.requestId++,
-      method: "tools/call",
-      params: {
-        name: toolName,
-        arguments: arguments_,
-      },
-    };
-
     try {
+      // Ensure session is initialized
+      await this.initializeSession();
+
+      const request: JSONRPCRequest = {
+        jsonrpc: "2.0",
+        id: this.requestId++,
+        method: "tools/call",
+        params: {
+          name: toolName,
+          arguments: arguments_,
+        },
+      };
+
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
       const response = await fetch(this.baseURL, {
         method: "POST",
-        headers: this.headers,
+        headers: {
+          ...this.headers,
+          "Mcp-Session-Id": this.sessionId!,
+        },
         body: JSON.stringify(request),
         signal: controller.signal,
       });
@@ -295,19 +410,13 @@ export class MCPClient {
         };
       }
 
-      const data: JSONRPCResponse = await response.json();
-
-      if (data.error) {
-        return {
-          success: false,
-          error: data.error.message,
-          code: data.error.code,
-        };
-      }
+      // Parse SSE response
+      const text = await response.text();
+      const data = this.parseSSEResponse(text);
 
       return {
         success: true,
-        data: data.result as T,
+        data: data as T,
       };
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -341,30 +450,37 @@ export class MCPClient {
    * Results are cached for repeated queries
    */
   async searchNodes(params: SearchNodesParams): Promise<MCPClientResponse<unknown[]>> {
-    // Sanitize query and group_ids to avoid RediSearch/Lucene syntax errors
-    const sanitizedParams: SearchNodesParams = {
-      ...params,
+    // Build server params with correct field names
+    const serverParams: Record<string, unknown> = {
       query: sanitizeSearchQuery(params.query),
-      group_ids: sanitizeGroupIds(params.group_ids),
     };
+    if (params.limit !== undefined) {
+      serverParams.max_nodes = params.limit;
+    }
+    if (params.group_ids) {
+      serverParams.group_ids = sanitizeGroupIds(params.group_ids);
+    }
+    if (params.entity_types) {
+      serverParams.entity_types = params.entity_types;
+    }
 
     // Check cache first
     if (this.cache) {
-      const cacheKey = this.getCacheKey(MCP_TOOLS.SEARCH_NODES, sanitizedParams as Record<string, unknown>);
+      const cacheKey = this.getCacheKey(MCP_TOOLS.SEARCH_NODES, serverParams);
       const cached = this.cache.get(cacheKey);
       if (cached) {
         return { success: true, data: cached as unknown[] };
       }
 
       // Fetch and cache
-      const result = await this.callTool<unknown[]>(MCP_TOOLS.SEARCH_NODES, sanitizedParams);
+      const result = await this.callTool<unknown[]>(MCP_TOOLS.SEARCH_NODES, serverParams);
       if (result.success && result.data) {
         this.cache.set(cacheKey, result.data);
       }
       return result;
     }
 
-    return await this.callTool<unknown[]>(MCP_TOOLS.SEARCH_NODES, sanitizedParams);
+    return await this.callTool<unknown[]>(MCP_TOOLS.SEARCH_NODES, serverParams);
   }
 
   /**
@@ -402,12 +518,18 @@ export class MCPClient {
    * Get recent episodes from the knowledge graph
    */
   async getEpisodes(params: GetEpisodesParams = {}): Promise<MCPClientResponse<unknown[]>> {
-    // Sanitize group_id to avoid RediSearch/Lucene syntax errors
-    const sanitizedParams: GetEpisodesParams = {
-      ...params,
-      group_id: sanitizeGroupId(params.group_id),
-    };
-    return await this.callTool<unknown[]>(MCP_TOOLS.GET_EPISODES, sanitizedParams);
+    // Build server params with correct field names
+    const serverParams: Record<string, unknown> = {};
+    if (params.limit !== undefined) {
+      serverParams.max_episodes = params.limit;
+    }
+    // Support both group_id (single) and group_ids (multiple)
+    if (params.group_ids) {
+      serverParams.group_ids = sanitizeGroupIds(params.group_ids);
+    } else if (params.group_id) {
+      serverParams.group_ids = [sanitizeGroupId(params.group_id)!];
+    }
+    return await this.callTool<unknown[]>(MCP_TOOLS.GET_EPISODES, serverParams);
   }
 
   /**
@@ -463,7 +585,7 @@ export class MCPClient {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout for health check
 
-      const response = await fetch(`${this.baseURL.replace("/mcp/", "")}/health`, {
+      const response = await fetch(`${this.baseURL.replace(/\/mcp\/?$/, "")}/health`, {
         method: "GET",
         signal: controller.signal,
       });

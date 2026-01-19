@@ -1,5 +1,6 @@
 ---
 name: Knowledge
+version: 1.2.5
 description: Personal knowledge management system using Graphiti knowledge graph with FalkorDB. USE WHEN user says 'store this', 'remember this', 'add to knowledge', 'search my knowledge', 'what do I know about', 'find in my knowledge base', 'organize my information', 'install knowledge', 'setup knowledge system', 'configure knowledge graph', or requests knowledge capture, retrieval, synthesis, installation, or configuration of their personal knowledge graph system.
 ---
 
@@ -42,21 +43,61 @@ Persistent personal knowledge system powered by Graphiti knowledge graph with Fa
 
 **Required Setup:**
 
+The pack is installed at `~/.claude/Packs/madeinoz-knowledge-system/` (or `$PAI_DIR/Packs/madeinoz-knowledge-system/`).
+
 1. **Start the Graphiti MCP server:**
    ```bash
-   cd /path/to/madeinoz-knowledge-system
+   cd ~/.claude/Packs/madeinoz-knowledge-system
    bun run src/server/run.ts
    ```
 
 2. **Verify server is running:**
    ```bash
-   curl http://localhost:8000/health
+   cd ~/.claude/Packs/madeinoz-knowledge-system && bun run src/server/knowledge.ts health
    ```
 
-3. **Configure API key** (in `config/.env.example`):
+3. **Configure API key** (in PAI .env `~/.claude/.env`):
    ```bash
    MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=sk-your-key-here
    ```
+
+## Knowledge CLI (Preferred Interface)
+
+The Knowledge CLI provides token-efficient, human-readable output. **Always use the Knowledge CLI instead of direct MCP tool calls** for better readability and reduced token consumption.
+
+**Run commands from the pack directory:**
+```bash
+cd ~/.claude/Packs/madeinoz-knowledge-system
+```
+
+**Commands:**
+```bash
+# Add knowledge
+bun run src/server/knowledge.ts add_episode "Title" "Body" "Source"
+
+# Search entities (30%+ token savings)
+bun run src/server/knowledge.ts search_nodes "query" 10
+
+# Search relationships (30%+ token savings)
+bun run src/server/knowledge.ts search_facts "query" 10
+
+# Get recent episodes (25%+ token savings)
+bun run src/server/knowledge.ts get_episodes 10
+
+# Get system status
+bun run src/server/knowledge.ts get_status
+
+# Clear graph (destructive - requires --force)
+bun run src/server/knowledge.ts clear_graph --force
+
+# Check server health
+bun run src/server/knowledge.ts health
+```
+
+**Options:**
+- `--raw` - Output raw JSON instead of compact format
+- `--metrics` - Display token metrics after each operation
+- `--metrics-file <path>` - Append metrics to JSONL file
 
 **What Gets Captured:**
 - Conversations and insights from work sessions

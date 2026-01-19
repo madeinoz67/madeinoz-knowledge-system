@@ -73,7 +73,20 @@ Running the **GetRecent** workflow from the **MadeinozKnowledgeSystem** skill...
 
 ## Step 4: Retrieve Recent Episodes
 
-**Call the MCP tool:**
+**Use the Knowledge CLI (preferred - 25%+ token savings):**
+
+```bash
+bun run src/server/knowledge.ts get_episodes 20
+```
+
+**Arguments:**
+1. Limit (optional) - Number of episodes to retrieve (default: 5)
+
+**Options:**
+- `--raw` - Output raw JSON instead of compact format
+- `--metrics` - Display token metrics after operation
+
+**Alternative: Direct MCP Tool Call (for programmatic access):**
 
 ```typescript
 get_episodes({

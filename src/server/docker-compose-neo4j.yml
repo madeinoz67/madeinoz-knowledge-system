@@ -87,11 +87,18 @@ services:
       # Telemetry
       - GRAPHITI_TELEMETRY_ENABLED=false
 
-      # Madeinoz Patch: Search all groups toggle (set in config/.env)
-      # When true, searches query ALL groups when no group_ids specified
+      # Madeinoz Patch: Search all groups toggle
       - MADEINOZ_KNOWLEDGE_SEARCH_ALL_GROUPS=${MADEINOZ_KNOWLEDGE_SEARCH_ALL_GROUPS:-true}
-      # Note: OPENAI_API_KEY, MODEL_NAME, LLM_PROVIDER, EMBEDDER_PROVIDER
-      # are loaded directly from env_file (config/.env)
+
+      # LLM Configuration (mapped from MADEINOZ_KNOWLEDGE_* prefix to container vars)
+      # The container expects unprefixed vars, but we store with pack prefix for isolation
+      - MODEL_NAME=${MADEINOZ_KNOWLEDGE_MODEL_NAME:-google/gemini-2.0-flash-001}
+      - LLM_PROVIDER=${MADEINOZ_KNOWLEDGE_LLM_PROVIDER:-openai}
+      - EMBEDDER_PROVIDER=${MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER:-ollama}
+      - EMBEDDER_MODEL=${MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL:-mxbai-embed-large}
+      - OPENAI_API_KEY=${MADEINOZ_KNOWLEDGE_OPENAI_API_KEY}
+      - OPENAI_BASE_URL=${MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL:-https://openrouter.ai/api/v1}
+      - OLLAMA_BASE_URL=${MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL:-http://host.containers.internal:11434}
     volumes:
       - ./config-neo4j.yaml:/app/mcp/config/config.yaml:ro
       # Madeinoz Patch: Search ALL groups by default when no group_ids specified

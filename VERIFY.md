@@ -488,6 +488,44 @@ done
 
 ---
 
+### 3.6 Version Tracking
+
+- [ ] **SKILL.md has version in frontmatter**
+- [ ] **Version matches pack README.md**
+
+**Verification commands:**
+```bash
+PAI_SKILLS="${PAI_DIR:-$HOME/.claude}/skills"
+SKILL_FILE="$PAI_SKILLS/Knowledge/SKILL.md"
+
+# Check SKILL.md version (primary source of truth)
+INSTALLED_VERSION=$(grep -E "^version:" "$SKILL_FILE" 2>/dev/null | head -1 | sed 's/version:[[:space:]]*//')
+if [ -n "$INSTALLED_VERSION" ]; then
+    echo "✓ Installed version: $INSTALLED_VERSION"
+else
+    echo "✗ No version in SKILL.md frontmatter (pre-1.2.0 or corrupted)"
+fi
+
+# Compare with pack version (if in pack directory)
+if [ -f "README.md" ]; then
+    PACK_VERSION=$(grep -E "^version:" README.md | head -1 | sed 's/version:[[:space:]]*//')
+    echo "Pack version: $PACK_VERSION"
+
+    if [ "$INSTALLED_VERSION" = "$PACK_VERSION" ]; then
+        echo "✓ Versions match"
+    else
+        echo "⚠ Version mismatch: installed=$INSTALLED_VERSION, pack=$PACK_VERSION"
+    fi
+fi
+```
+
+**Expected result:**
+- SKILL.md frontmatter contains `version: X.Y.Z`
+- Version matches the pack's README.md version field
+- Pre-1.2.0 installations will not have version field
+
+---
+
 ## Section 4: Configuration Verification
 
 Verify all configuration is correct.

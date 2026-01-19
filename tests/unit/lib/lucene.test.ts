@@ -1,8 +1,12 @@
 /**
  * Tests for Lucene sanitization utilities
+ *
+ * These tests focus on the pure Lucene functions (luceneSanitize, needsEscaping)
+ * that are independent of database backend, and backend-specific behavior
+ * for FalkorDB which requires Lucene sanitization.
  */
 
-import { describe, test, expect } from "bun:test";
+import { describe, test, expect, beforeEach, afterEach } from "bun:test";
 import {
   luceneSanitize,
   luceneSanitizeMany,
@@ -78,7 +82,23 @@ describe("needsEscaping", () => {
   });
 });
 
-describe("sanitizeGroupId", () => {
+/**
+ * Tests for FalkorDB-specific sanitization behavior
+ *
+ * These tests set DATABASE_TYPE=falkordb to enable Lucene sanitization
+ */
+describe("sanitizeGroupId (FalkorDB)", () => {
+  const originalEnv = process.env;
+
+  beforeEach(() => {
+    process.env = { ...originalEnv };
+    process.env.DATABASE_TYPE = "falkordb";
+  });
+
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
   test("should convert hyphens to underscores (WORKAROUND)", () => {
     expect(sanitizeGroupId("madeinoz-threat-intel")).toBe("madeinoz_threat_intel");
     expect(sanitizeGroupId("test-group")).toBe("test_group");
@@ -109,7 +129,18 @@ describe("sanitizeGroupId", () => {
   });
 });
 
-describe("sanitizeGroupIds", () => {
+describe("sanitizeGroupIds (FalkorDB)", () => {
+  const originalEnv = process.env;
+
+  beforeEach(() => {
+    process.env = { ...originalEnv };
+    process.env.DATABASE_TYPE = "falkordb";
+  });
+
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
   test("should convert hyphens to underscores in all group_ids", () => {
     const input = ["group-1", "group-2", "test_group"];
     const expected = ["group_1", "group_2", "test_group"];
@@ -125,7 +156,18 @@ describe("sanitizeGroupIds", () => {
   });
 });
 
-describe("sanitizeSearchQuery", () => {
+describe("sanitizeSearchQuery (FalkorDB)", () => {
+  const originalEnv = process.env;
+
+  beforeEach(() => {
+    process.env = { ...originalEnv };
+    process.env.DATABASE_TYPE = "falkordb";
+  });
+
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
   test("should escape hyphens in queries", () => {
     expect(sanitizeSearchQuery("madeinoz-threat-intel")).toBe("madeinoz\\-threat\\-intel");
   });

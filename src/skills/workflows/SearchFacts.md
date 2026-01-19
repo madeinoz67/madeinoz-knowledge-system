@@ -67,7 +67,21 @@ Running the **SearchFacts** workflow from the **MadeinozKnowledgeSystem** skill.
 
 ## Step 4: Execute Fact Search
 
-**Call the MCP tool:**
+**Use the Knowledge CLI (preferred - 30%+ token savings):**
+
+```bash
+bun run src/server/knowledge.ts search_facts "relationship query" 15
+```
+
+**Arguments:**
+1. Query (required) - Natural language query about relationships
+2. Limit (optional) - Number of results (default: 5)
+
+**Options:**
+- `--raw` - Output raw JSON instead of compact format
+- `--metrics` - Display token metrics after operation
+
+**Alternative: Direct MCP Tool Call (for programmatic access):**
 
 ```typescript
 search_facts({
@@ -76,18 +90,14 @@ search_facts({
 })
 ```
 
-**Parameters:**
-- `query` (required) - Natural language query about relationships
-- `limit` (optional) - Number of results (default: 15)
-- `group_id` (optional) - Filter by knowledge namespace
-- `entity` (optional) - Filter by entity type:
-  - `Preference` - User preferences and settings
-  - `Procedure` - How-to guides and processes
-  - `Learning` - Knowledge from learning sessions
-  - `Research` - Findings from research
-  - `Decision` - Architectural and strategic decisions
-  - `Feature` - Feature implementations
-  - `Person`, `Organization`, `Location`, `Concept`, `Event`, `Document`
+**Entity type filters (when using direct MCP):**
+- `Preference` - User preferences and settings
+- `Procedure` - How-to guides and processes
+- `Learning` - Knowledge from learning sessions
+- `Research` - Findings from research
+- `Decision` - Architectural and strategic decisions
+- `Feature` - Feature implementations
+- `Person`, `Organization`, `Location`, `Concept`, `Event`, `Document`
 
 ---
 

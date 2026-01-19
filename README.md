@@ -3,10 +3,10 @@
 name: Madeinoz Knowledge System
 
 # pack-id: (format) {author}-{pack-name}-{variant}-v{version}
-pack-id: madeinoz67-madeinoz-knowledge-system-core-v1.1.0
+pack-id: madeinoz67-madeinoz-knowledge-system-core-v1.2.5
 
 # version: (format) SemVer major.minor.patch
-version: 1.1.0
+version: 1.2.5
 
 # author: (1 word) GitHub username or organization
 author: madeinoz67
@@ -404,10 +404,9 @@ FalkorDB uses RediSearch, which implements Lucene query syntax. In Lucene, certa
 When searching for hyphenated group_ids like `madeinoz-threat-intel`, Lucene interprets this as "pai AND NOT threat AND NOT intel", causing query syntax errors.
 
 **The Solution:**
-Two sanitization modules automatically escape special characters:
+A centralized sanitization module automatically escapes special characters:
 
-1. **`src/hooks/lib/lucene.ts`** - Client-side sanitization for hooks
-2. **`src/server/lib/lucene.ts`** - Server-side sanitization for MCP operations
+**`src/server/lib/lucene.ts`** - Canonical sanitization module for all operations (server and hooks)
 
 **Sanitization Functions:**
 
@@ -1047,10 +1046,9 @@ If you see errors like "Syntax error near '-'" when searching for hyphenated ter
 QuerySyntaxError: Syntax error near '-' in query 'group_id:madeinoz-threat-intel'
 ```
 
-**Solution:** The Madeinoz Knowledge System includes automatic query sanitization that escapes special Lucene characters. The sanitization happens in two places:
+**Solution:** The Madeinoz Knowledge System includes automatic query sanitization that escapes special Lucene characters. The sanitization is handled by a centralized module:
 
-1. **Client-side** (`src/hooks/lib/lucene.ts`): For hook operations
-2. **Server-side** (`src/server/lib/lucene.ts`): For MCP server operations
+**`src/server/lib/lucene.ts`** - Canonical sanitization module used by both server and hook operations
 
 **What Gets Escaped:**
 - Hyphens: `madeinoz-threat-intel` → `"madeinoz-threat-intel"`
@@ -1061,7 +1059,7 @@ The sanitization is automatic and happens transparently. All CTI/OSINT operation
 
 **If you still see errors:**
 1. Verify you're using the latest version of the knowledge system
-2. Check that both `src/hooks/lib/lucene.ts` and `src/server/lib/lucene.ts` are present
+2. Check that `src/server/lib/lucene.ts` exists (the canonical sanitization module)
 3. Try the search again - sanitization is applied automatically
 
 ---
@@ -1260,11 +1258,43 @@ The hook is designed for graceful degradation:
 
 ### 1.0.1 - 2025-01-11
 - Added Lucene query sanitization for hyphenated identifiers
-- Implemented `src/hooks/lib/lucene.ts` for client-side sanitization
-- Implemented `src/server/lib/lucene.ts` for server-side sanitization
+- Implemented `src/server/lib/lucene.ts` as the canonical sanitization module
 - Fixed CTI/OSINT operations with hyphenated group_ids (e.g., `apt-28`, `tracked-actor-123`)
 - Root cause analysis: Hyphens interpreted as negation operators in Lucene syntax
 - All special Lucene characters now automatically escaped: `+ - && || ! ( ) { } [ ] ^ " ~ * ? : \ /`
+
+### 1.2.2 - 2026-01-19
+- Fixed `search_nodes` formatter to use `labels` array instead of `entity_type` field
+- Removed content truncation from all formatters to preserve complete knowledge
+- Facts now display full text (was truncated at 70 chars)
+- Episodes now display full content (was truncated at 60 chars)
+- Node summaries increased to 120 chars for better context
+- Token savings maintained: search_nodes 85.5%, search_facts 81.8%, get_episodes 74.4%
+
+### 1.2.1 - 2026-01-19
+- Fixed `search_facts` formatter to match actual MCP response structure
+- Added support for new fact format (name/fact fields) with legacy fallback
+- search_facts now achieves 83.6% token savings (was 0%)
+- Version tracking: SKILL.md `version:` field is single source of truth
+- Upgrade detection compares SKILL.md version with pack version
+
+### 1.2.0 - 2026-01-18
+- Added `knowledge` CLI for token-efficient MCP operations
+- New compact output format reduces token usage by up to 70%
+- Token metrics tracking with `--metrics` flag for cost monitoring
+- Database-aware Lucene sanitization (only applies to FalkorDB backend)
+- Consolidated sanitization module at `src/server/lib/lucene.ts`
+- Updated all 7 workflows to use the new knowledge CLI
+- Added output formatter system (`src/server/lib/output-formatter.ts`)
+- Added token metrics system (`src/server/lib/token-metrics.ts`)
+- Comprehensive test suite: unit tests for lucene, output-formatter, token-metrics
+- Integration benchmark tests for wrapper performance validation
+- Renamed MCP wrapper to `knowledge` CLI for clarity
+- **Upgrade support**: Version detection and comparison for existing installations
+- Automatic backup with manifest before upgrade (stored in `~/.madeinoz-backup/`)
+- SKILL.md frontmatter `version:` field is single source of truth for installed version
+- Skip reinstall if same version (use `--force` to override)
+- Added VERIFY.md Section 3.6 for version verification
 
 ### 1.1.0 - 2026-01-13
 - Added Neo4j as alternative database backend

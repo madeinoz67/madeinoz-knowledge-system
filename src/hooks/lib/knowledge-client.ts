@@ -6,7 +6,7 @@
  * Designed for fail-safe operation with timeouts and graceful degradation.
  */
 
-import { sanitizeGroupId } from "./lucene.js";
+import { sanitizeGroupId } from "../../server/lib/lucene.js";
 
 export interface KnowledgeClientConfig {
   baseURL: string;

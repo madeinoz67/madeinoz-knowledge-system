@@ -145,7 +145,19 @@ Do you want to create a backup before clearing?
 
 ## Step 5: Execute Clear Operation
 
-**After explicit confirmation:**
+**After explicit confirmation, use the Knowledge CLI:**
+
+```bash
+bun run src/server/knowledge.ts clear_graph --force
+```
+
+**Note:** The `--force` flag is required as a safety measure. Without it, the command will fail with a warning.
+
+**Options:**
+- `--raw` - Output raw JSON instead of compact format
+- `--metrics` - Display token metrics after operation
+
+**Alternative: Direct MCP Tool Call (for programmatic access):**
 
 ```typescript
 // Use the clear_graph tool

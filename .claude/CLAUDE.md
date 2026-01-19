@@ -44,7 +44,7 @@ src/
 │   ├── run.ts               # Main entry - starts containers (Neo4j or FalkorDB)
 │   ├── install.ts           # Interactive installer with backend selection
 │   ├── diagnose.ts          # System diagnostics
-│   ├── mcp-wrapper.ts       # MCP protocol handling
+│   ├── knowledge.ts         # Knowledge CLI (token-efficient wrapper)
 │   ├── lib/
 │   │   ├── container.ts     # Container manager (Podman/Docker abstraction)
 │   │   ├── config.ts        # Config loader and validation

@@ -71,7 +71,7 @@ The following tools are in `src/server/` (not installed with skill):
 - `install.ts` - Full installation wizard
 - `diagnose.ts` - Diagnostic and troubleshooting tool
 - `run.ts` - Initial container setup
-- `mcp-wrapper.ts` - MCP CLI wrapper
+- `knowledge.ts` - Knowledge CLI wrapper
 
 Run these from the pack directory:
 

@@ -290,18 +290,26 @@ class LLMClientFactory:
                     max_tokens=config.max_tokens,
                 )
 
-                # Madeinoz Patch v2: Use OpenAIGenericClient for ALL custom endpoints
-                # This includes both local (Ollama) and cloud (OpenRouter, Together) providers
-                # OpenAIGenericClient uses /v1/chat/completions which is the standard endpoint
-                # OpenAIClient uses /v1/responses (beta parse API) which only OpenAI supports
+                # Madeinoz Patch v3: Use OpenAIClient for cloud providers, OpenAIGenericClient for local
+                # Per GitHub issue #912, OpenAIClient has better structured output support
+                # which prevents EdgeDuplicate Pydantic validation errors.
+                # - OpenAIClient: Uses parse API with strict schema enforcement (better for OpenRouter)
+                # - OpenAIGenericClient: Uses basic json_object mode (needed for Ollama)
                 if is_custom:
-                    if not HAS_GENERIC_CLIENT:
-                        raise ValueError(
-                            'OpenAIGenericClient not available. '
-                            'Custom endpoints require graphiti-core >= 0.5.0'
-                        )
-                    logger.info(f'Madeinoz Patch v2: Using OpenAIGenericClient for {provider_name}')
-                    return OpenAIGenericClient(config=llm_config)
+                    if is_local:
+                        # Local endpoints (Ollama) - use generic client
+                        if not HAS_GENERIC_CLIENT:
+                            raise ValueError(
+                                'OpenAIGenericClient not available. '
+                                'Local endpoints require graphiti-core >= 0.5.0'
+                            )
+                        logger.info(f'Madeinoz Patch v3: Using OpenAIGenericClient for local {provider_name}')
+                        return OpenAIGenericClient(config=llm_config)
+                    else:
+                        # Cloud providers (OpenRouter, Together, etc.) - use standard OpenAI client
+                        # These providers proxy to OpenAI models and support the parse API
+                        logger.info(f'Madeinoz Patch v3: Using OpenAIClient for cloud {provider_name}')
+                        return OpenAIClient(config=llm_config)
 
                 # Standard OpenAI endpoint - use regular client
                 if is_reasoning_model:

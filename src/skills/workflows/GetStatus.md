@@ -19,7 +19,13 @@ Running the **GetStatus** workflow from the **MadeinozKnowledgeSystem** skill...
 
 ## Step 2: Check Server Health
 
-**Verify Graphiti MCP server is running:**
+**Use the Knowledge CLI (preferred):**
+
+```bash
+bun run src/server/knowledge.ts health
+```
+
+**Alternative: Direct curl check:**
 
 ```bash
 # Check if server responds
@@ -44,7 +50,17 @@ bun run src/skills/tools/logs.ts | head -50
 
 ## Step 3: Call MCP Status Tool
 
-**Get detailed status from knowledge graph:**
+**Use the Knowledge CLI (preferred - 25%+ token savings):**
+
+```bash
+bun run src/server/knowledge.ts get_status
+```
+
+**Options:**
+- `--raw` - Output raw JSON instead of compact format
+- `--metrics` - Display token metrics after operation
+
+**Alternative: Direct MCP Tool Call (for programmatic access):**
 
 ```typescript
 // Use the get_status tool
