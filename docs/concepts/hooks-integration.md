@@ -47,8 +47,8 @@ graph TB
     end
 
     subgraph "MCP Server"
-        MCP[Graphiti MCP Server<br/>localhost:8765]
-        API[add_memory Tool]
+        MCP[Graphiti MCP Server<br/>localhost:8000/mcp/]
+        API[add_memory Tool<br/>HTTP POST + JSON-RPC 2.0]
     end
 
     subgraph "Knowledge Graph"
@@ -332,6 +332,69 @@ The hooks system uses **content-based deduplication** to prevent duplicate entri
 !!! tip "Hash Stability"
     The hash is calculated from the entire file content, including frontmatter. Even minor edits (like fixing typos) will trigger a re-sync. This is intentional - it ensures your knowledge graph always reflects the latest version of your learnings.
 
+## MCP Protocol Details
+
+The hooks use a **dual protocol architecture** that automatically adapts to your database backend type. This ensures compatibility with both Neo4j (default) and FalkorDB backends.
+
+### Protocol Selection
+
+The `MADEINOZ_KNOWLEDGE_DB` environment variable determines which MCP protocol the hooks use:
+
+| Database Type | Protocol | Endpoint | Session Management |
+|---------------|----------|----------|-------------------|
+| `neo4j` (default) | HTTP POST + JSON-RPC 2.0 | `/mcp/` | `Mcp-Session-Id` header |
+| `falkorodb` | SSE GET + session messages | `/sse` | Session endpoint from SSE handshake |
+
+### Neo4j Protocol (HTTP POST)
+
+**Flow:**
+1. Initialize session: POST to `/mcp/` with `initialize` method
+2. Extract `Mcp-Session-Id` from response headers
+3. Call tools: POST to `/mcp/` with `tools/call` method, including `Mcp-Session-Id` header
+4. Parse response body as SSE format (extract `data:` lines containing JSON)
+
+**Example Request:**
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "add_memory",
+    "arguments": {
+      "name": "LEARNING: My Learning",
+      "episode_body": "Content here...",
+      "group_id": "learning"
+    }
+  }
+}
+```
+
+### FalkorDB Protocol (SSE GET)
+
+**Flow:**
+1. Connect to `/sse` endpoint
+2. Receive `endpoint` event with session-specific messages URL
+3. Send initialize request to messages URL
+4. Send tool calls via POST to messages URL
+5. Receive responses via SSE or as JSON
+
+### Query Sanitization
+
+The hooks automatically apply **conditional query sanitization** based on database type:
+
+**FalkorDB (Lucene/RediSearch):**
+- Special characters are escaped: `+ - && || ! ( ) { } [ ] ^ " ~ * ? : \ /`
+- Critical for CTI/OSINT data with hyphenated identifiers (e.g., `apt-28`, `CVE-2024-1234`)
+- Applied via `sanitizeGroupId()` utility from `lucene.ts`
+
+**Neo4j (Cypher):**
+- No escaping needed - native Cypher queries handle special characters naturally
+- Query parameters passed through as-is
+
+!!! warning "Protocol Mismatch Prevention"
+    The hooks automatically detect your database type and use the correct protocol. If you switch backends, simply update the `MADEINOZ_KNOWLEDGE_DB` environment variable and restart the MCP server.
+
 ## Configuration
 
 ### Environment Variables
@@ -340,10 +403,18 @@ The hooks system respects the same configuration as the main knowledge graph ser
 
 | Variable | Purpose | Default |
 |----------|---------|---------|
-| `MADEINOZ_KNOWLEDGE_HOST` | Graphiti MCP server host | `localhost` |
-| `MADEINOZ_KNOWLEDGE_PORT` | Graphiti MCP server port | `8765` |
-| `MADEINOZ_KNOWLEDGE_TIMEOUT` | Request timeout in milliseconds | `30000` |
-| `MADEINOZ_KNOWLEDGE_LOG_LEVEL` | Logging verbosity | `info` |
+| `MADEINOZ_KNOWLEDGE_MCP_URL` | Graphiti MCP server base URL | `http://localhost:8000` |
+| `MADEINOZ_KNOWLEDGE_DB` | Database backend type (determines protocol) | `neo4j` |
+| `MADEINOZ_KNOWLEDGE_TIMEOUT` | Request timeout in milliseconds | `15000` |
+| `MADEINOZ_KNOWLEDGE_RETRIES` | Maximum retry attempts for transient failures | `3` |
+
+!!! note "Database Protocol Selection"
+    The `MADEINOZ_KNOWLEDGE_DB` environment variable determines which MCP protocol the hooks use:
+
+    - **neo4j** (default): HTTP POST to `/mcp/` endpoint with JSON-RPC 2.0 protocol
+    - **falkorodb**: SSE GET to `/sse` endpoint with session-based messaging
+
+    This automatic protocol detection ensures the hooks work correctly with both database backends.
 
 ### Hook-Specific Settings
 
@@ -486,7 +557,7 @@ cat ~/.claude/.madeinoz-knowledge-sync-state.json
 
 3. Test connection manually:
    ```bash
-   curl http://localhost:8765
+   curl http://localhost:8000/health
    ```
 
 **Solutions:**

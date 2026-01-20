@@ -2,6 +2,28 @@
 
 All notable changes to the Madeinoz Knowledge System are documented here.
 
+## [1.2.5] - 2026-01-20
+
+### Fixed
+
+- **Sync Hook Protocol Mismatch** - Fixed critical bug where sync hook only supported SSE GET protocol (FalkorDB) and failed with Neo4j backend. Now implements dual protocol support:
+  - **FalkorDB**: SSE GET to `/sse` endpoint (preserved original working code)
+  - **Neo4j**: HTTP POST to `/mcp` endpoint with JSON-RPC 2.0 protocol
+  - Session management with `Mcp-Session-Id` header for Neo4j
+  - Exponential backoff retry logic for transient failures
+
+### Changed
+
+- **Database-specific protocol routing** - `MADEINOZ_KNOWLEDGE_DB` environment variable now determines which MCP client protocol to use
+- **Conditional query sanitization** - Lucene special character escaping (for hyphenated CTI identifiers like `apt-28`) now applied only for FalkorDB, not Neo4j
+
+### Technical Details
+
+- Created separate `FalkorDBClient` and `Neo4jClient` classes in `src/hooks/lib/knowledge-client.ts`
+- Database type validation: `neo4j` or `falkorodb` (throws error on invalid values)
+- SSE response body parsing to extract `data:` lines with JSON-RPC results
+- Graceful degradation when MCP server is unavailable
+
 ## [1.2.4] - 2026-01-19
 
 ### Fixed

@@ -2,11 +2,11 @@
  * Knowledge Client for Hooks
  *
  * Lightweight client for hook integration with the knowledge graph MCP.
- * Uses SSE transport to communicate with the Graphiti MCP server.
+ * Uses database-specific protocols: FalkorDB uses SSE (/sse), Neo4j uses HTTP POST (/mcp).
  * Designed for fail-safe operation with timeouts and graceful degradation.
  */
 
-import { sanitizeGroupId } from "../../server/lib/lucene.js";
+import { sanitizeSearchQuery, sanitizeGroupId } from "../../server/lib/lucene.js";
 
 export interface KnowledgeClientConfig {
   baseURL: string;
@@ -29,11 +29,10 @@ export interface AddEpisodeResult {
   error?: string;
 }
 
-interface SSESession {
-  sessionId: string;
-  messagesUrl: string;
-  initialized: boolean;
-}
+/**
+ * Database type for protocol and sanitization selection
+ */
+type DatabaseType = 'neo4j' | 'falkorodb';
 
 const DEFAULT_CONFIG: KnowledgeClientConfig = {
   baseURL: process.env.MADEINOZ_KNOWLEDGE_MCP_URL || 'http://localhost:8000',
@@ -42,7 +41,28 @@ const DEFAULT_CONFIG: KnowledgeClientConfig = {
 };
 
 /**
- * Parse SSE event data from response text
+ * Get database type from environment variable with validation
+ */
+function getDatabaseType(): DatabaseType {
+  const dbType = process.env.MADEINOZ_KNOWLEDGE_DB || 'neo4j';
+  const validDbTypes: DatabaseType[] = ['neo4j', 'falkorodb'];
+
+  if (!validDbTypes.includes(dbType as DatabaseType)) {
+    throw new Error(`Invalid MADEINOZ_KNOWLEDGE_DB: ${dbType}. Must be one of: ${validDbTypes.join(', ')}`);
+  }
+
+  return dbType as DatabaseType;
+}
+
+/**
+ * Check if database is FalkorDB (requires SSE protocol and sanitization)
+ */
+function isFalkorDB(): boolean {
+  return getDatabaseType() === 'falkorodb';
+}
+
+/**
+ * Parse SSE event data from response text (for FalkorDB SSE protocol)
  */
 function parseSSEEvent(text: string): { event?: string; data?: string } {
   const lines = text.split('\n');
@@ -61,246 +81,518 @@ function parseSSEEvent(text: string): { event?: string; data?: string } {
 }
 
 /**
- * Get SSE session endpoint from the server
+ * Parse SSE response body to extract JSON-RPC result (for Neo4j HTTP POST protocol)
+ * Response body contains lines like "data: {...}\n"
  */
-async function getSSESession(config: KnowledgeClientConfig): Promise<SSESession | null> {
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
-
-    const sseUrl = `${config.baseURL}/sse`;
-    const response = await fetch(sseUrl, {
-      headers: { 'Accept': 'text/event-stream' },
-      signal: controller.signal
-    });
-
-    clearTimeout(timeout);
-
-    if (!response.ok) {
-      return null;
-    }
-
-    // Read just enough to get the endpoint event
-    const reader = response.body?.getReader();
-    if (!reader) {
-      return null;
-    }
-
-    const decoder = new TextDecoder();
-    let buffer = '';
-
-    // Read chunks until we get the endpoint
-    for (let i = 0; i < 10; i++) {
-      const { value, done } = await reader.read();
-      if (done) break;
-
-      buffer += decoder.decode(value, { stream: true });
-
-      // Check if we have a complete event
-      if (buffer.includes('\n\n') || buffer.includes('data:')) {
-        const { event, data } = parseSSEEvent(buffer);
-
-        if (event === 'endpoint' && data) {
-          // Cancel the reader - we have what we need
-          reader.cancel().catch(() => {});
-
-          // Extract session ID from the messages URL
-          const sessionMatch = data.match(/session_id=([a-f0-9]+)/);
-          const sessionId = sessionMatch?.[1] || '';
-
-          return {
-            sessionId,
-            messagesUrl: `${config.baseURL}${data}`,
-            initialized: false
-          };
+function parseSSEResponse(text: string): unknown {
+  const lines = text.split('\n');
+  for (const line of lines) {
+    if (line.startsWith('data: ')) {
+      const jsonStr = line.substring(6);
+      try {
+        const parsed = JSON.parse(jsonStr);
+        // Extract result from the MCP response format
+        if (parsed.result) {
+          // Handle tool call response format
+          if (parsed.result.content && Array.isArray(parsed.result.content)) {
+            // Check for structuredContent first (preferred)
+            if (parsed.result.structuredContent) {
+              const sc = parsed.result.structuredContent;
+              // Unwrap Graphiti's result wrapper if present
+              if (sc.result && typeof sc.result === 'object') {
+                return sc.result;
+              }
+              return sc;
+            }
+            // Fall back to text content
+            const textContent = parsed.result.content.find((c: { type: string }) => c.type === 'text');
+            if (textContent && textContent.text) {
+              try {
+                return JSON.parse(textContent.text);
+              } catch {
+                return textContent.text;
+              }
+            }
+          }
+          return parsed.result;
         }
+        if (parsed.error) {
+          throw new Error(parsed.error.message || 'Unknown error');
+        }
+        return parsed;
+      } catch (e) {
+        if (e instanceof SyntaxError) continue;
+        throw e;
       }
     }
+  }
+  throw new Error('No valid SSE data found in response');
+}
 
-    reader.cancel().catch(() => {});
-    return null;
-  } catch {
-    return null;
+/**
+ * MCP Client for Neo4j (HTTP POST + JSON-RPC 2.0)
+ */
+class Neo4jClient {
+  private baseURL: string;
+  private timeout: number;
+  private headers: Record<string, string>;
+  private requestId: number;
+  private sessionId: string | null = null;
+  private initializePromise: Promise<void> | null = null;
+
+  constructor(config: KnowledgeClientConfig) {
+    // Use /mcp/ endpoint for Neo4j
+    this.baseURL = config.baseURL.endsWith('/mcp')
+      ? config.baseURL
+      : `${config.baseURL}/mcp`;
+    this.timeout = config.timeout;
+    this.headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json, text/event-stream',
+    };
+    this.requestId = 1;
+  }
+
+  /**
+   * Initialize MCP session and get session ID
+   */
+  private async initializeSession(): Promise<void> {
+    if (this.sessionId) return;
+    if (this.initializePromise) return this.initializePromise;
+
+    this.initializePromise = (async () => {
+      const request = {
+        jsonrpc: '2.0',
+        id: this.requestId++,
+        method: 'initialize',
+        params: {
+          protocolVersion: '2024-11-05',
+          capabilities: {},
+          clientInfo: { name: 'madeinoz-knowledge-hook', version: '1.0.0' },
+        },
+      };
+
+      const response = await fetch(this.baseURL, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify(request),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to initialize session: HTTP ${response.status}`);
+      }
+
+      // Get session ID from header
+      const sessionId = response.headers.get('Mcp-Session-Id');
+      if (!sessionId) {
+        throw new Error('Server did not return session ID');
+      }
+      this.sessionId = sessionId;
+
+      // Consume the SSE response body
+      await response.text();
+    })();
+
+    await this.initializePromise;
+  }
+
+  /**
+   * Call an MCP tool with JSON-RPC 2.0
+   */
+  async callTool(toolName: string, arguments_: Record<string, unknown>): Promise<{
+    success: boolean;
+    result?: unknown;
+    error?: string;
+  }> {
+    try {
+      // Ensure session is initialized
+      await this.initializeSession();
+
+      const request = {
+        jsonrpc: '2.0',
+        id: this.requestId++,
+        method: 'tools/call',
+        params: {
+          name: toolName,
+          arguments: arguments_,
+        },
+      };
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+
+      const response = await fetch(this.baseURL, {
+        method: 'POST',
+        headers: {
+          ...this.headers,
+          'Mcp-Session-Id': this.sessionId!,
+        },
+        body: JSON.stringify(request),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
+
+      // Parse SSE response
+      const text = await response.text();
+      const data = parseSSEResponse(text);
+
+      return {
+        success: true,
+        result: data,
+      };
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          return {
+            success: false,
+            error: `Request timeout after ${this.timeout}ms`,
+          };
+        }
+        return {
+          success: false,
+          error: error.message,
+        };
+      }
+      return {
+        success: false,
+        error: 'Unknown error occurred',
+      };
+    }
+  }
+
+  /**
+   * Check MCP server health via /health endpoint
+   */
+  async testConnection(): Promise<boolean> {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      // Use health endpoint on base URL without /mcp/
+      const healthURL = this.baseURL.replace(/\/mcp\/?$/, '') + '/health';
+
+      const response = await fetch(healthURL, {
+        method: 'GET',
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+      return response.ok;
+    } catch {
+      return false;
+    }
   }
 }
 
 /**
- * Initialize MCP session with server capabilities
+ * SSE Session for FalkorDB protocol
  */
-async function initializeSession(
-  session: SSESession,
-  config: KnowledgeClientConfig
-): Promise<boolean> {
-  if (session.initialized) {
-    return true;
+interface SSESession {
+  sessionId: string;
+  messagesUrl: string;
+  initialized: boolean;
+}
+
+/**
+ * MCP Client for FalkorDB (SSE GET protocol)
+ */
+class FalkorDBClient {
+  private baseURL: string;
+  private timeout: number;
+  private headers: Record<string, string>;
+  private requestId: number;
+
+  constructor(config: KnowledgeClientConfig) {
+    // Use base URL for SSE endpoint
+    this.baseURL = config.baseURL;
+    this.timeout = config.timeout;
+    this.headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'text/event-stream',
+    };
+    this.requestId = 1;
   }
 
-  const initRequest = {
-    jsonrpc: '2.0',
-    id: Date.now(),
-    method: 'initialize',
-    params: {
-      protocolVersion: '2024-11-05',
-      capabilities: {},
-      clientInfo: {
-        name: 'madeinoz-knowledge-hook',
-        version: '1.0.0'
+  /**
+   * Get SSE session endpoint from the server
+   */
+  private async getSSESession(): Promise<SSESession | null> {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000);
+
+      const sseUrl = `${this.baseURL}/sse`;
+      const response = await fetch(sseUrl, {
+        headers: { 'Accept': 'text/event-stream' },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeout);
+
+      if (!response.ok) {
+        return null;
       }
+
+      // Read just enough to get the endpoint event
+      const reader = response.body?.getReader();
+      if (!reader) {
+        return null;
+      }
+
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      // Read chunks until we get the endpoint
+      for (let i = 0; i < 10; i++) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        // Check if we have a complete event
+        if (buffer.includes('\n\n') || buffer.includes('data:')) {
+          const { event, data } = parseSSEEvent(buffer);
+
+          if (event === 'endpoint' && data) {
+            // Cancel the reader - we have what we need
+            reader.cancel().catch(() => {});
+
+            // Extract session ID from the messages URL
+            const sessionMatch = data.match(/session_id=([a-f0-9]+)/);
+            const sessionId = sessionMatch?.[1] || '';
+
+            return {
+              sessionId,
+              messagesUrl: `${this.baseURL}${data}`,
+              initialized: false,
+            };
+          }
+        }
+      }
+
+      reader.cancel().catch(() => {});
+      return null;
+    } catch {
+      return null;
     }
-  };
+  }
 
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
-
-    const response = await fetch(session.messagesUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(initRequest),
-      signal: controller.signal
-    });
-
-    clearTimeout(timeout);
-
-    if (response.ok || response.status === 202) {
-      // Send initialized notification
-      const notifyRequest = {
-        jsonrpc: '2.0',
-        method: 'notifications/initialized'
-      };
-
-      await fetch(session.messagesUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(notifyRequest)
-      }).catch(() => {});
-
-      session.initialized = true;
-      // Pause to let server process initialization
-      // SSE transport queues requests asynchronously, so we need to wait
-      // for the server to finish processing initialize before sending tools/call
-      await new Promise(r => setTimeout(r, 800));
+  /**
+   * Initialize MCP session with server capabilities
+   */
+  private async initializeSession(session: SSESession): Promise<boolean> {
+    if (session.initialized) {
       return true;
     }
 
-    return false;
-  } catch {
-    return false;
+    const initRequest = {
+      jsonrpc: '2.0',
+      id: this.requestId++,
+      method: 'initialize',
+      params: {
+        protocolVersion: '2024-11-05',
+        capabilities: {},
+        clientInfo: {
+          name: 'madeinoz-knowledge-hook',
+          version: '1.0.0',
+        },
+      },
+    };
+
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000);
+
+      const response = await fetch(session.messagesUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(initRequest),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeout);
+
+      if (response.ok || response.status === 202) {
+        // Send initialized notification
+        const notifyRequest = {
+          jsonrpc: '2.0',
+          method: 'notifications/initialized',
+        };
+
+        await fetch(session.messagesUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(notifyRequest),
+        }).catch(() => {});
+
+        session.initialized = true;
+        // Pause to let server process initialization
+        await new Promise((r) => setTimeout(r, 800));
+        return true;
+      }
+
+      return false;
+    } catch {
+      return false;
+    }
   }
-}
 
-/**
- * Check if MCP server is healthy by attempting SSE connection
- */
-export async function checkHealth(config: KnowledgeClientConfig = DEFAULT_CONFIG): Promise<boolean> {
-  const session = await getSSESession(config);
-  return session !== null;
-}
+  /**
+   * Send JSON-RPC request via SSE messages endpoint
+   */
+  private async sendRequest(
+    session: SSESession,
+    request: object,
+  ): Promise<{ success: boolean; result?: unknown; error?: string }> {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
-/**
- * Send JSON-RPC request via SSE messages endpoint
- */
-async function sendRequest(
-  session: SSESession,
-  request: object,
-  config: KnowledgeClientConfig
-): Promise<{ success: boolean; result?: unknown; error?: string }> {
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), config.timeout);
+      const response = await fetch(session.messagesUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(request),
+        signal: controller.signal,
+      });
 
-    const response = await fetch(session.messagesUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(request),
-      signal: controller.signal
-    });
+      clearTimeout(timeoutId);
 
-    clearTimeout(timeout);
-
-    if (!response.ok) {
-      const text = await response.text().catch(() => 'Unknown error');
-      return {
-        success: false,
-        error: `HTTP ${response.status}: ${text.slice(0, 100)}`
-      };
-    }
-
-    // For SSE transport, 202 Accepted means the request was queued
-    // The actual result comes via SSE stream, but for add_memory we don't need to wait
-    if (response.status === 202) {
-      return { success: true };
-    }
-
-    // Try to parse JSON response if available
-    const contentType = response.headers.get('content-type');
-    if (contentType?.includes('application/json')) {
-      const data = await response.json();
-      if (data.error) {
+      if (!response.ok) {
+        const text = await response.text().catch(() => 'Unknown error');
         return {
           success: false,
-          error: data.error.message || 'Unknown MCP error'
+          error: `HTTP ${response.status}: ${text.slice(0, 100)}`,
         };
       }
-      return { success: true, result: data.result };
+
+      // For SSE transport, 202 Accepted means the request was queued
+      if (response.status === 202) {
+        return { success: true };
+      }
+
+      // Try to parse JSON response if available
+      const contentType = response.headers.get('content-type');
+      if (contentType?.includes('application/json')) {
+        const data = await response.json();
+        if (data.error) {
+          return {
+            success: false,
+            error: data.error.message || 'Unknown MCP error',
+          };
+        }
+        return { success: true, result: data.result };
+      }
+
+      return { success: true };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      return { success: false, error: message };
+    }
+  }
+
+  /**
+   * Call an MCP tool using SSE protocol
+   */
+  async callTool(toolName: string, arguments_: Record<string, unknown>): Promise<{
+    success: boolean;
+    result?: unknown;
+    error?: string;
+  }> {
+      const session = await this.getSSESession();
+      if (!session) {
+        return {
+          success: false,
+          error: 'Failed to establish SSE session',
+        };
+      }
+
+      const initialized = await this.initializeSession(session);
+      if (!initialized) {
+        return {
+          success: false,
+          error: 'Failed to initialize MCP session',
+        };
+      }
+
+      const request = {
+        jsonrpc: '2.0',
+        id: this.requestId++,
+        method: 'tools/call',
+        params: {
+          name: toolName,
+          arguments: arguments_,
+        },
+      };
+
+      return await this.sendRequest(session, request);
     }
 
-    return { success: true };
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return { success: false, error: message };
+  /**
+   * Check MCP server health via SSE connection
+   */
+  async testConnection(): Promise<boolean> {
+    const session = await this.getSSESession();
+    return session !== null;
   }
 }
 
 /**
- * Add an episode to the knowledge graph
+ * Check if MCP server is healthy
+ */
+export async function checkHealth(config: KnowledgeClientConfig = DEFAULT_CONFIG): Promise<boolean> {
+  if (isFalkorDB()) {
+    const client = new FalkorDBClient(config);
+    return await client.testConnection();
+  } else {
+    const client = new Neo4jClient(config);
+    return await client.testConnection();
+  }
+}
+
+/**
+ * Add an episode to the knowledge graph with retry logic
  */
 export async function addEpisode(
   params: AddEpisodeParams,
-  config: KnowledgeClientConfig = DEFAULT_CONFIG
+  config: KnowledgeClientConfig = DEFAULT_CONFIG,
 ): Promise<AddEpisodeResult> {
-  // Sanitize group_id to avoid RediSearch/Lucene syntax errors
-  const sanitizedGroupId = sanitizeGroupId(params.group_id);
+  // Sanitize group_id if using FalkorDB (requires lucene escaping)
+  let sanitizedGroupId = params.group_id;
+  if (isFalkorDB() && params.group_id) {
+    sanitizedGroupId = sanitizeGroupId(params.group_id);
+  }
 
-  const request = {
-    jsonrpc: '2.0',
-    id: Date.now(),
-    method: 'tools/call',
-    params: {
-      name: 'add_memory',
-      arguments: {
-        name: params.name.slice(0, 200),
-        episode_body: params.episode_body.slice(0, 5000),
-        source: params.source || 'text',
-        source_description: params.source_description || '',
-        group_id: sanitizedGroupId
-      }
-    }
+  const requestArgs = {
+    name: params.name.slice(0, 200),
+    episode_body: params.episode_body.slice(0, 5000),
+    source: params.source || 'text',
+    source_description: params.source_description || '',
+    ...(sanitizedGroupId && { group_id: sanitizedGroupId }),
+    ...(params.reference_timestamp && { reference_timestamp: params.reference_timestamp }),
   };
 
+  // Retry loop with exponential backoff
   for (let attempt = 0; attempt < config.retries; attempt++) {
     try {
-      // Get SSE session for this request
-      const session = await getSSESession(config);
-      if (!session) {
-        if (attempt < config.retries - 1) {
-          await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
-          continue;
-        }
-        return { success: false, error: 'Failed to establish SSE session' };
-      }
+      let result;
 
-      // Initialize session before sending requests
-      const initialized = await initializeSession(session, config);
-      if (!initialized) {
-        if (attempt < config.retries - 1) {
-          await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
-          continue;
-        }
-        return { success: false, error: 'Failed to initialize MCP session' };
+      if (isFalkorDB()) {
+        // Use SSE protocol for FalkorDB
+        const client = new FalkorDBClient(config);
+        result = await client.callTool('add_memory', requestArgs);
+      } else {
+        // Use HTTP POST protocol for Neo4j
+        const client = new Neo4jClient(config);
+        result = await client.callTool('add_memory', requestArgs);
       }
-
-      const result = await sendRequest(session, request, config);
 
       if (result.success) {
         // Extract UUID from result if available
@@ -314,17 +606,15 @@ export async function addEpisode(
 
       // Check if retryable
       if (attempt < config.retries - 1) {
-        const isRetryable = result.error?.includes('abort') ||
+        const isRetryable = result.error?.includes('timeout') ||
           result.error?.includes('ECONNREFUSED') ||
-          result.error?.includes('timeout') ||
-          result.error?.includes('before initialization');
+          result.error?.includes('abort') ||
+          result.error?.includes('ECONNRESET') ||
+          result.error?.includes('ETIMEDOUT');
 
         if (isRetryable) {
-          // Longer backoff for initialization timing issues
-          const backoff = result.error?.includes('before initialization')
-            ? 1000 * (attempt + 1)
-            : 500 * (attempt + 1);
-          await new Promise(r => setTimeout(r, backoff));
+          const backoff = 500 * Math.pow(2, attempt);
+          await new Promise((r) => setTimeout(r, backoff));
           continue;
         }
       }
@@ -334,7 +624,8 @@ export async function addEpisode(
       const message = error instanceof Error ? error.message : 'Unknown error';
 
       if (attempt < config.retries - 1) {
-        await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
+        const backoff = 500 * Math.pow(2, attempt);
+        await new Promise((r) => setTimeout(r, backoff));
         continue;
       }
 
