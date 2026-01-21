@@ -58,6 +58,8 @@ nav:
     - Configuration: reference/configuration.md
     - Model Guide: reference/model-guide.md
     - Benchmarks: reference/benchmarks.md
+    - Developer Notes: reference/developer-notes.md
+    - Release Process: reference/releases.md
 
 plugins:
   - search

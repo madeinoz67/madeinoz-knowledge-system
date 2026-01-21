@@ -86,7 +86,10 @@ services:
       # Group ID
       - GROUP_ID=${GROUP_ID:-main}
     env_file:
-      - ${PAI_DIR}/.env  # Source of truth - all config here
+      # Reads directly from PAI .env (source of truth)
+      # Uses PAI_DIR if set, otherwise defaults to ~/.claude
+      # FIXED: Uses $HOME instead of ~ for proper expansion, added fallback (was missing)
+      - ${PAI_DIR:-$HOME/.claude}/.env
     depends_on:
       falkordb:
         condition: service_healthy

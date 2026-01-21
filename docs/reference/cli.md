@@ -511,9 +511,10 @@ Contains all Madeinoz Knowledge System configuration:
 
 ### Docker Compose Files
 
-- `src/server/docker-compose.yml` - FalkorDB backend
-- `src/server/docker-compose-neo4j.yml` - Neo4j backend
-- `src/server/podman-compose.yml` - Podman variant
+- `src/server/docker-compose-falkordb.yml` - FalkorDB backend (Docker)
+- `src/server/docker-compose-neo4j.yml` - Neo4j backend (Docker)
+- `src/server/podman-compose-falkordb.yml` - FalkorDB backend (Podman)
+- `src/server/podman-compose-neo4j.yml` - Neo4j backend (Podman)
 
 ### Configuration Template
 

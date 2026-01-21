@@ -36,7 +36,34 @@ keywords: [knowledge, graph, memory, semantic search, entity extraction, relatio
 
 > Persistent personal knowledge management system powered by Graphiti knowledge graph with FalkorDB or Neo4j backend - automatically extracts entities, relationships, and temporal context from conversations, documents, and ideas
 
+[![Docker Build](https://github.com/madeinoz67/madeinoz-knowledge-system/actions/workflows/docker-build.yml/badge.svg)](https://github.com/madeinoz67/madeinoz-knowledge-system/actions/workflows/docker-build.yml)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/madeinoz67/madeinoz-knowledge-system)](https://github.com/madeinoz67/madeinoz-knowledge-system/releases/latest)
+[![Docker Pulls](https://img.shields.io/docker/pulls/madeinoz-knowledge-system?label=Docker%20Hub)](https://hub.docker.com/r/madeinoz-knowledge-system)
+[![GitHub Container Registry](https://img.shields.io/badge/ghcr.io-madeinoz--knowledge--system-blue?logo=docker)](https://ghcr.io/madeinoz67/madeinoz-knowledge-system)
+
 📚 **[View Full Documentation](https://madeinoz67.github.io/madeinoz-knowledge-system/)** - Browse the complete docs online
+
+## Quick Start with Docker
+
+**Pull the custom image (with all patches):**
+```bash
+# From GitHub Container Registry (recommended)
+docker pull ghcr.io/madeinoz67/madeinoz-knowledge-system:latest
+
+# Or from Docker Hub
+docker pull madeinoz-knowledge-system:latest
+```
+
+**Run with Docker Compose:**
+```bash
+# Neo4j backend (default)
+docker compose -f src/server/docker-compose-neo4j.yml up -d
+
+# FalkorDB backend
+docker compose -f src/server/docker-compose-falkordb.yml up -d
+```
+
+**Why a custom image?** We apply critical upstream patches while waiting for official merges. See [Developer Notes](https://madeinoz67.github.io/madeinoz-knowledge-system/reference/developer-notes/) for details.
 
 > **FOR AI AGENTS:** This is a PAI Pack - a complete, self-contained module for the PAI (Personal AI Infrastructure) system. When installing this pack:
 > 1. Read the entire README first to understand what you're installing
@@ -88,9 +115,10 @@ Please follow the installation instructions below to integrate this pack into yo
 | MCP Server Launcher | `src/server/run.ts` | Graphiti server launcher with container orchestration |
 | Server Management | `src/skills/tools/{start,stop,status,logs}.ts` | Container management scripts |
 | Configuration Template | `config/.env.example` | API keys and model settings template (reference only) |
-| Docker Compose (FalkorDB) | `src/server/docker-compose.yml` | Docker Compose for FalkorDB backend |
+| Docker Compose (FalkorDB) | `src/server/docker-compose-falkordb.yml` | Docker Compose for FalkorDB backend |
 | Docker Compose (Neo4j) | `src/server/docker-compose-neo4j.yml` | Docker Compose for Neo4j backend |
-| Podman Compose | `src/server/podman-compose.yml` | Podman Compose config (Podman users) |
+| Podman Compose (FalkorDB) | `src/server/podman-compose-falkordb.yml` | Podman Compose for FalkorDB backend |
+| Podman Compose (Neo4j) | `src/server/podman-compose-neo4j.yml` | Podman Compose for Neo4j backend |
 | Neo4j Config | `src/server/config-neo4j.yaml` | Graphiti MCP config for Neo4j backend |
 
 **Summary:**
@@ -762,30 +790,66 @@ Once the server is running, try capturing knowledge again.
 
 ### Environment Variables
 
-All configuration is stored in your PAI config file:
-- Location: `$PAI_DIR/.env` (defaults to `~/.claude/.env`)
-- Template: `config/.env.example` in this pack (reference only)
+#### Configuration File Location
+
+**All environment variables must be configured in** `~/.claude/.env`
+
+This is the PAI configuration file, located in your home directory. **Do not** create a `.env` file in the project directory - it will not be used.
+
+The `config/.env.example` file in this pack is a reference template only, showing available variables and their defaults.
+
+#### Variable Prefix Pattern
+
+All configuration variables use the `MADEINOZ_KNOWLEDGE_` prefix. This naming convention prevents conflicts with other PAI packs that may use similar variable names.
+
+| Prefixed Variable | Unprefixed Container Variable |
+|-------------------|-------------------------------|
+| `MADEINOZ_KNOWLEDGE_LLM_PROVIDER` | `LLM_PROVIDER` |
+| `MADEINOZ_KNOWLEDGE_MODEL_NAME` | `MODEL_NAME` |
+| `MADEINOZ_KNOWLEDGE_OPENAI_API_KEY` | `OPENAI_API_KEY` |
+| `MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL` | `OLLAMA_BASE_URL` |
+
+#### entrypoint.sh Mapping
+
+The `entrypoint.sh` script automatically maps prefixed variables to their unprefixed equivalents at container startup. You only need to set the `MADEINOZ_KNOWLEDGE_*` prefixed variables in `~/.claude/.env` - the script handles the translation internally.
+
+**Benefits of this approach:**
+- Clear ownership: Each variable is pack-specific
+- No conflicts: Different packs can use different settings for the same underlying variable
+- Separate billing: Track costs per pack
+- Clean configuration: Only prefixed variables needed, no duplication
+
+#### Key Environment Variables
 
 ```bash
-# PAI Configuration File ($PAI_DIR/.env or ~/.claude/.env)
+# In ~/.claude/.env
 
-# LLM Provider Configuration
+# LLM Provider (openai, anthropic, gemini, groq)
 MADEINOZ_KNOWLEDGE_LLM_PROVIDER=openai
-MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER=openai
+
+# Model Name (e.g., gpt-4o-mini, gpt-4o)
 MADEINOZ_KNOWLEDGE_MODEL_NAME=gpt-4o-mini
 
-# API Keys
+# API Key (required for OpenAI provider)
 MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=sk-your-key-here
 
-# Performance Configuration
+# Embedder Provider (ollama recommended for free local embeddings)
+MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER=ollama
+
+# Ollama Base URL (when using Ollama for embeddings)
+MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL=http://host.containers.internal:11434
+
+# OpenRouter Base URL (optional - for accessing multiple LLM providers)
+MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL=https://openrouter.ai/api/v1
+
+# Concurrency Limit (adjust based on API tier)
 MADEINOZ_KNOWLEDGE_SEMAPHORE_LIMIT=10
 
-# Knowledge Graph Configuration
+# Knowledge Graph Group ID (creates isolated graphs)
 MADEINOZ_KNOWLEDGE_GROUP_ID=main
-
-# Telemetry
-MADEINOZ_KNOWLEDGE_GRAPHITI_TELEMETRY_ENABLED=false
 ```
+
+**For a complete list of all available variables**, see `config/.env.example` in this pack.
 
 ### Model Selection
 

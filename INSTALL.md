@@ -110,9 +110,11 @@ The upstream Graphiti MCP server has a bug ([GitHub issue #1116](https://github.
 - `api.perplexity.ai` → Perplexity
 - `api.mistral.ai` → Mistral AI
 
-The patch is automatically mounted when using either docker-compose file:
-- `docker-compose.yml` (FalkorDB backend)
-- `docker-compose-neo4j.yml` (Neo4j backend)
+The patch is automatically mounted when using any of the docker-compose files:
+- `docker-compose-falkordb.yml` (FalkorDB backend, Docker)
+- `docker-compose-neo4j.yml` (Neo4j backend, Docker)
+- `podman-compose-falkordb.yml` (FalkorDB backend, Podman)
+- `podman-compose-neo4j.yml` (Neo4j backend, Podman)
 
 ---
 
@@ -576,8 +578,10 @@ REQUIRED_FILES=(
     "README.md"
     "SKILL.md"
     "src/server/run.ts"
-    "src/server/podman-compose.yml"
-    "src/server/docker-compose.yml"
+    "src/server/podman-compose-falkordb.yml"
+    "src/server/podman-compose-neo4j.yml"
+    "src/server/docker-compose-falkordb.yml"
+    "src/server/docker-compose-neo4j.yml"
     "config/.env.example"
     "src/skills/workflows/CaptureEpisode.md"
     "src/skills/workflows/SearchKnowledge.md"
@@ -1065,7 +1069,7 @@ set -a; source ~/.claude/.env; set +a
 docker compose -f src/server/docker-compose-neo4j.yml up -d
 
 # For FalkorDB backend (alternative)
-docker compose -f src/server/docker-compose.yml up -d
+docker compose -f src/server/docker-compose-falkordb.yml up -d
 
 # Check status
 bun run src/skills/tools/status.ts

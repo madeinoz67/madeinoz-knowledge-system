@@ -70,11 +70,11 @@ export class ContainerManager {
   static readonly IMAGES = {
     falkordb: {
       database: "falkordb/falkordb:latest",
-      mcp: "falkordb/graphiti-knowledge-graph-mcp:latest",
+      mcp: "madeinoz-knowledge-system:fixed",  // Custom image with patches
     },
     neo4j: {
       database: "neo4j:5.26.0",
-      mcp: "zepai/knowledge-graph-mcp:standalone",
+      mcp: "madeinoz-knowledge-system:fixed",  // Custom image with patches
     },
   } as const;
 

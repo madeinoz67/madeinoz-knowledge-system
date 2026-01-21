@@ -196,8 +196,8 @@ Pack-level files in `src/server/` (not installed with skill):
 - [ ] `install.ts` - Interactive installation wizard
 - [ ] `diagnose.ts` - Diagnostic and troubleshooting tool
 - [ ] `mcp-wrapper.ts` - MCP protocol wrapper
-- [ ] `podman-compose.yml` - Podman compose file (FalkorDB)
-- [ ] `docker-compose.yml` - Docker compose file (FalkorDB)
+- [ ] `podman-compose-falkordb.yml` - Podman compose file (FalkorDB)
+- [ ] `docker-compose-falkordb.yml` - Docker compose file (FalkorDB)
 - [ ] `podman-compose-neo4j.yml` - Podman compose file (Neo4j)
 - [ ] `docker-compose-neo4j.yml` - Docker compose file (Neo4j)
 - [ ] `config-neo4j.yaml` - Neo4j backend configuration
@@ -1343,7 +1343,7 @@ grep -i "beyond.*scope\|implement.*your.*own\|left as.*exercise" \
 ### 10.3 Complete Component List
 
 - [ ] **MCP Server included** (`src/server/run.ts` and compose files)
-- [ ] **FalkorDB compose files included** (`docker-compose.yml`, `podman-compose.yml`)
+- [ ] **FalkorDB compose files included** (`docker-compose-falkordb.yml`, `podman-compose-falkordb.yml`)
 - [ ] **Neo4j compose files included** (`docker-compose-neo4j.yml`, `podman-compose-neo4j.yml`, `config-neo4j.yaml`)
 - [ ] **PAI Skill included** (`SKILL.md` with workflows)
 - [ ] **Workflows included** (7 complete workflows in `src/skills/workflows/`)

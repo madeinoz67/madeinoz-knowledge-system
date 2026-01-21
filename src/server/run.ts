@@ -72,6 +72,7 @@ async function startFalkorDB(
       `--name=${containerName}`,
       "--restart=unless-stopped",
       `--network=${networkName}`,
+      "--network-alias=falkordb",  // DNS alias for service discovery
       "-p=3000:3000",  // FalkorDB web UI
       `-v=${volumeName}:/data`,
       `-e=FALKORDB_PASSWORD=${config.FALKORDB_PASSWORD || ""}`,
@@ -144,6 +145,7 @@ async function startNeo4j(
       `--name=${containerName}`,
       "--restart=unless-stopped",
       `--network=${networkName}`,
+      "--network-alias=neo4j",  // DNS alias for service discovery
       "-p=7474:7474",  // Neo4j Browser HTTP
       "-p=7687:7687",  // Bolt protocol
       `-v=${volumeData}:/data`,
@@ -245,6 +247,8 @@ async function startMCPServer(
     "-p=8000:8000",  // MCP HTTP endpoint
     // LLM Configuration
     `-e=OPENAI_API_KEY=${containerEnv.OPENAI_API_KEY || ""}`,
+    `-e=OPENAI_BASE_URL=${containerEnv.OPENAI_BASE_URL || ""}`,
+    `-e=OLLAMA_BASE_URL=${containerEnv.OLLAMA_BASE_URL || ""}`,
     `-e=ANTHROPIC_API_KEY=${containerEnv.ANTHROPIC_API_KEY || ""}`,
     `-e=GOOGLE_API_KEY=${containerEnv.GOOGLE_API_KEY || ""}`,
     `-e=GROQ_API_KEY=${containerEnv.GROQ_API_KEY || ""}`,
@@ -253,6 +257,8 @@ async function startMCPServer(
     `-e=MODEL_NAME=${containerEnv.MODEL_NAME}`,
     `-e=LLM_PROVIDER=${containerEnv.LLM_PROVIDER}`,
     `-e=EMBEDDER_PROVIDER=${containerEnv.EMBEDDER_PROVIDER}`,
+    `-e=EMBEDDER_MODEL=${containerEnv.EMBEDDER_MODEL || ""}`,
+    `-e=EMBEDDER_DIMENSIONS=${containerEnv.EMBEDDER_DIMENSIONS || ""}`,
     // App Configuration
     `-e=SEMAPHORE_LIMIT=${containerEnv.SEMAPHORE_LIMIT}`,
     `-e=GRAPHITI_TELEMETRY_ENABLED=${containerEnv.GRAPHITI_TELEMETRY_ENABLED}`,
@@ -281,11 +287,8 @@ async function startMCPServer(
       `-e=NEO4J_DATABASE=${config.NEO4J_DATABASE || "neo4j"}`,
     );
 
-    // Mount the Neo4j config file for the standalone image
-    const packDir = dirname(dirname(import.meta.dir));
-    const configPath = join(packDir, "src/server/config-neo4j.yaml");
-    args.push(`-v=${configPath}:/app/mcp/config/config.yaml:ro`);
-    args.push(`-e=CONFIG_PATH=/app/mcp/config/config.yaml`);
+    // Note: Config files and patches are baked into the custom madeinoz-knowledge-system:fixed image
+    // The entrypoint.sh selects the correct config based on DATABASE_TYPE environment variable
   }
 
   // Add the image

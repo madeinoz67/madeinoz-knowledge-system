@@ -1,0 +1,170 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.0.2)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for changelog generation
+
+      - name: Validate version format
+        run: |
+          if ! [[ "${{ inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Error: Version must be in format X.Y.Z (e.g., 1.0.2)"
+            exit 1
+          fi
+
+      - name: Check if tag exists
+        run: |
+          if git rev-parse "v${{ inputs.version }}" >/dev/null 2>&1; then
+            echo "Error: Tag v${{ inputs.version }} already exists"
+            exit 1
+          fi
+
+      - name: Update version in Dockerfile
+        run: |
+          sed -i 's/LABEL version=".*"/LABEL version="${{ inputs.version }}"/' Dockerfile
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Dockerfile
+          git commit -m "chore: bump version to ${{ inputs.version }}" || echo "No version changes"
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Get the latest tag
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+
+          if [ -z "$LATEST_TAG" ]; then
+            echo "First release - including all commits"
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" --no-merges)
+          else
+            echo "Generating changelog since $LATEST_TAG"
+            CHANGELOG=$(git log ${LATEST_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges)
+          fi
+
+          # Create release notes
+          cat > release-notes.md << EOF
+          ## Madeinoz Knowledge System v${{ inputs.version }}
+
+          ### What's Changed
+          $CHANGELOG
+
+          ### Docker Images
+
+          **GitHub Container Registry:**
+          \`\`\`bash
+          docker pull ghcr.io/madeinoz67/madeinoz-knowledge-system:${{ inputs.version }}
+          docker pull ghcr.io/madeinoz67/madeinoz-knowledge-system:latest
+          \`\`\`
+
+          **Docker Hub** (if configured):
+          \`\`\`bash
+          docker pull madeinoz-knowledge-system:${{ inputs.version }}
+          docker pull madeinoz-knowledge-system:latest
+          \`\`\`
+
+          ### Quick Start
+
+          **Using Docker Compose (Recommended):**
+          \`\`\`bash
+          # Neo4j backend
+          docker compose -f src/server/docker-compose-neo4j.yml up -d
+
+          # FalkorDB backend
+          docker compose -f src/server/docker-compose-falkordb.yml up -d
+          \`\`\`
+
+          **Using Bun (for PAI packs):**
+          \`\`\`bash
+          bun run src/server/install.ts
+          bun run src/server/run.ts
+          \`\`\`
+
+          ### Patches Included
+          - ✅ Async iteration bug fix (NoneType error)
+          - ✅ Ollama/OpenRouter support ([#1116](https://github.com/getzep/graphiti/issues/1116))
+          - ✅ Search all groups functionality
+          - ✅ MADEINOZ_KNOWLEDGE_* environment prefix mapping
+
+          ### Documentation
+          - 📚 [Installation Guide](https://madeinoz67.github.io/madeinoz-knowledge-system/installation/)
+          - 🔧 [Configuration Reference](https://madeinoz67.github.io/madeinoz-knowledge-system/reference/configuration/)
+          - 💡 [Developer Notes](https://madeinoz67.github.io/madeinoz-knowledge-system/reference/developer-notes/)
+
+          **Full Changelog**: https://github.com/madeinoz67/madeinoz-knowledge-system/compare/${LATEST_TAG}...v${{ inputs.version }}
+          EOF
+
+          # Save for later steps
+          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_OUTPUT
+
+      - name: Create and push tag
+        run: |
+          git tag -a "v${{ inputs.version }}" -m "Release v${{ inputs.version }}"
+          git push origin "v${{ inputs.version }}"
+          git push origin main || echo "No main branch changes to push"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ inputs.version }}
+          name: v${{ inputs.version }}
+          body_path: release-notes.md
+          draft: false
+          prerelease: ${{ inputs.prerelease }}
+          generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Trigger Docker build
+        run: |
+          echo "Docker build will be triggered automatically by the tag push"
+          echo "Monitor at: https://github.com/${{ github.repository }}/actions/workflows/docker-build.yml"
+
+  update-docs:
+    needs: create-release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: v${{ inputs.version }}
+
+      - name: Update developer notes with release info
+        run: |
+          # Update the developer notes with the latest release
+          if [ -f docs/reference/developer-notes.md ]; then
+            # Add release info if not already present
+            if ! grep -q "Latest Release: v${{ inputs.version }}" docs/reference/developer-notes.md; then
+              sed -i "s/\*\*Last Updated:\*\* .*/\*\*Last Updated:\*\* $(date +%Y-%m-%d)\\n\*\*Latest Release:\*\* v${{ inputs.version }}/" docs/reference/developer-notes.md
+
+              git config user.name "github-actions[bot]"
+              git config user.email "github-actions[bot]@users.noreply.github.com"
+              git add docs/reference/developer-notes.md
+              git commit -m "docs: update developer notes with v${{ inputs.version }} release info"
+              git push origin HEAD:main
+            fi
+          fi
+
+      - name: Trigger docs deployment
+        run: |
+          echo "Documentation will be automatically deployed by docs.yml workflow"
