@@ -144,13 +144,14 @@ describe('output-formatter', () => {
         ],
       };
       const result = formatSearchFacts(data, {});
-      expect(result).toContain('0.88');
+      // Confidence is formatted as percentage (88%)
+      expect(result).toContain('88%');
     });
 
     test('should handle empty results', () => {
       const data = { facts: [] };
       const result = formatSearchFacts(data, { query: 'test' });
-      expect(result).toContain('No relationships found');
+      expect(result).toContain('No facts found');
     });
   });
 

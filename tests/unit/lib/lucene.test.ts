@@ -88,15 +88,27 @@ describe('needsEscaping', () => {
  * These tests set DATABASE_TYPE=falkordb to enable Lucene sanitization
  */
 describe('sanitizeGroupId (FalkorDB)', () => {
-  const originalEnv = process.env;
+  let originalDbType: string | undefined;
+  let originalPaiDbType: string | undefined;
 
   beforeEach(() => {
-    process.env = { ...originalEnv };
+    originalDbType = process.env.DATABASE_TYPE;
+    originalPaiDbType = process.env.MADEINOZ_KNOWLEDGE_DATABASE_TYPE;
+    delete process.env.MADEINOZ_KNOWLEDGE_DATABASE_TYPE;
     process.env.DATABASE_TYPE = 'falkordb';
   });
 
   afterEach(() => {
-    process.env = originalEnv;
+    if (originalDbType === undefined) {
+      delete process.env.DATABASE_TYPE;
+    } else {
+      process.env.DATABASE_TYPE = originalDbType;
+    }
+    if (originalPaiDbType === undefined) {
+      delete process.env.MADEINOZ_KNOWLEDGE_DATABASE_TYPE;
+    } else {
+      process.env.MADEINOZ_KNOWLEDGE_DATABASE_TYPE = originalPaiDbType;
+    }
   });
 
   test('should convert hyphens to underscores (WORKAROUND)', () => {
@@ -130,15 +142,27 @@ describe('sanitizeGroupId (FalkorDB)', () => {
 });
 
 describe('sanitizeGroupIds (FalkorDB)', () => {
-  const originalEnv = process.env;
+  let originalDbType: string | undefined;
+  let originalPaiDbType: string | undefined;
 
   beforeEach(() => {
-    process.env = { ...originalEnv };
+    originalDbType = process.env.DATABASE_TYPE;
+    originalPaiDbType = process.env.MADEINOZ_KNOWLEDGE_DATABASE_TYPE;
+    delete process.env.MADEINOZ_KNOWLEDGE_DATABASE_TYPE;
     process.env.DATABASE_TYPE = 'falkordb';
   });
 
   afterEach(() => {
-    process.env = originalEnv;
+    if (originalDbType === undefined) {
+      delete process.env.DATABASE_TYPE;
+    } else {
+      process.env.DATABASE_TYPE = originalDbType;
+    }
+    if (originalPaiDbType === undefined) {
+      delete process.env.MADEINOZ_KNOWLEDGE_DATABASE_TYPE;
+    } else {
+      process.env.MADEINOZ_KNOWLEDGE_DATABASE_TYPE = originalPaiDbType;
+    }
   });
 
   test('should convert hyphens to underscores in all group_ids', () => {
@@ -157,15 +181,27 @@ describe('sanitizeGroupIds (FalkorDB)', () => {
 });
 
 describe('sanitizeSearchQuery (FalkorDB)', () => {
-  const originalEnv = process.env;
+  let originalDbType: string | undefined;
+  let originalPaiDbType: string | undefined;
 
   beforeEach(() => {
-    process.env = { ...originalEnv };
+    originalDbType = process.env.DATABASE_TYPE;
+    originalPaiDbType = process.env.MADEINOZ_KNOWLEDGE_DATABASE_TYPE;
+    delete process.env.MADEINOZ_KNOWLEDGE_DATABASE_TYPE;
     process.env.DATABASE_TYPE = 'falkordb';
   });
 
   afterEach(() => {
-    process.env = originalEnv;
+    if (originalDbType === undefined) {
+      delete process.env.DATABASE_TYPE;
+    } else {
+      process.env.DATABASE_TYPE = originalDbType;
+    }
+    if (originalPaiDbType === undefined) {
+      delete process.env.MADEINOZ_KNOWLEDGE_DATABASE_TYPE;
+    } else {
+      process.env.MADEINOZ_KNOWLEDGE_DATABASE_TYPE = originalPaiDbType;
+    }
   });
 
   test('should escape hyphens in queries', () => {
