@@ -5,7 +5,7 @@
  * Handles JSON-RPC 2.0 requests for all MCP tools.
  */
 
-import { sanitizeGroupIds, sanitizeGroupId, sanitizeSearchQuery } from "./lucene.js";
+import { sanitizeGroupIds, sanitizeGroupId, sanitizeSearchQuery } from './lucene.js';
 
 /**
  * MCP tool names (Graphiti MCP server)
@@ -24,19 +24,19 @@ import { sanitizeGroupIds, sanitizeGroupId, sanitizeSearchQuery } from "./lucene
  */
 export const MCP_TOOLS = {
   // Knowledge capture (adds an "episode" to memory)
-  ADD_EPISODE: "add_memory",
+  ADD_EPISODE: 'add_memory',
   // Entity search (searches "nodes")
-  SEARCH_NODES: "search_nodes",
+  SEARCH_NODES: 'search_nodes',
   // Relationship search (searches "facts" in memory)
-  SEARCH_FACTS: "search_memory_facts",
+  SEARCH_FACTS: 'search_memory_facts',
   // Episode retrieval
-  GET_EPISODES: "get_episodes",
+  GET_EPISODES: 'get_episodes',
   // System operations
-  GET_STATUS: "get_status",
-  CLEAR_GRAPH: "clear_graph",
-  DELETE_EPISODE: "delete_episode",
-  DELETE_ENTITY_EDGE: "delete_entity_edge",
-  GET_ENTITY_EDGE: "get_entity_edge",
+  GET_STATUS: 'get_status',
+  CLEAR_GRAPH: 'clear_graph',
+  DELETE_EPISODE: 'delete_episode',
+  DELETE_ENTITY_EDGE: 'delete_entity_edge',
+  GET_ENTITY_EDGE: 'get_entity_edge',
 } as const;
 
 /**
@@ -77,13 +77,9 @@ export interface GetEpisodesParams {
   group_ids?: string[];
 }
 
-export interface GetStatusParams {
-  // No parameters
-}
+export type GetStatusParams = Record<string, never>;
 
-export interface ClearGraphParams {
-  // No parameters
-}
+export type ClearGraphParams = Record<string, never>;
 
 export interface DeleteEpisodeParams {
   uuid: string;
@@ -101,7 +97,7 @@ export interface GetEntityEdgeParams {
  * JSON-RPC 2.0 request
  */
 export interface JSONRPCRequest {
-  jsonrpc: "2.0";
+  jsonrpc: '2.0';
   id: number | string;
   method: string;
   params: {
@@ -114,7 +110,7 @@ export interface JSONRPCRequest {
  * JSON-RPC 2.0 response
  */
 export interface JSONRPCResponse {
-  jsonrpc: "2.0";
+  jsonrpc: '2.0';
   id: number | string;
   result?: unknown;
   error?: {
@@ -146,7 +142,7 @@ export interface MCPClientConfig {
 /**
  * Default MCP server URL
  */
-const DEFAULT_BASE_URL = "http://localhost:8000/mcp";
+const DEFAULT_BASE_URL = 'http://localhost:8000/mcp';
 const DEFAULT_TIMEOUT = 30000; // 30 seconds
 
 /**
@@ -162,7 +158,7 @@ class LRUCache<T> {
   private maxSize: number;
   private ttlMs: number;
 
-  constructor(maxSize: number = 100, ttlMs: number = 5 * 60 * 1000) {
+  constructor(maxSize = 100, ttlMs: number = 5 * 60 * 1000) {
     this.cache = new Map();
     this.maxSize = maxSize;
     this.ttlMs = ttlMs;
@@ -228,8 +224,8 @@ export class MCPClient {
     this.baseURL = config.baseURL || DEFAULT_BASE_URL;
     this.timeout = config.timeout || DEFAULT_TIMEOUT;
     this.headers = {
-      "Content-Type": "application/json",
-      "Accept": "application/json, text/event-stream",
+      'Content-Type': 'application/json',
+      Accept: 'application/json, text/event-stream',
       ...config.headers,
     };
     this.requestId = 1;
@@ -254,18 +250,18 @@ export class MCPClient {
 
     this.initializePromise = (async () => {
       const request = {
-        jsonrpc: "2.0",
+        jsonrpc: '2.0',
         id: this.requestId++,
-        method: "initialize",
+        method: 'initialize',
         params: {
-          protocolVersion: "2024-11-05",
+          protocolVersion: '2024-11-05',
           capabilities: {},
-          clientInfo: { name: "mcp-wrapper", version: "1.0.0" },
+          clientInfo: { name: 'mcp-wrapper', version: '1.0.0' },
         },
       };
 
       const response = await fetch(this.baseURL, {
-        method: "POST",
+        method: 'POST',
         headers: this.headers,
         body: JSON.stringify(request),
       });
@@ -275,9 +271,9 @@ export class MCPClient {
       }
 
       // Get session ID from header
-      const sessionId = response.headers.get("Mcp-Session-Id");
+      const sessionId = response.headers.get('Mcp-Session-Id');
       if (!sessionId) {
-        throw new Error("Server did not return session ID");
+        throw new Error('Server did not return session ID');
       }
       this.sessionId = sessionId;
 
@@ -293,9 +289,9 @@ export class MCPClient {
    */
   private parseSSEResponse(text: string): unknown {
     // SSE format: "event: message\ndata: {...}\n\n"
-    const lines = text.split("\n");
+    const lines = text.split('\n');
     for (const line of lines) {
-      if (line.startsWith("data: ")) {
+      if (line.startsWith('data: ')) {
         const jsonStr = line.substring(6);
         try {
           const parsed = JSON.parse(jsonStr);
@@ -313,8 +309,10 @@ export class MCPClient {
                 return sc;
               }
               // Fall back to text content
-              const textContent = parsed.result.content.find((c: { type: string }) => c.type === "text");
-              if (textContent && textContent.text) {
+              const textContent = parsed.result.content.find(
+                (c: { type: string }) => c.type === 'text'
+              );
+              if (textContent?.text) {
                 try {
                   const textParsed = JSON.parse(textContent.text);
                   // Unwrap Graphiti's result wrapper if present
@@ -330,7 +328,7 @@ export class MCPClient {
             return parsed.result;
           }
           if (parsed.error) {
-            throw new Error(parsed.error.message || "Unknown error");
+            throw new Error(parsed.error.message || 'Unknown error');
           }
           return parsed;
         } catch (e) {
@@ -339,7 +337,7 @@ export class MCPClient {
         }
       }
     }
-    throw new Error("No valid SSE data found in response");
+    throw new Error('No valid SSE data found in response');
   }
 
   /**
@@ -378,9 +376,9 @@ export class MCPClient {
       await this.initializeSession();
 
       const request: JSONRPCRequest = {
-        jsonrpc: "2.0",
+        jsonrpc: '2.0',
         id: this.requestId++,
-        method: "tools/call",
+        method: 'tools/call',
         params: {
           name: toolName,
           arguments: arguments_,
@@ -391,10 +389,10 @@ export class MCPClient {
       const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
       const response = await fetch(this.baseURL, {
-        method: "POST",
+        method: 'POST',
         headers: {
           ...this.headers,
-          "Mcp-Session-Id": this.sessionId!,
+          'Mcp-Session-Id': this.sessionId!,
         },
         body: JSON.stringify(request),
         signal: controller.signal,
@@ -420,7 +418,7 @@ export class MCPClient {
       };
     } catch (error: unknown) {
       if (error instanceof Error) {
-        if (error.name === "AbortError") {
+        if (error.name === 'AbortError') {
           return {
             success: false,
             error: `Request timeout after ${this.timeout}ms`,
@@ -433,7 +431,7 @@ export class MCPClient {
       }
       return {
         success: false,
-        error: "Unknown error occurred",
+        error: 'Unknown error occurred',
       };
     }
   }
@@ -497,7 +495,10 @@ export class MCPClient {
 
     // Check cache first
     if (this.cache) {
-      const cacheKey = this.getCacheKey(MCP_TOOLS.SEARCH_FACTS, sanitizedParams as Record<string, unknown>);
+      const cacheKey = this.getCacheKey(
+        MCP_TOOLS.SEARCH_FACTS,
+        sanitizedParams as Record<string, unknown>
+      );
       const cached = this.cache.get(cacheKey);
       if (cached) {
         return { success: true, data: cached as unknown[] };
@@ -559,14 +560,18 @@ export class MCPClient {
   /**
    * Delete an episode from the knowledge graph
    */
-  async deleteEpisode(params: DeleteEpisodeParams): Promise<MCPClientResponse<{ success: boolean }>> {
+  async deleteEpisode(
+    params: DeleteEpisodeParams
+  ): Promise<MCPClientResponse<{ success: boolean }>> {
     return await this.callTool<{ success: boolean }>(MCP_TOOLS.DELETE_EPISODE, params);
   }
 
   /**
    * Delete an entity edge from the knowledge graph
    */
-  async deleteEntityEdge(params: DeleteEntityEdgeParams): Promise<MCPClientResponse<{ success: boolean }>> {
+  async deleteEntityEdge(
+    params: DeleteEntityEdgeParams
+  ): Promise<MCPClientResponse<{ success: boolean }>> {
     return await this.callTool<{ success: boolean }>(MCP_TOOLS.DELETE_ENTITY_EDGE, params);
   }
 
@@ -585,8 +590,8 @@ export class MCPClient {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout for health check
 
-      const response = await fetch(`${this.baseURL.replace(/\/mcp\/?$/, "")}/health`, {
-        method: "GET",
+      const response = await fetch(`${this.baseURL.replace(/\/mcp\/?$/, '')}/health`, {
+        method: 'GET',
         signal: controller.signal,
       });
 
@@ -613,7 +618,7 @@ export class MCPClient {
       }
       return {
         success: false,
-        error: "Unknown error occurred",
+        error: 'Unknown error occurred',
       };
     }
   }

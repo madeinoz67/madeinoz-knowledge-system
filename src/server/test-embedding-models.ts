@@ -4,29 +4,29 @@
  * Evaluates: response time, dimensions, and semantic similarity
  */
 
-const OLLAMA_HOST = "http://10.0.0.150:11434";
+const OLLAMA_HOST = 'http://10.0.0.150:11434';
 
 const EMBEDDING_MODELS = [
-  "nomic-embed-text:latest",
-  "nomic-embed-text-v2-moe:latest",
-  "mxbai-embed-large:latest",
-  "qwen3-embedding:0.6b",
-  "embeddinggemma:latest",
+  'nomic-embed-text:latest',
+  'nomic-embed-text-v2-moe:latest',
+  'mxbai-embed-large:latest',
+  'qwen3-embedding:0.6b',
+  'embeddinggemma:latest',
 ];
 
 // Test sentences for semantic similarity
 const TEST_PAIRS = [
   {
-    similar: ["The cat sat on the mat", "A feline rested on the rug"],
-    label: "Cat/Feline synonyms",
+    similar: ['The cat sat on the mat', 'A feline rested on the rug'],
+    label: 'Cat/Feline synonyms',
   },
   {
-    similar: ["Alice is a software engineer", "Alice works as a developer"],
-    label: "Job title synonyms",
+    similar: ['Alice is a software engineer', 'Alice works as a developer'],
+    label: 'Job title synonyms',
   },
   {
-    dissimilar: ["The weather is sunny today", "I love programming in TypeScript"],
-    label: "Weather vs Programming",
+    dissimilar: ['The weather is sunny today', 'I love programming in TypeScript'],
+    label: 'Weather vs Programming',
   },
 ];
 
@@ -34,7 +34,7 @@ interface EmbeddingResult {
   model: string;
   dimensions: number;
   avgResponseMs: number;
-  similarityScores: { label: string; score: number; type: "similar" | "dissimilar" }[];
+  similarityScores: { label: string; score: number; type: 'similar' | 'dissimilar' }[];
   error?: string;
 }
 
@@ -50,11 +50,14 @@ function cosineSimilarity(a: number[], b: number[]): number {
   return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
 }
 
-async function getEmbedding(model: string, text: string): Promise<{ embedding: number[]; durationMs: number }> {
+async function getEmbedding(
+  model: string,
+  text: string
+): Promise<{ embedding: number[]; durationMs: number }> {
   const start = Date.now();
   const res = await fetch(`${OLLAMA_HOST}/api/embeddings`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ model, prompt: text }),
   });
 
@@ -62,17 +65,17 @@ async function getEmbedding(model: string, text: string): Promise<{ embedding: n
     throw new Error(`HTTP ${res.status}: ${await res.text()}`);
   }
 
-  const data = await res.json() as { embedding: number[] };
+  const data = (await res.json()) as { embedding: number[] };
   return { embedding: data.embedding, durationMs: Date.now() - start };
 }
 
 async function testModel(model: string): Promise<EmbeddingResult> {
   console.log(`\nTesting: ${model}`);
-  console.log("---");
+  console.log('---');
 
   try {
     // Test basic embedding
-    const { embedding, durationMs } = await getEmbedding(model, "Hello world test");
+    const { embedding, durationMs } = await getEmbedding(model, 'Hello world test');
     console.log(`  Dimensions: ${embedding.length}`);
     console.log(`  First call: ${durationMs}ms`);
 
@@ -86,7 +89,7 @@ async function testModel(model: string): Promise<EmbeddingResult> {
     console.log(`  Avg response: ${avgTime}ms`);
 
     // Test semantic similarity
-    const similarityScores: EmbeddingResult["similarityScores"] = [];
+    const similarityScores: EmbeddingResult['similarityScores'] = [];
 
     for (const pair of TEST_PAIRS) {
       if (pair.similar) {
@@ -95,7 +98,7 @@ async function testModel(model: string): Promise<EmbeddingResult> {
           getEmbedding(model, pair.similar[1]),
         ]);
         const score = cosineSimilarity(emb1.embedding, emb2.embedding);
-        similarityScores.push({ label: pair.label, score, type: "similar" });
+        similarityScores.push({ label: pair.label, score, type: 'similar' });
         console.log(`  Similar "${pair.label}": ${(score * 100).toFixed(1)}%`);
       }
       if (pair.dissimilar) {
@@ -104,7 +107,7 @@ async function testModel(model: string): Promise<EmbeddingResult> {
           getEmbedding(model, pair.dissimilar[1]),
         ]);
         const score = cosineSimilarity(emb1.embedding, emb2.embedding);
-        similarityScores.push({ label: pair.label, score, type: "dissimilar" });
+        similarityScores.push({ label: pair.label, score, type: 'dissimilar' });
         console.log(`  Dissimilar "${pair.label}": ${(score * 100).toFixed(1)}%`);
       }
     }
@@ -133,7 +136,7 @@ function calculateQualityScore(result: EmbeddingResult): number {
   // Quality = high similarity for similar pairs + low similarity for dissimilar pairs
   let score = 0;
   for (const s of result.similarityScores) {
-    if (s.type === "similar") {
+    if (s.type === 'similar') {
       score += s.score; // Higher is better
     } else {
       score += 1 - s.score; // Lower similarity is better for dissimilar
@@ -143,10 +146,10 @@ function calculateQualityScore(result: EmbeddingResult): number {
 }
 
 async function main() {
-  console.log("==============================================");
-  console.log("Ollama Embedding Model Performance Test");
+  console.log('==============================================');
+  console.log('Ollama Embedding Model Performance Test');
   console.log(`Testing ${EMBEDDING_MODELS.length} models`);
-  console.log("==============================================");
+  console.log('==============================================');
 
   const results: EmbeddingResult[] = [];
 
@@ -159,12 +162,12 @@ async function main() {
   const validResults = results.filter((r) => !r.error);
   validResults.sort((a, b) => calculateQualityScore(b) - calculateQualityScore(a));
 
-  console.log("\n==============================================");
-  console.log("RESULTS SUMMARY (ranked by quality)");
-  console.log("==============================================\n");
+  console.log('\n==============================================');
+  console.log('RESULTS SUMMARY (ranked by quality)');
+  console.log('==============================================\n');
 
-  console.log("| Rank | Model | Dims | Avg Time | Quality Score |");
-  console.log("|------|-------|------|----------|---------------|");
+  console.log('| Rank | Model | Dims | Avg Time | Quality Score |');
+  console.log('|------|-------|------|----------|---------------|');
 
   validResults.forEach((r, i) => {
     const quality = (calculateQualityScore(r) * 100).toFixed(1);
@@ -173,7 +176,7 @@ async function main() {
 
   const failed = results.filter((r) => r.error);
   if (failed.length > 0) {
-    console.log("\n❌ Failed models:");
+    console.log('\n❌ Failed models:');
     failed.forEach((r) => console.log(`   - ${r.model}: ${r.error}`));
   }
 
@@ -187,8 +190,11 @@ async function main() {
   }
 
   // Output JSON
-  const outputPath = new URL("./embedding-test-results.json", import.meta.url).pathname;
-  await Bun.write(outputPath, JSON.stringify({ results, timestamp: new Date().toISOString() }, null, 2));
+  const outputPath = new URL('./embedding-test-results.json', import.meta.url).pathname;
+  await Bun.write(
+    outputPath,
+    JSON.stringify({ results, timestamp: new Date().toISOString() }, null, 2)
+  );
   console.log(`\nResults saved to: ${outputPath}`);
 }
 

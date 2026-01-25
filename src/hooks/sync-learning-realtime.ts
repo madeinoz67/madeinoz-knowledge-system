@@ -21,19 +21,19 @@
  * - Manual: bun run sync-learning-realtime.ts [--verbose]
  */
 
-import { readFileSync, existsSync, readdirSync, statSync } from 'fs';
-import { join, basename } from 'path';
-import { homedir } from 'os';
-import { createHash } from 'crypto';
+import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
+import { join, basename } from 'node:path';
+import { homedir } from 'node:os';
+import { createHash } from 'node:crypto';
 import { parseMarkdownFile, cleanBody } from './lib/frontmatter-parser';
 import {
   loadSyncState,
   saveSyncState,
   getSyncedPaths,
   getContentHashes,
-  markAsSynced
+  markAsSynced,
 } from './lib/sync-state';
-import { checkHealth, addEpisode, AddEpisodeParams } from './lib/knowledge-client';
+import { checkHealth, addEpisode, type AddEpisodeParams } from './lib/knowledge-client';
 
 // Tools that indicate knowledge system operations (prevent feedback loop)
 const KNOWLEDGE_TOOL_PATTERNS = [
@@ -43,7 +43,7 @@ const KNOWLEDGE_TOOL_PATTERNS = [
   'get_episodes',
   'knowledge graph',
   'what do i know',
-  'what do you know'
+  'what do you know',
 ];
 
 interface SyncOptions {
@@ -56,9 +56,7 @@ interface SyncOptions {
  */
 function containsKnowledgeOperations(content: string): boolean {
   const lowerContent = content.toLowerCase();
-  return KNOWLEDGE_TOOL_PATTERNS.some(pattern =>
-    lowerContent.includes(pattern.toLowerCase())
-  );
+  return KNOWLEDGE_TOOL_PATTERNS.some((pattern) => lowerContent.includes(pattern.toLowerCase()));
 }
 
 /**
@@ -83,7 +81,7 @@ function findLatestLearning(): string | null {
   const memoryDir = getMemoryDir();
   const learningDirs = [
     join(memoryDir, 'LEARNING', 'ALGORITHM'),
-    join(memoryDir, 'LEARNING', 'SYSTEM')
+    join(memoryDir, 'LEARNING', 'SYSTEM'),
   ];
 
   const allFiles: { path: string; mtime: number }[] = [];
@@ -94,7 +92,7 @@ function findLatestLearning(): string | null {
     }
 
     // Get year-month subdirectories
-    const subdirs = readdirSync(learningDir).filter(d => {
+    const subdirs = readdirSync(learningDir).filter((d) => {
       const fullPath = join(learningDir, d);
       return statSync(fullPath).isDirectory() && /^\d{4}-\d{2}$/.test(d);
     });
@@ -110,10 +108,10 @@ function findLatestLearning(): string | null {
 
     // Get all markdown files in the latest month
     const files = readdirSync(monthDir)
-      .filter(f => f.endsWith('.md'))
-      .map(f => ({
+      .filter((f) => f.endsWith('.md'))
+      .map((f) => ({
         path: join(monthDir, f),
-        mtime: statSync(join(monthDir, f)).mtime.getTime()
+        mtime: statSync(join(monthDir, f)).mtime.getTime(),
       }));
 
     allFiles.push(...files);
@@ -145,7 +143,7 @@ async function syncLearning(
     if (containsKnowledgeOperations(content)) {
       return {
         success: false,
-        reason: 'Contains knowledge operations (feedback loop prevention)'
+        reason: 'Contains knowledge operations (feedback loop prevention)',
       };
     }
 
@@ -184,7 +182,7 @@ async function syncLearning(
       episode_body: cleanedBody.slice(0, 5000),
       source: 'text',
       source_description: sourceDescParts.join(' | '),
-      group_id: captureType.toLowerCase()
+      group_id: captureType.toLowerCase(),
     };
 
     if (options.verbose) {
@@ -201,22 +199,15 @@ async function syncLearning(
 
     if (result.success) {
       // Mark as synced
-      markAsSynced(
-        syncState,
-        filepath,
-        captureType,
-        undefined,
-        contentHash
-      );
+      markAsSynced(syncState, filepath, captureType, undefined, contentHash);
       saveSyncState(syncState);
 
       if (options.verbose) {
         console.error(`[RealtimeSync] ✓ Synced: ${params.name}`);
       }
       return { success: true };
-    } else {
-      return { success: false, reason: result.error };
     }
+    return { success: false, reason: result.error };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     return { success: false, reason: message };
@@ -230,7 +221,7 @@ async function main() {
   const args = process.argv.slice(2);
   const options: SyncOptions = {
     verbose: args.includes('--verbose') || args.includes('-v'),
-    dryRun: args.includes('--dry-run') || args.includes('-n')
+    dryRun: args.includes('--dry-run') || args.includes('-n'),
   };
 
   // Check if running as hook (stdin available)

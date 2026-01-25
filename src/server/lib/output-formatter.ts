@@ -96,7 +96,7 @@ export function truncateText(text: string, maxLength: number): string {
   // Account for ellipsis (3 chars) in max length
   const effectiveMax = maxLength - 3;
   if (effectiveMax <= 0) {
-    return text.slice(0, maxLength) + '...';
+    return `${text.slice(0, maxLength)}...`;
   }
 
   // Find last space before effective max
@@ -105,10 +105,10 @@ export function truncateText(text: string, maxLength: number): string {
 
   // If no space found or space is at the beginning, just cut at effectiveMax
   if (lastSpace <= 0) {
-    return truncated.trim() + '...';
+    return `${truncated.trim()}...`;
   }
 
-  return truncated.slice(0, lastSpace).trim() + '...';
+  return `${truncated.slice(0, lastSpace).trim()}...`;
 }
 
 // ============================================================================
@@ -227,12 +227,7 @@ function isAddMemoryResponse(data: unknown): data is AddMemoryResponse {
 }
 
 function isGetStatusResponse(data: unknown): data is GetStatusResponse {
-  return (
-    typeof data === 'object' &&
-    data !== null &&
-    'status' in data &&
-    'message' in data
-  );
+  return typeof data === 'object' && data !== null && 'status' in data && 'message' in data;
 }
 
 function isDeleteResponse(data: unknown): data is DeleteResponse {
@@ -378,7 +373,7 @@ export function formatGetEpisodes(data: unknown, options: FormatOptions): string
  * Legacy: ✓ Episode added: "Name" (id: ...uuid8)
  *           Extracted: N entities, M facts
  */
-export function formatAddMemory(data: unknown, options: FormatOptions): string {
+export function formatAddMemory(data: unknown, _options: FormatOptions): string {
   if (!isAddMemoryResponse(data)) {
     throw new Error('Invalid data format for add_memory');
   }
@@ -393,10 +388,7 @@ export function formatAddMemory(data: unknown, options: FormatOptions): string {
     lines[0] = `✓ Episode added: "${name}" (id: ${uuid})`;
   }
 
-  if (
-    data.entities_extracted !== undefined ||
-    data.facts_extracted !== undefined
-  ) {
+  if (data.entities_extracted !== undefined || data.facts_extracted !== undefined) {
     const entities = data.entities_extracted ?? 0;
     const facts = data.facts_extracted ?? 0;
     lines.push(`  Extracted: ${entities} entities, ${facts} facts`);
@@ -410,7 +402,7 @@ export function formatAddMemory(data: unknown, options: FormatOptions): string {
  * Output: Knowledge Graph Status: OK
  *         Connected to neo4j database
  */
-export function formatGetStatus(data: unknown, options: FormatOptions): string {
+export function formatGetStatus(data: unknown, _options: FormatOptions): string {
   if (!isGetStatusResponse(data)) {
     throw new Error('Invalid data format for get_status');
   }
@@ -436,7 +428,7 @@ export function formatGetStatus(data: unknown, options: FormatOptions): string {
  * Output: ✓ Deleted: ...uuid8
  *     or: ✗ Delete failed: message
  */
-export function formatDelete(data: unknown, options: FormatOptions): string {
+export function formatDelete(data: unknown, _options: FormatOptions): string {
   if (!isDeleteResponse(data)) {
     throw new Error('Invalid data format for delete');
   }
@@ -444,10 +436,9 @@ export function formatDelete(data: unknown, options: FormatOptions): string {
   if (data.success) {
     const uuid = data.uuid ? truncateUuid(data.uuid) : 'unknown';
     return `✓ Deleted: ${uuid}`;
-  } else {
-    const message = data.message || 'Unknown error';
-    return `✗ Delete failed: ${message}`;
   }
+  const message = data.message || 'Unknown error';
+  return `✗ Delete failed: ${message}`;
 }
 
 /**
@@ -455,7 +446,7 @@ export function formatDelete(data: unknown, options: FormatOptions): string {
  * Output: ✓ Knowledge graph cleared
  *           Removed: N entities, M episodes
  */
-export function formatClearGraph(data: unknown, options: FormatOptions): string {
+export function formatClearGraph(data: unknown, _options: FormatOptions): string {
   if (!isClearGraphResponse(data)) {
     throw new Error('Invalid data format for clear_graph');
   }
@@ -466,10 +457,7 @@ export function formatClearGraph(data: unknown, options: FormatOptions): string 
 
   const lines: string[] = ['✓ Knowledge graph cleared'];
 
-  if (
-    data.deleted_entities !== undefined ||
-    data.deleted_episodes !== undefined
-  ) {
+  if (data.deleted_entities !== undefined || data.deleted_episodes !== undefined) {
     const entities = data.deleted_entities ?? 0;
     const episodes = data.deleted_episodes ?? 0;
     lines.push(`  Removed: ${entities} entities, ${episodes} episodes`);
@@ -536,8 +524,7 @@ export function formatOutput(
     const output = formatter(data, opts);
     const compactBytes = new TextEncoder().encode(output).length;
     const processingTimeMs = performance.now() - startTime;
-    const savingsPercent =
-      rawBytes > 0 ? ((rawBytes - compactBytes) / rawBytes) * 100 : 0;
+    const savingsPercent = rawBytes > 0 ? ((rawBytes - compactBytes) / rawBytes) * 100 : 0;
 
     // Log slow transformations
     if (processingTimeMs >= 50) {
@@ -561,9 +548,7 @@ export function formatOutput(
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
     // Log transformation failure
-    logTransformationFailure(operation, rawBytes, errorMessage, processingTimeMs).catch(
-      () => {}
-    );
+    logTransformationFailure(operation, rawBytes, errorMessage, processingTimeMs).catch(() => {});
 
     return {
       output: rawJson,

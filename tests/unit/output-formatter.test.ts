@@ -15,7 +15,6 @@ import {
   formatDelete,
   formatClearGraph,
   formatOutput,
-  DEFAULT_OPTIONS,
 } from '../../src/server/lib/output-formatter';
 
 describe('output-formatter', () => {
@@ -206,7 +205,7 @@ describe('output-formatter', () => {
 
     test('should handle legacy format with UUID and extraction counts', () => {
       const data = {
-        message: "Episode added",
+        message: 'Episode added',
         uuid: '550e8400-e29b-41d4-a716-446655440000',
         name: 'Test',
         entities_extracted: 3,
@@ -335,8 +334,8 @@ describe('output-formatter', () => {
       const result = formatOutput('unknown_operation', data, { collectMetrics: true });
       expect(result.usedFallback).toBe(true);
       expect(result.metrics).toBeDefined();
-      expect(result.metrics!.rawBytes).toBeGreaterThan(0);
-      expect(result.metrics!.savingsPercent).toBe(0); // No savings on fallback
+      expect(result.metrics?.rawBytes).toBeGreaterThan(0);
+      expect(result.metrics?.savingsPercent).toBe(0); // No savings on fallback
     });
   });
 });

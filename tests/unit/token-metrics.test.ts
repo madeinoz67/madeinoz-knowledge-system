@@ -85,9 +85,9 @@ describe('token-metrics', () => {
   // T033: Unit test for estimateTokens
   describe('estimateTokens', () => {
     test('should return chars/4 rounded up', () => {
-      expect(estimateTokens('1234')).toBe(1);      // 4/4 = 1
-      expect(estimateTokens('12345')).toBe(2);     // 5/4 = 1.25 → 2
-      expect(estimateTokens('12345678')).toBe(2);  // 8/4 = 2
+      expect(estimateTokens('1234')).toBe(1); // 4/4 = 1
+      expect(estimateTokens('12345')).toBe(2); // 5/4 = 1.25 → 2
+      expect(estimateTokens('12345678')).toBe(2); // 8/4 = 2
       expect(estimateTokens('123456789')).toBe(3); // 9/4 = 2.25 → 3
     });
 
@@ -209,7 +209,10 @@ describe('token-metrics', () => {
     });
 
     test('should group by operation', () => {
-      const byOperation = aggregateMetrics(sampleMetrics, 'operation') as Map<string, AggregateStats>;
+      const byOperation = aggregateMetrics(sampleMetrics, 'operation') as Map<
+        string,
+        AggregateStats
+      >;
 
       expect(byOperation).toBeInstanceOf(Map);
       expect(byOperation.size).toBe(2);
@@ -226,7 +229,7 @@ describe('token-metrics', () => {
       const stats = aggregateMetrics(sampleMetrics) as AggregateStats;
 
       expect(stats.totalBytesBeforeTransform).toBe(2300); // 1000 + 800 + 500
-      expect(stats.totalBytesAfterTransform).toBe(650);   // 300 + 200 + 150
+      expect(stats.totalBytesAfterTransform).toBe(650); // 300 + 200 + 150
     });
 
     test('should calculate average processing time', () => {
@@ -335,7 +338,7 @@ describe('token-metrics', () => {
 
     describe('loadMetrics', () => {
       test('should load metrics from JSONL file', async () => {
-        const metricsLine = JSON.stringify({
+        const metricsLine = `${JSON.stringify({
           operation: 'search_nodes',
           timestamp: '2026-01-18T12:00:00.000Z',
           rawBytes: 1000,
@@ -344,7 +347,7 @@ describe('token-metrics', () => {
           estimatedTokensBefore: 250,
           estimatedTokensAfter: 75,
           processingTimeMs: 5,
-        }) + '\n';
+        })}\n`;
         await writeFile(testFile, metricsLine);
 
         const metrics = await loadMetrics(testFile);
@@ -362,9 +365,27 @@ describe('token-metrics', () => {
 
       test('should skip invalid JSON lines', async () => {
         const content = [
-          JSON.stringify({ operation: 'valid', timestamp: new Date().toISOString(), rawBytes: 100, compactBytes: 50, savingsPercent: 50, estimatedTokensBefore: 25, estimatedTokensAfter: 13, processingTimeMs: 1 }),
+          JSON.stringify({
+            operation: 'valid',
+            timestamp: new Date().toISOString(),
+            rawBytes: 100,
+            compactBytes: 50,
+            savingsPercent: 50,
+            estimatedTokensBefore: 25,
+            estimatedTokensAfter: 13,
+            processingTimeMs: 1,
+          }),
           'invalid json line',
-          JSON.stringify({ operation: 'valid2', timestamp: new Date().toISOString(), rawBytes: 200, compactBytes: 100, savingsPercent: 50, estimatedTokensBefore: 50, estimatedTokensAfter: 25, processingTimeMs: 2 }),
+          JSON.stringify({
+            operation: 'valid2',
+            timestamp: new Date().toISOString(),
+            rawBytes: 200,
+            compactBytes: 100,
+            savingsPercent: 50,
+            estimatedTokensBefore: 50,
+            estimatedTokensAfter: 25,
+            processingTimeMs: 2,
+          }),
         ].join('\n');
         await writeFile(testFile, content);
 
@@ -379,8 +400,26 @@ describe('token-metrics', () => {
   describe('generateBenchmarkReport', () => {
     test('should generate PASS verdict when all targets met', () => {
       const metrics: TokenMetrics[] = [
-        { operation: 'search_nodes', timestamp: new Date(), rawBytes: 1000, compactBytes: 300, savingsPercent: 70, estimatedTokensBefore: 250, estimatedTokensAfter: 75, processingTimeMs: 5 },
-        { operation: 'add_memory', timestamp: new Date(), rawBytes: 500, compactBytes: 200, savingsPercent: 60, estimatedTokensBefore: 125, estimatedTokensAfter: 50, processingTimeMs: 3 },
+        {
+          operation: 'search_nodes',
+          timestamp: new Date(),
+          rawBytes: 1000,
+          compactBytes: 300,
+          savingsPercent: 70,
+          estimatedTokensBefore: 250,
+          estimatedTokensAfter: 75,
+          processingTimeMs: 5,
+        },
+        {
+          operation: 'add_memory',
+          timestamp: new Date(),
+          rawBytes: 500,
+          compactBytes: 200,
+          savingsPercent: 60,
+          estimatedTokensBefore: 125,
+          estimatedTokensAfter: 50,
+          processingTimeMs: 3,
+        },
       ];
 
       const report = generateBenchmarkReport(metrics);
@@ -391,7 +430,16 @@ describe('token-metrics', () => {
 
     test('should generate FAIL verdict when targets not met', () => {
       const metrics: TokenMetrics[] = [
-        { operation: 'search_nodes', timestamp: new Date(), rawBytes: 1000, compactBytes: 900, savingsPercent: 10, estimatedTokensBefore: 250, estimatedTokensAfter: 225, processingTimeMs: 5 },
+        {
+          operation: 'search_nodes',
+          timestamp: new Date(),
+          rawBytes: 1000,
+          compactBytes: 900,
+          savingsPercent: 10,
+          estimatedTokensBefore: 250,
+          estimatedTokensAfter: 225,
+          processingTimeMs: 5,
+        },
       ];
 
       const report = generateBenchmarkReport(metrics);
@@ -404,7 +452,16 @@ describe('token-metrics', () => {
 
     test('should include overall stats', () => {
       const metrics: TokenMetrics[] = [
-        { operation: 'search_nodes', timestamp: new Date(), rawBytes: 1000, compactBytes: 300, savingsPercent: 70, estimatedTokensBefore: 250, estimatedTokensAfter: 75, processingTimeMs: 5 },
+        {
+          operation: 'search_nodes',
+          timestamp: new Date(),
+          rawBytes: 1000,
+          compactBytes: 300,
+          savingsPercent: 70,
+          estimatedTokensBefore: 250,
+          estimatedTokensAfter: 75,
+          processingTimeMs: 5,
+        },
       ];
 
       const report = generateBenchmarkReport(metrics);
@@ -416,8 +473,26 @@ describe('token-metrics', () => {
 
     test('should break down stats by operation', () => {
       const metrics: TokenMetrics[] = [
-        { operation: 'search_nodes', timestamp: new Date(), rawBytes: 1000, compactBytes: 300, savingsPercent: 70, estimatedTokensBefore: 250, estimatedTokensAfter: 75, processingTimeMs: 5 },
-        { operation: 'get_status', timestamp: new Date(), rawBytes: 500, compactBytes: 150, savingsPercent: 70, estimatedTokensBefore: 125, estimatedTokensAfter: 38, processingTimeMs: 2 },
+        {
+          operation: 'search_nodes',
+          timestamp: new Date(),
+          rawBytes: 1000,
+          compactBytes: 300,
+          savingsPercent: 70,
+          estimatedTokensBefore: 250,
+          estimatedTokensAfter: 75,
+          processingTimeMs: 5,
+        },
+        {
+          operation: 'get_status',
+          timestamp: new Date(),
+          rawBytes: 500,
+          compactBytes: 150,
+          savingsPercent: 70,
+          estimatedTokensBefore: 125,
+          estimatedTokensAfter: 38,
+          processingTimeMs: 2,
+        },
       ];
 
       const report = generateBenchmarkReport(metrics);
@@ -429,7 +504,16 @@ describe('token-metrics', () => {
 
     test('should generate human-readable summary', () => {
       const metrics: TokenMetrics[] = [
-        { operation: 'search_nodes', timestamp: new Date(), rawBytes: 1000, compactBytes: 300, savingsPercent: 70, estimatedTokensBefore: 250, estimatedTokensAfter: 75, processingTimeMs: 5 },
+        {
+          operation: 'search_nodes',
+          timestamp: new Date(),
+          rawBytes: 1000,
+          compactBytes: 300,
+          savingsPercent: 70,
+          estimatedTokensBefore: 250,
+          estimatedTokensAfter: 75,
+          processingTimeMs: 5,
+        },
       ];
 
       const report = generateBenchmarkReport(metrics);

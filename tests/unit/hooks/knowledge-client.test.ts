@@ -2,7 +2,7 @@
  * Unit tests for knowledge client
  */
 
-import { describe, it, expect, beforeAll, afterAll, mock } from 'bun:test';
+import { describe, it, expect } from 'bun:test';
 import { checkHealth, addEpisode, getConfig } from '../../../src/hooks/lib/knowledge-client';
 
 describe('knowledge-client', () => {
@@ -21,7 +21,7 @@ describe('knowledge-client', () => {
       const config = {
         baseURL: 'http://localhost:59999/mcp/', // Unlikely to be running
         timeout: 1000,
-        retries: 1
+        retries: 1,
       };
 
       const healthy = await checkHealth(config);
@@ -37,13 +37,13 @@ describe('knowledge-client', () => {
       const config = {
         baseURL: 'http://localhost:59999/mcp/', // Unlikely to be running
         timeout: 1000,
-        retries: 1
+        retries: 1,
       };
 
       const result = await addEpisode(
         {
           name: 'Test Episode',
-          episode_body: 'Test content'
+          episode_body: 'Test content',
         },
         config
       );
@@ -60,14 +60,14 @@ describe('knowledge-client', () => {
       const config = {
         baseURL: 'http://localhost:59999/mcp/',
         timeout: 100,
-        retries: 1
+        retries: 1,
       };
 
       // The function should not throw even with long inputs
       const result = await addEpisode(
         {
           name: longName,
-          episode_body: longBody
+          episode_body: longBody,
         },
         config
       );

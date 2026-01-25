@@ -16,9 +16,9 @@
  *   --metrics-file Write metrics to JSONL file
  */
 
-import { createMCPClient } from "./lib/mcp-client.js";
-import { cli } from "./lib/cli.js";
-import { formatOutput, type FormatOptions } from "./lib/output-formatter.js";
+import { createMCPClient } from './lib/mcp-client.js';
+import { cli } from './lib/cli.js';
+import { formatOutput, type FormatOptions } from './lib/output-formatter.js';
 
 /**
  * Command definitions
@@ -26,7 +26,9 @@ import { formatOutput, type FormatOptions } from "./lib/output-formatter.js";
 interface Command {
   name: string;
   description: string;
-  handler: (args: string[]) => Promise<{ success: boolean; data?: unknown; error?: string; query?: string }>;
+  handler: (
+    args: string[]
+  ) => Promise<{ success: boolean; data?: unknown; error?: string; query?: string }>;
 }
 
 /**
@@ -54,15 +56,15 @@ function parseFlags(args: string[]): { flags: CLIFlags; positionalArgs: string[]
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
 
-    if (arg === "--raw") {
+    if (arg === '--raw') {
       flags.raw = true;
-    } else if (arg === "--metrics") {
+    } else if (arg === '--metrics') {
       flags.metrics = true;
-    } else if (arg === "--metrics-file") {
+    } else if (arg === '--metrics-file') {
       flags.metricsFile = args[++i];
-    } else if (arg === "-h" || arg === "--help") {
+    } else if (arg === '-h' || arg === '--help') {
       flags.help = true;
-    } else if (!arg.startsWith("--")) {
+    } else if (!arg.startsWith('--')) {
       positionalArgs.push(arg);
     }
   }
@@ -88,44 +90,44 @@ class MCPWrapper {
    */
   private registerCommands(): void {
     this.addCommand({
-      name: "add_episode",
-      description: "Add knowledge to graph",
+      name: 'add_episode',
+      description: 'Add knowledge to graph',
       handler: this.cmdAddEpisode.bind(this),
     });
 
     this.addCommand({
-      name: "search_nodes",
-      description: "Search entities",
+      name: 'search_nodes',
+      description: 'Search entities',
       handler: this.cmdSearchNodes.bind(this),
     });
 
     this.addCommand({
-      name: "search_facts",
-      description: "Search relationships",
+      name: 'search_facts',
+      description: 'Search relationships',
       handler: this.cmdSearchFacts.bind(this),
     });
 
     this.addCommand({
-      name: "get_episodes",
-      description: "Get recent episodes",
+      name: 'get_episodes',
+      description: 'Get recent episodes',
       handler: this.cmdGetEpisodes.bind(this),
     });
 
     this.addCommand({
-      name: "get_status",
-      description: "Get graph status",
+      name: 'get_status',
+      description: 'Get graph status',
       handler: this.cmdGetStatus.bind(this),
     });
 
     this.addCommand({
-      name: "clear_graph",
-      description: "Delete all knowledge",
+      name: 'clear_graph',
+      description: 'Delete all knowledge',
       handler: this.cmdClearGraph.bind(this),
     });
 
     this.addCommand({
-      name: "health",
-      description: "Check server health",
+      name: 'health',
+      description: 'Check server health',
       handler: this.cmdHealth.bind(this),
     });
   }
@@ -154,11 +156,13 @@ class MCPWrapper {
   /**
    * Command: add_episode
    */
-  private async cmdAddEpisode(args: string[]): Promise<{ success: boolean; data?: unknown; error?: string }> {
+  private async cmdAddEpisode(
+    args: string[]
+  ): Promise<{ success: boolean; data?: unknown; error?: string }> {
     if (args.length < 2) {
       return {
         success: false,
-        error: "Usage: add_episode <title> <body> [source_description]",
+        error: 'Usage: add_episode <title> <body> [source_description]',
       };
     }
 
@@ -179,16 +183,18 @@ class MCPWrapper {
   /**
    * Command: search_nodes
    */
-  private async cmdSearchNodes(args: string[]): Promise<{ success: boolean; data?: unknown; error?: string; query?: string }> {
+  private async cmdSearchNodes(
+    args: string[]
+  ): Promise<{ success: boolean; data?: unknown; error?: string; query?: string }> {
     if (args.length < 1) {
       return {
         success: false,
-        error: "Usage: search_nodes <query> [limit]",
+        error: 'Usage: search_nodes <query> [limit]',
       };
     }
 
     const query = args[0];
-    const limit = args.length > 1 ? parseInt(args[1], 10) : 5;
+    const limit = args.length > 1 ? Number.parseInt(args[1], 10) : 5;
 
     const client = createMCPClient();
     const result = await client.searchNodes({ query, limit });
@@ -199,16 +205,18 @@ class MCPWrapper {
   /**
    * Command: search_facts
    */
-  private async cmdSearchFacts(args: string[]): Promise<{ success: boolean; data?: unknown; error?: string; query?: string }> {
+  private async cmdSearchFacts(
+    args: string[]
+  ): Promise<{ success: boolean; data?: unknown; error?: string; query?: string }> {
     if (args.length < 1) {
       return {
         success: false,
-        error: "Usage: search_facts <query> [limit]",
+        error: 'Usage: search_facts <query> [limit]',
       };
     }
 
     const query = args[0];
-    const limit = args.length > 1 ? parseInt(args[1], 10) : 5;
+    const limit = args.length > 1 ? Number.parseInt(args[1], 10) : 5;
 
     const client = createMCPClient();
     const result = await client.searchFacts({ query, limit });
@@ -219,8 +227,10 @@ class MCPWrapper {
   /**
    * Command: get_episodes
    */
-  private async cmdGetEpisodes(args: string[]): Promise<{ success: boolean; data?: unknown; error?: string }> {
-    const limit = args.length > 0 ? parseInt(args[0], 10) : 5;
+  private async cmdGetEpisodes(
+    args: string[]
+  ): Promise<{ success: boolean; data?: unknown; error?: string }> {
+    const limit = args.length > 0 ? Number.parseInt(args[0], 10) : 5;
 
     const client = createMCPClient();
     const result = await client.getEpisodes({ limit });
@@ -241,12 +251,14 @@ class MCPWrapper {
   /**
    * Command: clear_graph
    */
-  private async cmdClearGraph(args: string[]): Promise<{ success: boolean; data?: unknown; error?: string }> {
+  private async cmdClearGraph(
+    args: string[]
+  ): Promise<{ success: boolean; data?: unknown; error?: string }> {
     // Safety check
-    if (!args.includes("--force")) {
+    if (!args.includes('--force')) {
       return {
         success: false,
-        error: "This will delete ALL knowledge. Use --force to confirm.",
+        error: 'This will delete ALL knowledge. Use --force to confirm.',
       };
     }
 
@@ -271,15 +283,15 @@ class MCPWrapper {
    */
   printHelp(): void {
     cli.blank();
-    cli.header("Madeinoz Knowledge System - Knowledge CLI", 60);
+    cli.header('Madeinoz Knowledge System - Knowledge CLI', 60);
     cli.blank();
-    cli.info("Token-efficient command-line interface to the Graphiti MCP server.");
-    cli.info("Achieves 25-35% token savings through compact output formatting.");
+    cli.info('Token-efficient command-line interface to the Graphiti MCP server.');
+    cli.info('Achieves 25-35% token savings through compact output formatting.');
     cli.blank();
-    cli.info("Usage:");
-    cli.dim("  bun run src/server/knowledge.ts <command> [args...] [options]");
+    cli.info('Usage:');
+    cli.dim('  bun run src/server/knowledge.ts <command> [args...] [options]');
     cli.blank();
-    cli.info("Commands:");
+    cli.info('Commands:');
     cli.blank();
 
     const commands = this.listCommands();
@@ -291,26 +303,28 @@ class MCPWrapper {
     });
 
     cli.blank();
-    cli.info("Options:");
+    cli.info('Options:');
     cli.blank();
-    cli.dim("  --raw              Output raw JSON instead of compact format");
-    cli.dim("  --metrics          Display token metrics after each operation");
-    cli.dim("  --metrics-file <p> Write metrics to JSONL file");
-    cli.dim("  -h, --help         Show this help message");
+    cli.dim('  --raw              Output raw JSON instead of compact format');
+    cli.dim('  --metrics          Display token metrics after each operation');
+    cli.dim('  --metrics-file <p> Write metrics to JSONL file');
+    cli.dim('  -h, --help         Show this help message');
     cli.blank();
-    cli.info("Environment Variables:");
+    cli.info('Environment Variables:');
     cli.blank();
     cli.dim("  MADEINOZ_WRAPPER_COMPACT       Set to 'false' to disable compact output");
     cli.dim("  MADEINOZ_WRAPPER_METRICS       Set to 'true' to enable metrics collection");
-    cli.dim("  MADEINOZ_WRAPPER_METRICS_FILE  Path to write metrics JSONL file");
-    cli.dim("  MADEINOZ_WRAPPER_LOG_FILE      Path to write transformation error logs");
-    cli.dim("  MADEINOZ_WRAPPER_SLOW_THRESHOLD Slow processing threshold in ms (default: 50)");
-    cli.dim("  MADEINOZ_WRAPPER_TIMEOUT       Processing timeout in ms (default: 100)");
+    cli.dim('  MADEINOZ_WRAPPER_METRICS_FILE  Path to write metrics JSONL file');
+    cli.dim('  MADEINOZ_WRAPPER_LOG_FILE      Path to write transformation error logs');
+    cli.dim('  MADEINOZ_WRAPPER_SLOW_THRESHOLD Slow processing threshold in ms (default: 50)');
+    cli.dim('  MADEINOZ_WRAPPER_TIMEOUT       Processing timeout in ms (default: 100)');
     cli.blank();
-    cli.info("Examples:");
+    cli.info('Examples:');
     cli.blank();
     cli.dim('  # Add knowledge to graph');
-    cli.dim('  bun run src/server/knowledge.ts add_episode "Test Episode" "This is a test episode"');
+    cli.dim(
+      '  bun run src/server/knowledge.ts add_episode "Test Episode" "This is a test episode"'
+    );
     cli.blank();
     cli.dim('  # Search for entities (compact output, 30%+ token savings)');
     cli.dim('  bun run src/server/knowledge.ts search_nodes "PAI" 10');
@@ -322,7 +336,9 @@ class MCPWrapper {
     cli.dim('  bun run src/server/knowledge.ts search_nodes "PAI" --metrics');
     cli.blank();
     cli.dim('  # Save metrics to file for analysis');
-    cli.dim('  bun run src/server/knowledge.ts search_nodes "PAI" --metrics-file ~/.madeinoz-knowledge/metrics.jsonl');
+    cli.dim(
+      '  bun run src/server/knowledge.ts search_nodes "PAI" --metrics-file ~/.madeinoz-knowledge/metrics.jsonl'
+    );
     cli.blank();
     cli.dim('  # Get graph status');
     cli.dim('  bun run src/server/knowledge.ts get_status');
@@ -344,7 +360,7 @@ class MCPWrapper {
     if (!command) {
       cli.error(`Unknown command: ${commandName}`);
       cli.blank();
-      cli.info(`Available commands: ${Array.from(this.commands.keys()).join(", ")}`);
+      cli.info(`Available commands: ${Array.from(this.commands.keys()).join(', ')}`);
       return 1;
     }
 
@@ -370,23 +386,31 @@ class MCPWrapper {
           // Show metrics if requested
           if (this.flags.metrics && formatted.metrics) {
             console.log();
-            console.log("--- Token Metrics ---");
+            console.log('--- Token Metrics ---');
             console.log(`Operation: ${commandName}`);
-            console.log(`Raw size: ${formatted.metrics.rawBytes.toLocaleString()} bytes (${Math.ceil(formatted.metrics.rawBytes / 4)} est. tokens)`);
-            console.log(`Compact size: ${formatted.metrics.compactBytes.toLocaleString()} bytes (${Math.ceil(formatted.metrics.compactBytes / 4)} est. tokens)`);
-            const tokensSaved = Math.ceil(formatted.metrics.rawBytes / 4) - Math.ceil(formatted.metrics.compactBytes / 4);
-            console.log(`Savings: ${formatted.metrics.savingsPercent.toFixed(1)}% (${tokensSaved} tokens saved)`);
+            console.log(
+              `Raw size: ${formatted.metrics.rawBytes.toLocaleString()} bytes (${Math.ceil(formatted.metrics.rawBytes / 4)} est. tokens)`
+            );
+            console.log(
+              `Compact size: ${formatted.metrics.compactBytes.toLocaleString()} bytes (${Math.ceil(formatted.metrics.compactBytes / 4)} est. tokens)`
+            );
+            const tokensSaved =
+              Math.ceil(formatted.metrics.rawBytes / 4) -
+              Math.ceil(formatted.metrics.compactBytes / 4);
+            console.log(
+              `Savings: ${formatted.metrics.savingsPercent.toFixed(1)}% (${tokensSaved} tokens saved)`
+            );
             console.log(`Processing time: ${formatted.metrics.processingTimeMs.toFixed(0)}ms`);
           }
 
           // Write to metrics file if specified
           if (this.flags.metricsFile && formatted.metrics) {
-            const { appendFile, mkdir } = await import("node:fs/promises");
-            const { dirname } = await import("node:path");
+            const { appendFile, mkdir } = await import('node:fs/promises');
+            const { dirname } = await import('node:path');
 
             try {
               await mkdir(dirname(this.flags.metricsFile), { recursive: true });
-              const metricsLine = JSON.stringify({
+              const metricsLine = `${JSON.stringify({
                 operation: commandName,
                 timestamp: new Date().toISOString(),
                 rawBytes: formatted.metrics.rawBytes,
@@ -395,8 +419,8 @@ class MCPWrapper {
                 estimatedTokensBefore: Math.ceil(formatted.metrics.rawBytes / 4),
                 estimatedTokensAfter: Math.ceil(formatted.metrics.compactBytes / 4),
                 processingTimeMs: formatted.metrics.processingTimeMs,
-              }) + "\n";
-              await appendFile(this.flags.metricsFile, metricsLine, "utf-8");
+              })}\n`;
+              await appendFile(this.flags.metricsFile, metricsLine, 'utf-8');
             } catch (error) {
               cli.warn(`Failed to write metrics: ${error}`);
             }
@@ -404,10 +428,9 @@ class MCPWrapper {
         }
       }
       return 0;
-    } else {
-      cli.error(`Error: ${result.error}`);
-      return 1;
     }
+    cli.error(`Error: ${result.error}`);
+    return 1;
   }
 }
 
@@ -435,7 +458,7 @@ async function main() {
 
 // Run main function
 main().catch((error) => {
-  cli.error("Unexpected error:");
+  cli.error('Unexpected error:');
   console.error(error);
   process.exit(1);
 });

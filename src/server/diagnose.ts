@@ -6,10 +6,10 @@
  * Performs comprehensive health checks on the system.
  */
 
-import { createContainerManager, ContainerManager } from "./lib/container.js";
-import { createConfigLoader } from "./lib/config.js";
-import { cli } from "./lib/cli.js";
-import { $ } from "bun";
+import { createContainerManager } from './lib/container.js';
+import { createConfigLoader } from './lib/config.js';
+import { cli } from './lib/cli.js';
+import { $ } from 'bun';
 
 /**
  * Diagnostic check result
@@ -51,7 +51,7 @@ class Diagnostics {
    * Check 1: Podman Installation
    */
   async checkPodman(): Promise<void> {
-    this.printHeader("Check 1: Container Runtime");
+    this.printHeader('Check 1: Container Runtime');
 
     try {
       // Check if podman or docker is installed
@@ -61,30 +61,30 @@ class Diagnostics {
       if (podmanCheck.exitCode === 0) {
         const version = await $`podman --version`.quiet();
         this.addResult({
-          name: "Container Runtime",
+          name: 'Container Runtime',
           passed: true,
           message: `Podman installed: ${version.stdout.toString().trim()}`,
         });
       } else if (dockerCheck.exitCode === 0) {
         const version = await $`docker --version`.quiet();
         this.addResult({
-          name: "Container Runtime",
+          name: 'Container Runtime',
           passed: true,
           message: `Docker installed: ${version.stdout.toString().trim()}`,
         });
       } else {
         this.addResult({
-          name: "Container Runtime",
+          name: 'Container Runtime',
           passed: false,
-          message: "No container runtime found",
-          details: "Install from: https://podman.io/getting-started/installation",
+          message: 'No container runtime found',
+          details: 'Install from: https://podman.io/getting-started/installation',
         });
       }
     } catch {
       this.addResult({
-        name: "Container Runtime",
+        name: 'Container Runtime',
         passed: false,
-        message: "Error checking for container runtime",
+        message: 'Error checking for container runtime',
       });
     }
   }
@@ -93,15 +93,15 @@ class Diagnostics {
    * Check 2: Configuration File
    */
   async checkConfig(): Promise<void> {
-    this.printHeader("Check 2: Configuration File");
+    this.printHeader('Check 2: Configuration File');
 
     const configLoader = createConfigLoader();
 
     if (configLoader.envExists()) {
       this.addResult({
-        name: ".env File",
+        name: '.env File',
         passed: true,
-        message: ".env file exists",
+        message: '.env file exists',
       });
 
       // Load and check for API keys
@@ -117,53 +117,53 @@ class Diagnostics {
 
         if (hasAnyKey) {
           const keyType = config.OPENAI_API_KEY
-            ? "OpenAI"
+            ? 'OpenAI'
             : config.ANTHROPIC_API_KEY
-            ? "Anthropic"
-            : config.GOOGLE_API_KEY
-            ? "Google"
-            : "Groq";
+              ? 'Anthropic'
+              : config.GOOGLE_API_KEY
+                ? 'Google'
+                : 'Groq';
           this.addResult({
-            name: "API Key",
+            name: 'API Key',
             passed: true,
             message: `${keyType} API key configured`,
           });
         } else {
           this.addResult({
-            name: "API Key",
+            name: 'API Key',
             passed: false,
-            message: "No API keys found in .env",
-            details: "Run: bun run src/skills/tools/install.ts",
+            message: 'No API keys found in .env',
+            details: 'Run: bun run src/skills/tools/install.ts',
           });
         }
 
         // Check model configuration
         this.addResult({
-          name: "Model Configuration",
+          name: 'Model Configuration',
           passed: true,
           message: `Model: ${config.MODEL_NAME}`,
         });
 
         // Check semaphore limit
         this.addResult({
-          name: "Concurrency Limit",
+          name: 'Concurrency Limit',
           passed: true,
           message: `Semaphore limit: ${config.SEMAPHORE_LIMIT}`,
         });
       } catch (error) {
         this.addResult({
-          name: ".env File",
+          name: '.env File',
           passed: false,
-          message: "Error loading .env file",
+          message: 'Error loading .env file',
           details: String(error),
         });
       }
     } else {
       this.addResult({
-        name: ".env File",
+        name: '.env File',
         passed: false,
-        message: ".env file not found",
-        details: "Run: bun run src/skills/tools/install.ts",
+        message: '.env file not found',
+        details: 'Run: bun run src/skills/tools/install.ts',
       });
     }
   }
@@ -172,27 +172,27 @@ class Diagnostics {
    * Check 3: Container Status
    */
   async checkContainers(): Promise<void> {
-    this.printHeader("Check 3: Container Status");
+    this.printHeader('Check 3: Container Status');
 
     const containerManager = createContainerManager();
 
     if (!containerManager.isRuntimeAvailable()) {
       this.addResult({
-        name: "Container Runtime",
+        name: 'Container Runtime',
         passed: false,
-        message: "Container runtime not available",
+        message: 'Container runtime not available',
       });
       return;
     }
 
-    const containerName = "madeinoz-knowledge-graph-mcp";
+    const containerName = 'madeinoz-knowledge-graph-mcp';
     const isRunning = await containerManager.isContainerRunning(containerName);
 
     if (isRunning) {
       this.addResult({
-        name: "Container",
+        name: 'Container',
         passed: true,
-        message: "Container is running",
+        message: 'Container is running',
       });
 
       // Get container details
@@ -207,17 +207,17 @@ class Diagnostics {
       const exists = await containerManager.containerExists(containerName);
       if (exists) {
         this.addResult({
-          name: "Container",
+          name: 'Container',
           passed: false,
-          message: "Container exists but not running",
-          details: "Start with: bun run src/server/run.ts",
+          message: 'Container exists but not running',
+          details: 'Start with: bun run src/server/run.ts',
         });
       } else {
         this.addResult({
-          name: "Container",
+          name: 'Container',
           passed: false,
-          message: "Container not found",
-          details: "Run: bun run src/server/run.ts",
+          message: 'Container not found',
+          details: 'Run: bun run src/server/run.ts',
         });
       }
     }
@@ -227,42 +227,42 @@ class Diagnostics {
    * Check 4: Server Health
    */
   async checkServerHealth(): Promise<void> {
-    this.printHeader("Check 4: MCP Server Health");
+    this.printHeader('Check 4: MCP Server Health');
 
     try {
-      const response = await fetch("http://localhost:8000/health", {
+      const response = await fetch('http://localhost:8000/health', {
         signal: AbortSignal.timeout(5000),
       });
 
       if (response.ok) {
         const data = await response.json();
-        if (data.status === "healthy" || data.status === "ok") {
+        if (data.status === 'healthy' || data.status === 'ok') {
           this.addResult({
-            name: "MCP Server",
+            name: 'MCP Server',
             passed: true,
-            message: "MCP server is healthy",
+            message: 'MCP server is healthy',
           });
         } else {
           this.addResult({
-            name: "MCP Server",
+            name: 'MCP Server',
             passed: false,
-            message: "Server responding but health check unclear",
+            message: 'Server responding but health check unclear',
             details: `Response: ${JSON.stringify(data)}`,
           });
         }
       } else {
         this.addResult({
-          name: "MCP Server",
+          name: 'MCP Server',
           passed: false,
           message: `Server returned HTTP ${response.status}`,
         });
       }
     } catch {
       this.addResult({
-        name: "MCP Server",
+        name: 'MCP Server',
         passed: false,
-        message: "MCP server not responding",
-        details: "Check logs: bun run src/server/logs.ts",
+        message: 'MCP server not responding',
+        details: 'Check logs: bun run src/server/logs.ts',
       });
     }
   }
@@ -271,13 +271,13 @@ class Diagnostics {
    * Check 5: PAI Skill Installation
    */
   async checkPAISkill(): Promise<void> {
-    this.printHeader("Check 5: PAI Skill Installation");
+    this.printHeader('Check 5: PAI Skill Installation');
 
     const possiblePaths = [
       `${process.env.HOME}/.claude/skills/Knowledge`,
       `${process.env.HOME}/.claude/skills/madeinoz-knowledge-system`,
-      process.env.PAI_DIR ? `${process.env.PAI_DIR}/skills/Knowledge` : "",
-      process.env.PAI_DIR ? `${process.env.PAI_DIR}/skills/madeinoz-knowledge-system` : "",
+      process.env.PAI_DIR ? `${process.env.PAI_DIR}/skills/Knowledge` : '',
+      process.env.PAI_DIR ? `${process.env.PAI_DIR}/skills/madeinoz-knowledge-system` : '',
     ].filter(Boolean);
 
     let found = false;
@@ -286,7 +286,7 @@ class Diagnostics {
         const file = Bun.file(path);
         if (file.exists()) {
           this.addResult({
-            name: "PAI Skill",
+            name: 'PAI Skill',
             passed: true,
             message: `PAI skill installed: ${path}`,
           });
@@ -300,10 +300,10 @@ class Diagnostics {
 
     if (!found) {
       this.addResult({
-        name: "PAI Skill",
+        name: 'PAI Skill',
         passed: false,
-        message: "PAI skill not found in standard locations",
-        details: "Install with: cp -r madeinoz-knowledge-system ~/.claude/skills/",
+        message: 'PAI skill not found in standard locations',
+        details: 'Install with: cp -r madeinoz-knowledge-system ~/.claude/skills/',
       });
     }
   }
@@ -312,12 +312,12 @@ class Diagnostics {
    * Check 6: Port Availability
    */
   async checkPorts(): Promise<void> {
-    this.printHeader("Check 6: Port Availability");
+    this.printHeader('Check 6: Port Availability');
 
     const ports = [
-      { port: 8000, description: "MCP Server" },
-      { port: 6379, description: "FalkorDB" },
-      { port: 3000, description: "FalkorDB Web UI" },
+      { port: 8000, description: 'MCP Server' },
+      { port: 6379, description: 'FalkorDB' },
+      { port: 3000, description: 'FalkorDB Web UI' },
     ];
 
     for (const { port, description } of ports) {
@@ -325,7 +325,7 @@ class Diagnostics {
         // Try to bind to the port to check if it's available
         const server = Bun.serve({
           port,
-          fetch: () => new Response("OK"),
+          fetch: () => new Response('OK'),
         });
 
         // Immediately stop the server
@@ -350,35 +350,35 @@ class Diagnostics {
    * Check 7: Resource Usage
    */
   async checkResources(): Promise<void> {
-    this.printHeader("Check 7: Resource Usage");
+    this.printHeader('Check 7: Resource Usage');
 
     const containerManager = createContainerManager();
-    const containerName = "madeinoz-knowledge-graph-mcp";
+    const containerName = 'madeinoz-knowledge-graph-mcp';
 
     if (await containerManager.isContainerRunning(containerName)) {
       try {
         const stats = await containerManager.getStats(containerName);
         if (stats.success) {
           this.addResult({
-            name: "Resource Usage",
+            name: 'Resource Usage',
             passed: true,
-            message: "Container resource usage:",
+            message: 'Container resource usage:',
             details: stats.stdout,
           });
           console.log(stats.stdout);
         }
       } catch {
         this.addResult({
-          name: "Resource Usage",
+          name: 'Resource Usage',
           passed: false,
-          message: "Could not fetch resource stats",
+          message: 'Could not fetch resource stats',
         });
       }
     } else {
       this.addResult({
-        name: "Resource Usage",
+        name: 'Resource Usage',
         passed: false,
-        message: "Container not running",
+        message: 'Container not running',
       });
     }
   }
@@ -387,24 +387,24 @@ class Diagnostics {
    * Print summary
    */
   printSummary(): void {
-    this.printHeader("Diagnostic Summary");
+    this.printHeader('Diagnostic Summary');
 
-    const passed = this.results.filter((r) => r.passed).length;
-    const total = this.results.length;
+    const _passed = this.results.filter((r) => r.passed).length;
+    const _total = this.results.length;
 
     if (this.issues === 0) {
-      cli.success("✓ All checks passed! System is healthy.");
+      cli.success('✓ All checks passed! System is healthy.');
       cli.blank();
-      cli.info("Your Madeinoz Knowledge System is ready to use.");
+      cli.info('Your Madeinoz Knowledge System is ready to use.');
       cli.blank();
-      cli.info("Try these commands:");
-      cli.dim('  Remember that I\'ve successfully installed the Madeinoz Knowledge System.');
+      cli.info('Try these commands:');
+      cli.dim("  Remember that I've successfully installed the Madeinoz Knowledge System.");
       cli.dim('  What do I know about PAI?');
       cli.dim('  Show the knowledge graph status');
     } else {
       cli.warning(`⚠ Found ${this.issues} issue(s) that need attention`);
       cli.blank();
-      cli.info("Recommended actions:");
+      cli.info('Recommended actions:');
 
       // Group recommendations by check type
       for (const result of this.results) {
@@ -414,36 +414,36 @@ class Diagnostics {
       }
 
       // Additional contextual recommendations
-      const runtimeResult = this.results.find((r) => r.name === "Container Runtime");
+      const runtimeResult = this.results.find((r) => r.name === 'Container Runtime');
       if (!runtimeResult?.passed) {
         cli.blank();
-        cli.info("1. Install Podman");
+        cli.info('1. Install Podman');
       }
 
-      const configResult = this.results.find((r) => r.name === ".env File");
+      const configResult = this.results.find((r) => r.name === '.env File');
       if (!configResult?.passed) {
         cli.blank();
-        cli.info("2. Run installation: bun run src/skills/tools/install.ts");
+        cli.info('2. Run installation: bun run src/skills/tools/install.ts');
       }
 
-      const containerResult = this.results.find((r) => r.name === "Container");
+      const containerResult = this.results.find((r) => r.name === 'Container');
       if (!containerResult?.passed) {
         cli.blank();
-        cli.info("3. Start the server: bun run src/server/run.ts");
+        cli.info('3. Start the server: bun run src/server/run.ts');
       }
 
-      const healthResult = this.results.find((r) => r.name === "MCP Server");
+      const healthResult = this.results.find((r) => r.name === 'MCP Server');
       if (!healthResult?.passed) {
         cli.blank();
-        cli.info("4. Check logs: bun run src/server/logs.ts");
+        cli.info('4. Check logs: bun run src/server/logs.ts');
       }
     }
 
     cli.blank();
-    cli.info("For more help, see:");
-    cli.dim("  - README.md");
-    cli.dim("  - INSTALL.md");
-    cli.dim("  - VERIFY.md");
+    cli.info('For more help, see:');
+    cli.dim('  - README.md');
+    cli.dim('  - INSTALL.md');
+    cli.dim('  - VERIFY.md');
     cli.blank();
   }
 
@@ -452,7 +452,7 @@ class Diagnostics {
    */
   async run(): Promise<void> {
     cli.clear();
-    cli.header("Madeinoz Knowledge System Diagnostics");
+    cli.header('Madeinoz Knowledge System Diagnostics');
     cli.blank();
 
     await this.checkPodman();
@@ -477,7 +477,7 @@ async function main() {
 
 // Run main function
 main().catch((error) => {
-  cli.error("Unexpected error:");
+  cli.error('Unexpected error:');
   console.error(error);
   process.exit(1);
 });

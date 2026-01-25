@@ -9,16 +9,16 @@
  * - Sync state now stored in MEMORY/STATE/knowledge-sync/
  */
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
-import { join, dirname } from 'path';
-import { homedir } from 'os';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { homedir } from 'node:os';
 
 export interface SyncedFile {
   filepath: string;
   synced_at: string;
   episode_uuid?: string;
   capture_type: string;
-  content_hash?: string;  // SHA-256 hash of episode_body for content-level dedup
+  content_hash?: string; // SHA-256 hash of episode_body for content-level dedup
 }
 
 export interface SyncState {
@@ -48,7 +48,7 @@ export function loadSyncState(statePath?: string): SyncState {
     return {
       version: SYNC_STATE_VERSION,
       last_sync: '',
-      synced_files: []
+      synced_files: [],
     };
   }
 
@@ -67,7 +67,7 @@ export function loadSyncState(statePath?: string): SyncState {
     return {
       version: SYNC_STATE_VERSION,
       last_sync: '',
-      synced_files: []
+      synced_files: [],
     };
   }
 }
@@ -92,7 +92,7 @@ export function saveSyncState(state: SyncState, statePath?: string): void {
  * Get set of already synced file paths for quick lookup
  */
 export function getSyncedPaths(state: SyncState): Set<string> {
-  return new Set(state.synced_files.map(f => f.filepath));
+  return new Set(state.synced_files.map((f) => f.filepath));
 }
 
 /**
@@ -106,7 +106,7 @@ export function markAsSynced(
   contentHash?: string
 ): void {
   // Check if already synced
-  const existing = state.synced_files.find(f => f.filepath === filepath);
+  const existing = state.synced_files.find((f) => f.filepath === filepath);
   if (existing) {
     existing.synced_at = new Date().toISOString();
     existing.episode_uuid = episodeUuid;
@@ -119,7 +119,7 @@ export function markAsSynced(
     synced_at: new Date().toISOString(),
     episode_uuid: episodeUuid,
     capture_type: captureType,
-    content_hash: contentHash
+    content_hash: contentHash,
   });
 }
 
@@ -127,7 +127,7 @@ export function markAsSynced(
  * Check if content has already been synced (by hash)
  */
 export function isContentDuplicate(state: SyncState, contentHash: string): boolean {
-  return state.synced_files.some(f => f.content_hash === contentHash);
+  return state.synced_files.some((f) => f.content_hash === contentHash);
 }
 
 /**
@@ -160,7 +160,7 @@ export function getSyncStats(state: SyncState): {
   return {
     totalSynced: state.synced_files.length,
     byType,
-    lastSync: state.last_sync
+    lastSync: state.last_sync,
   };
 }
 
@@ -170,7 +170,7 @@ export function getSyncStats(state: SyncState): {
 export function pruneMissing(state: SyncState): number {
   const before = state.synced_files.length;
 
-  state.synced_files = state.synced_files.filter(f => existsSync(f.filepath));
+  state.synced_files = state.synced_files.filter((f) => existsSync(f.filepath));
 
   return before - state.synced_files.length;
 }
@@ -178,8 +178,8 @@ export function pruneMissing(state: SyncState): number {
 /**
  * Get files synced in the last N hours
  */
-export function getRecentlySynced(state: SyncState, hours: number = 24): SyncedFile[] {
+export function getRecentlySynced(state: SyncState, hours = 24): SyncedFile[] {
   const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
 
-  return state.synced_files.filter(f => f.synced_at > cutoff);
+  return state.synced_files.filter((f) => f.synced_at > cutoff);
 }

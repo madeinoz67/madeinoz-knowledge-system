@@ -33,12 +33,12 @@ export interface WrapperConfig {
  * Environment variable names for wrapper configuration
  */
 export const ENV_VARS = {
-  COMPACT: "MADEINOZ_WRAPPER_COMPACT",
-  METRICS: "MADEINOZ_WRAPPER_METRICS",
-  METRICS_FILE: "MADEINOZ_WRAPPER_METRICS_FILE",
-  LOG_FILE: "MADEINOZ_WRAPPER_LOG_FILE",
-  SLOW_THRESHOLD: "MADEINOZ_WRAPPER_SLOW_THRESHOLD",
-  TIMEOUT: "MADEINOZ_WRAPPER_TIMEOUT",
+  COMPACT: 'MADEINOZ_WRAPPER_COMPACT',
+  METRICS: 'MADEINOZ_WRAPPER_METRICS',
+  METRICS_FILE: 'MADEINOZ_WRAPPER_METRICS_FILE',
+  LOG_FILE: 'MADEINOZ_WRAPPER_LOG_FILE',
+  SLOW_THRESHOLD: 'MADEINOZ_WRAPPER_SLOW_THRESHOLD',
+  TIMEOUT: 'MADEINOZ_WRAPPER_TIMEOUT',
 } as const;
 
 /**
@@ -50,13 +50,13 @@ function loadFromEnv(): Partial<WrapperConfig> {
   // MADEINOZ_WRAPPER_COMPACT (boolean, default: true)
   const compactEnv = process.env[ENV_VARS.COMPACT];
   if (compactEnv !== undefined) {
-    config.compactOutput = compactEnv.toLowerCase() !== "false";
+    config.compactOutput = compactEnv.toLowerCase() !== 'false';
   }
 
   // MADEINOZ_WRAPPER_METRICS (boolean, default: false)
   const metricsEnv = process.env[ENV_VARS.METRICS];
   if (metricsEnv !== undefined) {
-    config.collectMetrics = metricsEnv.toLowerCase() === "true";
+    config.collectMetrics = metricsEnv.toLowerCase() === 'true';
   }
 
   // MADEINOZ_WRAPPER_METRICS_FILE (string path)
@@ -76,8 +76,8 @@ function loadFromEnv(): Partial<WrapperConfig> {
   // MADEINOZ_WRAPPER_SLOW_THRESHOLD (number in ms)
   const slowThresholdEnv = process.env[ENV_VARS.SLOW_THRESHOLD];
   if (slowThresholdEnv) {
-    const parsed = parseInt(slowThresholdEnv, 10);
-    if (!isNaN(parsed) && parsed > 0) {
+    const parsed = Number.parseInt(slowThresholdEnv, 10);
+    if (!Number.isNaN(parsed) && parsed > 0) {
       config.slowThresholdMs = parsed;
     }
   }
@@ -85,8 +85,8 @@ function loadFromEnv(): Partial<WrapperConfig> {
   // MADEINOZ_WRAPPER_TIMEOUT (number in ms)
   const timeoutEnv = process.env[ENV_VARS.TIMEOUT];
   if (timeoutEnv) {
-    const parsed = parseInt(timeoutEnv, 10);
-    if (!isNaN(parsed) && parsed > 0) {
+    const parsed = Number.parseInt(timeoutEnv, 10);
+    if (!Number.isNaN(parsed) && parsed > 0) {
       config.timeoutMs = parsed;
     }
   }

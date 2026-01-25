@@ -112,7 +112,7 @@ describe('knowledge', () => {
     });
 
     test('should ignore unknown flags', () => {
-      const { flags, positionalArgs } = parseFlags(['--unknown', 'search_nodes']);
+      const { positionalArgs } = parseFlags(['--unknown', 'search_nodes']);
       expect(positionalArgs).toEqual(['search_nodes']);
       // Unknown flags starting with -- are not added to positional args
     });

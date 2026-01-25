@@ -12,21 +12,20 @@
  * Configuration is read from PAI .env (${PAI_DIR}/.env or ~/.claude/.env)
  */
 
-import { createContainerManager, ContainerManager, type DatabaseBackend } from "./lib/container.js";
-import { createConfigLoader, type KnowledgeConfig } from "./lib/config.js";
-import { cli } from "./lib/cli.js";
-import inquirer from "inquirer";
-import { dirname, join } from "path";
+import { createContainerManager, ContainerManager, type DatabaseBackend } from './lib/container.js';
+import { createConfigLoader, type KnowledgeConfig } from './lib/config.js';
+import { cli } from './lib/cli.js';
+import inquirer from 'inquirer';
 
 /**
  * Get the database backend from config
  */
 function getDatabaseBackend(config: KnowledgeConfig): DatabaseBackend {
-  const dbType = config.DATABASE_TYPE?.toLowerCase() || "neo4j";
-  if (dbType === "falkordb") {
-    return "falkordb";
+  const dbType = config.DATABASE_TYPE?.toLowerCase() || 'neo4j';
+  if (dbType === 'falkordb') {
+    return 'falkordb';
   }
-  return "neo4j";
+  return 'neo4j';
 }
 
 /**
@@ -42,7 +41,7 @@ async function startFalkorDB(
   const image = ContainerManager.IMAGES.falkordb.database;
 
   cli.blank();
-  cli.header("Starting FalkorDB container...");
+  cli.header('Starting FalkorDB container...');
 
   // Check if container exists
   const exists = await containerManager.containerExists(containerName);
@@ -51,15 +50,15 @@ async function startFalkorDB(
 
     const { recreate } = await inquirer.prompt([
       {
-        type: "confirm",
-        name: "recreate",
-        message: "Do you want to remove and recreate it?",
+        type: 'confirm',
+        name: 'recreate',
+        message: 'Do you want to remove and recreate it?',
         default: false,
       },
     ]);
 
     if (recreate) {
-      cli.info("Stopping and removing existing FalkorDB container...");
+      cli.info('Stopping and removing existing FalkorDB container...');
       await containerManager.stopAndRemoveContainer(containerName);
     } else {
       return true; // Already exists, continue
@@ -67,21 +66,21 @@ async function startFalkorDB(
   }
 
   // Run FalkorDB container
-  if (!await containerManager.containerExists(containerName)) {
+  if (!(await containerManager.containerExists(containerName))) {
     const args = [
       `--name=${containerName}`,
-      "--restart=unless-stopped",
+      '--restart=unless-stopped',
       `--network=${networkName}`,
-      "--network-alias=falkordb",  // DNS alias for service discovery
-      "-p=3000:3000",  // FalkorDB web UI
+      '--network-alias=falkordb', // DNS alias for service discovery
+      '-p=3000:3000', // FalkorDB web UI
       `-v=${volumeName}:/data`,
-      `-e=FALKORDB_PASSWORD=${config.FALKORDB_PASSWORD || ""}`,
+      `-e=FALKORDB_PASSWORD=${config.FALKORDB_PASSWORD || ''}`,
       image,
     ];
 
     const result = await containerManager.runContainer(args);
     if (result.success) {
-      cli.success("✓ FalkorDB container started");
+      cli.success('✓ FalkorDB container started');
       cli.dim(`  Container: ${containerName}`);
       cli.dim(`  Volume: ${volumeName}`);
       cli.dim(`  Network: ${networkName}`);
@@ -92,7 +91,7 @@ async function startFalkorDB(
   }
 
   // Wait for FalkorDB to be ready
-  cli.info("Waiting for FalkorDB to be ready...");
+  cli.info('Waiting for FalkorDB to be ready...');
   await new Promise((resolve) => setTimeout(resolve, 5000));
 
   return true;
@@ -112,7 +111,7 @@ async function startNeo4j(
   const image = ContainerManager.IMAGES.neo4j.database;
 
   cli.blank();
-  cli.header("Starting Neo4j container...");
+  cli.header('Starting Neo4j container...');
 
   // Check if container exists
   const exists = await containerManager.containerExists(containerName);
@@ -121,15 +120,15 @@ async function startNeo4j(
 
     const { recreate } = await inquirer.prompt([
       {
-        type: "confirm",
-        name: "recreate",
-        message: "Do you want to remove and recreate it?",
+        type: 'confirm',
+        name: 'recreate',
+        message: 'Do you want to remove and recreate it?',
         default: false,
       },
     ]);
 
     if (recreate) {
-      cli.info("Stopping and removing existing Neo4j container...");
+      cli.info('Stopping and removing existing Neo4j container...');
       await containerManager.stopAndRemoveContainer(containerName);
     } else {
       return true; // Already exists, continue
@@ -137,29 +136,29 @@ async function startNeo4j(
   }
 
   // Run Neo4j container
-  if (!await containerManager.containerExists(containerName)) {
-    const neo4jUser = config.NEO4J_USER || "neo4j";
-    const neo4jPassword = config.NEO4J_PASSWORD || "madeinozknowledge";
+  if (!(await containerManager.containerExists(containerName))) {
+    const neo4jUser = config.NEO4J_USER || 'neo4j';
+    const neo4jPassword = config.NEO4J_PASSWORD || 'madeinozknowledge';
 
     const args = [
       `--name=${containerName}`,
-      "--restart=unless-stopped",
+      '--restart=unless-stopped',
       `--network=${networkName}`,
-      "--network-alias=neo4j",  // DNS alias for service discovery
-      "-p=7474:7474",  // Neo4j Browser HTTP
-      "-p=7687:7687",  // Bolt protocol
+      '--network-alias=neo4j', // DNS alias for service discovery
+      '-p=7474:7474', // Neo4j Browser HTTP
+      '-p=7687:7687', // Bolt protocol
       `-v=${volumeData}:/data`,
       `-v=${volumeLogs}:/logs`,
       `-e=NEO4J_AUTH=${neo4jUser}/${neo4jPassword}`,
-      "-e=NEO4J_server_memory_heap_initial__size=512m",
-      "-e=NEO4J_server_memory_heap_max__size=1G",
-      "-e=NEO4J_server_memory_pagecache_size=512m",
+      '-e=NEO4J_server_memory_heap_initial__size=512m',
+      '-e=NEO4J_server_memory_heap_max__size=1G',
+      '-e=NEO4J_server_memory_pagecache_size=512m',
       image,
     ];
 
     const result = await containerManager.runContainer(args);
     if (result.success) {
-      cli.success("✓ Neo4j container started");
+      cli.success('✓ Neo4j container started');
       cli.dim(`  Container: ${containerName}`);
       cli.dim(`  Volumes: ${volumeData}, ${volumeLogs}`);
       cli.dim(`  Network: ${networkName}`);
@@ -170,18 +169,18 @@ async function startNeo4j(
   }
 
   // Wait for Neo4j to be ready (takes longer than FalkorDB)
-  cli.info("Waiting for Neo4j to be ready (this may take 30+ seconds)...");
+  cli.info('Waiting for Neo4j to be ready (this may take 30+ seconds)...');
   await new Promise((resolve) => setTimeout(resolve, 15000));
 
   // Health check
-  cli.info("Checking Neo4j health...");
+  cli.info('Checking Neo4j health...');
   for (let i = 0; i < 6; i++) {
     try {
-      const response = await fetch("http://localhost:7474", {
+      const response = await fetch('http://localhost:7474', {
         signal: AbortSignal.timeout(5000),
       });
       if (response.ok) {
-        cli.success("✓ Neo4j is ready");
+        cli.success('✓ Neo4j is ready');
         break;
       }
     } catch {
@@ -189,7 +188,7 @@ async function startNeo4j(
         cli.dim(`  Waiting... (attempt ${i + 1}/6)`);
         await new Promise((resolve) => setTimeout(resolve, 5000));
       } else {
-        cli.warning("Neo4j health check timed out - may still be starting");
+        cli.warning('Neo4j health check timed out - may still be starting');
       }
     }
   }
@@ -220,18 +219,18 @@ async function startMCPServer(
 
     const { recreate } = await inquirer.prompt([
       {
-        type: "confirm",
-        name: "recreate",
-        message: "Do you want to remove and recreate it?",
+        type: 'confirm',
+        name: 'recreate',
+        message: 'Do you want to remove and recreate it?',
         default: false,
       },
     ]);
 
     if (recreate) {
-      cli.info("Stopping and removing existing MCP container...");
+      cli.info('Stopping and removing existing MCP container...');
       await containerManager.stopAndRemoveContainer(containerName);
     } else {
-      cli.info("Using existing MCP container...");
+      cli.info('Using existing MCP container...');
       return true;
     }
   }
@@ -242,23 +241,23 @@ async function startMCPServer(
   // Build args based on backend
   const args: string[] = [
     `--name=${containerName}`,
-    "--restart=unless-stopped",
+    '--restart=unless-stopped',
     `--network=${networkName}`,
-    "-p=8000:8000",  // MCP HTTP endpoint
+    '-p=8000:8000', // MCP HTTP endpoint
     // LLM Configuration
-    `-e=OPENAI_API_KEY=${containerEnv.OPENAI_API_KEY || ""}`,
-    `-e=OPENAI_BASE_URL=${containerEnv.OPENAI_BASE_URL || ""}`,
-    `-e=OLLAMA_BASE_URL=${containerEnv.OLLAMA_BASE_URL || ""}`,
-    `-e=ANTHROPIC_API_KEY=${containerEnv.ANTHROPIC_API_KEY || ""}`,
-    `-e=GOOGLE_API_KEY=${containerEnv.GOOGLE_API_KEY || ""}`,
-    `-e=GROQ_API_KEY=${containerEnv.GROQ_API_KEY || ""}`,
-    `-e=VOYAGE_API_KEY=${containerEnv.VOYAGE_API_KEY || ""}`,
+    `-e=OPENAI_API_KEY=${containerEnv.OPENAI_API_KEY || ''}`,
+    `-e=OPENAI_BASE_URL=${containerEnv.OPENAI_BASE_URL || ''}`,
+    `-e=OLLAMA_BASE_URL=${containerEnv.OLLAMA_BASE_URL || ''}`,
+    `-e=ANTHROPIC_API_KEY=${containerEnv.ANTHROPIC_API_KEY || ''}`,
+    `-e=GOOGLE_API_KEY=${containerEnv.GOOGLE_API_KEY || ''}`,
+    `-e=GROQ_API_KEY=${containerEnv.GROQ_API_KEY || ''}`,
+    `-e=VOYAGE_API_KEY=${containerEnv.VOYAGE_API_KEY || ''}`,
     // Model Configuration
     `-e=MODEL_NAME=${containerEnv.MODEL_NAME}`,
     `-e=LLM_PROVIDER=${containerEnv.LLM_PROVIDER}`,
     `-e=EMBEDDER_PROVIDER=${containerEnv.EMBEDDER_PROVIDER}`,
-    `-e=EMBEDDER_MODEL=${containerEnv.EMBEDDER_MODEL || ""}`,
-    `-e=EMBEDDER_DIMENSIONS=${containerEnv.EMBEDDER_DIMENSIONS || ""}`,
+    `-e=EMBEDDER_MODEL=${containerEnv.EMBEDDER_MODEL || ''}`,
+    `-e=EMBEDDER_DIMENSIONS=${containerEnv.EMBEDDER_DIMENSIONS || ''}`,
     // App Configuration
     `-e=SEMAPHORE_LIMIT=${containerEnv.SEMAPHORE_LIMIT}`,
     `-e=GRAPHITI_TELEMETRY_ENABLED=${containerEnv.GRAPHITI_TELEMETRY_ENABLED}`,
@@ -267,24 +266,24 @@ async function startMCPServer(
   ];
 
   // Add backend-specific configuration
-  if (backend === "falkordb") {
+  if (backend === 'falkordb') {
     args.push(
-      `-e=DATABASE_TYPE=falkordb`,
+      '-e=DATABASE_TYPE=falkordb',
       `-e=FALKORDB_HOST=${ContainerManager.FALKORDB_CONTAINER}`,
-      `-e=FALKORDB_PORT=6379`,
-      `-e=FALKORDB_PASSWORD=${containerEnv.FALKORDB_PASSWORD || ""}`,
+      '-e=FALKORDB_PORT=6379',
+      `-e=FALKORDB_PASSWORD=${containerEnv.FALKORDB_PASSWORD || ''}`
     );
   } else {
     // Neo4j backend
-    const neo4jUser = config.NEO4J_USER || "neo4j";
-    const neo4jPassword = config.NEO4J_PASSWORD || "madeinozknowledge";
+    const neo4jUser = config.NEO4J_USER || 'neo4j';
+    const neo4jPassword = config.NEO4J_PASSWORD || 'madeinozknowledge';
 
     args.push(
-      `-e=DATABASE_TYPE=neo4j`,
+      '-e=DATABASE_TYPE=neo4j',
       `-e=NEO4J_URI=bolt://${ContainerManager.NEO4J_CONTAINER}:7687`,
       `-e=NEO4J_USER=${neo4jUser}`,
       `-e=NEO4J_PASSWORD=${neo4jPassword}`,
-      `-e=NEO4J_DATABASE=${config.NEO4J_DATABASE || "neo4j"}`,
+      `-e=NEO4J_DATABASE=${config.NEO4J_DATABASE || 'neo4j'}`
     );
 
     // Note: Config files and patches are baked into the custom madeinoz-knowledge-system:fixed image
@@ -295,10 +294,10 @@ async function startMCPServer(
   args.push(image);
 
   // Run MCP server
-  if (!await containerManager.containerExists(containerName)) {
+  if (!(await containerManager.containerExists(containerName))) {
     const result = await containerManager.runContainer(args);
     if (result.success) {
-      cli.success("✓ MCP Server container started");
+      cli.success('✓ MCP Server container started');
       cli.dim(`  Container: ${containerName}`);
       cli.dim(`  Image: ${image}`);
       cli.dim(`  Network: ${networkName}`);
@@ -315,13 +314,13 @@ async function startMCPServer(
  * Main run function
  */
 async function main() {
-  cli.header("Madeinoz Knowledge System - Setup & Run");
+  cli.header('Madeinoz Knowledge System - Setup & Run');
   cli.blank();
-  cli.info("This script will set up and start the Madeinoz Knowledge System.");
+  cli.info('This script will set up and start the Madeinoz Knowledge System.');
   cli.blank();
-  cli.info("Prerequisites:");
-  cli.dim("  - Podman or Docker (container runtime)");
-  cli.dim("  - OpenAI API key or compatible LLM provider");
+  cli.info('Prerequisites:');
+  cli.dim('  - Podman or Docker (container runtime)');
+  cli.dim('  - OpenAI API key or compatible LLM provider');
   cli.blank();
 
   // Create config loader
@@ -329,21 +328,21 @@ async function main() {
 
   // Check if PAI .env file exists
   if (!configLoader.envExists()) {
-    cli.error(`Error: PAI .env file not found!`);
+    cli.error('Error: PAI .env file not found!');
     cli.blank();
-    cli.warning("Expected location: " + configLoader.getEnvFile());
+    cli.warning(`Expected location: ${configLoader.getEnvFile()}`);
     cli.blank();
-    cli.info("Run the installer to create the configuration:");
-    cli.dim(`  bun run src/server/install.ts`);
+    cli.info('Run the installer to create the configuration:');
+    cli.dim('  bun run src/server/install.ts');
     cli.blank();
-    cli.info("Or manually create the .env file:");
+    cli.info('Or manually create the .env file:');
     cli.dim(`  nano ${configLoader.getEnvFile()}`);
     process.exit(1);
   }
 
   // Load configuration
   cli.blank();
-  cli.info("Loading configuration...");
+  cli.info('Loading configuration...');
   const config = await configLoader.load();
 
   // Determine database backend
@@ -354,10 +353,10 @@ async function main() {
   let openaiKey = config.OPENAI_API_KEY;
   if (!openaiKey && config.PAI_PREFIXES?.MADEINOZ_KNOWLEDGE_OPENAI_API_KEY) {
     openaiKey = config.PAI_PREFIXES.MADEINOZ_KNOWLEDGE_OPENAI_API_KEY;
-    cli.success("✓ Using dedicated Madeinoz Knowledge System API key");
+    cli.success('✓ Using dedicated Madeinoz Knowledge System API key');
   } else if (!openaiKey) {
-    cli.warning("Warning: MADEINOZ_KNOWLEDGE_OPENAI_API_KEY is not set in .env");
-    cli.warning("The server may not work properly without an API key.");
+    cli.warning('Warning: MADEINOZ_KNOWLEDGE_OPENAI_API_KEY is not set in .env');
+    cli.warning('The server may not work properly without an API key.');
   }
 
   // Create container manager
@@ -365,12 +364,12 @@ async function main() {
 
   // Check if runtime is available
   if (!containerManager.isRuntimeAvailable()) {
-    cli.error("Error: No container runtime found!");
+    cli.error('Error: No container runtime found!');
     cli.blank();
-    cli.info("Please install Podman or Docker:");
+    cli.info('Please install Podman or Docker:');
     cli.blank();
-    cli.dim("  Podman: brew install podman (macOS)");
-    cli.dim("  Docker: https://docs.docker.com/get-docker/");
+    cli.dim('  Podman: brew install podman (macOS)');
+    cli.dim('  Docker: https://docs.docker.com/get-docker/');
     process.exit(1);
   }
 
@@ -386,7 +385,7 @@ async function main() {
     cli.info(`Creating public network: ${NETWORK_NAME}`);
     const result = await containerManager.createNetwork(NETWORK_NAME);
     if (result.success) {
-      cli.success("✓ Network created");
+      cli.success('✓ Network created');
     } else {
       cli.error(`Failed to create network: ${result.stderr}`);
       process.exit(1);
@@ -397,14 +396,14 @@ async function main() {
 
   // Start database backend
   let dbStarted: boolean;
-  if (backend === "neo4j") {
+  if (backend === 'neo4j') {
     dbStarted = await startNeo4j(containerManager, config, NETWORK_NAME);
   } else {
     dbStarted = await startFalkorDB(containerManager, config, NETWORK_NAME);
   }
 
   if (!dbStarted) {
-    cli.error("Failed to start database container");
+    cli.error('Failed to start database container');
     process.exit(1);
   }
 
@@ -418,20 +417,20 @@ async function main() {
   );
 
   if (!mcpStarted) {
-    cli.error("Failed to start MCP server");
+    cli.error('Failed to start MCP server');
     process.exit(1);
   }
 
   // Print success message
   cli.blank();
-  cli.success("═══════════════════════════════════════");
-  cli.success("Madeinoz Knowledge System is running!");
-  cli.success("═══════════════════════════════════════");
+  cli.success('═══════════════════════════════════════');
+  cli.success('Madeinoz Knowledge System is running!');
+  cli.success('═══════════════════════════════════════');
   cli.blank();
 
   // Network topology based on backend
-  cli.info("Network Topology:");
-  if (backend === "neo4j") {
+  cli.info('Network Topology:');
+  if (backend === 'neo4j') {
     cli.dim(`  Neo4j:        ${ContainerManager.NEO4J_CONTAINER}`);
   } else {
     cli.dim(`  FalkorDB:     ${ContainerManager.FALKORDB_CONTAINER}`);
@@ -441,28 +440,28 @@ async function main() {
   cli.blank();
 
   // Access points based on backend
-  cli.info("Access points:");
-  cli.url("MCP Server", "http://localhost:8000/mcp/");
-  cli.url("Health Check", "http://localhost:8000/health");
-  if (backend === "neo4j") {
-    cli.url("Neo4j Browser", "http://localhost:7474");
-    cli.dim("  Bolt URI: bolt://localhost:7687");
+  cli.info('Access points:');
+  cli.url('MCP Server', 'http://localhost:8000/mcp/');
+  cli.url('Health Check', 'http://localhost:8000/health');
+  if (backend === 'neo4j') {
+    cli.url('Neo4j Browser', 'http://localhost:7474');
+    cli.dim('  Bolt URI: bolt://localhost:7687');
   } else {
-    cli.url("FalkorDB UI", "http://localhost:3000");
+    cli.url('FalkorDB UI', 'http://localhost:3000');
   }
   cli.blank();
 
-  cli.info("Management commands:");
-  cli.dim("  View logs:     bun run src/server/logs.ts");
-  cli.dim("  Stop system:   bun run src/server/stop.ts");
-  cli.dim("  Start system:  bun run src/server/start.ts");
-  cli.dim("  Check status:  bun run src/server/status.ts");
+  cli.info('Management commands:');
+  cli.dim('  View logs:     bun run src/server/logs.ts');
+  cli.dim('  Stop system:   bun run src/server/stop.ts');
+  cli.dim('  Start system:  bun run src/server/start.ts');
+  cli.dim('  Check status:  bun run src/server/status.ts');
   cli.blank();
 }
 
 // Run main function
 main().catch((error) => {
-  cli.error("Unexpected error:");
+  cli.error('Unexpected error:');
   console.error(error);
   process.exit(1);
 });

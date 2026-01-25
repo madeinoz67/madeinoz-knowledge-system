@@ -6,26 +6,26 @@
  * This is a simple start script - containers should already be created.
  */
 
-import { createContainerManager, ContainerManager } from "../lib/container.js";
-import { cli } from "../lib/cli.js";
+import { createContainerManager, ContainerManager } from '../lib/container.js';
+import { cli } from '../lib/cli.js';
 
 /**
  * Main start function
  */
 async function main() {
-  cli.header("Madeinoz Knowledge System - Start");
+  cli.header('Madeinoz Knowledge System - Start');
 
   // Create container manager
   const containerManager = createContainerManager();
 
   // Check if runtime is available
   if (!containerManager.isRuntimeAvailable()) {
-    cli.error("No container runtime found!");
+    cli.error('No container runtime found!');
     cli.blank();
-    cli.info("Please install Podman or Docker:");
+    cli.info('Please install Podman or Docker:');
     cli.blank();
-    cli.dim("  Podman: brew install podman (macOS)");
-    cli.dim("  Docker: https://docs.docker.com/get-docker/");
+    cli.dim('  Podman: brew install podman (macOS)');
+    cli.dim('  Docker: https://docs.docker.com/get-docker/');
     process.exit(1);
   }
 
@@ -41,26 +41,26 @@ async function main() {
   const mcpExists = await containerManager.containerExists(MCP_CONTAINER);
 
   if (!falkorDbExists && !mcpExists) {
-    cli.error("Containers not found");
+    cli.error('Containers not found');
     cli.blank();
-    cli.info("Please run the main setup script first:");
-    cli.dim("  bun run src/server/run.ts");
+    cli.info('Please run the main setup script first:');
+    cli.dim('  bun run src/server/run.ts');
     process.exit(1);
   }
 
-  cli.info("Starting Madeinoz Knowledge System...");
+  cli.info('Starting Madeinoz Knowledge System...');
   cli.blank();
 
   // Start FalkorDB first
   if (falkorDbExists) {
     const isRunning = await containerManager.isContainerRunning(FALKORDB_CONTAINER);
     if (isRunning) {
-      cli.success("✓ FalkorDB already running");
+      cli.success('✓ FalkorDB already running');
     } else {
       cli.info(`Starting FalkorDB container: ${FALKORDB_CONTAINER}`);
       const result = await containerManager.startContainer(FALKORDB_CONTAINER);
       if (result.success) {
-        cli.success("✓ FalkorDB started");
+        cli.success('✓ FalkorDB started');
       } else {
         cli.error(`✗ Failed to start FalkorDB: ${result.stderr}`);
         process.exit(1);
@@ -72,7 +72,7 @@ async function main() {
   if (falkorDbExists) {
     const isRunning = await containerManager.isContainerRunning(FALKORDB_CONTAINER);
     if (isRunning) {
-      cli.info("Waiting for FalkorDB to be ready...");
+      cli.info('Waiting for FalkorDB to be ready...');
       await new Promise((resolve) => setTimeout(resolve, 3000));
     }
   }
@@ -81,12 +81,12 @@ async function main() {
   if (mcpExists) {
     const isRunning = await containerManager.isContainerRunning(MCP_CONTAINER);
     if (isRunning) {
-      cli.success("✓ MCP Server already running");
+      cli.success('✓ MCP Server already running');
     } else {
       cli.info(`Starting MCP Server container: ${MCP_CONTAINER}`);
       const result = await containerManager.startContainer(MCP_CONTAINER);
       if (result.success) {
-        cli.success("✓ MCP Server started");
+        cli.success('✓ MCP Server started');
       } else {
         cli.error(`✗ Failed to start MCP Server: ${result.stderr}`);
         process.exit(1);
@@ -95,18 +95,18 @@ async function main() {
   }
 
   cli.blank();
-  cli.success("Madeinoz Knowledge System started");
+  cli.success('Madeinoz Knowledge System started');
   cli.blank();
-  cli.info("Access points:");
-  cli.url("MCP Server", "http://localhost:8000/mcp/");
-  cli.url("Health Check", "http://localhost:8000/health");
-  cli.url("FalkorDB UI", "http://localhost:3000");
+  cli.info('Access points:');
+  cli.url('MCP Server', 'http://localhost:8000/mcp/');
+  cli.url('Health Check', 'http://localhost:8000/health');
+  cli.url('FalkorDB UI', 'http://localhost:3000');
   cli.blank();
 }
 
 // Run main function
 main().catch((error) => {
-  cli.error("Unexpected error:");
+  cli.error('Unexpected error:');
   console.error(error);
   process.exit(1);
 });

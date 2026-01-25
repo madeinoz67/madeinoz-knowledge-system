@@ -4,7 +4,7 @@
  * Uses proper SSE/streaming protocol for MCP communication
  */
 
-const MCP_URL = "http://localhost:8000/mcp";
+const MCP_URL = 'http://localhost:8000/mcp';
 
 interface MCPResult {
   success: boolean;
@@ -16,20 +16,20 @@ interface MCPResult {
 // Test data
 const TEST_EPISODES = [
   {
-    name: "Tech Stack Decision",
-    body: "The team decided to use TypeScript with Bun runtime for the new API project. Sarah recommended Hono for the HTTP framework.",
-    group_id: "mcp-test"
+    name: 'Tech Stack Decision',
+    body: 'The team decided to use TypeScript with Bun runtime for the new API project. Sarah recommended Hono for the HTTP framework.',
+    group_id: 'mcp-test',
   },
   {
-    name: "Meeting Notes",
+    name: 'Meeting Notes',
     body: "John Smith from Acme Corp met with CTO Alice Chen to discuss partnership for integrating Acme's payment API.",
-    group_id: "mcp-test"
+    group_id: 'mcp-test',
   },
   {
-    name: "PAI Documentation",
-    body: "The PAI system uses Neo4j as graph database. OpenAI gpt-4o-mini handles entity extraction. Ollama mxbai-embed-large does embeddings.",
-    group_id: "mcp-test"
-  }
+    name: 'PAI Documentation',
+    body: 'The PAI system uses Neo4j as graph database. OpenAI gpt-4o-mini handles entity extraction. Ollama mxbai-embed-large does embeddings.',
+    group_id: 'mcp-test',
+  },
 ];
 
 async function callMCP(method: string, params: any): Promise<MCPResult> {
@@ -37,17 +37,17 @@ async function callMCP(method: string, params: any): Promise<MCPResult> {
 
   try {
     const response = await fetch(MCP_URL, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json, text/event-stream"
+        'Content-Type': 'application/json',
+        Accept: 'application/json, text/event-stream',
       },
       body: JSON.stringify({
-        jsonrpc: "2.0",
+        jsonrpc: '2.0',
         id: Date.now(),
         method,
-        params
-      })
+        params,
+      }),
     });
 
     const text = await response.text();
@@ -82,44 +82,44 @@ async function callMCP(method: string, params: any): Promise<MCPResult> {
 }
 
 async function main() {
-  console.log("═".repeat(60));
-  console.log("🧪 MCP Knowledge System Real-Life Test");
-  console.log("═".repeat(60));
+  console.log('═'.repeat(60));
+  console.log('🧪 MCP Knowledge System Real-Life Test');
+  console.log('═'.repeat(60));
 
   // Health check
-  const health = await fetch("http://localhost:8000/health").then(r => r.json());
+  const health = await fetch('http://localhost:8000/health').then((r) => r.json());
   console.log(`\n📋 Health: ${health.status} | LLM: gpt-4o-mini | DB: neo4j`);
 
   const results: any[] = [];
 
   // Test add_memory
-  console.log("\n" + "─".repeat(60));
-  console.log("📥 ADD_MEMORY Tests");
-  console.log("─".repeat(60));
+  console.log(`\n${'─'.repeat(60)}`);
+  console.log('📥 ADD_MEMORY Tests');
+  console.log('─'.repeat(60));
 
   for (const ep of TEST_EPISODES) {
-    const res = await callMCP("tools/call", {
-      name: "add_memory",
-      arguments: { name: ep.name, episode_body: ep.body, source: "text", group_id: ep.group_id }
+    const res = await callMCP('tools/call', {
+      name: 'add_memory',
+      arguments: { name: ep.name, episode_body: ep.body, source: 'text', group_id: ep.group_id },
     });
 
-    console.log(`${res.success ? "✅" : "❌"} ${ep.name} (${res.duration}ms)`);
+    console.log(`${res.success ? '✅' : '❌'} ${ep.name} (${res.duration}ms)`);
     if (res.error) console.log(`   Error: ${res.error}`);
 
-    results.push({ op: "add_memory", name: ep.name, ...res });
+    results.push({ op: 'add_memory', name: ep.name, ...res });
     await Bun.sleep(3000); // Wait for processing
   }
 
   // Test search_nodes
-  console.log("\n" + "─".repeat(60));
-  console.log("🔍 SEARCH_NODES Tests");
-  console.log("─".repeat(60));
+  console.log(`\n${'─'.repeat(60)}`);
+  console.log('🔍 SEARCH_NODES Tests');
+  console.log('─'.repeat(60));
 
-  const nodeQueries = ["TypeScript Bun", "Acme Corp partnership", "Neo4j PAI"];
+  const nodeQueries = ['TypeScript Bun', 'Acme Corp partnership', 'Neo4j PAI'];
   for (const q of nodeQueries) {
-    const res = await callMCP("tools/call", {
-      name: "search_nodes",
-      arguments: { query: q, group_ids: ["mcp-test"], max_nodes: 5 }
+    const res = await callMCP('tools/call', {
+      name: 'search_nodes',
+      arguments: { query: q, group_ids: ['mcp-test'], max_nodes: 5 },
     });
 
     let nodes: any[] = [];
@@ -128,23 +128,25 @@ async function main() {
       if (content) nodes = JSON.parse(content).nodes || [];
     } catch {}
 
-    console.log(`${nodes.length > 0 ? "✅" : "⚠️"} "${q}" → ${nodes.length} nodes (${res.duration}ms)`);
-    nodes.slice(0, 2).forEach(n => console.log(`   • ${n.name} (${n.entity_type})`));
+    console.log(
+      `${nodes.length > 0 ? '✅' : '⚠️'} "${q}" → ${nodes.length} nodes (${res.duration}ms)`
+    );
+    nodes.slice(0, 2).forEach((n) => console.log(`   • ${n.name} (${n.entity_type})`));
 
-    results.push({ op: "search_nodes", query: q, nodes: nodes.length, ...res });
+    results.push({ op: 'search_nodes', query: q, nodes: nodes.length, ...res });
     await Bun.sleep(500);
   }
 
   // Test search_memory_facts
-  console.log("\n" + "─".repeat(60));
-  console.log("🔗 SEARCH_MEMORY_FACTS Tests");
-  console.log("─".repeat(60));
+  console.log(`\n${'─'.repeat(60)}`);
+  console.log('🔗 SEARCH_MEMORY_FACTS Tests');
+  console.log('─'.repeat(60));
 
-  const factQueries = ["technology decisions", "company partnerships", "database systems"];
+  const factQueries = ['technology decisions', 'company partnerships', 'database systems'];
   for (const q of factQueries) {
-    const res = await callMCP("tools/call", {
-      name: "search_memory_facts",
-      arguments: { query: q, group_ids: ["mcp-test"], max_facts: 5 }
+    const res = await callMCP('tools/call', {
+      name: 'search_memory_facts',
+      arguments: { query: q, group_ids: ['mcp-test'], max_facts: 5 },
     });
 
     let facts: any[] = [];
@@ -153,28 +155,33 @@ async function main() {
       if (content) facts = JSON.parse(content).facts || [];
     } catch {}
 
-    console.log(`${facts.length > 0 ? "✅" : "⚠️"} "${q}" → ${facts.length} facts (${res.duration}ms)`);
-    facts.slice(0, 2).forEach(f => console.log(`   • ${f.fact?.slice(0, 70)}...`));
+    console.log(
+      `${facts.length > 0 ? '✅' : '⚠️'} "${q}" → ${facts.length} facts (${res.duration}ms)`
+    );
+    facts.slice(0, 2).forEach((f) => console.log(`   • ${f.fact?.slice(0, 70)}...`));
 
-    results.push({ op: "search_memory_facts", query: q, facts: facts.length, ...res });
+    results.push({ op: 'search_memory_facts', query: q, facts: facts.length, ...res });
     await Bun.sleep(500);
   }
 
   // Summary
-  console.log("\n" + "═".repeat(60));
-  console.log("📊 SUMMARY");
-  console.log("═".repeat(60));
+  console.log(`\n${'═'.repeat(60)}`);
+  console.log('📊 SUMMARY');
+  console.log('═'.repeat(60));
 
-  const ops = ["add_memory", "search_nodes", "search_memory_facts"];
+  const ops = ['add_memory', 'search_nodes', 'search_memory_facts'];
   for (const op of ops) {
-    const opResults = results.filter(r => r.op === op);
-    const success = opResults.filter(r => r.success).length;
+    const opResults = results.filter((r) => r.op === op);
+    const success = opResults.filter((r) => r.success).length;
     const avgMs = Math.round(opResults.reduce((a, r) => a + r.duration, 0) / opResults.length);
     console.log(`${op.padEnd(20)} ${success}/${opResults.length} passed | avg ${avgMs}ms`);
   }
 
-  await Bun.write("mcp-live-results.json", JSON.stringify({ results, timestamp: new Date().toISOString() }, null, 2));
-  console.log("\n📁 Saved to mcp-live-results.json");
+  await Bun.write(
+    'mcp-live-results.json',
+    JSON.stringify({ results, timestamp: new Date().toISOString() }, null, 2)
+  );
+  console.log('\n📁 Saved to mcp-live-results.json');
 }
 
 main();

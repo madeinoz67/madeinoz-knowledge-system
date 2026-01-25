@@ -6,14 +6,14 @@
  * Supports following logs in real-time.
  */
 
-import { createContainerManager, ContainerManager } from "../lib/container.js";
-import { cli } from "../lib/cli.js";
+import { createContainerManager, ContainerManager } from '../lib/container.js';
+import { cli } from '../lib/cli.js';
 
 /**
  * Log container options
  */
 interface LogOptions {
-  container: "falkordb" | "mcp";
+  container: 'falkordb' | 'mcp';
   follow?: boolean;
 }
 
@@ -22,7 +22,7 @@ interface LogOptions {
  */
 function parseArgs(args: string[]): LogOptions {
   const options: LogOptions = {
-    container: "mcp", // Default to MCP server logs
+    container: 'mcp', // Default to MCP server logs
     follow: true, // Default to following logs
   };
 
@@ -30,26 +30,27 @@ function parseArgs(args: string[]): LogOptions {
     const arg = args[i];
 
     switch (arg) {
-      case "-f":
-      case "--falkordb":
-        options.container = "falkordb";
+      case '-f':
+      case '--falkordb':
+        options.container = 'falkordb';
         break;
-      case "-m":
-      case "--mcp":
-        options.container = "mcp";
+      case '-m':
+      case '--mcp':
+        options.container = 'mcp';
         break;
-      case "-n":
-      case "--no-follow":
+      case '-n':
+      case '--no-follow':
         options.follow = false;
         break;
-      case "-h":
-      case "--help":
+      case '-h':
+      case '--help':
         printHelp();
         process.exit(0);
+        break;
       default:
         cli.error(`Unknown option: ${arg}`);
         cli.blank();
-        cli.info("Use -h for help");
+        cli.info('Use -h for help');
         process.exit(1);
     }
   }
@@ -62,32 +63,32 @@ function parseArgs(args: string[]): LogOptions {
  */
 function printHelp() {
   cli.blank();
-  cli.header("Madeinoz Knowledge System - Logs", 50);
+  cli.header('Madeinoz Knowledge System - Logs', 50);
   cli.blank();
-  cli.info("View logs from Madeinoz Knowledge System containers.");
+  cli.info('View logs from Madeinoz Knowledge System containers.');
   cli.blank();
-  cli.info("Usage:");
-  cli.dim("  bun run src/server/logs.ts [OPTIONS]");
+  cli.info('Usage:');
+  cli.dim('  bun run src/server/logs.ts [OPTIONS]');
   cli.blank();
-  cli.info("Options:");
+  cli.info('Options:');
   cli.blank();
   cli.table([
-    ["-f, --falkordb", "View FalkorDB container logs"],
-    ["-m, --mcp", "View MCP Server container logs (default)"],
-    ["-n, --no-follow", "Don't follow logs (just show recent)"],
-    ["-h, --help", "Show this help message"],
+    ['-f, --falkordb', 'View FalkorDB container logs'],
+    ['-m, --mcp', 'View MCP Server container logs (default)'],
+    ['-n, --no-follow', "Don't follow logs (just show recent)"],
+    ['-h, --help', 'Show this help message'],
   ]);
   cli.blank();
-  cli.info("Examples:");
+  cli.info('Examples:');
   cli.blank();
-  cli.dim("  # View MCP server logs (follow)");
-  cli.dim("  bun run src/server/logs.ts --mcp");
+  cli.dim('  # View MCP server logs (follow)');
+  cli.dim('  bun run src/server/logs.ts --mcp');
   cli.blank();
-  cli.dim("  # View FalkorDB logs (follow)");
-  cli.dim("  bun run src/server/logs.ts --falkordb");
+  cli.dim('  # View FalkorDB logs (follow)');
+  cli.dim('  bun run src/server/logs.ts --falkordb');
   cli.blank();
-  cli.dim("  # View recent logs without following");
-  cli.dim("  bun run src/server/logs.ts --mcp --no-follow");
+  cli.dim('  # View recent logs without following');
+  cli.dim('  bun run src/server/logs.ts --mcp --no-follow');
   cli.blank();
 }
 
@@ -106,13 +107,13 @@ async function main() {
 
   // Check if runtime is available
   if (!containerManager.isRuntimeAvailable()) {
-    cli.error("No container runtime found!");
+    cli.error('No container runtime found!');
     process.exit(1);
   }
 
   // Determine container name
   const containerName =
-    options.container === "falkordb"
+    options.container === 'falkordb'
       ? ContainerManager.FALKORDB_CONTAINER
       : ContainerManager.MCP_CONTAINER;
 
@@ -121,8 +122,8 @@ async function main() {
   if (!exists) {
     cli.error(`✗ Container '${containerName}' not found`);
     cli.blank();
-    cli.info("Make sure the system is running:");
-    cli.dim("  bun run src/server/start.ts");
+    cli.info('Make sure the system is running:');
+    cli.dim('  bun run src/server/start.ts');
     process.exit(1);
   }
 
@@ -132,7 +133,7 @@ async function main() {
     if (!isRunning) {
       cli.warning(`⚠ Container '${containerName}' is not running`);
       cli.blank();
-      cli.info("Showing recent logs (container is stopped)");
+      cli.info('Showing recent logs (container is stopped)');
     }
   }
 
@@ -140,7 +141,7 @@ async function main() {
   cli.blank();
   cli.info(`Viewing logs for: ${containerName}`);
   if (options.follow) {
-    cli.dim("Press Ctrl+C to stop viewing logs");
+    cli.dim('Press Ctrl+C to stop viewing logs');
   }
   cli.blank();
 
@@ -151,7 +152,7 @@ async function main() {
     if (result.stdout) {
       console.log(result.stdout);
     } else {
-      cli.info("No logs available (container may be new)");
+      cli.info('No logs available (container may be new)');
     }
   } else {
     cli.error(`Failed to retrieve logs: ${result.stderr}`);
@@ -161,7 +162,7 @@ async function main() {
 
 // Run main function
 main().catch((error) => {
-  cli.error("Unexpected error:");
+  cli.error('Unexpected error:');
   console.error(error);
   process.exit(1);
 });

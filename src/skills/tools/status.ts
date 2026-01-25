@@ -6,21 +6,21 @@
  * Tests health endpoint and displays access URLs.
  */
 
-import { createContainerManager, ContainerManager } from "../lib/container.js";
-import { cli } from "../lib/cli.js";
+import { createContainerManager, ContainerManager } from '../lib/container.js';
+import { cli } from '../lib/cli.js';
 
 /**
  * Main status function
  */
 async function main() {
-  cli.header("Madeinoz Knowledge System - Status");
+  cli.header('Madeinoz Knowledge System - Status');
 
   // Create container manager
   const containerManager = createContainerManager();
 
   // Check if runtime is available
   if (!containerManager.isRuntimeAvailable()) {
-    cli.error("No container runtime found!");
+    cli.error('No container runtime found!');
     process.exit(1);
   }
 
@@ -47,14 +47,14 @@ async function main() {
   const falkorDbInfo = await containerManager.getContainerInfo(FALKORDB_CONTAINER);
   cli.info(`FalkorDB Container: ${FALKORDB_CONTAINER}`);
   if (falkorDbInfo.exists) {
-    cli.dim(`  Status: ${falkorDbInfo.uptime || "Unknown"}`);
-    if (falkorDbInfo.status === "running") {
-      cli.success("  ✓ Running");
+    cli.dim(`  Status: ${falkorDbInfo.uptime || 'Unknown'}`);
+    if (falkorDbInfo.status === 'running') {
+      cli.success('  ✓ Running');
     } else {
-      cli.warning("  ⚠ Stopped");
+      cli.warning('  ⚠ Stopped');
     }
   } else {
-    cli.error("  ✗ FalkorDB container not found");
+    cli.error('  ✗ FalkorDB container not found');
   }
   cli.blank();
 
@@ -62,38 +62,38 @@ async function main() {
   const mcpInfo = await containerManager.getContainerInfo(MCP_CONTAINER);
   cli.info(`MCP Server Container: ${MCP_CONTAINER}`);
   if (mcpInfo.exists) {
-    cli.dim(`  Status: ${mcpInfo.uptime || "Unknown"}`);
-    if (mcpInfo.status === "running") {
-      cli.success("  ✓ Running");
+    cli.dim(`  Status: ${mcpInfo.uptime || 'Unknown'}`);
+    if (mcpInfo.status === 'running') {
+      cli.success('  ✓ Running');
       cli.blank();
-      cli.info("  Access points:");
-      cli.url("    MCP Server", "http://localhost:8000/mcp/");
-      cli.url("    Health Check", "http://localhost:8000/health");
-      cli.url("    FalkorDB UI", "http://localhost:3000");
+      cli.info('  Access points:');
+      cli.url('    MCP Server', 'http://localhost:8000/mcp/');
+      cli.url('    Health Check', 'http://localhost:8000/health');
+      cli.url('    FalkorDB UI', 'http://localhost:3000');
 
       // Test health endpoint
       cli.blank();
-      cli.info("  Testing health endpoint...");
+      cli.info('  Testing health endpoint...');
       try {
-        const response = await fetch("http://localhost:8000/health");
+        const response = await fetch('http://localhost:8000/health');
         if (response.ok) {
           const data = await response.json();
-          if (data.status === "healthy" || data.status === "ok") {
-            cli.success("  ✓ Health check passed");
+          if (data.status === 'healthy' || data.status === 'ok') {
+            cli.success('  ✓ Health check passed');
           } else {
             cli.warning(`  ⚠ Health check status: ${data.status}`);
           }
         } else {
-          cli.warning("  ⚠ Health check failed (server may be starting up)");
+          cli.warning('  ⚠ Health check failed (server may be starting up)');
         }
       } catch {
-        cli.warning("  ⚠ Could not connect to health endpoint (server may be starting up)");
+        cli.warning('  ⚠ Could not connect to health endpoint (server may be starting up)');
       }
     } else {
-      cli.warning("  ⚠ Stopped");
+      cli.warning('  ⚠ Stopped');
     }
   } else {
-    cli.error("  ✗ MCP Server container not found");
+    cli.error('  ✗ MCP Server container not found');
   }
 
   cli.blank();
@@ -102,8 +102,8 @@ async function main() {
 
   // Show running containers count
   let runningCount = 0;
-  const falkorDbRunning = falkorDbInfo.exists && falkorDbInfo.status === "running";
-  const mcpRunning = mcpInfo.exists && mcpInfo.status === "running";
+  const falkorDbRunning = falkorDbInfo.exists && falkorDbInfo.status === 'running';
+  const mcpRunning = mcpInfo.exists && mcpInfo.status === 'running';
 
   if (falkorDbRunning) runningCount++;
   if (mcpRunning) runningCount++;
@@ -113,25 +113,25 @@ async function main() {
   // Exit with appropriate code
   if (runningCount === 2) {
     cli.blank();
-    cli.success("✓ System fully operational");
+    cli.success('✓ System fully operational');
     process.exit(0);
   } else if (runningCount === 1) {
     cli.blank();
-    cli.warning("⚠ System partially operational");
+    cli.warning('⚠ System partially operational');
     process.exit(1);
   } else {
     cli.blank();
-    cli.error("✗ System not running");
+    cli.error('✗ System not running');
     cli.blank();
-    cli.info("To start the system:");
-    cli.dim("  bun run src/server/start.ts");
+    cli.info('To start the system:');
+    cli.dim('  bun run src/server/start.ts');
     process.exit(1);
   }
 }
 
 // Run main function
 main().catch((error) => {
-  cli.error("Unexpected error:");
+  cli.error('Unexpected error:');
   console.error(error);
   process.exit(1);
 });

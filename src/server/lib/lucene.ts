@@ -219,7 +219,9 @@ export function sanitizeGroupId(groupId: string | undefined): string | undefined
   const validGroupIdPattern = /^[a-zA-Z0-9_-]+$/;
 
   if (!validGroupIdPattern.test(groupId)) {
-    console.warn(`[lucene] Invalid group_id "${groupId}" - must contain only alphanumeric, dashes, or underscores`);
+    console.warn(
+      `[lucene] Invalid group_id "${groupId}" - must contain only alphanumeric, dashes, or underscores`
+    );
     // Return as-is so Graphiti can provide proper error message
     return groupId;
   }
@@ -229,7 +231,9 @@ export function sanitizeGroupId(groupId: string | undefined): string | undefined
   const sanitized = groupId.replace(/-/g, '_');
 
   if (sanitized !== groupId) {
-    console.log(`[lucene] Converted group_id "${groupId}" to "${sanitized}" (hyphens → underscores)`);
+    console.log(
+      `[lucene] Converted group_id "${groupId}" to "${sanitized}" (hyphens → underscores)`
+    );
   }
 
   return sanitized;
@@ -276,7 +280,7 @@ export function sanitizeGroupIds(groupIds: string[] | undefined): string[] | und
  */
 export function sanitizeSearchQuery(query: string): string {
   if (!query) {
-    return "";
+    return '';
   }
 
   // Check if we're using Neo4j backend - if so, no sanitization needed

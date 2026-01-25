@@ -5,25 +5,25 @@
  * Stops both MCP server and FalkorDB containers.
  */
 
-import { createContainerManager, ContainerManager } from "../lib/container.js";
-import { cli } from "../lib/cli.js";
+import { createContainerManager, ContainerManager } from '../lib/container.js';
+import { cli } from '../lib/cli.js';
 
 /**
  * Main stop function
  */
 async function main() {
-  cli.header("Madeinoz Knowledge System - Stop");
+  cli.header('Madeinoz Knowledge System - Stop');
 
   // Create container manager
   const containerManager = createContainerManager();
 
   // Check if runtime is available
   if (!containerManager.isRuntimeAvailable()) {
-    cli.error("No container runtime found!");
+    cli.error('No container runtime found!');
     process.exit(1);
   }
 
-  cli.info("Stopping Madeinoz Knowledge System...");
+  cli.info('Stopping Madeinoz Knowledge System...');
   cli.blank();
 
   // Container names
@@ -36,12 +36,12 @@ async function main() {
     cli.info(`Stopping MCP server container: ${MCP_CONTAINER}`);
     const result = await containerManager.stopContainer(MCP_CONTAINER);
     if (result.success) {
-      cli.success("✓ MCP server stopped");
+      cli.success('✓ MCP server stopped');
     } else {
       cli.warning(`⚠ Failed to stop MCP server: ${result.stderr}`);
     }
   } else {
-    cli.warning("⚠ MCP server container not running");
+    cli.warning('⚠ MCP server container not running');
   }
 
   // Stop FalkorDB container
@@ -50,21 +50,21 @@ async function main() {
     cli.info(`Stopping FalkorDB container: ${FALKORDB_CONTAINER}`);
     const result = await containerManager.stopContainer(FALKORDB_CONTAINER);
     if (result.success) {
-      cli.success("✓ FalkorDB stopped");
+      cli.success('✓ FalkorDB stopped');
     } else {
       cli.warning(`⚠ Failed to stop FalkorDB: ${result.stderr}`);
     }
   } else {
-    cli.warning("⚠ FalkorDB container not running");
+    cli.warning('⚠ FalkorDB container not running');
   }
 
   cli.blank();
-  cli.success("Madeinoz Knowledge System stopped");
+  cli.success('Madeinoz Knowledge System stopped');
   cli.blank();
-  cli.info("To start again:");
-  cli.dim("  bun run src/server/start.ts");
+  cli.info('To start again:');
+  cli.dim('  bun run src/server/start.ts');
   cli.blank();
-  cli.info("To remove containers and network:");
+  cli.info('To remove containers and network:');
   cli.dim(`  ${containerManager.getRuntimeCommand()} rm ${MCP_CONTAINER} ${FALKORDB_CONTAINER}`);
   cli.dim(`  ${containerManager.getRuntimeCommand()} network rm ${ContainerManager.NETWORK_NAME}`);
   cli.blank();
@@ -72,7 +72,7 @@ async function main() {
 
 // Run main function
 main().catch((error) => {
-  cli.error("Unexpected error:");
+  cli.error('Unexpected error:');
   console.error(error);
   process.exit(1);
 });

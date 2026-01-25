@@ -95,9 +95,7 @@ export function measureTokens(
   const rawBytes = new TextEncoder().encode(rawJson).length;
   const compactBytes = new TextEncoder().encode(compactOutput).length;
 
-  const savingsPercent = rawBytes > 0
-    ? ((rawBytes - compactBytes) / rawBytes) * 100
-    : 0;
+  const savingsPercent = rawBytes > 0 ? ((rawBytes - compactBytes) / rawBytes) * 100 : 0;
 
   return {
     operation,
@@ -147,10 +145,10 @@ export async function appendMetrics(metrics: TokenMetrics, filePath: string): Pr
   await mkdir(dirname(filePath), { recursive: true });
 
   // Serialize metrics to JSON line
-  const line = JSON.stringify({
+  const line = `${JSON.stringify({
     ...metrics,
     timestamp: metrics.timestamp.toISOString(),
-  }) + '\n';
+  })}\n`;
 
   await appendFile(filePath, line, 'utf-8');
 }
@@ -164,18 +162,20 @@ export async function loadMetrics(filePath: string): Promise<TokenMetrics[]> {
     const content = await readFile(filePath, 'utf-8');
     const lines = content.trim().split('\n').filter(Boolean);
 
-    return lines.map(line => {
-      try {
-        const parsed = JSON.parse(line);
-        return {
-          ...parsed,
-          timestamp: new Date(parsed.timestamp),
-        };
-      } catch {
-        return null;
-      }
-    }).filter((m): m is TokenMetrics => m !== null);
-  } catch (error) {
+    return lines
+      .map((line) => {
+        try {
+          const parsed = JSON.parse(line);
+          return {
+            ...parsed,
+            timestamp: new Date(parsed.timestamp),
+          };
+        } catch {
+          return null;
+        }
+      })
+      .filter((m): m is TokenMetrics => m !== null);
+  } catch (_error) {
     // File doesn't exist or is unreadable
     return [];
   }
@@ -202,8 +202,8 @@ function calculateStats(metrics: TokenMetrics[]): AggregateStats {
     };
   }
 
-  const savingsValues = metrics.map(m => m.savingsPercent).sort((a, b) => a - b);
-  const processingTimes = metrics.map(m => m.processingTimeMs);
+  const savingsValues = metrics.map((m) => m.savingsPercent).sort((a, b) => a - b);
+  const processingTimes = metrics.map((m) => m.processingTimeMs);
 
   const count = metrics.length;
   const avgSavingsPercent = savingsValues.reduce((a, b) => a + b, 0) / count;
@@ -212,9 +212,8 @@ function calculateStats(metrics: TokenMetrics[]): AggregateStats {
 
   // Calculate median
   const mid = Math.floor(count / 2);
-  const medianSavingsPercent = count % 2 === 0
-    ? (savingsValues[mid - 1] + savingsValues[mid]) / 2
-    : savingsValues[mid];
+  const medianSavingsPercent =
+    count % 2 === 0 ? (savingsValues[mid - 1] + savingsValues[mid]) / 2 : savingsValues[mid];
 
   const totalBytesBeforeTransform = metrics.reduce((sum, m) => sum + m.rawBytes, 0);
   const totalBytesAfterTransform = metrics.reduce((sum, m) => sum + m.compactBytes, 0);
@@ -307,14 +306,18 @@ export function generateBenchmarkReport(metrics: TokenMetrics[]): BenchmarkRepor
   for (const [operation, stats] of byOperation) {
     const target = TOKEN_SAVINGS_TARGETS[operation] ?? DEFAULT_TARGET;
     const status = stats.avgSavingsPercent >= target ? '✅' : '❌';
-    summaryLines.push(`  ${operation}: ${stats.avgSavingsPercent.toFixed(1)}% avg (target: ${target}%) ${status}`);
+    summaryLines.push(
+      `  ${operation}: ${stats.avgSavingsPercent.toFixed(1)}% avg (target: ${target}%) ${status}`
+    );
   }
 
   summaryLines.push('');
   if (verdict === 'PASS') {
     summaryLines.push('Verdict: PASS - All operations exceed target savings');
   } else {
-    summaryLines.push(`Verdict: FAIL - ${underperformingOperations.length} operation(s) below target`);
+    summaryLines.push(
+      `Verdict: FAIL - ${underperformingOperations.length} operation(s) below target`
+    );
     for (const { operation, avgSavingsPercent, target } of underperformingOperations) {
       summaryLines.push(`  - ${operation}: ${avgSavingsPercent.toFixed(1)}% (target: ${target}%)`);
     }

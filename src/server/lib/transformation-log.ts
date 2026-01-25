@@ -78,7 +78,7 @@ export async function logTransformation(
     await mkdir(dirname(logPath), { recursive: true });
 
     // Append log entry
-    const line = formatLogEntry(entry) + '\n';
+    const line = `${formatLogEntry(entry)}\n`;
     await appendFile(logPath, line, 'utf-8');
   } catch (error) {
     // Silently fail - logging should not break the wrapper

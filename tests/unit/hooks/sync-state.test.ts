@@ -3,9 +3,9 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
-import { mkdirSync, rmSync, writeFileSync, existsSync } from 'fs';
-import { join } from 'path';
-import { tmpdir } from 'os';
+import { mkdirSync, rmSync, writeFileSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import {
   loadSyncState,
   saveSyncState,
@@ -14,7 +14,7 @@ import {
   getSyncStats,
   pruneMissing,
   getRecentlySynced,
-  SyncState
+  type SyncState,
 } from '../../../src/hooks/lib/sync-state';
 
 describe('sync-state', () => {
@@ -51,9 +51,9 @@ describe('sync-state', () => {
             filepath: '/path/to/file.md',
             synced_at: '2026-01-04T10:00:00.000Z',
             episode_uuid: 'uuid-123',
-            capture_type: 'LEARNING'
-          }
-        ]
+            capture_type: 'LEARNING',
+          },
+        ],
       };
 
       writeFileSync(statePath, JSON.stringify(existingState));
@@ -83,9 +83,9 @@ describe('sync-state', () => {
           {
             filepath: '/path/to/file.md',
             synced_at: '2026-01-04T10:00:00.000Z',
-            capture_type: 'LEARNING'
-          }
-        ]
+            capture_type: 'LEARNING',
+          },
+        ],
       };
 
       saveSyncState(state, statePath);
@@ -102,7 +102,7 @@ describe('sync-state', () => {
       const state: SyncState = {
         version: '1.0.0',
         last_sync: '',
-        synced_files: []
+        synced_files: [],
       };
 
       saveSyncState(state, nestedPath);
@@ -119,8 +119,8 @@ describe('sync-state', () => {
         synced_files: [
           { filepath: '/path/one.md', synced_at: '', capture_type: 'LEARNING' },
           { filepath: '/path/two.md', synced_at: '', capture_type: 'RESEARCH' },
-          { filepath: '/path/three.md', synced_at: '', capture_type: 'DECISION' }
-        ]
+          { filepath: '/path/three.md', synced_at: '', capture_type: 'DECISION' },
+        ],
       };
 
       const paths = getSyncedPaths(state);
@@ -138,7 +138,7 @@ describe('sync-state', () => {
       const state: SyncState = {
         version: '1.0.0',
         last_sync: '',
-        synced_files: []
+        synced_files: [],
       };
 
       markAsSynced(state, '/path/to/file.md', 'LEARNING', 'uuid-123');
@@ -157,9 +157,9 @@ describe('sync-state', () => {
           {
             filepath: '/path/to/file.md',
             synced_at: '2026-01-01T00:00:00.000Z',
-            capture_type: 'LEARNING'
-          }
-        ]
+            capture_type: 'LEARNING',
+          },
+        ],
       };
 
       markAsSynced(state, '/path/to/file.md', 'LEARNING', 'new-uuid');
@@ -179,8 +179,8 @@ describe('sync-state', () => {
           { filepath: '/a.md', synced_at: '', capture_type: 'LEARNING' },
           { filepath: '/b.md', synced_at: '', capture_type: 'LEARNING' },
           { filepath: '/c.md', synced_at: '', capture_type: 'RESEARCH' },
-          { filepath: '/d.md', synced_at: '', capture_type: 'DECISION' }
-        ]
+          { filepath: '/d.md', synced_at: '', capture_type: 'DECISION' },
+        ],
       };
 
       const stats = getSyncStats(state);
@@ -204,8 +204,8 @@ describe('sync-state', () => {
         last_sync: '',
         synced_files: [
           { filepath: existingFile, synced_at: '', capture_type: 'LEARNING' },
-          { filepath: '/nonexistent/file.md', synced_at: '', capture_type: 'RESEARCH' }
-        ]
+          { filepath: '/nonexistent/file.md', synced_at: '', capture_type: 'RESEARCH' },
+        ],
       };
 
       const pruned = pruneMissing(state);
@@ -227,8 +227,8 @@ describe('sync-state', () => {
         last_sync: '',
         synced_files: [
           { filepath: '/recent.md', synced_at: oneHourAgo.toISOString(), capture_type: 'LEARNING' },
-          { filepath: '/old.md', synced_at: twoDaysAgo.toISOString(), capture_type: 'RESEARCH' }
-        ]
+          { filepath: '/old.md', synced_at: twoDaysAgo.toISOString(), capture_type: 'RESEARCH' },
+        ],
       };
 
       const recent = getRecentlySynced(state, 24);

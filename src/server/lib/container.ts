@@ -8,10 +8,10 @@
 // Using Bun.spawn and Bun.spawnSync for container operations
 
 // Container runtime types
-export type ContainerRuntime = "podman" | "docker" | "none";
+export type ContainerRuntime = 'podman' | 'docker' | 'none';
 
 // Container status
-export type ContainerStatus = "running" | "stopped" | "not-found";
+export type ContainerStatus = 'running' | 'stopped' | 'not-found';
 
 // Container info
 export interface ContainerInfo {
@@ -46,7 +46,7 @@ export interface CommandResult {
 /**
  * Database backend type
  */
-export type DatabaseBackend = "falkordb" | "neo4j";
+export type DatabaseBackend = 'falkordb' | 'neo4j';
 
 /**
  * Container Manager class
@@ -56,37 +56,37 @@ export class ContainerManager {
   private runtimeCommand: string;
 
   // Default container names - FalkorDB backend
-  static readonly FALKORDB_CONTAINER = "madeinoz-knowledge-falkordb";
-  static readonly MCP_CONTAINER = "madeinoz-knowledge-graph-mcp";
-  static readonly NETWORK_NAME = "madeinoz-knowledge-net";
-  static readonly VOLUME_NAME = "madeinoz-knowledge-falkordb-data";
+  static readonly FALKORDB_CONTAINER = 'madeinoz-knowledge-falkordb';
+  static readonly MCP_CONTAINER = 'madeinoz-knowledge-graph-mcp';
+  static readonly NETWORK_NAME = 'madeinoz-knowledge-net';
+  static readonly VOLUME_NAME = 'madeinoz-knowledge-falkordb-data';
 
   // Neo4j backend container names
-  static readonly NEO4J_CONTAINER = "madeinoz-knowledge-neo4j";
-  static readonly NEO4J_VOLUME_DATA = "madeinoz-knowledge-neo4j-data";
-  static readonly NEO4J_VOLUME_LOGS = "madeinoz-knowledge-neo4j-logs";
+  static readonly NEO4J_CONTAINER = 'madeinoz-knowledge-neo4j';
+  static readonly NEO4J_VOLUME_DATA = 'madeinoz-knowledge-neo4j-data';
+  static readonly NEO4J_VOLUME_LOGS = 'madeinoz-knowledge-neo4j-logs';
 
   // Container images per backend
   static readonly IMAGES = {
     falkordb: {
-      database: "falkordb/falkordb:latest",
-      mcp: "madeinoz-knowledge-system:fixed",  // Custom image with patches
+      database: 'falkordb/falkordb:latest',
+      mcp: 'madeinoz-knowledge-system:fixed', // Custom image with patches
     },
     neo4j: {
-      database: "neo4j:5.26.0",
-      mcp: "madeinoz-knowledge-system:fixed",  // Custom image with patches
+      database: 'neo4j:5.26.0',
+      mcp: 'madeinoz-knowledge-system:fixed', // Custom image with patches
     },
   } as const;
 
   // Port mappings per backend
   static readonly PORTS = {
     falkordb: {
-      database: ["3000:3000"],  // FalkorDB web UI
-      mcp: ["8000:8000"],       // MCP HTTP endpoint
+      database: ['3000:3000'], // FalkorDB web UI
+      mcp: ['8000:8000'], // MCP HTTP endpoint
     },
     neo4j: {
-      database: ["7474:7474", "7687:7687"],  // Neo4j Browser + Bolt
-      mcp: ["8000:8000"],                     // MCP HTTP endpoint
+      database: ['7474:7474', '7687:7687'], // Neo4j Browser + Bolt
+      mcp: ['8000:8000'], // MCP HTTP endpoint
     },
   } as const;
 
@@ -107,24 +107,24 @@ export class ContainerManager {
   detectRuntime(): ContainerRuntime {
     // Use Bun.spawnSync for synchronous detection
     try {
-      const podmanCheck = Bun.spawnSync(["which", "podman"]);
+      const podmanCheck = Bun.spawnSync(['which', 'podman']);
       if (podmanCheck.exitCode === 0) {
-        return "podman";
+        return 'podman';
       }
     } catch {
       // Podman not found, try Docker
     }
 
     try {
-      const dockerCheck = Bun.spawnSync(["which", "docker"]);
+      const dockerCheck = Bun.spawnSync(['which', 'docker']);
       if (dockerCheck.exitCode === 0) {
-        return "docker";
+        return 'docker';
       }
     } catch {
       // Docker not found
     }
 
-    return "none";
+    return 'none';
   }
 
   /**
@@ -145,18 +145,18 @@ export class ContainerManager {
    * Check if runtime is available
    */
   isRuntimeAvailable(): boolean {
-    return this.runtime !== "none";
+    return this.runtime !== 'none';
   }
 
   /**
    * Execute a container command
    */
-  async exec(args: string[], options: ExecOptions = {}): Promise<CommandResult> {
+  async exec(args: string[], _options: ExecOptions = {}): Promise<CommandResult> {
     if (!this.isRuntimeAvailable()) {
       return {
         success: false,
-        stdout: "",
-        stderr: "No container runtime found",
+        stdout: '',
+        stderr: 'No container runtime found',
         exitCode: 1,
       };
     }
@@ -164,8 +164,8 @@ export class ContainerManager {
     try {
       // Use Bun.spawn for proper async execution
       const proc = Bun.spawn([this.runtimeCommand, ...args], {
-        stdout: "pipe",
-        stderr: "pipe",
+        stdout: 'pipe',
+        stderr: 'pipe',
       });
 
       const stdout = await new Response(proc.stdout).text();
@@ -181,8 +181,8 @@ export class ContainerManager {
     } catch (error: any) {
       return {
         success: false,
-        stdout: "",
-        stderr: error?.message || "Unknown error",
+        stdout: '',
+        stderr: error?.message || 'Unknown error',
         exitCode: error?.exitCode || 1,
       };
     }
@@ -192,7 +192,7 @@ export class ContainerManager {
    * Check if a network exists
    */
   async networkExists(networkName: string): Promise<boolean> {
-    const result = await this.exec(["network", "inspect", networkName], {
+    const result = await this.exec(['network', 'inspect', networkName], {
       silent: true,
     });
     return result.success;
@@ -201,14 +201,11 @@ export class ContainerManager {
   /**
    * Create a network
    */
-  async createNetwork(
-    networkName: string,
-    subnet?: string
-  ): Promise<CommandResult> {
-    const args = ["network", "create", "--driver", "bridge"];
+  async createNetwork(networkName: string, subnet?: string): Promise<CommandResult> {
+    const args = ['network', 'create', '--driver', 'bridge'];
 
     if (subnet) {
-      args.push("--subnet", subnet);
+      args.push('--subnet', subnet);
     }
 
     args.push(networkName);
@@ -228,7 +225,7 @@ export class ContainerManager {
 
     // Try to get subnet info
     const result = await this.exec(
-      ["network", "inspect", "--format", "{{range .IPAM.Config}}{{.Subnet}}{{end}}", networkName],
+      ['network', 'inspect', '--format', '{{range .IPAM.Config}}{{.Subnet}}{{end}}', networkName],
       { silent: true }
     );
 
@@ -243,7 +240,7 @@ export class ContainerManager {
    * Check if a container exists
    */
   async containerExists(containerName: string): Promise<boolean> {
-    const result = await this.exec(["ps", "-a", "--format", "{{.Names}}"], {
+    const result = await this.exec(['ps', '-a', '--format', '{{.Names}}'], {
       silent: true,
     });
 
@@ -251,7 +248,7 @@ export class ContainerManager {
       return false;
     }
 
-    const containers = result.stdout.split("\n").filter((line) => line.trim());
+    const containers = result.stdout.split('\n').filter((line) => line.trim());
     return containers.includes(containerName);
   }
 
@@ -259,7 +256,7 @@ export class ContainerManager {
    * Check if a container is running
    */
   async isContainerRunning(containerName: string): Promise<boolean> {
-    const result = await this.exec(["ps", "--format", "{{.Names}}"], {
+    const result = await this.exec(['ps', '--format', '{{.Names}}'], {
       silent: true,
     });
 
@@ -267,7 +264,7 @@ export class ContainerManager {
       return false;
     }
 
-    const runningContainers = result.stdout.split("\n").filter((line) => line.trim());
+    const runningContainers = result.stdout.split('\n').filter((line) => line.trim());
     return runningContainers.includes(containerName);
   }
 
@@ -280,7 +277,7 @@ export class ContainerManager {
     if (!exists) {
       return {
         name: containerName,
-        status: "not-found",
+        status: 'not-found',
         exists: false,
         ports: undefined,
         uptime: undefined,
@@ -291,19 +288,19 @@ export class ContainerManager {
 
     // Get detailed status
     const statusResult = await this.exec(
-      ["ps", "-a", "--filter", `name=${containerName}`, "--format", "{{.Status}}"],
+      ['ps', '-a', '--filter', `name=${containerName}`, '--format', '{{.Status}}'],
       { silent: true }
     );
 
     // Get port mappings
     const portsResult = await this.exec(
-      ["ps", "--filter", `name=${containerName}`, "--format", "{{.Ports}}"],
+      ['ps', '--filter', `name=${containerName}`, '--format', '{{.Ports}}'],
       { silent: true }
     );
 
     return {
       name: containerName,
-      status: isRunning ? "running" : "stopped",
+      status: isRunning ? 'running' : 'stopped',
       exists: true,
       ports: portsResult.success ? portsResult.stdout : undefined,
       uptime: statusResult.success ? statusResult.stdout : undefined,
@@ -314,28 +311,28 @@ export class ContainerManager {
    * Start a container
    */
   async startContainer(containerName: string): Promise<CommandResult> {
-    return await this.exec(["start", containerName]);
+    return await this.exec(['start', containerName]);
   }
 
   /**
    * Stop a container
    */
   async stopContainer(containerName: string): Promise<CommandResult> {
-    return await this.exec(["stop", containerName]);
+    return await this.exec(['stop', containerName]);
   }
 
   /**
    * Restart a container
    */
   async restartContainer(containerName: string): Promise<CommandResult> {
-    return await this.exec(["restart", containerName]);
+    return await this.exec(['restart', containerName]);
   }
 
   /**
    * Remove a container
    */
   async removeContainer(containerName: string): Promise<CommandResult> {
-    return await this.exec(["rm", containerName]);
+    return await this.exec(['rm', containerName]);
   }
 
   /**
@@ -351,16 +348,16 @@ export class ContainerManager {
    * Run a new container
    */
   async runContainer(args: string[]): Promise<CommandResult> {
-    return await this.exec(["run", "-d", ...args]);
+    return await this.exec(['run', '-d', ...args]);
   }
 
   /**
    * Get container logs
    */
   async getLogs(containerName: string, follow = false): Promise<CommandResult> {
-    const args = ["logs"];
+    const args = ['logs'];
     if (follow) {
-      args.push("-f");
+      args.push('-f');
     }
     args.push(containerName);
 
@@ -374,7 +371,13 @@ export class ContainerManager {
    */
   async getStats(containerName: string): Promise<CommandResult> {
     return await this.exec(
-      ["stats", containerName, "--no-stream", "--format", "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}"],
+      [
+        'stats',
+        containerName,
+        '--no-stream',
+        '--format',
+        'table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}',
+      ],
       { silent: true }
     );
   }
@@ -383,14 +386,14 @@ export class ContainerManager {
    * Create a volume
    */
   async createVolume(volumeName: string): Promise<CommandResult> {
-    return await this.exec(["volume", "create", volumeName]);
+    return await this.exec(['volume', 'create', volumeName]);
   }
 
   /**
    * Check if a volume exists
    */
   async volumeExists(volumeName: string): Promise<boolean> {
-    const result = await this.exec(["volume", "inspect", volumeName], {
+    const result = await this.exec(['volume', 'inspect', volumeName], {
       silent: true,
     });
     return result.success;
@@ -400,7 +403,7 @@ export class ContainerManager {
    * List all containers (including stopped)
    */
   async listContainers(all = true): Promise<CommandResult> {
-    return await this.exec(["ps", all ? "-a" : "", "--format", "{{.Names}}"], {
+    return await this.exec(['ps', all ? '-a' : '', '--format', '{{.Names}}'], {
       silent: true,
     });
   }
@@ -409,14 +412,14 @@ export class ContainerManager {
    * Export a container to a tar file
    */
   async exportContainer(containerName: string, outputPath: string): Promise<CommandResult> {
-    return await this.exec(["export", containerName, "-o", outputPath]);
+    return await this.exec(['export', containerName, '-o', outputPath]);
   }
 
   /**
    * Parse container name from various formats
    */
   static normalizeContainerName(name: string): string {
-    return name.replace(/^[\/*]/, "").replace(/\/$/, "");
+    return name.replace(/^[\/*]/, '').replace(/\/$/, '');
   }
 }
 
@@ -430,10 +433,8 @@ export function createContainerManager(): ContainerManager {
 /**
  * Create a container manager instance with specific runtime
  */
-export function createContainerManagerWithRuntime(
-  runtime: ContainerRuntime
-): ContainerManager {
-  if (runtime === "none") {
+export function createContainerManagerWithRuntime(runtime: ContainerRuntime): ContainerManager {
+  if (runtime === 'none') {
     throw new Error("Cannot create container manager with runtime 'none'");
   }
   return new ContainerManager(runtime);
