@@ -1,0 +1,49 @@
+{
+  "name": "madeinoz-knowledge-system",
+  "version": "1.2.5",
+  "description": "Persistent personal knowledge management system powered by Graphiti knowledge graph with FalkorDB or Neo4j backend - automatic entity extraction, relationship mapping, and semantic search for AI conversations and documents",
+  "author": {
+    "name": "Stephen Eaton",
+    "url": "https://github.com/madeinoz67"
+  },
+  "license": "MIT",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/madeinoz67/madeinoz-knowledge-system.git"
+  },
+  "homepage": "https://madeinoz67.github.io/madeinoz-knowledge-system/",
+  "keywords": [
+    "knowledge",
+    "graph",
+    "memory",
+    "semantic-search",
+    "entity-extraction",
+    "graphiti",
+    "falkordb",
+    "neo4j",
+    "mcp",
+    "claude-code",
+    "pai"
+  ],
+  "scripts": {
+    "build": "bun build ./src/server/run.ts --outdir ./dist --target bun",
+    "typecheck": "tsc --noEmit",
+    "dev": "bun run --watch src/server/run.ts",
+    "test": "bun test",
+    "test:unit": "bun test tests/unit",
+    "test:integration": "bun test tests/integration",
+    "test:watch": "bun test --watch",
+    "test:coverage": "bun test --coverage",
+    "start": "bun run src/server/run.ts",
+    "stop": "bun run src/skills/tools/stop.ts",
+    "status": "bun run src/skills/tools/status.ts",
+    "logs": "bun run src/skills/tools/logs.ts",
+    "install:system": "bun run src/server/install.ts",
+    "diagnose": "bun run src/server/diagnose.ts"
+  },
+  "devDependencies": {
+    "bun-types": "latest",
+    "typescript": "^5.0.0"
+  }
+}
