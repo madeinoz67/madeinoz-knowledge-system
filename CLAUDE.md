@@ -34,4 +34,69 @@ TypeScript (ES modules, strict mode), Bun runtime: Follow standard conventions
 
 
 <!-- MANUAL ADDITIONS START -->
+
+## Codanna Code Intelligence
+
+### CLI Syntax
+
+Codanna supports both MCP tools and CLI commands with Unix-friendly syntax:
+
+**Simple Commands (positional arguments):**
+```bash
+# Text output (DEFAULT - prefer this to save context)
+codanna mcp find_symbol main
+codanna mcp get_calls process_file
+codanna mcp find_callers init
+
+# JSON output (only when structured data needed)
+codanna mcp find_symbol main --json
+```
+
+**Complex Commands (key:value pairs):**
+```bash
+# Text output (DEFAULT - prefer this)
+codanna mcp search_symbols query:parse limit:10
+codanna mcp semantic_search_docs query:"error handling"
+
+# JSON output (only for parsing/piping)
+codanna mcp search_symbols query:parse --json | jq '.data[].name'
+```
+
+**Important:** Prefer TEXT output - JSON fills context window quickly (3-5x more tokens).
+
+### Search Workflow
+
+1. **Semantic Search** (start here):
+   ```bash
+   codanna mcp semantic_search_with_context query:"your search" limit:5
+   ```
+
+2. **Read Code** using line ranges from search results:
+   - Formula: `limit = end_line - start_line + 1`
+   - Use Read tool with `offset` and `limit` parameters
+
+3. **Explore Details**:
+   ```bash
+   codanna retrieve describe symbol_id:896
+   ```
+
+4. **Follow Relationships**:
+   ```bash
+   codanna retrieve callers symbol_id:896
+   codanna retrieve calls symbol_id:896
+   ```
+
+### Document Search
+
+```bash
+codanna mcp search_documents query:"installation guide" limit:5
+```
+
+### Tips
+
+- Read only line ranges provided (saves tokens)
+- Use symbol_id to chain commands
+- Add `lang:rust` to filter by language
+- Use `rg` (ripgrep) for pattern matching: `rg "pattern" src/`
+
 <!-- MANUAL ADDITIONS END -->
