@@ -48,21 +48,21 @@ The skill is installed at `~/.claude/skills/Knowledge/` (or `$PAI_DIR/skills/Kno
 1. **Start the Graphiti MCP server:**
    ```bash
    cd ~/.claude/skills/Knowledge
-   bun run tools/server.ts start
+   bun run tools/server-cli.ts start
    ```
 
 2. **Verify server is running:**
    ```bash
-   cd ~/.claude/skills/Knowledge && bun run tools/server.ts status
+   cd ~/.claude/skills/Knowledge && bun run tools/server-cli.ts status
    ```
 
 3. **Other server commands:**
    ```bash
-   bun run tools/server.ts stop      # Stop containers
-   bun run tools/server.ts restart   # Restart containers
-   bun run tools/server.ts logs      # View logs
-   bun run tools/server.ts logs --mcp  # MCP server logs only
-   bun run tools/server.ts logs --db   # Database logs only
+   bun run tools/server-cli.ts stop      # Stop containers
+   bun run tools/server-cli.ts restart   # Restart containers
+   bun run tools/server-cli.ts logs      # View logs
+   bun run tools/server-cli.ts logs --mcp  # MCP server logs only
+   bun run tools/server-cli.ts logs --db   # Database logs only
    ```
 
 4. **Configure API key** (in PAI .env `~/.claude/.env`):
