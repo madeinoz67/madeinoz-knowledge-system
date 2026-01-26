@@ -1245,9 +1245,16 @@ async def run_mcp_server():
         configure_uvicorn_logging()
 
         # SECURITY: Add rate limiting middleware if enabled
+        # Note: FastMCP may not expose .app attribute in all versions
         if rate_limiter is not None:
-            mcp.app.add_middleware(RateLimitMiddleware, rate_limiter=rate_limiter)
-            logger.info('Rate limiting middleware added')
+            try:
+                if hasattr(mcp, 'app') and mcp.app is not None:
+                    mcp.app.add_middleware(RateLimitMiddleware, rate_limiter=rate_limiter)
+                    logger.info('Rate limiting middleware added')
+                else:
+                    logger.warning('Rate limiting not available - FastMCP does not expose app attribute')
+            except Exception as e:
+                logger.warning(f'Could not add rate limiting middleware: {e}')
 
         await mcp.run_streamable_http_async()
     else:
