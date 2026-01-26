@@ -40,7 +40,11 @@
       "mcp__playwright__browser_click",
       "mcp__playwright__browser_resize",
       "mcp__playwright__browser_console_messages",
-      "mcp__playwright__browser_press_key"
+      "mcp__playwright__browser_press_key",
+      "mcp__plugin_codanna-cc_codanna-cc__semantic_search_docs",
+      "mcp__plugin_codanna-cc_codanna-cc__search_symbols",
+      "mcp__plugin_codanna-cc_codanna-cc__semantic_search_with_context",
+      "mcp__plugin_codanna-cc_codanna-cc__search_documents"
     ]
   }
 }

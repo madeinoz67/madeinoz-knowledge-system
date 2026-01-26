@@ -1,6 +1,6 @@
 # Tasks: Documentation and Docker Compose Updates
 
-**Input**: Design documents from `/specs/001-docs-compose-updates/`
+**Input**: Design documents from `/specs/005-docs-compose-updates/`
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md (available)
 **Tests**: No code tests requested - manual verification only
 
@@ -144,6 +144,7 @@
 - [X] T049 [P] [US3] Update all podman-compose files with ghcr.io/madeinoz67/madeinoz-knowledge-system:latest image reference
 
 **Files updated by T049:**
+
 - `src/skills/server/podman-compose-neo4j.yml`
 - `src/skills/server/podman-compose-falkordb.yml`
 - `src/skills/server/podman-compose.yml`
@@ -181,6 +182,7 @@
 ### Recommended Execution Strategy
 
 #### MVP Scope (P1 User Stories Only)
+
 1. Complete Phase 1: Setup
 2. Complete Phase 2: User Story 1 (Documentation Cleanup)
 3. Complete Phase 4: User Story 3 (Docker Compose Updates)
@@ -188,6 +190,7 @@
 5. Complete Phase 5: Polish & Verification
 
 #### Full Implementation (Priority Order)
+
 1. Phase 1: Setup → Foundation ready
 2. Phase 2: US1 (Documentation Cleanup) → Test independently
 3. Phase 4: US3 (Docker Compose Updates) → Test independently (can parallelize with US1 after initial audit)
@@ -195,7 +198,9 @@
 5. Phase 5: Polish & Verification → Final validation
 
 #### Parallel Team Strategy
+
 With multiple developers:
+
 1. Complete Setup together
 2. Split immediately:
    - Developer A: User Story 1 (Documentation Cleanup)

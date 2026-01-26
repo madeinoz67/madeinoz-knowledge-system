@@ -102,10 +102,12 @@ Tested for semantic similarity accuracy using 8 test pairs (5 similar, 3 dissimi
 1. **Export important knowledge** (manually note key facts)
 2. **Clear the graph**: Use `clear_graph` MCP tool
 3. **Update config**:
+
    ```env
    MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL=your-new-model
    MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS=matching-dimension
    ```
+
 4. **Restart the server**
 5. **Re-add all knowledge**
 
@@ -121,6 +123,7 @@ Tested for semantic similarity accuracy using 8 test pairs (5 similar, 3 dissimi
 We tested **all 15 models** with actual Graphiti integration, not just simple JSON extraction. The test used a complex business scenario requiring extraction of companies, people, locations, and relationships.
 
 **Test Input:**
+
 ```
 "During the Q4 planning meeting at TechCorp headquarters in Austin, CEO Sarah
 Martinez announced a strategic partnership with CloudBase Inc, brokered by
@@ -298,6 +301,7 @@ MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS=1536
 - **Database**: FREE (self-hosted Neo4j or FalkorDB)
 
 **Example monthly breakdown** (1000 episodes added, 5000 searches):
+
 - Gemini 2.0 Flash (1000 extractions): $0.125
 - MxBai embeddings (1000 + 5000 operations): $0.00 (local)
 - **Total**: $0.125/month
@@ -309,6 +313,7 @@ MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS=1536
 ### Test 1: Business Entity Extraction
 
 **Input:**
+
 ```
 "During the Q4 planning meeting, CEO Michael Chen announced that TechVentures
 Inc will acquire DataFlow Systems for $500 million. The deal, brokered by
@@ -319,6 +324,7 @@ in Seattle."
 **Results with GPT-4o Mini:**
 
 ✅ **Extracted Entities** (verified in Neo4j):
+
 - DataFlow Systems
 - Goldman Sachs
 - Michael Chen
@@ -326,6 +332,7 @@ in Seattle."
 - TechVentures Inc
 
 ✅ **Extracted Facts**:
+
 - "The acquisition deal of DataFlow Systems was brokered by Goldman Sachs"
 - "TechVentures Inc will acquire DataFlow Systems for $500 million"
 - "DataFlow Systems has a 200-person engineering team based in Seattle"
@@ -335,6 +342,7 @@ in Seattle."
 ### Test 2: Technical Team Context
 
 **Input:**
+
 ```
 "Team uses TypeScript with Bun runtime. Sarah, our tech lead, chose Hono for
 the HTTP framework because it's lightweight and fast."
@@ -343,6 +351,7 @@ the HTTP framework because it's lightweight and fast."
 **Results with GPT-4o Mini:**
 
 ✅ **Extracted Entities**:
+
 - TypeScript
 - Bun
 - Sarah
@@ -350,6 +359,7 @@ the HTTP framework because it's lightweight and fast."
 - HTTP framework
 
 ✅ **Extracted Facts**:
+
 - "The team uses TypeScript with Bun"
 - "Hono is an HTTP framework"
 - "Sarah chose Hono as the HTTP framework"

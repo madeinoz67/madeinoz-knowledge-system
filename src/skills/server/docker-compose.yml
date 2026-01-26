@@ -48,7 +48,7 @@ services:
       start_period: 30s
 
   graphiti-mcp:
-    image: zepai/knowledge-graph-mcp:standalone
+    image: ghcr.io/madeinoz67/madeinoz-knowledge-system:latest
     container_name: madeinoz-knowledge-graph-mcp
     restart: unless-stopped
     networks:
@@ -69,8 +69,6 @@ services:
     volumes:
       - ./config-neo4j.yaml:/app/mcp/config/config.yaml:ro
       - ./entrypoint.sh:/entrypoint.sh:ro
-      - ./patches/graphiti_mcp_server.py:/app/mcp/src/graphiti_mcp_server.py:ro
-      - ./patches/factories.py:/app/mcp/src/services/factories.py:ro
     entrypoint: ["/bin/sh", "/entrypoint.sh"]
     env_file:
       - /tmp/madeinoz-knowledge-mcp.env

@@ -35,6 +35,7 @@ Relationships identified:
 ### Alternative Phrases
 
 All of these work the same way:
+
 - "Remember this"
 - "Store this"
 - "Add to my knowledge"
@@ -51,6 +52,7 @@ You: Remember that we chose FalkorDB over Neo4j because it's lighter weight and 
 ```
 
 The system uses an LLM (GPT-4) to automatically extract:
+
 - The decision (FalkorDB vs Neo4j)
 - The reasoning (lighter weight, Redis backend)
 - Temporal context (when you made this decision)
@@ -63,6 +65,7 @@ You: Store this: I prefer writing documentation in Markdown rather than Word doc
 ```
 
 The system extracts:
+
 - Preference: Markdown over Word
 - Reason: version control compatibility
 - Type: personal preference
@@ -74,6 +77,7 @@ You: Remember this procedure: To reset the knowledge graph, use the clear graph 
 ```
 
 The system creates:
+
 - A procedure entity
 - Steps in sequence
 - Related tools and commands
@@ -129,6 +133,7 @@ Episodes:
 ### Alternative Search Phrases
 
 These all trigger searches:
+
 - "What do I know about X?"
 - "Search my knowledge for X"
 - "Find information about X"
@@ -278,16 +283,19 @@ Shows only recent knowledge about containers.
 Search your knowledge by date using the `--since` and `--until` flags:
 
 **Today's knowledge:**
+
 ```
 You: What did I learn today?
 ```
 
 **Last 7 days:**
+
 ```
 You: What did I learn this week about APIs?
 ```
 
 **Using CLI for precise date filtering:**
+
 ```bash
 # Today's knowledge
 bun run tools/knowledge-cli.ts search_nodes "AI" --since today
@@ -314,6 +322,7 @@ bun run tools/knowledge-cli.ts search_nodes "learning" --since yesterday --until
 | ISO 8601 | `--since 2026-01-15` | Specific date |
 
 Temporal search helps you:
+
 - Review what you learned on a specific day
 - Find decisions made during a particular period
 - Track knowledge accumulation over time
@@ -384,6 +393,7 @@ When you capture knowledge, the system uses LLMs in two ways:
 2. **Embedding Generation (text-embedding-3-small)** - Creates searchable vectors for semantic search
 
 This means:
+
 - You write naturally, the AI structures it for you
 - Search works by meaning, not just keywords
 - Relationships are automatically discovered
@@ -397,11 +407,13 @@ See [concepts/knowledge-graph.md](../concepts/knowledge-graph.md#the-role-of-llm
 ### 1. Be Specific
 
 **Instead of:**
+
 ```
 Remember Docker.
 ```
 
 **Try:**
+
 ```
 Remember that Docker requires a daemon process running as root,
 which is why Podman is often preferred for rootless containers.
@@ -412,11 +424,13 @@ More detail = better entity extraction.
 ### 2. Include Context
 
 **Instead of:**
+
 ```
 Remember that config file.
 ```
 
 **Try:**
+
 ```
 Remember my VS Code settings: 2-space tabs, auto-save enabled,
 Dracula theme, and JetBrains Mono font.
@@ -427,11 +441,13 @@ Context helps with future searches.
 ### 3. Explain Relationships
 
 **Instead of:**
+
 ```
 Remember Graphiti and FalkorDB.
 ```
 
 **Try:**
+
 ```
 Remember that Graphiti uses FalkorDB as its graph database backend
 for storing entities and relationships.
@@ -442,11 +458,13 @@ Explicit relationships make connections clearer.
 ### 4. Add Temporal Context When Relevant
 
 **Instead of:**
+
 ```
 Remember we had a bug.
 ```
 
 **Try:**
+
 ```
 Remember that on January 8th we fixed the container networking bug
 by adding a network reload command to the startup script.
@@ -457,6 +475,7 @@ Temporal context helps track how your knowledge evolves.
 ### 5. Review Regularly
 
 Once a week, run:
+
 ```
 What did I learn this week?
 ```
@@ -470,11 +489,13 @@ You can maintain separate graphs for different purposes:
 ### Setting Up Groups
 
 In your PAI config (`$PAI_DIR/.env` or `~/.claude/.env`):
+
 ```bash
 MADEINOZ_KNOWLEDGE_GROUP_ID=work
 ```
 
 Or specify in commands:
+
 ```
 Remember this in my work knowledge: [information]
 ```
@@ -497,6 +518,7 @@ Change the GROUP_ID in your config and restart the server, or use group-specific
 The PAI Memory System (~/.claude/MEMORY/) automatically syncs with the sync hook:
 
 **What Gets Synced:**
+
 - Learning captures from LEARNING/ALGORITHM/ (task execution insights)
 - Learning captures from LEARNING/SYSTEM/ (PAI/tooling insights)
 - Research findings from RESEARCH/
@@ -505,6 +527,7 @@ The PAI Memory System (~/.claude/MEMORY/) automatically syncs with the sync hook
 The hook runs at session start and syncs new captures automatically.
 
 **Manual Sync:**
+
 ```bash
 bun run ~/.claude/hooks/sync-memory-to-knowledge.ts --verbose
 ```
@@ -528,6 +551,7 @@ The knowledge system caches search results to make repeated queries faster.
 When you search for something, the result is cached for 5 minutes. If you ask the same question again within that time, you get an instant response without waiting for the database.
 
 **Example:**
+
 ```
 You: What do I know about Podman?
 AI: [fetches from database - takes ~500ms]
@@ -547,10 +571,13 @@ After adding new knowledge and wanting to search for it immediately:
 
 1. Wait 5 minutes for automatic refresh, **or**
 2. Ask a slightly different question (different queries aren't cached together):
+
    ```
    You: Tell me about Podman containers
    ```
+
    instead of
+
    ```
    You: What do I know about Podman?
    ```

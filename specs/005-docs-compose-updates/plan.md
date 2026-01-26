@@ -1,7 +1,7 @@
 # Implementation Plan: Documentation and Docker Compose Updates
 
-**Branch**: `001-docs-compose-updates` | **Date**: 2026-01-26 | **Spec**: [spec.md](./spec.md)
-**Input**: Feature specification from `/specs/001-docs-compose-updates/spec.md`
+**Branch**: `005-docs-compose-updates` | **Date**: 2026-01-26 | **Spec**: [spec.md](./spec.md)
+**Input**: Feature specification from `/specs/005-docs-compose-updates/spec.md`
 
 ## Summary
 
@@ -24,21 +24,25 @@ Remove obsolete Lucene-specific documentation content, improve benchmark documen
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
 ### Principle I: Container-First Architecture
+
 **Status**: ✅ PASS
 
 **Rationale**: This feature UPDATES container orchestration files to use correct image references from GitHub Container Registry. No changes to container orchestration architecture, health checks, or volume management. Complies with container-first principle.
 
 ### Principle II: Graph-Centric Design
+
 **Status**: ✅ PASS
 
 **Rationale**: Documentation updates only. No changes to knowledge graph operations, entity storage, or API design. Complies with graph-centric principle.
 
 ### Principle III: Zero-Friction Knowledge Capture
+
 **Status**: ✅ PASS
 
 **Rationale**: Documentation updates only. No changes to entity extraction, LLM automation, or natural language triggers. Complies with zero-friction principle.
 
 ### Principle IV: Query Resilience
+
 **Status**: ✅ PASS
 
 **Rationale**: While removing Lucene documentation references, the underlying query sanitization implementation in `lucene.ts` remains unchanged. Documentation will be simplified to remove implementation details that confuse users. Query handling functionality is preserved.
@@ -46,11 +50,13 @@ Remove obsolete Lucene-specific documentation content, improve benchmark documen
 **Note**: Removing Lucene documentation is a SIMPLIFICATION, not a functional change. The `lucene.ts` library still handles special character escaping internally - we're just removing confusing documentation about backend-specific internals.
 
 ### Principle V: Graceful Degradation
+
 **Status**: ✅ PASS
 
 **Rationale**: Documentation updates only. No changes to error handling, retry logic, or graceful failure modes. Complies with graceful degradation principle.
 
 ### Principle VI: Codanna-First Development
+
 **Status**: ✅ PASS
 
 **Rationale**: This principle applies to CODEBASE EXPLORATION and DOCUMENTATION SEARCHES during development. This feature IS a documentation update, not code exploration. We will use `codanna mcp search_documents` to find existing Lucene references before removing them. Complies with Codanna-first principle.
@@ -103,9 +109,9 @@ scripts/                      # REVIEW: for image references
 > **No Constitution violations - this section intentionally left blank**
 
 All updates are straightforward:
+
 - Documentation text removal (Lucene references)
 - Documentation reorganization (benchmark sections)
 - String replacements (image references)
 
 No new complexity introduced. Simplification of documentation reduces cognitive load for users.
-

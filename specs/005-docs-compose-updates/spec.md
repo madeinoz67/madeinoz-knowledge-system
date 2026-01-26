@@ -1,6 +1,6 @@
 # Feature Specification: Documentation and Docker Compose Updates
 
-**Feature Branch**: `001-docs-compose-updates`
+**Feature Branch**: `005-docs-compose-updates`
 **Created**: 2026-01-26
 **Status**: Draft
 **Input**: User description: "document review to remove the lucene sections and improve benchmark sections, also minor fixes for docker compose files to point to ghcr.io/madeinoz67/madeinoz-knowledge-system:latest"

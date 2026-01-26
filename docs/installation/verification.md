@@ -10,6 +10,7 @@ Mandatory verification checklist for the Knowledge pack installation.
 **Use this checklist to verify that your installation is complete and functional.**
 
 > **FOR AI AGENTS:** This checklist MUST be completed after installation. Follow these rules:
+>
 > 1. **Run EVERY check** - Do not skip any verification step
 > 2. **Mark each item PASS or FAIL** - Keep track of results
 > 3. **Stop on failures** - If a section fails, troubleshoot before continuing
@@ -22,12 +23,14 @@ Mandatory verification checklist for the Knowledge pack installation.
 ## Verification Overview
 
 This checklist ensures:
+
 - All components are installed
 - System is properly configured
 - All integrations are working
 - End-to-end functionality is operational
 
 **Supports two database backends:**
+
 - **Neo4j** (default): Native graph database with Cypher queries
 - **FalkorDB**: Redis-based graph database with RediSearch
 
@@ -45,6 +48,7 @@ This checklist ensures:
 - [ ] **Database backend identified**
 
 **Verification commands:**
+
 ```bash
 # Check PAI config for DATABASE_TYPE
 grep "MADEINOZ_KNOWLEDGE_DATABASE_TYPE" "${PAI_DIR:-$HOME/.claude}/.env" 2>/dev/null
@@ -56,6 +60,7 @@ docker ps --format "{{.Names}}" | grep madeinoz-knowledge
 ```
 
 **Results:**
+
 - If `DATABASE_TYPE=neo4j` OR container `madeinoz-knowledge-neo4j` is running → **Neo4j Backend**
 - If `DATABASE_TYPE=falkordb` OR container `madeinoz-knowledge-falkordb` is running → **FalkorDB Backend**
 - Default (not set) → **Neo4j Backend**
@@ -76,6 +81,7 @@ Verify all required files and directories are present.
 - [ ] **package.json** exists in pack root
 
 **Verification commands:**
+
 ```bash
 cd /path/to/madeinoz-knowledge-system
 ls -la README.md INSTALL.md VERIFY.md package.json
@@ -94,6 +100,7 @@ Verify the Graphiti MCP server is running and accessible.
 - [ ] **Containers are running**
 
 **Verification commands:**
+
 ```bash
 # For Podman
 podman ps | grep madeinoz-knowledge
@@ -106,9 +113,11 @@ bun run server-cli status
 ```
 
 **Expected result (FalkorDB backend):**
+
 - Containers `madeinoz-knowledge-graph-mcp` and `madeinoz-knowledge-falkordb` listed with status "Up"
 
 **Expected result (Neo4j backend):**
+
 - Containers `madeinoz-knowledge-graph-mcp` and `madeinoz-knowledge-neo4j` listed with status "Up"
 
 ---
@@ -118,11 +127,13 @@ bun run server-cli status
 - [ ] **MCP health endpoint is accessible and returns healthy status**
 
 **Verification commands:**
+
 ```bash
 curl -s http://localhost:8000/health --max-time 2
 ```
 
 **Expected result:** JSON response indicating healthy status:
+
 ```json
 {"status":"healthy","service":"graphiti-mcp"}
 ```
@@ -138,6 +149,7 @@ Verify the PAI skill is properly installed and formatted.
 - [ ] **Skill directory exists in PAI installation**
 
 **Verification commands:**
+
 ```bash
 # Check standard location
 ls -la ~/.claude/skills/Knowledge/
@@ -158,6 +170,7 @@ ls -la ${PAI_DIR:-$HOME/.claude}/skills/Knowledge/
 - [ ] **Description includes 'USE WHEN' clause**
 
 **Verification commands:**
+
 ```bash
 head -10 ~/.claude/skills/Knowledge/SKILL.md
 ```
@@ -182,6 +195,7 @@ Check PAI's global .env for required variables:
 - [ ] **LLM provider is configured**
 
 **Verification commands:**
+
 ```bash
 PAI_ENV="${PAI_DIR:-$HOME/.claude}/.env"
 if [ -f "$PAI_ENV" ]; then
@@ -203,6 +217,7 @@ fi
 - [ ] **HTTP transport configured**
 
 **Verification commands:**
+
 ```bash
 if [ -f ~/.claude.json ]; then
     grep -A 5 "madeinoz-knowledge" ~/.claude.json
@@ -212,6 +227,7 @@ fi
 ```
 
 **Expected result:**
+
 ```json
 "madeinoz-knowledge": {
   "type": "http",
@@ -233,6 +249,7 @@ Verify the complete system works end-to-end using the actual MCP tools.
 - [ ] **Can capture knowledge to graph**
 
 **Verification commands:**
+
 ```bash
 curl -s -X POST http://localhost:8000/mcp/ \
     -H "Content-Type: application/json" \
@@ -261,6 +278,7 @@ curl -s -X POST http://localhost:8000/mcp/ \
 - [ ] **Can search knowledge graph nodes**
 
 **Verification commands:**
+
 ```bash
 curl -s -X POST http://localhost:8000/mcp/ \
     -H "Content-Type: application/json" \
@@ -287,6 +305,7 @@ curl -s -X POST http://localhost:8000/mcp/ \
 - [ ] **Can search relationships/facts**
 
 **Verification commands:**
+
 ```bash
 curl -s -X POST http://localhost:8000/mcp/ \
     -H "Content-Type: application/json" \
@@ -317,6 +336,7 @@ Verify integration with PAI system and Claude Code.
 - [ ] **Claude Code recognizes the skill**
 
 **Verification:**
+
 1. Restart Claude Code
 2. In Claude Code, type: `What is the Madeinoz Knowledge System?`
 3. Check if Claude mentions the skill
@@ -350,6 +370,7 @@ Verify the memory sync hook is properly installed for syncing learnings and rese
 - [ ] **Hook lib files exist**
 
 **Verification commands:**
+
 ```bash
 PAI_HOOKS="$HOME/.claude/hooks"
 ls -la "$PAI_HOOKS/"
@@ -367,6 +388,7 @@ ls -la "$PAI_HOOKS/lib/"
 - [ ] **SubagentStop hook registered** (sync-learning-realtime.ts)
 
 **Verification commands:**
+
 ```bash
 SETTINGS="$HOME/.claude/settings.json"
 if [ -f "$SETTINGS" ]; then
@@ -400,6 +422,7 @@ Verify all documentation is complete and accurate.
 - [ ] **README.md has proper YAML frontmatter**
 
 **Verification commands:**
+
 ```bash
 grep "^##" README.md | head -20
 head -35 README.md | grep "^---"
@@ -416,6 +439,7 @@ head -35 README.md | grep "^---"
 For a successful installation, you must have:
 
 **Critical (ALL must pass):**
+
 - Database backend detected (Section 0)
 - All files in correct locations (Section 1)
 - MCP server running and accessible (Section 2)
@@ -425,6 +449,7 @@ For a successful installation, you must have:
 - MCP configured in ~/.claude.json (Section 4.2)
 
 **Important (at least 80% pass):**
+
 - Integration with Claude Code (Section 6)
 - Memory sync hook installed (Section 7)
 - Documentation complete (Section 8)
@@ -454,5 +479,6 @@ Once all checks pass:
 ---
 
 **Next Steps:**
+
 - If PASS: Start using the Madeinoz Knowledge System!
 - If FAIL: Review failed items, re-install as needed, and re-verify

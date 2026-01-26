@@ -75,19 +75,21 @@ These providers use the same API format as OpenAI but with different base URLs:
 
 | Provider | Description | Get API Key |
 |----------|-------------|-------------|
-| **OpenRouter** | Access to 200+ models (Claude, GPT-4, Llama, etc.) | https://openrouter.ai/keys |
-| **Together AI** | Fast inference, good for Llama models | https://api.together.xyz/settings/api-keys |
-| **Fireworks AI** | Low latency inference | https://fireworks.ai/api-keys |
-| **DeepInfra** | Serverless GPU inference | https://deepinfra.com/dash/api_keys |
+| **OpenRouter** | Access to 200+ models (Claude, GPT-4, Llama, etc.) | <https://openrouter.ai/keys> |
+| **Together AI** | Fast inference, good for Llama models | <https://api.together.xyz/settings/api-keys> |
+| **Fireworks AI** | Low latency inference | <https://fireworks.ai/api-keys> |
+| **DeepInfra** | Serverless GPU inference | <https://deepinfra.com/dash/api_keys> |
 
 **Ollama Setup (if using Ollama or Hybrid mode):**
 
-1. Install Ollama: https://ollama.com/download
+1. Install Ollama: <https://ollama.com/download>
 2. Pull required models:
+
    ```bash
    ollama pull llama3.2            # LLM model (only needed for full Ollama mode)
    ollama pull mxbai-embed-large   # Embedding model (recommended - 77% quality, 156ms)
    ```
+
 3. Ensure Ollama is running: `ollama serve`
 
 **Note:** The `mxbai-embed-large` model provides the best balance of quality (77%) and speed (156ms) among tested Ollama embedders. See `docs/OLLAMA-MODEL-GUIDE.md` for detailed comparisons.
@@ -95,6 +97,7 @@ These providers use the same API format as OpenAI but with different base URLs:
 **Madeinoz Patches (Applied at Image Build Time):**
 
 The custom Docker image includes patches that enable support for:
+
 - **Ollama** (local, no API key required)
 - **OpenAI-compatible providers** (OpenRouter, Together AI, Fireworks AI, DeepInfra)
 
@@ -122,6 +125,7 @@ The upstream Graphiti MCP server has a bug ([GitHub issue #1116](https://github.
 - `api.mistral.ai` → Mistral AI
 
 The patch is automatically mounted when using any of the docker-compose files:
+
 - `docker-compose-falkordb.yml` (FalkorDB backend, Docker)
 - `docker-compose-neo4j.yml` (Neo4j backend, Docker)
 - `podman-compose-falkordb.yml` (FalkorDB backend, Podman)
@@ -158,6 +162,7 @@ The installer guides you through:
 Here are the recommended configurations based on **real-world MCP testing** (15 models tested):
 
 #### Option 1: GPT-4o Mini + Ollama (Recommended) ⭐
+
 **Most stable LLM + free local embeddings - Proven & Reliable**
 
 | Component | Provider | Model | Cost | Quality |
@@ -278,11 +283,13 @@ EMBEDDER_DIMENSIONS=1536
 To change providers after initial setup:
 
 1. **Stop the server:**
+
    ```bash
    bun run stop
    ```
 
 2. **Edit the configuration:**
+
    ```bash
    # Edit ~/.claude/.env (or wherever your config is)
    nano ~/.claude/.env
@@ -291,6 +298,7 @@ To change providers after initial setup:
 3. **Update the relevant variables** (see examples above)
 
 4. **Restart the server:**
+
    ```bash
    bun run start
    ```
@@ -302,6 +310,7 @@ To change providers after initial setup:
 **IMPORTANT:** Before installing, analyze the current system state to detect conflicts and ensure dependencies are met.
 
 > **FOR AI AGENTS:** Run ALL pre-installation checks before proceeding. If ANY check shows a conflict or missing dependency:
+>
 > - **Port in use**: Stop the existing service or choose a different port
 > - **Missing dependency**: Install the dependency first (Podman, Bun)
 > - **Existing installation**: Backup existing files, then proceed with update
@@ -694,6 +703,7 @@ fi
 **Symptoms:** `bun run server-cli start` fails or container exits immediately
 
 **Solutions:**
+
 1. **Port conflict:** Stop conflicting service or modify ports in Docker Compose files
 2. **API key invalid:** Verify API key in PAI config has credits/quota
 3. **Image pull failed:** Check internet connection and try again
@@ -702,6 +712,7 @@ fi
 ### Skill Not Loading
 
 **Solutions:**
+
 1. **Restart Claude Code** - Skills are loaded on startup
 2. **Check SKILL.md format** - Ensure frontmatter is valid YAML
 3. **Verify file paths** - All workflows should be in `workflows/` and tools in `tools/`
@@ -709,6 +720,7 @@ fi
 ### Knowledge Not Being Captured
 
 **Solutions:**
+
 1. **Server not running:** Start with `bun run server-cli start`
 2. **API quota exceeded:** Check OpenAI usage dashboard
 3. **Content too brief:** Add more context and detail

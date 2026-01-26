@@ -31,6 +31,7 @@ You: "Remember that I prefer using gpt-4o-mini for everyday tasks because it's f
 ```
 
 The system will automatically:
+
 - Extract key concepts (gpt-4o-mini, preferences, cost optimization)
 - Note relationships (preference, reason: speed and cost)
 - Store it with today's date
@@ -44,6 +45,7 @@ You: "What do I know about Podman?"
 ```
 
 The system searches your knowledge and shows you:
+
 - Everything you've stored about Podman
 - Related topics (Docker, containers, etc.)
 - When you learned each piece of information
@@ -127,16 +129,19 @@ Episodes:
 ### For Developers
 
 **Capture technical decisions:**
+
 ```
 "Remember that we chose PostgreSQL over MongoDB because we need strong consistency and complex relationships."
 ```
 
 **Store configuration snippets:**
+
 ```
 "Save this: my preferred VS Code settings are 2-space tabs, auto-save on focus change, and Dracula theme."
 ```
 
 **Document solutions to problems:**
+
 ```
 "Remember: when Podman containers can't reach the network, check if the firewall is blocking the CNI plugins."
 ```
@@ -144,11 +149,13 @@ Episodes:
 ### For Learning
 
 **Capture research findings:**
+
 ```
 "Store this research: Graphiti uses LLMs to automatically extract entities from text, unlike traditional knowledge graphs that require manual annotation."
 ```
 
 **Track concept connections:**
+
 ```
 "Remember that FalkorDB is a Redis module that adds graph database capabilities, which is why Graphiti can use it as a backend."
 ```
@@ -156,11 +163,13 @@ Episodes:
 ### For Personal Organization
 
 **Save preferences:**
+
 ```
 "Remember that I prefer morning meetings between 9-11 AM and need at least 30 minutes between back-to-back calls."
 ```
 
 **Track decisions:**
+
 ```
 "Store this decision: I'm going to use weekly reviews instead of daily standups for my solo projects."
 ```
@@ -170,6 +179,7 @@ Episodes:
 ### Episodes
 
 Every time you add knowledge, the system creates an "episode." Think of episodes as diary entries - each one captures:
+
 - What you said
 - When you said it
 - What entities and relationships were found
@@ -179,6 +189,7 @@ Every time you add knowledge, the system creates an "episode." Think of episodes
 These are the "things" in your knowledge - people, places, tools, concepts, preferences, procedures, etc. The system automatically identifies these as you add information.
 
 Common entity types:
+
 - **People**: Names of individuals
 - **Organizations**: Companies, teams, groups
 - **Locations**: Places, servers, repositories
@@ -190,6 +201,7 @@ Common entity types:
 ### Relationships
 
 Relationships show how entities connect. For example:
+
 - "Bun is faster than npm" creates a relationship
 - "PostgreSQL requires strong consistency" creates another
 - "I prefer morning meetings" connects you to a preference

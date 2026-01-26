@@ -4,18 +4,26 @@
 
 ### Why We Use a Custom Image
 
-This project currently uses a custom Docker image (`madeinoz-knowledge-system:fixed`) instead of the official upstream images. This is a **temporary workaround** while waiting for upstream fixes to be merged.
+This project currently uses a custom Docker image (`ghcr.io/madeinoz67/madeinoz-knowledge-system:latest`) instead of the official upstream images. This is a **temporary workaround** while waiting for upstream fixes to be merged.
+
+**Published Image:**
+
+- **Registry:** [GitHub Container Registry](https://github.com/madeinoz67/madeinoz-knowledge-system/pkgs/container/madeinoz-knowledge-system)
+- **Image:** `ghcr.io/madeinoz67/madeinoz-knowledge-system:latest`
 
 **Upstream images we're NOT using:**
+
 - `falkordb/graphiti-knowledge-graph-mcp:latest` (FalkorDB backend)
 - `zepai/knowledge-graph-mcp:standalone` (Neo4j backend)
 
 ### Patches Applied
 
-The custom Docker image includes three critical patches applied at image build time:
+The custom Docker image includes four critical patches applied at image build time:
 
 #### 1. Async Iteration Bug Fix
+
 **Issue:** [Upstream GitHub Issue - async iteration on NoneType]
+
 **Fix:** Added None check before async for loop in `get_all_group_ids()`
 
 ```python
@@ -30,22 +38,44 @@ else:
 ```
 
 #### 2. Ollama/Custom Endpoint Support
+
 **Issue:** [Upstream GitHub Issue #1116](https://github.com/getzep/graphiti/issues/1116)
+
 **Fix:** Added explicit Ollama embedder client and OpenAI-compatible API support
 
 This enables:
+
 - Ollama embeddings with custom models
 - OpenRouter and other OpenAI-compatible LLM providers
 - Custom embedding dimensions
 
 #### 3. Search All Groups Functionality
+
 **Issue:** Default behavior only searches specified group_ids, making cross-group discovery impossible
+
 **Fix:** When no `group_ids` are specified, search queries ALL groups in the knowledge graph
 
 This is essential for PAI pack usage where knowledge may be stored across multiple groups (e.g., `osint-profiles`, `main`, `research`).
 
+#### 4. Temporal Search Feature
+
+**Issue:** Original search functionality lacked time-based filtering capabilities
+
+**Fix:** Added `start_date` and `end_date` parameters to search functions for temporal queries
+
+This enables:
+
+- Time-range filtered searches (e.g., "find entities created in last 7 days")
+- Historical knowledge tracking and analysis
+- Temporal relationship discovery
+- Episode-based timeline reconstruction
+
+The temporal search feature integrates with the existing search API, allowing combined spatial and temporal queries for comprehensive knowledge retrieval.
+
 ### Configuration Selection
+
 **File:** `src/skills/server/entrypoint.sh` (development) or baked into image
+
 **Purpose:** Dynamically select the correct config file based on `DATABASE_TYPE` environment variable
 
 ```bash
@@ -60,6 +90,7 @@ esac
 ```
 
 Both config files are baked into the image at build time:
+
 - `/tmp/config-neo4j.yaml`
 - `/tmp/config-falkordb.yaml`
 
@@ -71,6 +102,7 @@ docker build -t madeinoz-knowledge-system:fixed .
 ```
 
 The Dockerfile applies patches during the image build process:
+
 1. Copies patch files from the patches directory
 2. Copies both config files
 3. Copies `entrypoint.sh` for runtime config selection
@@ -81,6 +113,7 @@ The Dockerfile applies patches during the image build process:
 **When upstream merges these fixes**, we will:
 
 1. Update `src/skills/server/lib/container.ts` to use official images:
+
 ```typescript
 static readonly IMAGES = {
   falkordb: {
@@ -94,11 +127,12 @@ static readonly IMAGES = {
 }
 ```
 
-2. Remove custom image build from documentation
-3. Archive patches to `docker/patches/archived/` for reference
-4. Update this document with migration completion date
+1. Remove custom image build from documentation
+2. Archive patches to `docker/patches/archived/` for reference
+3. Update this document with migration completion date
 
 **Status:** Waiting for upstream to merge fixes. Track progress at:
+
 - Graphiti GitHub Issues
 - Zep AI releases
 
@@ -150,7 +184,7 @@ test -n "$OPENAI_API_KEY" && export OPENAI_API_KEY="$OPENAI_API_KEY"
 ### How It Works
 
 1. **PAI .env** contains only prefixed variables (`MADEINOZ_KNOWLEDGE_*`)
-2. **Docker Compose** passes these to the container via `env_file`
+2. **Docker Compose** passes these to the container via a targeted `env_file`
 3. **entrypoint.sh** runs before the MCP server starts
 4. Script checks for prefixed variables and exports unprefixed versions
 5. **MCP server** sees standard unprefixed variables it expects
@@ -175,6 +209,7 @@ test -n "$OPENAI_API_KEY" && export OPENAI_API_KEY="$OPENAI_API_KEY"
 ```
 
 This ensures the system works both:
+
 - **As a PAI pack** (using prefixed variables)
 - **Standalone** (using unprefixed variables)
 
@@ -219,23 +254,13 @@ When adding a new config variable:
 
 1. **Add to `.env.example`** with `MADEINOZ_KNOWLEDGE_` prefix
 2. **Add mapping in `entrypoint.sh`**:
+
    ```bash
    test -n "$MADEINOZ_KNOWLEDGE_NEW_VAR" && export NEW_VAR="$MADEINOZ_KNOWLEDGE_NEW_VAR"
    ```
+
 3. **Document in `docs/reference/configuration.md`**
 4. **Test both prefixed and unprefixed modes**
-
----
-
-## Password Typo Bug (Fixed)
-
-**Issue:** `docker-compose-neo4j.yml` had inconsistent Neo4j password
-**Impact:** Authentication failures with "madeinojknowledge" vs "madeinozknowledge"
-**Fixed in:** Commit [insert hash] - standardized to `madeinozknowledge`
-
-**Affected lines:**
-- Line 62: `NEO4J_AUTH=neo4j/madeinozknowledge`
-- Line 88: `NEO4J_PASSWORD=madeinozknowledge`
 
 ---
 
@@ -246,6 +271,7 @@ When adding a new config variable:
 **Fixed in:** `src/skills/server/server-cli.ts`
 
 **Solution:**
+
 ```typescript
 // FalkorDB
 "--network-alias=falkordb",  // DNS alias for service discovery
@@ -265,12 +291,14 @@ Docker handles this automatically, but Podman requires explicit aliases.
 **Fixed in:** `src/skills/server/server-cli.ts`
 
 **Before (broken):**
+
 ```typescript
 args.push(`-v=${configPath}:/app/mcp/config/config.yaml:ro`);
 args.push(`-v=${patchesDir}/factories.py:/app/mcp/src/services/factories.py:ro`);
 ```
 
 **After (fixed):**
+
 ```typescript
 // Config files and patches are baked into the custom image
 // The entrypoint.sh selects the correct config based on DATABASE_TYPE

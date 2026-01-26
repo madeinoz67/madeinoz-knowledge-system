@@ -20,11 +20,13 @@ bun run server-cli start
 Launches the Graphiti MCP server with the configured database backend (Neo4j or FalkorDB).
 
 **Options:**
+
 - Detects container runtime (Podman or Docker) automatically
 - Loads configuration from PAI .env file
 - Waits for server initialization before returning
 
 **Expected Output:**
+
 ```
 ✓ Server is running and healthy!
 ```
@@ -54,6 +56,7 @@ bun run server-cli status
 Displays current container status and server health.
 
 **Output includes:**
+
 - Container status (running/stopped)
 - MCP server health
 - Database backend status
@@ -68,6 +71,7 @@ bun run server-cli logs
 Streams logs from the running MCP server container.
 
 **Usage:**
+
 ```bash
 # Follow logs in real-time
 bun run server-cli logs
@@ -81,11 +85,13 @@ bun run server-cli logs --lines 100
 ### Add Knowledge (Capture)
 
 Via Claude Code skill:
+
 ```
 Remember that [your knowledge here]
 ```
 
 This triggers the CaptureEpisode workflow which:
+
 1. Sends content to MCP server
 2. Extracts entities and relationships
 3. Creates vector embeddings
@@ -94,11 +100,13 @@ This triggers the CaptureEpisode workflow which:
 ### Search Knowledge
 
 Via Claude Code skill:
+
 ```
 What do I know about [topic]?
 ```
 
 This triggers the SearchKnowledge workflow which:
+
 1. Converts query to vector embedding
 2. Searches graph for semantically similar entities
 3. Returns entities with summaries and facts
@@ -106,11 +114,13 @@ This triggers the SearchKnowledge workflow which:
 ### Find Relationships
 
 Via Claude Code skill:
+
 ```
 How are [entity A] and [entity B] related?
 ```
 
 This triggers the SearchFacts workflow which:
+
 1. Traverses edges between entities in graph
 2. Returns direct relationships
 3. Shows temporal context of relationships
@@ -118,11 +128,13 @@ This triggers the SearchFacts workflow which:
 ### View Recent Knowledge
 
 Via Claude Code skill:
+
 ```
 What did I learn recently?
 ```
 
 This triggers the GetRecent workflow which:
+
 1. Queries graph for recent episodes
 2. Returns chronological list
 3. Shows timestamps and summaries
@@ -130,11 +142,13 @@ This triggers the GetRecent workflow which:
 ### Check System Status
 
 Via Claude Code skill:
+
 ```
 Show the knowledge graph status
 ```
 
 This triggers the GetStatus workflow which:
+
 1. Connects to MCP server
 2. Returns entity count, episode count, last update
 3. Shows database health
@@ -142,11 +156,13 @@ This triggers the GetStatus workflow which:
 ### Clear Knowledge
 
 Via Claude Code skill:
+
 ```
 Clear my knowledge graph
 ```
 
 This triggers the ClearGraph workflow which:
+
 1. Confirms destructive action
 2. Deletes all entities and relationships
 3. Rebuilds indices
@@ -182,6 +198,7 @@ bun run tools/knowledge-cli.ts add_episode "CTI Research" "Analysis of threat ac
 ```
 
 **Arguments:**
+
 - `<title>` (required): Episode title
 - `<body>` (required): Episode content
 - `[source_description]` (optional): Source identifier (e.g., 'user-input', 'api-import', 'osint-recon')
@@ -201,10 +218,12 @@ bun run tools/knowledge-cli.ts search_nodes "container orchestration" 10
 ```
 
 **Arguments:**
+
 - `<query>` (required): Search query
 - `[limit]` (optional): Max results (default: 5)
 
 **Output format:**
+
 - Compact format showing entity name, type, and summary
 - ~30% token savings vs raw MCP output
 
@@ -223,10 +242,12 @@ bun run tools/knowledge-cli.ts search_facts "Podman" 10
 ```
 
 **Arguments:**
+
 - `<query>` (required): Entity name or search query
 - `[limit]` (optional): Max facts (default: 5)
 
 **Output format:**
+
 - Shows relationship text and type
 - ~30% token savings vs raw MCP output
 
@@ -245,9 +266,11 @@ bun run tools/knowledge-cli.ts get_episodes 10
 ```
 
 **Arguments:**
+
 - `[limit]` (optional): Max episodes to retrieve (default: 5)
 
 **Output format:**
+
 - Shows episode content and timestamp
 - ~30% token savings vs raw MCP output
 
@@ -260,6 +283,7 @@ bun run tools/knowledge-cli.ts get_status
 ```
 
 **Output includes:**
+
 - Entity count
 - Episode count
 - Last update timestamp
@@ -274,6 +298,7 @@ bun run tools/knowledge-cli.ts clear_graph --force
 ```
 
 **Safety:**
+
 - Requires `--force` flag to confirm
 - Deletes ALL entities, relationships, and episodes
 - Cannot be undone
@@ -287,6 +312,7 @@ bun run tools/knowledge-cli.ts health
 ```
 
 **Output:**
+
 - Server status
 - Connection state
 - Response time
@@ -421,6 +447,7 @@ bun run tools/knowledge-cli.ts search_nodes "AI models" --metrics
 ```
 
 **Metrics output includes:**
+
 - Operation name
 - Raw size (bytes and estimated tokens)
 - Compact size (bytes and estimated tokens)
@@ -449,6 +476,7 @@ When using `--metrics-file`, metrics are written as JSONL (one JSON object per l
 ```
 
 This format is ideal for:
+
 - Time-series analysis
 - Performance monitoring
 - Cost tracking
@@ -462,6 +490,7 @@ bun run tools/install.ts
 ```
 
 Guides through:
+
 1. System analysis and conflict detection
 2. LLM provider selection
 3. API key configuration
@@ -469,6 +498,7 @@ Guides through:
 5. Service startup
 
 **Options:**
+
 - `--yes` / `-y`: Non-interactive mode with defaults
 - `--update` / `-u`: Update existing installation
 
@@ -481,6 +511,7 @@ curl http://localhost:8000/health
 ```
 
 Returns server health status as JSON:
+
 ```json
 {
   "status": "healthy",
@@ -564,6 +595,7 @@ bun run server-cli start
 Location: `~/.claude/.env` (or `$PAI_DIR/.env`)
 
 Contains all Madeinoz Knowledge System configuration:
+
 - API keys
 - LLM provider settings
 - Database backend configuration

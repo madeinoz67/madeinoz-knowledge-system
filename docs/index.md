@@ -139,4 +139,3 @@ bun run ~/.claude/hooks/sync-memory-to-knowledge.ts --dry-run
 - **Knowledge graph engine**: [Graphiti](https://github.com/getzep/graphiti) by Zep AI
 - **Graph databases**: [Neo4j](https://neo4j.com/) and [FalkorDB](https://www.falkordb.com/)
 - **Part of**: [Personal AI Infrastructure (PAI)](https://github.com/danielmiessler/PAI)
-
