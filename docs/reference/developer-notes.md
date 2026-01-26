@@ -95,7 +95,7 @@ static readonly IMAGES = {
 ```
 
 2. Remove custom image build from documentation
-3. Archive patches to `src/skills/server/patches/archived/` for reference
+3. Archive patches to `docker/patches/archived/` for reference
 4. Update this document with migration completion date
 
 **Status:** Waiting for upstream to merge fixes. Track progress at:

@@ -93,7 +93,7 @@ LLM_PROVIDER=openai
 
 #### Patch 2: graphiti_mcp_server.py - Search All Groups
 
-**Location:** `src/skills/server/patches/graphiti_mcp_server.py`
+**Location:** `docker/patches/graphiti_mcp_server.py`
 
 **Purpose:** Enables searching across ALL groups when no `group_ids` are specified.
 
@@ -115,7 +115,7 @@ GRAPHITI_SEARCH_ALL_GROUPS=false  # Disable (original behavior)
 
 #### Patch 3: factories.py - Ollama and OpenAI-Compatible Support
 
-**Location:** `src/skills/server/patches/factories.py`
+**Location:** `docker/patches/factories.py`
 
 **Purpose:** Enables support for:
 - **Ollama** (local, no API key required)
@@ -241,7 +241,7 @@ These providers use the same API format as OpenAI but with different base URLs:
 
 **Madeinoz Patch (Ollama + OpenAI-Compatible Support):**
 
-This pack includes a patch (`src/skills/server/patches/factories.py`) that enables support for:
+This pack includes a patch (`docker/patches/factories.py`) that enables support for:
 - **Ollama** (local, no API key required)
 - **OpenAI-compatible providers** (OpenRouter, Together AI, Fireworks AI, DeepInfra)
 
@@ -1251,7 +1251,7 @@ The patch:
 - Dynamically queries all available group_ids at search time
 - Uses a 30-second cache to balance performance and freshness
 - Ensures new groups are searchable within 30 seconds of creation
-- Located at: `src/skills/server/patches/graphiti_mcp_server.py`
+- Located at: `docker/patches/graphiti_mcp_server.py`
 
 **Verify patch status:**
 ```bash
