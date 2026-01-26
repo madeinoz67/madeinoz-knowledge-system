@@ -7,11 +7,15 @@ FROM zepai/knowledge-graph-mcp:standalone
 LABEL description="Madeinoz Knowledge System - Graphiti MCP with Ollama/OpenRouter support, Neo4j + FalkorDB, Lucene sanitization"
 LABEL version="1.1.0"
 
-# Copy patches directory
-# Note: These are .py files that monkey-patch Graphiti at runtime
-COPY docker/patches/factories.py /app/mcp/patches/
-COPY docker/patches/graphiti_mcp_server.py /app/mcp/patches/
-COPY docker/patches/falkordb_lucene.py /app/mcp/patches/
+# Apply patches by replacing original files
+# factories.py - Adds Ollama/OpenRouter support (fixes GitHub #1116)
+COPY docker/patches/factories.py /app/mcp/src/services/factories.py
+
+# graphiti_mcp_server.py - Enables search across all groups
+COPY docker/patches/graphiti_mcp_server.py /app/mcp/src/graphiti_mcp_server.py
+
+# falkordb_lucene.py - Lucene query sanitization (new file, not a replacement)
+COPY docker/patches/falkordb_lucene.py /app/mcp/src/utils/falkordb_lucene.py
 
 # Copy both Neo4j and FalkorDB configs
 COPY src/skills/server/config-neo4j.yaml /tmp/config-neo4j.yaml
