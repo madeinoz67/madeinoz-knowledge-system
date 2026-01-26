@@ -66,22 +66,23 @@ The `lib/` directory contains shared utilities used by skill tools:
 
 ## Pack-Level Tools
 
-The following tools are in `src/server/` (not installed with skill):
+The following tools are in `src/skills/` (not installed with skill):
 
-- `install.ts` - Full installation wizard
-- `diagnose.ts` - Diagnostic and troubleshooting tool
-- `server-cli.ts` - Unified server CLI (start, stop, restart, status, logs)
-- `knowledge.ts` - Knowledge CLI wrapper
+- `server/install.ts` - Full installation wizard
+- `server/diagnose.ts` - Diagnostic and troubleshooting tool
+- `server/server-cli.ts` - Unified server CLI (start, stop, restart, status, logs)
+- `tools/knowledge-cli.ts` - Knowledge CLI wrapper (token-efficient MCP operations)
 
 Run these from the pack directory:
 
 ```bash
-bun run src/server/install.ts      # Interactive installation
-bun run src/server/diagnose.ts     # Run diagnostics
+bun run src/skills/server/install.ts   # Interactive installation
+bun run src/skills/server/diagnose.ts  # Run diagnostics
 bun run server-cli start               # Start the server
 bun run server-cli stop                # Stop the server
 bun run server-cli status              # Check status
 bun run server-cli logs                # View logs
+bun run src/skills/tools/knowledge-cli.ts search_nodes "query"  # Knowledge CLI
 ```
 
 ## Tool Development
