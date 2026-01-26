@@ -121,7 +121,7 @@ jobs:
           file: ./docker/Dockerfile
           platforms: linux/amd64
           push: false
-          tags: ${{ env.IMAGE_NAME }}:test
+          tags: ghcr.io/madeinoz67/madeinoz-knowledge-system:test
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
