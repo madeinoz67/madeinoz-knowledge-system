@@ -180,7 +180,8 @@ async function start(): Promise<void> {
       cli.url('Neo4j Browser', `http://localhost:${browserPort}`);
       cli.url('Bolt', `bolt://localhost:${flags.dev ? 7688 : 7687}`);
     } else {
-      cli.url('FalkorDB Browser', 'http://localhost:3000');
+      const falkorPort = flags.dev ? 3001 : 3000;
+      cli.url('FalkorDB Browser', `http://localhost:${falkorPort}`);
       cli.url('Redis', 'localhost:6379');
     }
     const mcpPort = flags.dev ? 8001 : 8000;
@@ -276,7 +277,8 @@ async function restart(): Promise<void> {
       cli.url('Neo4j Browser', `http://localhost:${browserPort}`);
       cli.url('Bolt', `bolt://localhost:${flags.dev ? 7688 : 7687}`);
     } else {
-      cli.url('FalkorDB Browser', 'http://localhost:3000');
+      const falkorPort = flags.dev ? 3001 : 3000;
+      cli.url('FalkorDB Browser', `http://localhost:${falkorPort}`);
       cli.url('Redis', 'localhost:6379');
     }
     const mcpPort = flags.dev ? 8001 : 8000;
@@ -338,7 +340,7 @@ async function status(): Promise<void> {
 
   // Determine ports based on database type and mode
   const mcpPort = flags.dev ? 8001 : 8000;
-  const dbPort = databaseType === 'neo4j' ? (flags.dev ? 7475 : 7474) : 3000;
+  const dbPort = databaseType === 'neo4j' ? (flags.dev ? 7475 : 7474) : (flags.dev ? 3001 : 3000);
   const dbName = databaseType === 'neo4j' ? 'Neo4j Browser' : 'FalkorDB UI';
 
   // Test health endpoint

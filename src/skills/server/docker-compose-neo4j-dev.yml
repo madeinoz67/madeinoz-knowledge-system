@@ -1,0 +1,76 @@
+# Docker Compose configuration for Madeinoz Knowledge System - DEVELOPMENT
+# Isolated from production with different ports, volumes, and container names
+#
+# Usage:
+#   ./start.sh --dev     # Start dev environment
+#   ./start.sh           # Start production environment
+#
+# Port Mapping (Dev vs Prod):
+#   Dev  -> Prod
+#   7475 -> 7474  (Neo4j Browser)
+#   7688 -> 7687  (Neo4j Bolt)
+#   8001 -> 8000  (MCP Server)
+#
+# Volumes are prefixed with 'dev-' to isolate from production data
+
+name: madeinoz-knowledge-system-dev
+
+networks:
+  madeinoz-knowledge-dev-net:
+    driver: bridge
+
+volumes:
+  dev-neo4j-data:
+    driver: local
+  dev-neo4j-logs:
+    driver: local
+
+services:
+  # Neo4j Graph Database (Development)
+  neo4j:
+    image: neo4j:latest
+    container_name: madeinoz-knowledge-neo4j-dev
+    restart: unless-stopped
+    networks:
+      - madeinoz-knowledge-dev-net
+    ports:
+      - "7475:7474"  # Neo4j Browser HTTP (dev port)
+      - "7688:7687"  # Bolt protocol (dev port)
+    volumes:
+      - dev-neo4j-data:/data
+      - dev-neo4j-logs:/logs
+    environment:
+      # NEO4J_PASSWORD interpolated from host env (start.sh exports it)
+      - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD:-devpassword}
+      - NEO4J_server_memory_heap_initial__size=256m
+      - NEO4J_server_memory_heap_max__size=512m
+      - NEO4J_server_memory_pagecache_size=256m
+      - NEO4J_dbms_usage__report_enabled=false
+    healthcheck:
+      test: ["CMD", "wget", "-O", "/dev/null", "http://localhost:7474"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  # Graphiti MCP Server (Development)
+  graphiti-mcp:
+    image: madeinoz-knowledge-system:latest
+    container_name: madeinoz-knowledge-graph-mcp-dev
+    restart: unless-stopped
+    networks:
+      - madeinoz-knowledge-dev-net
+    ports:
+      - "8001:8000"  # MCP HTTP endpoint (dev port)
+    env_file:
+      - /tmp/madeinoz-knowledge-mcp-dev.env
+    depends_on:
+      neo4j:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "--max-time", "5", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    command: ["uv", "run", "main.py"]
