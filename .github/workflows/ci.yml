@@ -125,6 +125,15 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Scan Docker image with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'image'
+          image-ref: ghcr.io/madeinoz67/madeinoz-knowledge-system:test
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+
       # Build documentation (validate only)
       - name: Setup Python
         uses: actions/setup-python@v5
