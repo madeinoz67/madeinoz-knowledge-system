@@ -160,6 +160,123 @@ MADEINOZ_KNOWLEDGE_NEO4J_USER=your-username
 MADEINOZ_KNOWLEDGE_NEO4J_PASSWORD=your-password
 ```
 
+### Changing Neo4j Password
+
+#### Why This Process Is Required
+
+Neo4j's security architecture stores credentials **inside the persistent data volume**, not in environment variables. Understanding this is critical:
+
+1. **First Startup Behavior**: The `NEO4J_AUTH` environment variable is only read on **first startup** when no user data exists. Neo4j uses it to create the initial `neo4j` user with the specified password.
+
+2. **Password Persistence**: After initialization, the password is stored encrypted in the `/data` volume as part of the `system` database. The `NEO4J_AUTH` environment variable is **ignored on subsequent startups**.
+
+3. **Why Environment Variables Don't Work**: Many users expect changing `NEO4J_AUTH` to update the password—this is a common misconception. Since the password lives in the data volume, changing environment variables has no effect on existing databases.
+
+4. **The Correct Approach**: You must use Cypher commands (`ALTER CURRENT USER` or `ALTER USER`) to modify passwords in a running database. This ensures the change is written to the `system` database where credentials are actually stored.
+
+This design ensures that your credentials remain consistent with your data, and that accidentally changing an environment variable cannot lock you out of your database.
+
+**Reference**: [Neo4j Operations Manual - Manage Users](https://neo4j.com/docs/operations-manual/current/authentication-authorization/manage-users/)
+
+#### Method 1: Using Neo4j Browser (Recommended)
+
+The Neo4j Browser provides a web interface for database administration.
+
+1. **Open Neo4j Browser:**
+   ```
+   http://localhost:7474
+   ```
+
+2. **Login with current credentials:**
+   - Username: `neo4j`
+   - Password: (your current password, default: `madeinozknowledge`)
+
+3. **Run the official password change command:**
+   ```cypher
+   ALTER CURRENT USER SET PASSWORD FROM 'current-password' TO 'new-password'
+   ```
+
+   This command requires you to know your current password and changes it atomically in the `system` database.
+
+4. **Update your `.env` file to match:**
+   ```bash
+   # Edit ~/.claude/.env
+   MADEINOZ_KNOWLEDGE_NEO4J_PASSWORD=new-password
+   ```
+
+   **Important:** The `.env` file must match the database password for the MCP server to connect.
+
+5. **Restart the MCP server to apply the new password:**
+   ```bash
+   bun run src/skills/tools/stop.ts
+   bun run src/skills/tools/start.ts
+   ```
+
+#### Method 2: Using Cypher Shell (Command Line)
+
+For users who prefer command-line administration.
+
+1. **Connect to the Neo4j container:**
+   ```bash
+   docker exec -it madeinoz-knowledge-neo4j cypher-shell -u neo4j -p 'current-password'
+   ```
+
+2. **Run the official password change command:**
+   ```cypher
+   ALTER CURRENT USER SET PASSWORD FROM 'current-password' TO 'new-password';
+   ```
+
+   Then exit the shell:
+   ```
+   :exit
+   ```
+
+3. **Update `.env` and restart** (same as Method 1, steps 4-5)
+
+#### Method 3: Admin Changing Another User's Password (Enterprise)
+
+If you have admin privileges, you can change any user's password:
+
+```cypher
+ALTER USER username SET PASSWORD 'new-password'
+```
+
+Optionally force a password change on next login:
+
+```cypher
+ALTER USER username SET PASSWORD 'new-password' CHANGE REQUIRED
+```
+
+#### Password Requirements
+
+- Minimum 8 characters (Neo4j default)
+- Avoid special characters that may cause shell escaping issues
+- Store securely - this password protects your knowledge graph
+
+#### ⚠️ CRITICAL: Never Delete Data Volumes
+
+**NEVER use `docker compose down -v` or `podman compose down -v` to "reset" a forgotten password.** The `-v` flag deletes all data volumes, permanently destroying your knowledge graph. This data is irreplaceable.
+
+If you've forgotten your password:
+1. Try the default password: `madeinozknowledge`
+2. Check your `~/.claude/.env` for `MADEINOZ_KNOWLEDGE_NEO4J_PASSWORD`
+3. Use Method 1 or Method 2 above with a password you remember having set
+4. If all else fails, contact the community for recovery assistance before considering any destructive action
+
+#### Troubleshooting Password Issues
+
+**"AuthenticationRateLimit" error:**
+Neo4j blocks connections after too many failed attempts. Wait 30 seconds or restart the Neo4j container:
+```bash
+docker restart madeinoz-knowledge-neo4j
+```
+
+**"Authentication failed" after password change:**
+The MCP server is using the old password. Ensure:
+1. `.env` file has the new password
+2. MCP server was restarted after the change
+3. No shell environment variable is overriding the `.env` value
+
 ### FalkorDB Configuration
 
 ```bash
@@ -220,7 +337,7 @@ Controls concurrent API requests to LLM provider. Tune based on API rate limits:
 ### Search All Groups (Neo4j only)
 
 ```bash
-MADEINOZ_KNOWLEDGE_SEARCH_ALL_GROUPS=true
+GRAPHITI_SEARCH_ALL_GROUPS=true
 ```
 
 When enabled, searches automatically query all available group_ids without explicitly specifying them. This ensures knowledge stored in different groups is discoverable:
@@ -344,7 +461,7 @@ MADEINOZ_KNOWLEDGE_GROUP_ID=main
 # Create additional groups by using different group_id in workflows
 
 # Search all groups automatically
-MADEINOZ_KNOWLEDGE_SEARCH_ALL_GROUPS=true
+GRAPHITI_SEARCH_ALL_GROUPS=true
 ```
 
 ## Verification

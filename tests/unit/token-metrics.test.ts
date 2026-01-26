@@ -17,7 +17,7 @@ import {
   TOKEN_SAVINGS_TARGETS,
   type TokenMetrics,
   type AggregateStats,
-} from '../../src/server/lib/token-metrics';
+} from '../../src/skills/server/lib/token-metrics';
 
 describe('token-metrics', () => {
   // T032: Unit test for measureTokens

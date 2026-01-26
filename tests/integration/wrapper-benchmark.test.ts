@@ -4,13 +4,13 @@
  * @module tests/integration/wrapper-benchmark.test.ts
  */
 import { describe, test, expect } from 'bun:test';
-import { formatOutput } from '../../src/server/lib/output-formatter';
+import { formatOutput } from '../../src/skills/server/lib/output-formatter';
 import {
   measureTokens,
   generateBenchmarkReport,
   TOKEN_SAVINGS_TARGETS,
   type TokenMetrics,
-} from '../../src/server/lib/token-metrics';
+} from '../../src/skills/server/lib/token-metrics';
 
 describe('wrapper-benchmark', () => {
   // Helper to measure token savings for a formatter

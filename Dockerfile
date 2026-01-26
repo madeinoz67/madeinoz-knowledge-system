@@ -4,21 +4,23 @@
 
 FROM zepai/knowledge-graph-mcp:standalone
 
-LABEL description="Madeinoz Knowledge System - Graphiti MCP with Ollama/OpenRouter support, Neo4j + FalkorDB"
-LABEL version="1.0.1"
+LABEL description="Madeinoz Knowledge System - Graphiti MCP with Ollama/OpenRouter support, Neo4j + FalkorDB, Lucene sanitization"
+LABEL version="1.1.0"
 
-# Copy patches from src/server directory
-COPY src/server/patches/factories.patch /tmp/
-COPY src/server/patches/graphiti_mcp_server.patch /tmp/
-RUN cat /tmp/factories.patch > /app/mcp/src/services/factories.py && \
-    cat /tmp/graphiti_mcp_server.patch > /app/mcp/src/graphiti_mcp_server.py && \
-    rm /tmp/*.patch
+# Copy patches from src/server/patches directory
+# Note: These are .py files that get copied into the patches/ directory
+# The patches are imported at runtime to monkey-patch Graphiti
+COPY src/server/patches/factories.py /app/mcp/patches/
+COPY src/server/patches/graphiti_mcp_server.py /app/mcp/patches/
+COPY src/server/patches/falkordb_lucene.py /app/mcp/patches/
 
 # Copy both Neo4j and FalkorDB configs
 COPY src/server/config-neo4j.yaml /tmp/config-neo4j.yaml
 COPY src/server/config-falkordb.yaml /tmp/config-falkordb.yaml
 
-# Copy and configure entrypoint script for prefix mapping and config selection
+# Copy and configure entrypoint script for config selection
+# Note: Environment variables are provided by docker compose via env_file
+# The entrypoint only selects the appropriate config file (neo4j/falkordb)
 COPY src/server/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
@@ -26,13 +28,13 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 ENV GRAPHITI_GROUP_ID=main \
     SEMAPHORE_LIMIT=10 \
     GRAPHITI_TELEMETRY_ENABLED=false \
-    SEARCH_ALL_GROUPS=true \
+    GRAPHITI_SEARCH_ALL_GROUPS=true \
     DATABASE_TYPE=neo4j
 
 # Expose ports
 EXPOSE 8000
 
-# Set entrypoint to handle MADEINOZ_KNOWLEDGE_* prefix mapping and config selection
+# Set entrypoint to select appropriate config based on DATABASE_TYPE
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 # Health check

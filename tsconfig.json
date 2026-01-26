@@ -54,19 +54,11 @@
     // Path Mapping (for clean imports)
     "baseUrl": ".",
     "paths": {
-      "@server/*": ["./src/server/*"],
-      "@lib/*": ["./src/server/lib/*"],
+      "@server/*": ["./src/skills/server/*"],
+      "@lib/*": ["./src/skills/lib/*"],
       "@tools/*": ["./src/skills/tools/*"]
     }
   },
-  "include": [
-    "src/**/*",
-    "tests/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "**/*.sh",
-    "**/*.py"
-  ]
+  "include": ["src/**/*", "tests/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.sh", "**/*.py"]
 }

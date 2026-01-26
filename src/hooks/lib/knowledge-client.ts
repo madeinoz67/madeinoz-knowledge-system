@@ -4,9 +4,10 @@
  * Lightweight client for hook integration with the knowledge graph MCP.
  * Uses database-specific protocols: FalkorDB uses SSE (/sse), Neo4j uses HTTP POST (/mcp).
  * Designed for fail-safe operation with timeouts and graceful degradation.
+ *
+ * NOTE: Lucene sanitization is now handled server-side by the Python patch
+ * (falkordb_lucene.py). The client passes group_ids directly without escaping.
  */
-
-import { sanitizeGroupId } from '../../server/lib/lucene.js';
 
 export interface KnowledgeClientConfig {
   baseURL: string;
@@ -573,18 +574,13 @@ export async function addEpisode(
   params: AddEpisodeParams,
   config: KnowledgeClientConfig = DEFAULT_CONFIG
 ): Promise<AddEpisodeResult> {
-  // Sanitize group_id if using FalkorDB (requires lucene escaping)
-  let sanitizedGroupId = params.group_id;
-  if (isFalkorDB() && params.group_id) {
-    sanitizedGroupId = sanitizeGroupId(params.group_id);
-  }
-
+  // Server-side sanitization handles Lucene escaping for FalkorDB
   const requestArgs = {
     name: params.name.slice(0, 200),
     episode_body: params.episode_body.slice(0, 5000),
     source: params.source || 'text',
     source_description: params.source_description || '',
-    ...(sanitizedGroupId && { group_id: sanitizedGroupId }),
+    ...(params.group_id && { group_id: params.group_id }),
     ...(params.reference_timestamp && { reference_timestamp: params.reference_timestamp }),
   };
 
