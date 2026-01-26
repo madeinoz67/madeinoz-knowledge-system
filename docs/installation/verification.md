@@ -102,7 +102,7 @@ podman ps | grep madeinoz-knowledge
 docker ps | grep madeinoz-knowledge
 
 # Or use the status script
-bun run src/skills/tools/status.ts
+bun run server-cli status
 ```
 
 **Expected result (FalkorDB backend):**

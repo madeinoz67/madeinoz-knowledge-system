@@ -1,0 +1,10 @@
+name: test
+services:
+  neo4j:
+    image: neo4j:latest
+    environment:
+      - NEO4J_AUTH=neo4j/password
+  test:
+    image: alpine
+    depends_on:
+      - neo4j

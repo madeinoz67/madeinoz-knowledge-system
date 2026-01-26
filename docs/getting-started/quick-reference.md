@@ -60,27 +60,27 @@ One-page reference for the Madeinoz Knowledge System.
 ### Status
 ```bash
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
-bun run src/server/status.ts
+bun run server-cli status
 ```
 
 ### Start
 ```bash
-bun run src/server/start.ts
+bun run server-cli start
 ```
 
 ### Stop
 ```bash
-bun run src/server/stop.ts
+bun run server-cli stop
 ```
 
 ### Logs
 ```bash
-bun run src/server/logs.ts
+bun run server-cli logs
 ```
 
 ### Restart
 ```bash
-bun run src/server/stop.ts && bun run src/server/start.ts
+bun run server-cli restart
 ```
 
 ## Configuration File
@@ -176,10 +176,10 @@ Use these types to filter searches: "Find my procedures about X"
 ### Issue: Can't connect
 ```bash
 # Check if running
-bun run src/server/status.ts
+bun run server-cli status
 
 # Start if needed
-bun run src/server/start.ts
+bun run server-cli start
 
 # Check endpoint
 curl http://localhost:8000/sse
@@ -259,27 +259,29 @@ Per operation:
 
 - `$PAI_DIR/.env` (defaults to `~/.claude/.env`) - All configuration
 
-**Pack Directory:**
+**Installed Skill Directory:**
 
 ```
-~/.config/pai/Packs/madeinoz-knowledge-system/
+~/.claude/skills/Knowledge/
+├── SKILL.md                 # Skill definition with routing
 ├── config/.env.example      # Configuration template (reference only)
-├── src/server/              # Server scripts
-│   ├── run.ts              # Start everything
-│   ├── start.ts            # Start containers
-│   ├── stop.ts             # Stop containers
-│   ├── status.ts           # Check status
-│   └── logs.ts             # View logs
-├── src/skills/              # PAI skill files
-│   ├── SKILL.md            # Skill definition
-│   └── workflows/*.md      # Workflow definitions
-├── src/hooks/               # Integration hooks
-└── docs/                    # User documentation
-    ├── getting-started/    # Getting started guides
-    ├── installation.md     # Setup guide
-    ├── usage.md            # How-to guide
-    ├── concepts.md         # Deep dive
-    └── troubleshooting.md  # Fix problems
+├── tools/                   # Server and CLI tools
+│   ├── server-cli.ts       # Unified server CLI (start, stop, restart, status, logs)
+│   ├── knowledge-cli.ts    # Knowledge CLI (add, search, status)
+│   └── install.ts          # Interactive installer
+├── workflows/               # Workflow definitions
+│   ├── CaptureEpisode.md   # Store knowledge
+│   ├── SearchKnowledge.md  # Search entities
+│   ├── SearchFacts.md      # Find relationships
+│   ├── SearchByDate.md     # Temporal search
+│   ├── GetRecent.md        # Recent additions
+│   ├── GetStatus.md        # System health
+│   ├── ClearGraph.md       # Clear knowledge
+│   └── BulkImport.md       # Bulk import
+├── docker/                  # Container configuration
+│   ├── docker-compose-*.yml
+│   └── podman-compose-*.yml
+└── lib/                     # Shared libraries
 ```
 
 ## Keyboard Shortcuts
@@ -313,13 +315,13 @@ Learnings and research automatically sync from `~/.claude/MEMORY/` to knowledge 
 **Manual sync:**
 
 ```bash
-bun run src/hooks/sync-memory-to-knowledge.ts
+bun run ~/.claude/hooks/sync-memory-to-knowledge.ts
 ```
 
 **Check what will sync:**
 
 ```bash
-bun run src/hooks/sync-memory-to-knowledge.ts --dry-run
+bun run ~/.claude/hooks/sync-memory-to-knowledge.ts --dry-run
 ```
 
 ## Backup and Restore
@@ -379,7 +381,7 @@ See the [Backup & Restore Guide](../usage/backup-restore.md) for detailed instru
 ## Common Errors
 
 **"Connection refused"**
-→ Server not running. Run: `bun run src/server/start.ts`
+→ Server not running. Run: `bun run server-cli start`
 
 **"API key invalid"**
 → Check PAI config (`$PAI_DIR/.env`) has correct key
@@ -395,7 +397,7 @@ See the [Backup & Restore Guide](../usage/backup-restore.md) for detailed instru
 
 ## Getting Help
 
-1. Check logs: `bun run src/server/logs.ts`
+1. Check logs: `bun run server-cli logs`
 2. Read the [Troubleshooting Guide](../troubleshooting/common-issues.md)
 3. Review the [Knowledge Graph Concepts](../concepts/knowledge-graph.md)
 4. Check the [Architecture](../concepts/architecture.md)

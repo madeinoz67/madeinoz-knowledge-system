@@ -273,6 +273,51 @@ You: What did I learn about containers this week?
 
 Shows only recent knowledge about containers.
 
+### Temporal Search (Date Filtering)
+
+Search your knowledge by date using the `--since` and `--until` flags:
+
+**Today's knowledge:**
+```
+You: What did I learn today?
+```
+
+**Last 7 days:**
+```
+You: What did I learn this week about APIs?
+```
+
+**Using CLI for precise date filtering:**
+```bash
+# Today's knowledge
+bun run tools/knowledge-cli.ts search_nodes "AI" --since today
+
+# Last 7 days
+bun run tools/knowledge-cli.ts search_facts "decisions" --since 7d
+
+# Specific date range
+bun run tools/knowledge-cli.ts search_nodes "project" --since 2026-01-01 --until 2026-01-15
+
+# Yesterday only
+bun run tools/knowledge-cli.ts search_nodes "learning" --since yesterday --until today
+```
+
+**Supported date formats:**
+
+| Format | Example | Description |
+|--------|---------|-------------|
+| `today` | `--since today` | Start of current day |
+| `yesterday` | `--since yesterday` | Start of previous day |
+| `Nd` | `--since 7d` | N days ago |
+| `Nw` | `--since 2w` | N weeks ago |
+| `Nm` | `--since 1m` | N months ago |
+| ISO 8601 | `--since 2026-01-15` | Specific date |
+
+Temporal search helps you:
+- Review what you learned on a specific day
+- Find decisions made during a particular period
+- Track knowledge accumulation over time
+
 ### Getting System Status
 
 ```
@@ -461,15 +506,14 @@ The hook runs at session start and syncs new captures automatically.
 
 **Manual Sync:**
 ```bash
-cd ~/.config/pai/Packs/madeinoz-knowledge-system
-bun run src/hooks/sync-memory-to-knowledge.ts --verbose
+bun run ~/.claude/hooks/sync-memory-to-knowledge.ts --verbose
 ```
 
 ### Checking Sync Status
 
 ```bash
 # Dry run - see what would be synced
-bun run src/hooks/sync-memory-to-knowledge.ts --dry-run
+bun run ~/.claude/hooks/sync-memory-to-knowledge.ts --dry-run
 
 # View sync history
 cat ~/.claude/MEMORY/STATE/knowledge-sync/sync-state.json

@@ -41,7 +41,7 @@ bun run diagnose              # System diagnostics
 ```
 src/
 ├── server/                   # MCP server orchestration
-│   ├── run.ts               # Main entry - starts containers (Neo4j or FalkorDB)
+│   ├── server-cli.ts        # Main entry - starts containers (Neo4j or FalkorDB)
 │   ├── install.ts           # Interactive installer with backend selection
 │   ├── diagnose.ts          # System diagnostics
 │   ├── knowledge.ts         # Knowledge CLI (token-efficient wrapper)
@@ -50,8 +50,10 @@ src/
 │   │   ├── config.ts        # Config loader and validation
 │   │   ├── cli.ts           # CLI utilities
 │   │   └── lucene.ts        # Lucene query sanitization for special characters
-│   ├── docker-compose.yml         # FalkorDB backend
-│   └── docker-compose-neo4j.yml   # Neo4j backend
+│   ├── docker-compose-falkordb.yml         # FalkorDB backend (Docker)
+│   ├── docker-compose-neo4j.yml           # Neo4j backend (Docker)
+│   ├── podman-compose-falkordb.yml        # FalkorDB backend (Podman)
+│   └── podman-compose-neo4j.yml           # Neo4j backend (Podman)
 ├── skills/                   # PAI Skill definition
 │   ├── SKILL.md             # Main skill with intent routing table
 │   ├── workflows/           # 7 workflows: Capture, Search, Facts, Recent, Status, Clear, BulkImport

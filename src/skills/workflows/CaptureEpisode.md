@@ -58,24 +58,37 @@ source_description: "Technical learning about Podman"
 
 ---
 
-## Step 4: Call Knowledge CLI
+## Step 4: Add Episode (CLI-First, MCP-Fallback)
 
-**Use the Knowledge CLI (preferred - 25%+ token savings):**
+### Primary: Knowledge CLI (via Bash)
+
+**ALWAYS try CLI first - it's more reliable and token-efficient:**
 
 ```bash
-bun run src/server/knowledge.ts add_episode "Episode Title" "Content to store" "Source description"
+bun run tools/knowledge-cli.ts add_episode "Episode Title" "Content to store" "Source description"
 ```
 
+**CRITICAL: This command requires TWO separate quoted arguments (title AND body).**
+
+Passing a single argument will fail with: `Usage: add_episode <title> <body> [source_description]`
+
 **Arguments:**
-1. Title (required) - Brief title describing the content
-2. Body (required) - The full content to store in the graph
-3. Source description (optional) - Where this came from
+1. **Title** (required) - Brief title describing the content (extract from user's request)
+2. **Body** (required) - The full content to store in the graph
+3. **Source description** (optional) - Where this came from
+
+**When user says "remember that X":**
+- Extract a short title from the content (e.g., "Podman Volume Syntax")
+- Use the full content as the body
+- Pass both as separate quoted strings
 
 **Options:**
 - `--raw` - Output raw JSON instead of compact format
 - `--metrics` - Display token metrics after operation
 
-**Alternative: Direct MCP Tool Call (for programmatic access):**
+### Fallback: MCP Tool (Only if CLI fails)
+
+**⚠️ Only use MCP if CLI returns connection/execution errors.**
 
 > **MCP Tool:** `add_memory` (internally adds an "episode" to the graph)
 
@@ -204,7 +217,7 @@ add_episode({
 
 **Error: "Connection refused"**
 - Graphiti MCP server is not running
-- Start server: `bun run src/server/run.ts`
+- Start server: `bun run server-cli start`
 
 **Error: "API key not configured"**
 - MADEINOZ_KNOWLEDGE_OPENAI_API_KEY is missing or invalid

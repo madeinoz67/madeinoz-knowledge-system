@@ -2,6 +2,162 @@
 
 **This guide is designed for AI agents installing this pack into a user's infrastructure.**
 
+## Environment Variable Configuration
+
+### Madeinoz Knowledge System Variable Prefix
+
+All configuration variables use the `MADEINOZ_KNOWLEDGE_` prefix to avoid conflicts with other PAI packs. The `entrypoint.sh` script automatically maps these prefixed variables to unprefixed container variables at startup.
+
+**How the mapping works:**
+
+| Prefixed Variable (in `~/.claude/.env`) | Unprefixed Variable (inside container) |
+|----------------------------------------|----------------------------------------|
+| `MADEINOZ_KNOWLEDGE_LLM_PROVIDER` | `LLM_PROVIDER` |
+| `MADEINOZ_KNOWLEDGE_MODEL_NAME` | `MODEL_NAME` |
+| `MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER` | `EMBEDDER_PROVIDER` |
+| `MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL` | `EMBEDDER_MODEL` |
+| `MADEINOZ_KNOWLEDGE_OPENAI_API_KEY` | `OPENAI_API_KEY` |
+| `MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL` | `OPENAI_BASE_URL` |
+| `MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER_URL` | `EMBEDDER_PROVIDER_URL` |
+| `MADEINOZ_KNOWLEDGE_ANTHROPIC_API_KEY` | `ANTHROPIC_API_KEY` |
+| `MADEINOZ_KNOWLEDGE_GOOGLE_API_KEY` | `GOOGLE_API_KEY` |
+| `MADEINOZ_KNOWLEDGE_GROQ_API_KEY` | `GROQ_API_KEY` |
+| `MADEINOZ_KNOWLEDGE_VOYAGE_API_KEY` | `VOYAGE_API_KEY` |
+| `MADEINOZ_KNOWLEDGE_NEO4J_URI` | `NEO4J_URI` |
+| `MADEINOZ_KNOWLEDGE_NEO4J_USER` | `NEO4J_USER` |
+| `MADEINOZ_KNOWLEDGE_NEO4J_PASSWORD` | `NEO4J_PASSWORD` |
+| `MADEINOZ_KNOWLEDGE_FALKORDB_HOST` | `FALKORDB_HOST` |
+| `MADEINOZ_KNOWLEDGE_FALKORDB_PORT` | `FALKORDB_PORT` |
+| `MADEINOZ_KNOWLEDGE_SEMAPHORE_LIMIT` | `SEMAPHORE_LIMIT` |
+| `MADEINOZ_KNOWLEDGE_GROUP_ID` | `GRAPHITI_GROUP_ID` |
+
+**Benefits of the prefix system:**
+
+- **Clear ownership:** Each variable is pack-specific
+- **No conflicts:** Different packs can use different API keys and models
+- **Separate billing:** Track costs per pack
+- **Independent rate limits:** One pack does not affect another
+- **Clean .env:** Only prefixed variables needed, no duplication
+
+### Setting Up Configuration
+
+To configure the Madeinoz Knowledge System:
+
+1. **Copy the environment template:**
+   ```bash
+   cp config/.env.example ~/.claude/.env
+   ```
+
+2. **Edit your PAI configuration:**
+   ```bash
+   nano ~/.claude/.env
+   ```
+
+3. **Configure your API keys with the `MADEINOZ_KNOWLEDGE_` prefix:**
+   ```bash
+   # Example configuration
+   MADEINOZ_KNOWLEDGE_LLM_PROVIDER=openai
+   MADEINOZ_KNOWLEDGE_MODEL_NAME=openai/gpt-4o-mini
+   MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=sk-or-v1-your-key-here
+   MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL=https://openrouter.ai/api/v1
+   MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER=ollama
+   MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL=mxbai-embed-large
+   MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER_URL=http://host.containers.internal:11434
+   ```
+
+4. **The entrypoint.sh script handles mapping automatically at container startup.** You do not need to set unprefixed variables.
+
+### Applied Patches
+
+This system includes three patches to the upstream Graphiti MCP server:
+
+#### Patch 1: entrypoint.sh - Variable Mapping
+
+**Location:** `src/skills/server/entrypoint.sh`
+
+**Purpose:** Maps `MADEINOZ_KNOWLEDGE_*` prefixed environment variables to unprefixed container variables.
+
+**How it works:**
+- Runs before the main container command
+- Tests each prefixed variable and exports the unprefixed version if set
+- Clean one-way mapping (prefixed -> unprefixed)
+
+**Example:**
+```bash
+# In ~/.claude/.env
+MADEINOZ_KNOWLEDGE_LLM_PROVIDER=openai
+
+# Inside container (mapped by entrypoint.sh)
+LLM_PROVIDER=openai
+```
+
+#### Patch 2: graphiti_mcp_server.py - Search All Groups
+
+**Location:** `docker/patches/graphiti_mcp_server.py`
+
+**Purpose:** Enables searching across ALL groups when no `group_ids` are specified.
+
+**Behavior:**
+- When `GRAPHITI_SEARCH_ALL_GROUPS=true`: Searches all available groups
+- When `GRAPHITI_SEARCH_ALL_GROUPS=false` or unset: Uses original behavior (default group only)
+- Uses a 30-second cache for group discovery to balance performance and freshness
+
+**Configuration:**
+```bash
+# In ~/.claude/.env
+GRAPHITI_SEARCH_ALL_GROUPS=true   # Enable (default)
+GRAPHITI_SEARCH_ALL_GROUPS=false  # Disable (original behavior)
+```
+
+**Why this matters:**
+- Knowledge stored in different groups (e.g., `osint-profiles`, `main`, `research`) becomes discoverable
+- No need to explicitly specify groups in every search query
+
+#### Patch 3: factories.py - Ollama and OpenAI-Compatible Support
+
+**Location:** `docker/patches/factories.py`
+
+**Purpose:** Enables support for:
+- **Ollama** (local, no API key required)
+- **OpenAI-compatible providers** (OpenRouter, Together AI, Fireworks AI, DeepInfra)
+
+**How it works:**
+- Detects provider by URL (e.g., `openrouter.ai`, `api.together.xyz`)
+- Local providers (localhost/LAN): No API key required
+- Cloud providers: Requires provider-specific API key
+- Uses `OpenAIGenericClient` with `/v1/chat/completions` endpoint (compatible everywhere)
+
+**Configuration:**
+```bash
+# Ollama embedder (local, free)
+MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER_URL=http://host.containers.internal:11434
+
+# OpenRouter LLM (recommended)
+MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL=https://openrouter.ai/api/v1
+MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=sk-or-v1-your-key-here
+
+# Together AI LLM
+MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL=https://api.together.xyz/v1
+MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=your-together-key-here
+```
+
+### Embedder Provider URL Configuration
+
+For custom embedder endpoints (like Ollama), set the `MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER_URL` variable:
+
+```bash
+# Docker/Podman containers (default)
+MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER_URL=http://host.containers.internal:11434
+
+# Same machine (no container)
+MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER_URL=http://localhost:11434
+
+# Remote Ollama server
+MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER_URL=http://10.0.0.150:11434
+```
+
+**Note:** The `EMBEDDER_PROVIDER_URL` variable is automatically mapped from the prefixed `MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER_URL`.
+
 ---
 
 **FOR AI AGENTS:** This installation MUST be completed exactly as specified. Follow these rules:
@@ -85,7 +241,7 @@ These providers use the same API format as OpenAI but with different base URLs:
 
 **Madeinoz Patch (Ollama + OpenAI-Compatible Support):**
 
-This pack includes a patch (`src/server/patches/factories.py`) that enables support for:
+This pack includes a patch (`docker/patches/factories.py`) that enables support for:
 - **Ollama** (local, no API key required)
 - **OpenAI-compatible providers** (OpenRouter, Together AI, Fireworks AI, DeepInfra)
 
@@ -110,9 +266,11 @@ The upstream Graphiti MCP server has a bug ([GitHub issue #1116](https://github.
 - `api.perplexity.ai` → Perplexity
 - `api.mistral.ai` → Mistral AI
 
-The patch is automatically mounted when using either docker-compose file:
-- `docker-compose.yml` (FalkorDB backend)
-- `docker-compose-neo4j.yml` (Neo4j backend)
+The patch is automatically mounted when using any of the docker-compose files:
+- `docker-compose-falkordb.yml` (FalkorDB backend, Docker)
+- `docker-compose-neo4j.yml` (Neo4j backend, Docker)
+- `podman-compose-falkordb.yml` (FalkorDB backend, Podman)
+- `podman-compose-neo4j.yml` (Neo4j backend, Podman)
 
 ---
 
@@ -266,8 +424,8 @@ To change providers after initial setup:
 
 2. **Edit the configuration:**
    ```bash
-   # Edit src/server/.env (or wherever your config is)
-   nano src/server/.env
+   # Edit src/skills/server/.env (or wherever your config is)
+   nano src/skills/server/.env
    ```
 
 3. **Update the relevant variables** (see examples above)
@@ -431,7 +589,7 @@ Based on the detection above, follow the appropriate path:
 |----------|---------------|--------|
 | **Clean Install** | No MCP server, ports available, no existing skill | Proceed normally with Step 1 |
 | **Server Running** | MCP server already running | Decide: keep existing (skip to Step 4) or stop/reinstall |
-| **Port Conflict (FalkorDB)** | Ports 8000 or 6379 in use | Stop conflicting services or change ports in run.ts |
+| **Port Conflict (FalkorDB)** | Ports 8000 or 6379 in use | Stop conflicting services or change ports in Docker Compose files |
 | **Port Conflict (Neo4j)** | Ports 7474 or 7687 in use | Stop conflicting services or use FalkorDB backend |
 | **Skill Exists** | Knowledge skill already installed | Backup old skill, compare versions, then replace |
 | **Missing Dependencies** | Podman or Bun not installed | Install dependencies first, then retry |
@@ -575,9 +733,11 @@ echo "Checking pack contents..."
 REQUIRED_FILES=(
     "README.md"
     "SKILL.md"
-    "src/server/run.ts"
-    "src/server/podman-compose.yml"
-    "src/server/docker-compose.yml"
+    "src/skills/server/server-cli.ts"
+    "src/skills/server/podman-compose-falkordb.yml"
+    "src/skills/server/podman-compose-neo4j.yml"
+    "src/skills/server/docker-compose-falkordb.yml"
+    "src/skills/server/docker-compose-neo4j.yml"
     "config/.env.example"
     "src/skills/workflows/CaptureEpisode.md"
     "src/skills/workflows/SearchKnowledge.md"
@@ -1028,7 +1188,7 @@ echo ""
 echo "🚀 Starting MCP Server"
 echo "======================"
 echo ""
-bun run src/server/run.ts
+bun run server-cli start
 
 # Wait for server to initialize
 echo ""
@@ -1062,10 +1222,10 @@ If you prefer Docker Compose, use the appropriate compose file for your backend:
 set -a; source ~/.claude/.env; set +a
 
 # For Neo4j backend (default - includes search-all-groups patch)
-docker compose -f src/server/docker-compose-neo4j.yml up -d
+docker compose -f src/skills/server/docker-compose-neo4j.yml up -d
 
 # For FalkorDB backend (alternative)
-docker compose -f src/server/docker-compose.yml up -d
+docker compose -f src/skills/server/docker-compose-falkordb.yml up -d
 
 # Check status
 bun run src/skills/tools/status.ts
@@ -1082,16 +1242,16 @@ The Neo4j docker-compose includes a patch that can search across ALL groups when
 **Configuration:**
 ```bash
 # In PAI config ($PAI_DIR/.env or ~/.claude/.env) - set to enable/disable the patch
-MADEINOZ_KNOWLEDGE_SEARCH_ALL_GROUPS=true   # Enable (default)
-MADEINOZ_KNOWLEDGE_SEARCH_ALL_GROUPS=false  # Disable (original behavior)
+GRAPHITI_SEARCH_ALL_GROUPS=true   # Enable (default)
+GRAPHITI_SEARCH_ALL_GROUPS=false  # Disable (original behavior)
 ```
 
 The patch:
-- Controlled by `MADEINOZ_KNOWLEDGE_SEARCH_ALL_GROUPS` environment variable
+- Controlled by `GRAPHITI_SEARCH_ALL_GROUPS` environment variable
 - Dynamically queries all available group_ids at search time
 - Uses a 30-second cache to balance performance and freshness
 - Ensures new groups are searchable within 30 seconds of creation
-- Located at: `src/server/patches/graphiti_mcp_server.py`
+- Located at: `docker/patches/graphiti_mcp_server.py`
 
 **Verify patch status:**
 ```bash
@@ -1107,7 +1267,7 @@ When using Neo4j backend, you can access the Neo4j Browser at http://localhost:7
 
 **Troubleshooting:**
 - If server fails to start, check logs: `bun run src/skills/tools/logs.ts`
-- If port is already in use, stop conflicting service or modify `src/server/run.ts` to use different ports
+- If port is already in use, stop conflicting service or modify the Docker Compose files to use different ports
 - If API key validation fails, verify your API key has available credits/quota
 
 ---
@@ -1206,7 +1366,7 @@ echo "  Pack:  $PACK_INSTALL_DIR"
 echo "  Skill: $PAI_SKILLS_DIR/Knowledge"
 echo ""
 echo "Installed files:"
-echo "  ├── src/server/    (docker-compose, patches, CLI)"
+echo "  ├── src/skills/server/    (docker-compose, patches, CLI)"
 echo "  ├── src/skills/    (workflows, tools)"
 echo "  ├── src/hooks/     (memory sync hooks)"
 echo "  └── config/        (.env.example)"
@@ -1623,7 +1783,7 @@ else
 
     # Create a test script that calls the MCP server with a hyphenated group_id
     cat > /tmp/test_lucene_sanitization.ts << 'EOF'
-import { sanitizeGroupId } from './src/server/lib/lucene';
+import { sanitizeGroupId } from './src/skills/server/lib/lucene';
 
 // Test cases with various hyphenated patterns
 const testCases = [
@@ -1657,7 +1817,7 @@ EOF
         echo "  Hyphenated group_ids will be properly escaped in queries"
     else
         echo "⚠️  Lucene sanitization test failed"
-        echo "  Check that src/server/lib/lucene.ts exists and exports sanitizeGroupId"
+        echo "  Check that src/skills/server/lib/lucene.ts exists and exports sanitizeGroupId"
     fi
 
     # Clean up test file
@@ -1753,18 +1913,24 @@ echo "🔗 Installing Memory Sync Hook"
 echo "================================"
 echo ""
 
-# Determine PAI directory and installed pack location
+# Determine PAI directory and pack location
 PAI_DIR="${PAI_DIR:-$HOME/.claude}"
 PACK_INSTALL_DIR="$PAI_DIR/Packs/madeinoz-knowledge-system"
+PACK_SOURCE_DIR="$(pwd)"
 
-# Check if pack is installed (Step 4 must be completed first)
-if [[ ! -d "$PACK_INSTALL_DIR" ]]; then
-    echo "❌ Pack not installed at: $PACK_INSTALL_DIR"
-    echo "   Run Step 4 first to install the full pack."
+# Try installed pack first, fall back to source directory
+if [[ -d "$PACK_INSTALL_DIR" ]]; then
+    echo "Using installed pack: $PACK_INSTALL_DIR"
+    HOOK_SOURCE_DIR="$PACK_INSTALL_DIR/src/hooks"
+elif [[ -d "$PACK_SOURCE_DIR/src/hooks" ]]; then
+    echo "Using source directory: $PACK_SOURCE_DIR"
+    HOOK_SOURCE_DIR="$PACK_SOURCE_DIR/src/hooks"
+else
+    echo "❌ Pack not found at: $PACK_INSTALL_DIR"
+    echo "❌ Source hooks not found at: $PACK_SOURCE_DIR/src/hooks"
+    echo "   Ensure you're in the madeinoz-knowledge-system repository"
     exit 1
 fi
-
-echo "Using installed pack: $PACK_INSTALL_DIR"
 
 # Verify memory system directory exists
 MEMORY_DIR="$PAI_DIR/MEMORY"
@@ -1781,10 +1947,10 @@ mkdir -p "$PAI_HOOKS_DIR/lib"
 
 echo "Installing hook files to: $PAI_HOOKS_DIR"
 
-# Copy hook implementation files FROM INSTALLED PACK
-cp "$PACK_INSTALL_DIR/src/hooks/sync-memory-to-knowledge.ts" "$PAI_HOOKS_DIR/"
-cp "$PACK_INSTALL_DIR/src/hooks/sync-learning-realtime.ts" "$PAI_HOOKS_DIR/"
-cp -r "$PACK_INSTALL_DIR/src/hooks/lib/"* "$PAI_HOOKS_DIR/lib/"
+# Copy hook implementation files FROM SOURCE
+cp "$HOOK_SOURCE_DIR/sync-memory-to-knowledge.ts" "$PAI_HOOKS_DIR/"
+cp "$HOOK_SOURCE_DIR/sync-learning-realtime.ts" "$PAI_HOOKS_DIR/"
+cp -r "$HOOK_SOURCE_DIR/lib/"* "$PAI_HOOKS_DIR/lib/"
 
 echo "✓ Hook files installed"
 
@@ -1798,8 +1964,8 @@ SETTINGS_FILE="$HOME/.claude/settings.json"
 echo ""
 echo "Registering hooks in: $SETTINGS_FILE"
 
-# Use bun/node to merge hook configuration
-bun << 'SCRIPT_EOF'
+# Use node to merge hook configuration (bun heredoc doesn't work properly)
+node << 'SCRIPT_EOF'
 const fs = require('fs');
 const path = require('path');
 
@@ -1991,7 +2157,7 @@ The hook tracks which files have been synced in `~/.claude/MEMORY/STATE/knowledg
 
 ### Server Won't Start
 
-**Symptoms:** `bun run src/server/run.ts` fails or container exits immediately
+**Symptoms:** `bun run server-cli start` fails or container exits immediately
 
 **Diagnosis:**
 ```bash
@@ -2004,7 +2170,7 @@ lsof -i :6379
 ```
 
 **Solutions:**
-1. **Port conflict:** Stop conflicting service or modify ports in `src/server/run.ts`
+1. **Port conflict:** Stop conflicting service or modify ports in Docker Compose files
 2. **API key invalid:** Verify API key in PAI config (`$PAI_DIR/.env` or `~/.claude/.env`) has credits/quota
 3. **Image pull failed:** Check internet connection and try again
 4. **Resource limits:** Ensure system has at least 2GB RAM available
@@ -2080,7 +2246,7 @@ grep SEMAPHORE_LIMIT "${PAI_DIR:-$HOME/.claude}/.env"
 **Diagnosis:**
 ```bash
 # Check if lucene.ts exists and exports sanitizeGroupId
-cat src/server/lib/lucene.ts | grep -A 5 "sanitizeGroupId"
+cat src/skills/server/lib/lucene.ts | grep -A 5 "sanitizeGroupId"
 ```
 
 **Solutions:**

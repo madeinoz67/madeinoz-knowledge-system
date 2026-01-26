@@ -13,7 +13,7 @@
 
 ```bash
 # Verify wrapper is working
-bun run src/server/knowledge.ts health
+bun run src/skills/tools/knowledge-cli.ts health
 
 # Expected output:
 # MCP Server: HEALTHY (http://localhost:8000)
@@ -25,7 +25,7 @@ bun run src/server/knowledge.ts health
 
 ```bash
 # Compact output (default)
-bun run src/server/knowledge.ts search_nodes "Graphiti"
+bun run src/skills/tools/knowledge-cli.ts search_nodes "Graphiti"
 
 # Output:
 # Found 3 entities for "Graphiti":
@@ -34,13 +34,13 @@ bun run src/server/knowledge.ts search_nodes "Graphiti"
 # 3. MCP Server [Service] - Model Context Protocol server
 
 # Raw JSON output (for debugging)
-bun run src/server/knowledge.ts search_nodes "Graphiti" --raw
+bun run src/skills/tools/knowledge-cli.ts search_nodes "Graphiti" --raw
 ```
 
 ### Add Knowledge
 
 ```bash
-bun run src/server/knowledge.ts add_episode "Docker Tips" "Use --rm flag for temporary containers"
+bun run src/skills/tools/knowledge-cli.ts add_episode "Docker Tips" "Use --rm flag for temporary containers"
 
 # Output:
 # ✓ Episode added: "Docker Tips" (id: ...a1b2c3d4)
@@ -50,7 +50,7 @@ bun run src/server/knowledge.ts add_episode "Docker Tips" "Use --rm flag for tem
 ### View Recent Episodes
 
 ```bash
-bun run src/server/knowledge.ts get_episodes 5
+bun run src/skills/tools/knowledge-cli.ts get_episodes 5
 
 # Output:
 # Recent episodes (5):
@@ -63,7 +63,7 @@ bun run src/server/knowledge.ts get_episodes 5
 
 ```bash
 # Enable metrics display
-bun run src/server/knowledge.ts search_nodes "knowledge" --metrics
+bun run src/skills/tools/knowledge-cli.ts search_nodes "knowledge" --metrics
 
 # Output includes metrics:
 # --- Token Metrics ---

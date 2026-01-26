@@ -229,8 +229,8 @@ Ready to dive deeper? Check out:
 
 If something isn't working:
 
-1. Check if the MCP server is running: `bun run src/server/status.ts`
-2. Look at the logs: `bun run src/server/logs.ts`
+1. Check if the MCP server is running: `bun run server-cli status`
+2. Look at the logs: `bun run server-cli logs`
 3. Read the [troubleshooting guide](../troubleshooting/common-issues.md)
 4. Review the [Architecture](../concepts/architecture.md) for technical details
 

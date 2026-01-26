@@ -1,0 +1,67 @@
+# Docker Compose - Madeinoz Knowledge System (Custom Image)
+# Uses our pre-built Docker image with patches already applied
+# Just set your environment variables in .env and run
+
+name: madeinoz-knowledge-system
+
+networks:
+  madeinoz-knowledge-net:
+    driver: bridge
+
+volumes:
+  neo4j-data:
+    driver: local
+  neo4j-logs:
+    driver: local
+
+services:
+  neo4j:
+    image: neo4j:latest
+    container_name: madeinoz-knowledge-neo4j
+    restart: unless-stopped
+    networks:
+      - madeinoz-knowledge-net
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j-data:/data
+      - neo4j-logs:/logs
+    environment:
+      - NEO4J_AUTH=neo4j/madeinozknowledge
+      - NEO4J_server_memory_heap_initial__size=512m
+      - NEO4J_server_memory_heap_max__size=1G
+      - NEO4J_server_memory_pagecache_size=512m
+      - NEO4J_dbms_usage__report_enabled=false
+    healthcheck:
+      test: ["CMD", "wget", "-O", "/dev/null", "http://localhost:7474"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  graphiti-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: madeinoz-knowledge-system:latest
+    container_name: madeinoz-knowledge-graph-mcp
+    restart: unless-stopped
+    networks:
+      - madeinoz-knowledge-net
+    ports:
+      - "8000:8000"
+    environment:
+      # Config path (not in .env, set here)
+      - CONFIG_PATH=/app/mcp/config/config.yaml
+    env_file:
+      - .env
+    depends_on:
+      neo4j:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "--max-time", "5", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

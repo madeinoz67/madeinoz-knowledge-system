@@ -49,10 +49,10 @@ export function parseFrontmatter(content: string): {
       frontmatter: {
         capture_type: 'LEARNING',
         timestamp: new Date().toISOString(),
-        auto_captured: true
+        auto_captured: true,
       },
       body: content.trim(),
-      hasFrontmatter: false
+      hasFrontmatter: false,
     };
   }
 
@@ -71,14 +71,14 @@ export function parseFrontmatter(content: string): {
     if (colonIndex === -1) continue;
 
     const key = trimmed.slice(0, colonIndex).trim();
-    let value = trimmed.slice(colonIndex + 1).trim();
+    const value = trimmed.slice(colonIndex + 1).trim();
 
     if (!key) continue;
 
     // Handle arrays [item1, item2]
     if (value.startsWith('[') && value.endsWith(']')) {
       const arrayContent = value.slice(1, -1);
-      frontmatter[key] = arrayContent.split(',').map(s => s.trim().replace(/^['"]|['"]$/g, ''));
+      frontmatter[key] = arrayContent.split(',').map((s) => s.trim().replace(/^['"]|['"]$/g, ''));
     }
     // Handle booleans
     else if (value === 'true') {
@@ -88,7 +88,7 @@ export function parseFrontmatter(content: string): {
     }
     // Handle numbers
     else if (/^\d+$/.test(value)) {
-      frontmatter[key] = parseInt(value, 10);
+      frontmatter[key] = Number.parseInt(value, 10);
     }
     // Handle strings
     else if (value) {
@@ -108,7 +108,7 @@ export function parseFrontmatter(content: string): {
   return {
     frontmatter: frontmatter as MemoryFrontmatter,
     body,
-    hasFrontmatter: true
+    hasFrontmatter: true,
   };
 }
 
@@ -127,12 +127,12 @@ export function extractTitle(body: string, fallback: string): string {
     // **Bold text** at start
     /^\*\*(.+?)\*\*/m,
     // First non-empty line (at least 10 chars)
-    /^([^\n#*-].{10,})/m
+    /^([^\n#*-].{10,})/m,
   ];
 
   for (const pattern of patterns) {
     const match = body.match(pattern);
-    if (match && match[1]) {
+    if (match?.[1]) {
       return match[1].trim().slice(0, 100);
     }
   }
@@ -152,9 +152,10 @@ export function extractMetadataFromFilename(filename: string): Partial<MemoryFro
   const timestampMatch = filename.match(/^(\d{4}-\d{2}-\d{2})[_-](\d{4,6})/);
   if (timestampMatch) {
     const [, date, time] = timestampMatch;
-    const formattedTime = time.length === 6
-      ? `${time.slice(0, 2)}:${time.slice(2, 4)}:${time.slice(4, 6)}`
-      : `${time.slice(0, 2)}:${time.slice(2, 4)}:00`;
+    const formattedTime =
+      time.length === 6
+        ? `${time.slice(0, 2)}:${time.slice(2, 4)}:${time.slice(4, 6)}`
+        : `${time.slice(0, 2)}:${time.slice(2, 4)}:00`;
     metadata.timestamp = `${date} ${formattedTime}`;
   }
 
@@ -186,7 +187,7 @@ export function parseMarkdownFile(content: string, filename?: string): ParsedMar
     frontmatter,
     body,
     title,
-    hasFrontmatter
+    hasFrontmatter,
   };
 }
 
@@ -195,13 +196,15 @@ export function parseMarkdownFile(content: string, filename?: string): ParsedMar
  * Removes capture system footer and excessive whitespace
  */
 export function cleanBody(body: string): string {
-  return body
-    // Remove capture footer (with optional blank lines before ---)
-    .replace(/\n+---\n+\*Captured by PAI[^*]*\*\s*$/s, '')
-    .replace(/\n+---\n+\*Auto-captured by[^*]*\*\s*$/s, '')
-    // Remove excessive blank lines
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
+  return (
+    body
+      // Remove capture footer (with optional blank lines before ---)
+      .replace(/\n+---\n+\*Captured by PAI[^*]*\*\s*$/s, '')
+      .replace(/\n+---\n+\*Auto-captured by[^*]*\*\s*$/s, '')
+      // Remove excessive blank lines
+      .replace(/\n{3,}/g, '\n\n')
+      .trim()
+  );
 }
 
 // Legacy export for backwards compatibility

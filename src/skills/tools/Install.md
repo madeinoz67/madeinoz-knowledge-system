@@ -28,13 +28,22 @@ Before installation, verify:
    - Check for `MADEINOZ_KNOWLEDGE_OPENAI_API_KEY` in PAI config (`$PAI_DIR/.env` or `~/.claude/.env`)
    - Legacy `OPENAI_API_KEY` is also supported but `MADEINOZ_KNOWLEDGE_*` prefix is preferred
 
+4. **Neo4j connection configured (for Neo4j backend):**
+   - Add to PAI config (`~/.claude/.env`):
+     ```bash
+     MADEINOZ_KNOWLEDGE_NEO4J_URI=bolt://neo4j:7687
+     MADEINOZ_KNOWLEDGE_NEO4J_USER=neo4j
+     MADEINOZ_KNOWLEDGE_NEO4J_PASSWORD=madeinozknowledge
+     ```
+   - Note: Use `bolt://neo4j:7687` (container hostname) not `bolt://localhost:7687`
+
 ## Installation Steps
 
 ### Step 1: Start MCP Server
 
 ```bash
 cd /path/to/madeinoz-knowledge-system
-bun run src/server/run.ts
+bun run server-cli start
 ```
 
 ### Step 2: Verify Server Health
@@ -82,9 +91,11 @@ After installation, test with:
 
 | Issue | Solution |
 |-------|----------|
-| Server won't start | Check logs: `bun run src/server/logs.ts` |
+| Server won't start | Check logs: `bun run server-cli logs` |
 | MCP tools not available | Verify `~/.claude.json` has madeinoz-knowledge entry |
-| API errors | Check API key is valid and has quota |
+| API errors (401) | Check API key is valid and has quota |
+| Neo4j connection errors | Verify `MADEINOZ_KNOWLEDGE_NEO4J_URI=bolt://neo4j:7687` in `~/.claude/.env` |
+| Env file has wrong URI | Run `bun run stop && bun run start` to regenerate env files |
 
 ## Related
 

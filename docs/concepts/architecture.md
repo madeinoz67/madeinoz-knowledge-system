@@ -431,7 +431,7 @@ The knowledge system includes automatic query sanitization to handle special cha
 
 The architecture includes every component needed for end-to-end operation:
 
-- ✅ **MCP Server**: `run.ts` starts Graphiti + Neo4j/FalkorDB
+- ✅ **MCP Server**: `bun run server-cli start` starts Graphiti + Neo4j/FalkorDB
 - ✅ **PAI Skill**: `SKILL.md` with intent routing
 - ✅ **Workflows**: 7 complete operational procedures
 - ✅ **Installation**: Step-by-step in `tools/Install.md`

@@ -92,9 +92,9 @@ These providers use the same API format as OpenAI but with different base URLs:
 
 **Note:** The `mxbai-embed-large` model provides the best balance of quality (77%) and speed (156ms) among tested Ollama embedders. See `docs/OLLAMA-MODEL-GUIDE.md` for detailed comparisons.
 
-**Madeinoz Patch (Ollama + OpenAI-Compatible Support):**
+**Madeinoz Patches (Applied at Image Build Time):**
 
-This pack includes a patch (`src/server/patches/factories.py`) that enables support for:
+The custom Docker image includes patches that enable support for:
 - **Ollama** (local, no API key required)
 - **OpenAI-compatible providers** (OpenRouter, Together AI, Fireworks AI, DeepInfra)
 
@@ -121,9 +121,11 @@ The upstream Graphiti MCP server has a bug ([GitHub issue #1116](https://github.
 - `api.perplexity.ai` → Perplexity
 - `api.mistral.ai` → Mistral AI
 
-The patch is automatically mounted when using either docker-compose file:
-- `docker-compose.yml` (FalkorDB backend)
-- `docker-compose-neo4j.yml` (Neo4j backend)
+The patch is automatically mounted when using any of the docker-compose files:
+- `docker-compose-falkordb.yml` (FalkorDB backend, Docker)
+- `docker-compose-neo4j.yml` (Neo4j backend, Docker)
+- `podman-compose-falkordb.yml` (FalkorDB backend, Podman)
+- `podman-compose-neo4j.yml` (Neo4j backend, Podman)
 
 ---
 
@@ -141,8 +143,8 @@ The Madeinoz Knowledge System requires **two AI components**:
 The easiest way to configure providers is through the interactive installer:
 
 ```bash
-cd src/server
-bun run install.ts
+cd ~/.claude/skills/Knowledge
+bun run tools/install.ts
 ```
 
 The installer guides you through:
@@ -282,8 +284,8 @@ To change providers after initial setup:
 
 2. **Edit the configuration:**
    ```bash
-   # Edit src/server/.env (or wherever your config is)
-   nano src/server/.env
+   # Edit ~/.claude/.env (or wherever your config is)
+   nano ~/.claude/.env
    ```
 
 3. **Update the relevant variables** (see examples above)
@@ -447,7 +449,7 @@ Based on the detection above, follow the appropriate path:
 |----------|---------------|--------|
 | **Clean Install** | No MCP server, ports available, no existing skill | Proceed normally with Step 1 |
 | **Server Running** | MCP server already running | Decide: keep existing (skip to Step 4) or stop/reinstall |
-| **Port Conflict (FalkorDB)** | Ports 8000 or 6379 in use | Stop conflicting services or change ports in run.ts |
+| **Port Conflict (FalkorDB)** | Ports 8000 or 6379 in use | Stop conflicting services or change ports in Docker Compose files |
 | **Port Conflict (Neo4j)** | Ports 7474 or 7687 in use | Stop conflicting services or use FalkorDB backend |
 | **Skill Exists** | Knowledge skill already installed | Backup old skill, compare versions, then replace |
 | **Missing Dependencies** | Podman or Bun not installed | Install dependencies first, then retry |
@@ -591,18 +593,21 @@ echo "Checking pack contents..."
 REQUIRED_FILES=(
     "README.md"
     "SKILL.md"
-    "src/server/run.ts"
-    "src/server/podman-compose.yml"
-    "src/server/docker-compose.yml"
+    "tools/server-cli.ts"
+    "docker/podman-compose-falkordb.yml"
+    "docker/podman-compose-neo4j.yml"
+    "docker/docker-compose-falkordb.yml"
+    "docker/docker-compose-neo4j.yml"
     "config/.env.example"
-    "src/skills/workflows/CaptureEpisode.md"
-    "src/skills/workflows/SearchKnowledge.md"
-    "src/skills/workflows/SearchFacts.md"
-    "src/skills/workflows/GetRecent.md"
-    "src/skills/workflows/GetStatus.md"
-    "src/skills/workflows/ClearGraph.md"
-    "src/skills/workflows/BulkImport.md"
-    "src/skills/tools/Install.md"
+    "workflows/CaptureEpisode.md"
+    "workflows/SearchKnowledge.md"
+    "workflows/SearchFacts.md"
+    "workflows/SearchByDate.md"
+    "workflows/GetRecent.md"
+    "workflows/GetStatus.md"
+    "workflows/ClearGraph.md"
+    "workflows/BulkImport.md"
+    "tools/Install.md"
 )
 
 ALL_FOUND=true
@@ -686,10 +691,10 @@ fi
 
 ### Server Won't Start
 
-**Symptoms:** `bun run src/server/run.ts` fails or container exits immediately
+**Symptoms:** `bun run server-cli start` fails or container exits immediately
 
 **Solutions:**
-1. **Port conflict:** Stop conflicting service or modify ports in `src/server/run.ts`
+1. **Port conflict:** Stop conflicting service or modify ports in Docker Compose files
 2. **API key invalid:** Verify API key in PAI config has credits/quota
 3. **Image pull failed:** Check internet connection and try again
 4. **Resource limits:** Ensure system has at least 2GB RAM available
@@ -699,12 +704,12 @@ fi
 **Solutions:**
 1. **Restart Claude Code** - Skills are loaded on startup
 2. **Check SKILL.md format** - Ensure frontmatter is valid YAML
-3. **Verify file paths** - All workflows and tools should be in `src/skills/`
+3. **Verify file paths** - All workflows should be in `workflows/` and tools in `tools/`
 
 ### Knowledge Not Being Captured
 
 **Solutions:**
-1. **Server not running:** Start with `bun run src/skills/tools/start.ts`
+1. **Server not running:** Start with `bun run server-cli start`
 2. **API quota exceeded:** Check OpenAI usage dashboard
 3. **Content too brief:** Add more context and detail
 
@@ -716,7 +721,7 @@ To completely remove the Knowledge skill:
 
 ```bash
 # 1. Stop and remove container
-bun run src/skills/tools/stop.ts
+bun run server-cli stop
 podman rm madeinoz-knowledge-graph-mcp
 
 # 2. Remove Knowledge skill
@@ -729,8 +734,8 @@ rm -rf ~/.claude/skills/Knowledge
 
 If you encounter issues not covered here:
 
-1. **Check logs:** `bun run src/skills/tools/logs.ts`
-2. **Check status:** `bun run src/skills/tools/status.ts`
+1. **Check logs:** `bun run server-cli logs`
+2. **Check status:** `bun run server-cli status`
 3. **Review documentation:**
    - `README.md` - Complete pack documentation
    - `../verification.md` - Verification checklist

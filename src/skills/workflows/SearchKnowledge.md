@@ -65,12 +65,14 @@ Running the **SearchKnowledge** workflow from the **MadeinozKnowledgeSystem** sk
 
 ---
 
-## Step 4: Execute Semantic Search
+## Step 4: Execute Semantic Search (CLI-First, MCP-Fallback)
 
-**Use the Knowledge CLI (preferred - 30%+ token savings):**
+### Primary: Knowledge CLI (via Bash)
+
+**ALWAYS try CLI first - it's more reliable and token-efficient (30%+ savings):**
 
 ```bash
-bun run src/server/knowledge.ts search_nodes "search query" 10
+bun run tools/knowledge-cli.ts search_nodes "search query" 10
 ```
 
 **Parameters:**
@@ -81,7 +83,9 @@ bun run src/server/knowledge.ts search_nodes "search query" 10
 - `--raw` - Output raw JSON instead of compact format
 - `--metrics` - Display token metrics after operation
 
-**Alternative: Direct MCP Tool Call (for programmatic access):**
+### Fallback: MCP Tool (Only if CLI fails)
+
+**⚠️ Only use MCP if CLI returns connection/execution errors.**
 
 ```typescript
 search_nodes({
@@ -278,11 +282,26 @@ search_nodes({
 query: "Podman container networking troubleshooting"
 ```
 
-**Temporal Searches:**
-```typescript
-// Add time context
-query: "recent knowledge about PAI skills from 2025"
+**Temporal Searches (with date filters):**
+```bash
+# Search from today
+bun run tools/knowledge-cli.ts search_nodes "PAI skills" --since today
+
+# Search from last 7 days
+bun run tools/knowledge-cli.ts search_nodes "PAI skills" --since 7d
+
+# Search within date range
+bun run tools/knowledge-cli.ts search_nodes "PAI skills" --since 2026-01-01 --until 2026-01-15
+
+# Yesterday only
+bun run tools/knowledge-cli.ts search_nodes "PAI skills" --since yesterday --until today
 ```
+
+**Temporal filter options:**
+- `--since <date>` - Filter to nodes created after this date
+- `--until <date>` - Filter to nodes created before this date
+
+**Date formats:** `today`, `yesterday`, `7d`, `1w`, `1m`, `2026-01-26`
 
 **Relationship-Focused:**
 ```typescript

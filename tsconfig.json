@@ -1,71 +1,28 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    // Type Checking
-    "strict": true,
-    "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true,
-    "allowUnusedLocals": false,
-    "allowUnusedParameters": false,
-    "exactOptionalPropertyTypes": true,
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitReturns": true,
-    "noPropertyAccessFromIndexSignature": false,
-    "noUncheckedSideEffectImports": true,
-
-    // Module Resolution
+    "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
+    "strict": true,
     "esModuleInterop": true,
-    "isolatedModules": true,
-    "verbatimModuleSyntax": true,
-
-    // Emit
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "removeComments": false,
-    "newLine": "lf",
-    "stripInternal": true,
-    "noEmit": false,
-
-    // Interop Constraints
-    "allowJs": false,
-    "forceConsistentCasingInFileNames": true,
-
-    // Language and Environment
-    "target": "ESNext",
-    "lib": ["ESNext", "DOM"],
-    "types": ["bun-types"],
     "skipLibCheck": true,
-
-    // Projects
-    "composite": false,
-
-    // Completeness
-    "skipDefaultLibCheck": true,
-
-    // Output Paths
+    "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
-    "rootDir": ".",
-
-    // Path Mapping (for clean imports)
+    "declaration": true,
+    "resolveJsonModule": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "sourceMap": true,
+    "newLine": "lf",
+    "lib": ["ESNext", "DOM"],
     "baseUrl": ".",
     "paths": {
-      "@server/*": ["./src/server/*"],
-      "@lib/*": ["./src/server/lib/*"],
+      "@server/*": ["./src/skills/server/*"],
+      "@lib/*": ["./src/skills/lib/*"],
       "@tools/*": ["./src/skills/tools/*"]
     }
   },
-  "include": [
-    "src/**/*",
-    "tests/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "**/*.sh",
-    "**/*.py"
-  ]
+  "include": ["src/**/*", "tests/**/*", "bun-test.d.ts"],
+  "exclude": ["node_modules", "dist", "**/*.sh", "**/*.py", "src/skills/server/test-*.ts"]
 }

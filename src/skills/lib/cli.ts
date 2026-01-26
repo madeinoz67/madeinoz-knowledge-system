@@ -5,8 +5,8 @@
  * for consistent command-line interface across all scripts.
  */
 
-import chalk from "chalk";
-import type inquirer from "inquirer";
+import chalk from 'chalk';
+import type inquirer from 'inquirer';
 
 // Prompt types
 export type PromptChoice = string;
@@ -33,7 +33,7 @@ export class CLIOutput {
    * Print a header/section title
    */
   static header(title: string, width = 50): void {
-    const line = "═".repeat(width);
+    const line = '═'.repeat(width);
     console.log();
     console.log(chalk.blue(line));
     console.log(chalk.blue.bold(title));
@@ -61,21 +61,21 @@ export class CLIOutput {
    * Print a success message
    */
   static success(text: string): void {
-    console.log(`${chalk.green.bold("✓")} ${text}`);
+    console.log(`${chalk.green.bold('✓')} ${text}`);
   }
 
   /**
    * Print an error message
    */
   static error(text: string): void {
-    console.error(`${chalk.red.bold("✗")} ${text}`);
+    console.error(`${chalk.red.bold('✗')} ${text}`);
   }
 
   /**
    * Print a warning message
    */
   static warning(text: string): void {
-    console.log(`${chalk.yellow.bold("⚠")} ${text}`);
+    console.log(`${chalk.yellow.bold('⚠')} ${text}`);
   }
 
   /**
@@ -109,7 +109,7 @@ export class CLIOutput {
   /**
    * Print a separator line
    */
-  static separator(char = "─", width = 50): void {
+  static separator(char = '─', width = 50): void {
     console.log(chalk.gray(char.repeat(width)));
   }
 
@@ -117,9 +117,9 @@ export class CLIOutput {
    * Print a bulleted list
    */
   static list(items: string[], indent = 0): void {
-    const prefix = " ".repeat(indent);
+    const prefix = ' '.repeat(indent);
     items.forEach((item) => {
-      console.log(`${prefix}${chalk.gray("•")} ${item}`);
+      console.log(`${prefix}${chalk.gray('•')} ${item}`);
     });
   }
 
@@ -147,7 +147,7 @@ export class CLIOutput {
   /**
    * Print a code block
    */
-  static code(text: string, language = ""): void {
+  static code(text: string, language = ''): void {
     console.log();
     if (language) {
       console.log(chalk.dim(`${language}:`));
@@ -165,9 +165,9 @@ export class CLIOutput {
   /**
    * Print a box
    */
-  static box(lines: string[], title = ""): void {
+  static box(lines: string[], title = ''): void {
     const maxLength = Math.max(...lines.map((line) => line.length), title.length);
-    const horizontal = "─".repeat(maxLength + 2);
+    const horizontal = '─'.repeat(maxLength + 2);
 
     console.log();
     console.log(chalk.gray(`┌${horizontal}┐`));
@@ -213,7 +213,7 @@ export class CLIOutput {
    * Print multiple hints
    */
   static hints(commands: string[]): void {
-    commands.forEach((cmd) => this.hint(cmd));
+    commands.forEach((cmd) => CLIOutput.hint(cmd));
   }
 
   /**
@@ -226,14 +226,13 @@ export class CLIOutput {
   /**
    * Print progress (percentage)
    */
-  static progress(current: number, total: number, label = ""): void {
+  static progress(current: number, total: number, label = ''): void {
     const percentage = Math.round((current / total) * 100);
-    const bar = "█".repeat(Math.floor(percentage / 5)) + "░".repeat(20 - Math.floor(percentage / 5));
-    const text = label ? `${label} ` : "";
+    const bar =
+      '█'.repeat(Math.floor(percentage / 5)) + '░'.repeat(20 - Math.floor(percentage / 5));
+    const text = label ? `${label} ` : '';
 
-    console.log(
-      `${text}[${chalk.green(bar)}] ${chalk.cyan(percentage)}% (${current}/${total})`
-    );
+    console.log(`${text}[${chalk.green(bar)}] ${chalk.cyan(percentage)}% (${current}/${total})`);
   }
 
   /**
@@ -275,11 +274,11 @@ export class CLIPrompts {
   /**
    * Prompt for text input
    */
-  async input(message: string, defaultValue = ""): Promise<string> {
+  async input(message: string, defaultValue = ''): Promise<string> {
     const answers = await this.inquirer.prompt<{ value: string }>([
       {
-        type: "input",
-        name: "value",
+        type: 'input',
+        name: 'value',
         message,
         default: defaultValue,
       },
@@ -293,8 +292,8 @@ export class CLIPrompts {
   async password(message: string): Promise<string> {
     const answers = await this.inquirer.prompt<{ value: string }>([
       {
-        type: "password",
-        name: "value",
+        type: 'password',
+        name: 'value',
         message,
       },
     ]);
@@ -307,8 +306,8 @@ export class CLIPrompts {
   async confirm(message: string, defaultValue = false): Promise<boolean> {
     const answers = await this.inquirer.prompt<{ value: boolean }>([
       {
-        type: "confirm",
-        name: "value",
+        type: 'confirm',
+        name: 'value',
         message,
         default: defaultValue,
       },
@@ -322,8 +321,8 @@ export class CLIPrompts {
   async select(message: string, choices: SelectChoice[], defaultValue?: string): Promise<string> {
     const answers = await this.inquirer.prompt<{ value: string }>([
       {
-        type: "list",
-        name: "value",
+        type: 'list',
+        name: 'value',
         message,
         choices,
         default: defaultValue,
@@ -338,8 +337,8 @@ export class CLIPrompts {
   async multiselect(message: string, choices: CheckboxChoice[]): Promise<string[]> {
     const answers = await this.inquirer.prompt<{ value: string[] }>([
       {
-        type: "checkbox",
-        name: "value",
+        type: 'checkbox',
+        name: 'value',
         message,
         choices,
       },
@@ -353,8 +352,8 @@ export class CLIPrompts {
   async number(message: string, defaultValue?: number): Promise<number> {
     const answers = await this.inquirer.prompt<{ value: number }>([
       {
-        type: "number",
-        name: "value",
+        type: 'number',
+        name: 'value',
         message,
         default: defaultValue,
       },
@@ -372,8 +371,8 @@ export class CLIPrompts {
   ): Promise<number> {
     const answers = await this.inquirer.prompt<{ value: number }>([
       {
-        type: "list",
-        name: "value",
+        type: 'list',
+        name: 'value',
         message,
         choices,
         default: defaultValue,
@@ -392,7 +391,7 @@ export class Validators {
    */
   static nonEmpty(value: string): boolean | string {
     if (!value || value.trim().length === 0) {
-      return "This field is required";
+      return 'This field is required';
     }
     return true;
   }
@@ -402,7 +401,7 @@ export class Validators {
    */
   static positive(value: number): boolean | string {
     if (value <= 0) {
-      return "Must be a positive number";
+      return 'Must be a positive number';
     }
     return true;
   }
@@ -427,7 +426,7 @@ export class Validators {
       new URL(value);
       return true;
     } catch {
-      return "Must be a valid URL";
+      return 'Must be a valid URL';
     }
   }
 
@@ -436,10 +435,10 @@ export class Validators {
    */
   static apiKey(value: string): boolean | string {
     if (!value || value.trim().length === 0) {
-      return "API key is required";
+      return 'API key is required';
     }
     if (value.length < 10) {
-      return "API key seems too short";
+      return 'API key seems too short';
     }
     return true;
   }
@@ -453,7 +452,7 @@ export class Formatters {
    * Format bytes to human-readable size
    */
   static bytes(bytes: number): string {
-    const units = ["B", "KB", "MB", "GB", "TB"];
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
     let size = bytes;
     let unitIndex = 0;
 
@@ -478,7 +477,7 @@ export class Formatters {
     if (minutes > 0) parts.push(`${minutes}m`);
     if (secs > 0 || parts.length === 0) parts.push(`${secs}s`);
 
-    return parts.join(" ");
+    return parts.join(' ');
   }
 
   /**
@@ -492,10 +491,10 @@ export class Formatters {
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
 
-    if (days > 0) return `${days} day${days > 1 ? "s" : ""} ago`;
-    if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
-    if (minutes > 0) return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
-    return "just now";
+    if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
+    if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    return 'just now';
   }
 
   /**
@@ -509,27 +508,28 @@ export class Formatters {
   /**
    * Pad text to width
    */
-  static pad(text: string, width: number, align: "left" | "right" | "center" = "left"): string {
+  static pad(text: string, width: number, align: 'left' | 'right' | 'center' = 'left'): string {
     if (text.length >= width) return text;
 
     const padding = width - text.length;
 
     switch (align) {
-      case "left":
-        return text + " ".repeat(padding);
-      case "right":
-        return " ".repeat(padding) + text;
-      case "center":
+      case 'left':
+        return text + ' '.repeat(padding);
+      case 'right':
+        return ' '.repeat(padding) + text;
+      case 'center': {
         const left = Math.floor(padding / 2);
         const right = padding - left;
-        return " ".repeat(left) + text + " ".repeat(right);
+        return ' '.repeat(left) + text + ' '.repeat(right);
+      }
     }
   }
 
   /**
    * Truncate text to max length
    */
-  static truncate(text: string, maxLength: number, suffix = "..."): string {
+  static truncate(text: string, maxLength: number, suffix = '...'): string {
     if (text.length <= maxLength) return text;
     return text.substring(0, maxLength - suffix.length) + suffix;
   }
@@ -537,7 +537,7 @@ export class Formatters {
   /**
    * Mask sensitive text (e.g., API keys)
    */
-  static mask(text: string, visibleChars = 4, maskChar = "•"): string {
+  static mask(text: string, visibleChars = 4, maskChar = '•'): string {
     if (text.length <= visibleChars) return text;
     const start = text.substring(0, visibleChars);
     const end = text.substring(text.length - 4);
@@ -561,6 +561,12 @@ export const cli = {
   blank: CLIOutput.blank,
   separator: CLIOutput.separator,
   clear: CLIOutput.clear,
+  url: CLIOutput.url,
+  kv: CLIOutput.kv,
+  list: CLIOutput.list,
+  table: CLIOutput.table,
+  hint: CLIOutput.hint,
+  hints: CLIOutput.hints,
 };
 
 export const fmt = {

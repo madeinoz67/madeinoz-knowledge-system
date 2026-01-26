@@ -7,7 +7,7 @@ import {
   parseFrontmatter,
   extractTitle,
   parseMarkdownFile,
-  cleanBody
+  cleanBody,
 } from '../../../src/hooks/lib/frontmatter-parser';
 
 describe('frontmatter-parser', () => {

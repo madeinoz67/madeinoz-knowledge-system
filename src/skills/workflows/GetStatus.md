@@ -22,7 +22,7 @@ Running the **GetStatus** workflow from the **MadeinozKnowledgeSystem** skill...
 **Use the Knowledge CLI (preferred):**
 
 ```bash
-bun run src/server/knowledge.ts health
+bun run tools/knowledge-cli.ts health
 ```
 
 **Alternative: Direct curl check:**
@@ -40,27 +40,31 @@ curl -s http://localhost:8000/health
 **If server is not reachable:**
 ```bash
 # Check if container is running (using pack status script)
-bun run src/skills/tools/status.ts
+bun run tools/status.ts
 
 # Or check container logs
-bun run src/skills/tools/logs.ts | head -50
+bun run tools/logs.ts | head -50
 ```
 
 ---
 
-## Step 3: Call MCP Status Tool
+## Step 3: Call Status Check (CLI-First, MCP-Fallback)
 
-**Use the Knowledge CLI (preferred - 25%+ token savings):**
+### Primary: Knowledge CLI (via Bash)
+
+**ALWAYS try CLI first - it's more reliable and token-efficient (25%+ savings):**
 
 ```bash
-bun run src/server/knowledge.ts get_status
+bun run tools/knowledge-cli.ts get_status
 ```
 
 **Options:**
 - `--raw` - Output raw JSON instead of compact format
 - `--metrics` - Display token metrics after operation
 
-**Alternative: Direct MCP Tool Call (for programmatic access):**
+### Fallback: MCP Tool (Only if CLI fails)
+
+**⚠️ Only use MCP if CLI returns connection/execution errors.**
 
 ```typescript
 // Use the get_status tool

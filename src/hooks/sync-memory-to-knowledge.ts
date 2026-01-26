@@ -24,10 +24,10 @@
  * - Manual: bun run sync-memory-to-knowledge.ts [--all] [--dry-run]
  */
 
-import { readFileSync, existsSync, readdirSync, statSync } from 'fs';
-import { join, basename } from 'path';
-import { homedir } from 'os';
-import { createHash } from 'crypto';
+import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
+import { join, basename } from 'node:path';
+import { homedir } from 'node:os';
+import { createHash } from 'node:crypto';
 import { parseMarkdownFile, cleanBody } from './lib/frontmatter-parser';
 import {
   loadSyncState,
@@ -35,9 +35,9 @@ import {
   getSyncedPaths,
   getContentHashes,
   markAsSynced,
-  getSyncStats
+  getSyncStats,
 } from './lib/sync-state';
-import { checkHealth, addEpisode, AddEpisodeParams } from './lib/knowledge-client';
+import { checkHealth, addEpisode, type AddEpisodeParams } from './lib/knowledge-client';
 
 /**
  * Generate SHA-256 hash of content for deduplication
@@ -53,16 +53,16 @@ function hashContent(content: string): string {
 const SYNC_SOURCES = [
   { path: 'LEARNING/ALGORITHM', type: 'LEARNING', description: 'Task execution learnings' },
   { path: 'LEARNING/SYSTEM', type: 'LEARNING', description: 'PAI/tooling learnings' },
-  { path: 'RESEARCH', type: 'RESEARCH', description: 'Agent research outputs' }
+  { path: 'RESEARCH', type: 'RESEARCH', description: 'Agent research outputs' },
 ];
 
 // Skip these directories (low entity value or specialized formats)
-const SKIP_PATTERNS = [
-  'LEARNING/SIGNALS',    // JSONL format, not markdown
-  'LEARNING/SYNTHESIS',  // Aggregated reports, separate sync if needed
-  'WORK',                // Work tracking, different structure
-  'SECURITY',            // Security events, JSONL format
-  'STATE'                // Runtime state, not knowledge
+const _SKIP_PATTERNS = [
+  'LEARNING/SIGNALS', // JSONL format, not markdown
+  'LEARNING/SYNTHESIS', // Aggregated reports, separate sync if needed
+  'WORK', // Work tracking, different structure
+  'SECURITY', // Security events, JSONL format
+  'STATE', // Runtime state, not knowledge
 ];
 
 interface SyncOptions {
@@ -76,7 +76,7 @@ const DEFAULT_OPTIONS: SyncOptions = {
   dryRun: false,
   syncAll: false,
   maxFiles: 50, // Limit per run to avoid overwhelming the API
-  verbose: false
+  verbose: false,
 };
 
 /**
@@ -91,14 +91,14 @@ interface RetryConfig {
 const RETRY_CONFIG: RetryConfig = {
   maxRetries: 3,
   baseDelayMs: 1000,
-  maxDelayMs: 10000
+  maxDelayMs: 10000,
 };
 
 /**
  * Calculate exponential backoff delay
  */
 function getBackoffDelay(attempt: number, config: RetryConfig): number {
-  const delay = config.baseDelayMs * Math.pow(2, attempt);
+  const delay = config.baseDelayMs * 2 ** attempt;
   return Math.min(delay, config.maxDelayMs);
 }
 
@@ -118,9 +118,11 @@ async function waitForMcpServer(verbose: boolean): Promise<boolean> {
     if (attempt < RETRY_CONFIG.maxRetries - 1) {
       const delay = getBackoffDelay(attempt, RETRY_CONFIG);
       if (verbose) {
-        console.error(`[Sync] MCP server offline, retrying in ${delay}ms (attempt ${attempt + 1}/${RETRY_CONFIG.maxRetries})`);
+        console.error(
+          `[Sync] MCP server offline, retrying in ${delay}ms (attempt ${attempt + 1}/${RETRY_CONFIG.maxRetries})`
+        );
       }
-      await new Promise(r => setTimeout(r, delay));
+      await new Promise((r) => setTimeout(r, delay));
     }
   }
 
@@ -146,7 +148,7 @@ function findMarkdownFiles(sourceDir: string): string[] {
   const files: string[] = [];
 
   // Check for YYYY-MM subdirectories first
-  const subdirs = readdirSync(sourceDir).filter(d => {
+  const subdirs = readdirSync(sourceDir).filter((d) => {
     const fullPath = join(sourceDir, d);
     return statSync(fullPath).isDirectory() && /^\d{4}-\d{2}$/.test(d);
   });
@@ -156,16 +158,16 @@ function findMarkdownFiles(sourceDir: string): string[] {
     for (const subdir of subdirs) {
       const subdirPath = join(sourceDir, subdir);
       const mdFiles = readdirSync(subdirPath)
-        .filter(f => f.endsWith('.md'))
-        .map(f => join(subdirPath, f));
+        .filter((f) => f.endsWith('.md'))
+        .map((f) => join(subdirPath, f));
 
       files.push(...mdFiles);
     }
   } else {
     // Flat directory structure
     const mdFiles = readdirSync(sourceDir)
-      .filter(f => f.endsWith('.md'))
-      .map(f => join(sourceDir, f));
+      .filter((f) => f.endsWith('.md'))
+      .map((f) => join(sourceDir, f));
 
     files.push(...mdFiles);
   }
@@ -214,7 +216,7 @@ function mapToKnowledgeParams(
     source: 'text',
     source_description: sourceDescParts.filter(Boolean).join(' | '),
     reference_timestamp: frontmatter.timestamp,
-    group_id: captureType.toLowerCase()
+    group_id: captureType.toLowerCase(),
   };
 }
 
@@ -224,11 +226,19 @@ function mapToKnowledgeParams(
 function isRetryableError(error: string | undefined): boolean {
   if (!error) return false;
   const retryablePatterns = [
-    'timeout', 'ECONNREFUSED', 'ECONNRESET', 'ETIMEDOUT',
-    'abort', '429', '503', '502', '504', 'rate limit'
+    'timeout',
+    'ECONNREFUSED',
+    'ECONNRESET',
+    'ETIMEDOUT',
+    'abort',
+    '429',
+    '503',
+    '502',
+    '504',
+    'rate limit',
   ];
   const lowerError = error.toLowerCase();
-  return retryablePatterns.some(pattern => lowerError.includes(pattern.toLowerCase()));
+  return retryablePatterns.some((pattern) => lowerError.includes(pattern.toLowerCase()));
 }
 
 /**
@@ -261,7 +271,9 @@ async function syncFile(
 
       if (result.success) {
         if (options.verbose) {
-          console.error(`[Sync] ✓ Synced: ${params.name}${attempt > 0 ? ` (attempt ${attempt + 1})` : ''}`);
+          console.error(
+            `[Sync] ✓ Synced: ${params.name}${attempt > 0 ? ` (attempt ${attempt + 1})` : ''}`
+          );
         }
         return { success: true };
       }
@@ -278,7 +290,7 @@ async function syncFile(
         if (options.verbose) {
           console.error(`[Sync] Retrying ${params.name} in ${delay}ms (attempt ${attempt + 1})`);
         }
-        await new Promise(r => setTimeout(r, delay));
+        await new Promise((r) => setTimeout(r, delay));
       }
     }
 
@@ -325,7 +337,9 @@ async function syncMemoryToKnowledge(options: SyncOptions = DEFAULT_OPTIONS): Pr
 
   if (options.verbose) {
     const stateStats = getSyncStats(syncState);
-    console.error(`[Sync] Previously synced: ${stateStats.totalSynced} files, ${syncedHashes.size} unique hashes`);
+    console.error(
+      `[Sync] Previously synced: ${stateStats.totalSynced} files, ${syncedHashes.size} unique hashes`
+    );
   }
 
   // Collect files to sync from all sources
@@ -406,7 +420,13 @@ async function syncMemoryToKnowledge(options: SyncOptions = DEFAULT_OPTIONS): Pr
           const content = readFileSync(filepath, 'utf-8');
           const filename = basename(filepath);
           const parsed = parseMarkdownFile(content, filename);
-          markAsSynced(syncState, filepath, parsed.frontmatter.capture_type || sourceType, undefined, contentHash);
+          markAsSynced(
+            syncState,
+            filepath,
+            parsed.frontmatter.capture_type || sourceType,
+            undefined,
+            contentHash
+          );
           // Add hash to in-memory set for this run
           if (contentHash) syncedHashes.add(contentHash);
         } catch {
@@ -419,7 +439,7 @@ async function syncMemoryToKnowledge(options: SyncOptions = DEFAULT_OPTIONS): Pr
 
     // Brief pause between API calls
     if (!options.dryRun && stats.synced % 5 === 0) {
-      await new Promise(r => setTimeout(r, 100));
+      await new Promise((r) => setTimeout(r, 100));
     }
   }
 
@@ -428,7 +448,9 @@ async function syncMemoryToKnowledge(options: SyncOptions = DEFAULT_OPTIONS): Pr
     saveSyncState(syncState);
   }
 
-  console.error(`[Sync] Complete: ${stats.synced} synced, ${stats.failed} failed, ${stats.skipped} skipped`);
+  console.error(
+    `[Sync] Complete: ${stats.synced} synced, ${stats.failed} failed, ${stats.skipped} skipped`
+  );
 
   return stats;
 }
@@ -455,7 +477,7 @@ function parseArgs(args: string[]): SyncOptions {
         break;
       default:
         if (arg.startsWith('--max=')) {
-          options.maxFiles = parseInt(arg.slice(6), 10) || 50;
+          options.maxFiles = Number.parseInt(arg.slice(6), 10) || 50;
         }
     }
   }
@@ -479,7 +501,7 @@ async function main() {
       // Run sync with defaults (limited files, not verbose)
       await syncMemoryToKnowledge({
         ...DEFAULT_OPTIONS,
-        maxFiles: 20 // Limit for hook execution
+        maxFiles: 20, // Limit for hook execution
       });
     } catch (error) {
       console.error('[Sync Hook] Error:', error);

@@ -142,7 +142,7 @@ Replace `sk-your-openai-api-key-here` with your actual API key.
 Now start the MCP server (this runs the knowledge graph):
 
 ```bash
-bun run src/server/run.ts
+bun run server-cli start
 ```
 
 You'll see output like:
@@ -164,7 +164,7 @@ Open a new terminal window and check the status:
 
 ```bash
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
-bun run src/server/status.ts
+bun run server-cli status
 ```
 
 You should see:
@@ -184,7 +184,8 @@ MCP Server: http://localhost:8000/sse
 This hook automatically syncs your learning captures from the PAI Memory System to your knowledge graph:
 
 ```bash
-bun run src/server/install.ts
+cd ~/.claude/skills/Knowledge
+bun run tools/install.ts
 ```
 
 Follow the prompts to:
@@ -246,27 +247,27 @@ In the terminal where it's running, press `Ctrl + C`.
 Or from another terminal:
 ```bash
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
-bun run src/server/stop.ts
+bun run server-cli stop
 ```
 
 ### To Start Again
 
 ```bash
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
-bun run src/server/start.ts
+bun run server-cli start
 ```
 
 ### Check Status Anytime
 
 ```bash
-bun run src/server/status.ts
+bun run server-cli status
 ```
 
 ### View Logs
 
 If something goes wrong:
 ```bash
-bun run src/server/logs.ts
+bun run server-cli logs
 ```
 
 ## Optional: Add to Your Shell Startup
@@ -278,7 +279,7 @@ Add this to your shell configuration file (`~/.zshrc` or `~/.bashrc`):
 ```bash
 # Auto-start Madeinoz Knowledge System
 if ! podman ps | grep -q "madeinoz-knowledge-graph-mcp"; then
-    cd ~/.config/pai/Packs/madeinoz-knowledge-system && bun run src/server/start.ts
+    cd ~/.config/pai/Packs/madeinoz-knowledge-system && bun run server-cli start
 fi
 ```
 
@@ -334,7 +335,7 @@ Now that everything is installed:
 
 **Problem: "Port already in use"**
 - Another service is using port 8000 or 7687 (Neo4j)
-- Stop the other service or change ports in `src/server/run.ts`
+- Stop the other service or change ports in the Docker Compose files
 
 **Problem: "API key invalid"**
 - Check your API key in PAI config (`$PAI_DIR/.env` or `~/.claude/.env`)
@@ -342,8 +343,8 @@ Now that everything is installed:
 
 **Problem: "Container won't start"**
 - Check Docker/Podman is running: `podman ps`
-- View logs: `bun run src/server/logs.ts`
-- Try restarting: `bun run src/server/stop.ts && bun run src/server/start.ts`
+- View logs: `bun run server-cli logs`
+- Try restarting: `bun run server-cli restart`
 
 **Problem: "No entities extracted"**
 - Add more detail to what you're capturing

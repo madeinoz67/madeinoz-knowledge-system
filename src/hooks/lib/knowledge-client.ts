@@ -4,9 +4,10 @@
  * Lightweight client for hook integration with the knowledge graph MCP.
  * Uses database-specific protocols: FalkorDB uses SSE (/sse), Neo4j uses HTTP POST (/mcp).
  * Designed for fail-safe operation with timeouts and graceful degradation.
+ *
+ * NOTE: Lucene sanitization is now handled server-side by the Python patch
+ * (falkordb_lucene.py). The client passes group_ids directly without escaping.
  */
-
-import { sanitizeSearchQuery, sanitizeGroupId } from "../../server/lib/lucene.js";
 
 export interface KnowledgeClientConfig {
   baseURL: string;
@@ -36,8 +37,8 @@ type DatabaseType = 'neo4j' | 'falkorodb';
 
 const DEFAULT_CONFIG: KnowledgeClientConfig = {
   baseURL: process.env.MADEINOZ_KNOWLEDGE_MCP_URL || 'http://localhost:8000',
-  timeout: parseInt(process.env.MADEINOZ_KNOWLEDGE_TIMEOUT || '15000', 10),
-  retries: parseInt(process.env.MADEINOZ_KNOWLEDGE_RETRIES || '3', 10)
+  timeout: Number.parseInt(process.env.MADEINOZ_KNOWLEDGE_TIMEOUT || '15000', 10),
+  retries: Number.parseInt(process.env.MADEINOZ_KNOWLEDGE_RETRIES || '3', 10),
 };
 
 /**
@@ -48,7 +49,9 @@ function getDatabaseType(): DatabaseType {
   const validDbTypes: DatabaseType[] = ['neo4j', 'falkorodb'];
 
   if (!validDbTypes.includes(dbType as DatabaseType)) {
-    throw new Error(`Invalid MADEINOZ_KNOWLEDGE_DB: ${dbType}. Must be one of: ${validDbTypes.join(', ')}`);
+    throw new Error(
+      `Invalid MADEINOZ_KNOWLEDGE_DB: ${dbType}. Must be one of: ${validDbTypes.join(', ')}`
+    );
   }
 
   return dbType as DatabaseType;
@@ -105,8 +108,10 @@ function parseSSEResponse(text: string): unknown {
               return sc;
             }
             // Fall back to text content
-            const textContent = parsed.result.content.find((c: { type: string }) => c.type === 'text');
-            if (textContent && textContent.text) {
+            const textContent = parsed.result.content.find(
+              (c: { type: string }) => c.type === 'text'
+            );
+            if (textContent?.text) {
               try {
                 return JSON.parse(textContent.text);
               } catch {
@@ -142,13 +147,11 @@ class Neo4jClient {
 
   constructor(config: KnowledgeClientConfig) {
     // Use /mcp/ endpoint for Neo4j
-    this.baseURL = config.baseURL.endsWith('/mcp')
-      ? config.baseURL
-      : `${config.baseURL}/mcp`;
+    this.baseURL = config.baseURL.endsWith('/mcp') ? config.baseURL : `${config.baseURL}/mcp`;
     this.timeout = config.timeout;
     this.headers = {
       'Content-Type': 'application/json',
-      'Accept': 'application/json, text/event-stream',
+      Accept: 'application/json, text/event-stream',
     };
     this.requestId = 1;
   }
@@ -199,7 +202,10 @@ class Neo4jClient {
   /**
    * Call an MCP tool with JSON-RPC 2.0
    */
-  async callTool(toolName: string, arguments_: Record<string, unknown>): Promise<{
+  async callTool(
+    toolName: string,
+    arguments_: Record<string, unknown>
+  ): Promise<{
     success: boolean;
     result?: unknown;
     error?: string;
@@ -277,7 +283,7 @@ class Neo4jClient {
       const timeoutId = setTimeout(() => controller.abort(), 5000);
 
       // Use health endpoint on base URL without /mcp/
-      const healthURL = this.baseURL.replace(/\/mcp\/?$/, '') + '/health';
+      const healthURL = `${this.baseURL.replace(/\/mcp\/?$/, '')}/health`;
 
       const response = await fetch(healthURL, {
         method: 'GET',
@@ -316,7 +322,7 @@ class FalkorDBClient {
     this.timeout = config.timeout;
     this.headers = {
       'Content-Type': 'application/json',
-      'Accept': 'text/event-stream',
+      Accept: 'text/event-stream',
     };
     this.requestId = 1;
   }
@@ -331,7 +337,7 @@ class FalkorDBClient {
 
       const sseUrl = `${this.baseURL}/sse`;
       const response = await fetch(sseUrl, {
-        headers: { 'Accept': 'text/event-stream' },
+        headers: { Accept: 'text/event-stream' },
         signal: controller.signal,
       });
 
@@ -450,7 +456,7 @@ class FalkorDBClient {
    */
   private async sendRequest(
     session: SSESession,
-    request: object,
+    request: object
   ): Promise<{ success: boolean; result?: unknown; error?: string }> {
     try {
       const controller = new AbortController();
@@ -501,39 +507,42 @@ class FalkorDBClient {
   /**
    * Call an MCP tool using SSE protocol
    */
-  async callTool(toolName: string, arguments_: Record<string, unknown>): Promise<{
+  async callTool(
+    toolName: string,
+    arguments_: Record<string, unknown>
+  ): Promise<{
     success: boolean;
     result?: unknown;
     error?: string;
   }> {
-      const session = await this.getSSESession();
-      if (!session) {
-        return {
-          success: false,
-          error: 'Failed to establish SSE session',
-        };
-      }
-
-      const initialized = await this.initializeSession(session);
-      if (!initialized) {
-        return {
-          success: false,
-          error: 'Failed to initialize MCP session',
-        };
-      }
-
-      const request = {
-        jsonrpc: '2.0',
-        id: this.requestId++,
-        method: 'tools/call',
-        params: {
-          name: toolName,
-          arguments: arguments_,
-        },
+    const session = await this.getSSESession();
+    if (!session) {
+      return {
+        success: false,
+        error: 'Failed to establish SSE session',
       };
-
-      return await this.sendRequest(session, request);
     }
+
+    const initialized = await this.initializeSession(session);
+    if (!initialized) {
+      return {
+        success: false,
+        error: 'Failed to initialize MCP session',
+      };
+    }
+
+    const request = {
+      jsonrpc: '2.0',
+      id: this.requestId++,
+      method: 'tools/call',
+      params: {
+        name: toolName,
+        arguments: arguments_,
+      },
+    };
+
+    return await this.sendRequest(session, request);
+  }
 
   /**
    * Check MCP server health via SSE connection
@@ -547,14 +556,15 @@ class FalkorDBClient {
 /**
  * Check if MCP server is healthy
  */
-export async function checkHealth(config: KnowledgeClientConfig = DEFAULT_CONFIG): Promise<boolean> {
+export async function checkHealth(
+  config: KnowledgeClientConfig = DEFAULT_CONFIG
+): Promise<boolean> {
   if (isFalkorDB()) {
     const client = new FalkorDBClient(config);
     return await client.testConnection();
-  } else {
-    const client = new Neo4jClient(config);
-    return await client.testConnection();
   }
+  const client = new Neo4jClient(config);
+  return await client.testConnection();
 }
 
 /**
@@ -562,27 +572,22 @@ export async function checkHealth(config: KnowledgeClientConfig = DEFAULT_CONFIG
  */
 export async function addEpisode(
   params: AddEpisodeParams,
-  config: KnowledgeClientConfig = DEFAULT_CONFIG,
+  config: KnowledgeClientConfig = DEFAULT_CONFIG
 ): Promise<AddEpisodeResult> {
-  // Sanitize group_id if using FalkorDB (requires lucene escaping)
-  let sanitizedGroupId = params.group_id;
-  if (isFalkorDB() && params.group_id) {
-    sanitizedGroupId = sanitizeGroupId(params.group_id);
-  }
-
+  // Server-side sanitization handles Lucene escaping for FalkorDB
   const requestArgs = {
     name: params.name.slice(0, 200),
     episode_body: params.episode_body.slice(0, 5000),
     source: params.source || 'text',
     source_description: params.source_description || '',
-    ...(sanitizedGroupId && { group_id: sanitizedGroupId }),
+    ...(params.group_id && { group_id: params.group_id }),
     ...(params.reference_timestamp && { reference_timestamp: params.reference_timestamp }),
   };
 
   // Retry loop with exponential backoff
   for (let attempt = 0; attempt < config.retries; attempt++) {
     try {
-      let result;
+      let result: { success: boolean; result?: unknown; error?: string };
 
       if (isFalkorDB()) {
         // Use SSE protocol for FalkorDB
@@ -606,14 +611,15 @@ export async function addEpisode(
 
       // Check if retryable
       if (attempt < config.retries - 1) {
-        const isRetryable = result.error?.includes('timeout') ||
+        const isRetryable =
+          result.error?.includes('timeout') ||
           result.error?.includes('ECONNREFUSED') ||
           result.error?.includes('abort') ||
           result.error?.includes('ECONNRESET') ||
           result.error?.includes('ETIMEDOUT');
 
         if (isRetryable) {
-          const backoff = 500 * Math.pow(2, attempt);
+          const backoff = 500 * 2 ** attempt;
           await new Promise((r) => setTimeout(r, backoff));
           continue;
         }
@@ -624,7 +630,7 @@ export async function addEpisode(
       const message = error instanceof Error ? error.message : 'Unknown error';
 
       if (attempt < config.retries - 1) {
-        const backoff = 500 * Math.pow(2, attempt);
+        const backoff = 500 * 2 ** attempt;
         await new Promise((r) => setTimeout(r, backoff));
         continue;
       }

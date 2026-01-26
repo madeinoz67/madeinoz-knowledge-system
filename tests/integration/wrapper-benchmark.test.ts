@@ -4,13 +4,13 @@
  * @module tests/integration/wrapper-benchmark.test.ts
  */
 import { describe, test, expect } from 'bun:test';
-import { formatOutput } from '../../src/server/lib/output-formatter';
+import { formatOutput } from '../../src/skills/lib/output-formatter';
 import {
   measureTokens,
   generateBenchmarkReport,
   TOKEN_SAVINGS_TARGETS,
   type TokenMetrics,
-} from '../../src/server/lib/token-metrics';
+} from '../../src/skills/lib/token-metrics';
 
 describe('wrapper-benchmark', () => {
   // Helper to measure token savings for a formatter
@@ -30,14 +30,16 @@ describe('wrapper-benchmark', () => {
             uuid: '550e8400-e29b-41d4-a716-446655440001',
             name: 'Graphiti',
             entity_type: 'Framework',
-            summary: 'A knowledge graph framework for building temporal, memory-aware AI systems with entity extraction',
+            summary:
+              'A knowledge graph framework for building temporal, memory-aware AI systems with entity extraction',
             created_at: '2026-01-18T10:00:00Z',
           },
           {
             uuid: '550e8400-e29b-41d4-a716-446655440002',
             name: 'FalkorDB',
             entity_type: 'Database',
-            summary: 'Redis-based graph database with RediSearch integration for efficient graph queries',
+            summary:
+              'Redis-based graph database with RediSearch integration for efficient graph queries',
             created_at: '2026-01-18T09:00:00Z',
           },
           {
@@ -127,21 +129,24 @@ describe('wrapper-benchmark', () => {
           {
             uuid: '550e8400-e29b-41d4-a716-446655440020',
             name: 'Knowledge Graph Setup',
-            content: 'Installed FalkorDB via Docker and configured the Graphiti MCP server for local development.',
+            content:
+              'Installed FalkorDB via Docker and configured the Graphiti MCP server for local development.',
             created_at: new Date(Date.now() - 2 * 3600000).toISOString(),
             source_description: 'session-capture',
           },
           {
             uuid: '550e8400-e29b-41d4-a716-446655440021',
             name: 'API Integration',
-            content: 'Connected the MCP server to the Claude Code CLI using the settings.json configuration.',
+            content:
+              'Connected the MCP server to the Claude Code CLI using the settings.json configuration.',
             created_at: new Date(Date.now() - 5 * 3600000).toISOString(),
             source_description: 'manual-entry',
           },
           {
             uuid: '550e8400-e29b-41d4-a716-446655440022',
             name: 'Performance Testing',
-            content: 'Ran benchmark tests on search operations and validated token savings meet targets.',
+            content:
+              'Ran benchmark tests on search operations and validated token savings meet targets.',
             created_at: new Date(Date.now() - 24 * 3600000).toISOString(),
             source_description: 'test-run',
           },
@@ -191,37 +196,51 @@ describe('wrapper-benchmark', () => {
       const allMetrics: TokenMetrics[] = [];
 
       // search_nodes - larger payload for better compression
-      allMetrics.push(measureSavings('search_nodes', {
-        nodes: Array.from({ length: 5 }, (_, i) => ({
-          uuid: `550e8400-e29b-41d4-a716-44665544000${i}`,
-          name: `Entity${i}`,
-          entity_type: 'TestType',
-          summary: `This is a detailed summary for entity ${i} that provides context.`,
-          created_at: new Date().toISOString(),
-        })),
-      }, 'test'));
+      allMetrics.push(
+        measureSavings(
+          'search_nodes',
+          {
+            nodes: Array.from({ length: 5 }, (_, i) => ({
+              uuid: `550e8400-e29b-41d4-a716-44665544000${i}`,
+              name: `Entity${i}`,
+              entity_type: 'TestType',
+              summary: `This is a detailed summary for entity ${i} that provides context.`,
+              created_at: new Date().toISOString(),
+            })),
+          },
+          'test'
+        )
+      );
 
       // search_facts - larger payload
-      allMetrics.push(measureSavings('search_facts', {
-        facts: Array.from({ length: 5 }, (_, i) => ({
-          uuid: `550e8400-e29b-41d4-a716-44665544010${i}`,
-          source: { name: `Source${i}` },
-          target: { name: `Target${i}` },
-          relation: 'RELATES_TO',
-          confidence: 0.9,
-        })),
-      }, 'test'));
+      allMetrics.push(
+        measureSavings(
+          'search_facts',
+          {
+            facts: Array.from({ length: 5 }, (_, i) => ({
+              uuid: `550e8400-e29b-41d4-a716-44665544010${i}`,
+              source: { name: `Source${i}` },
+              target: { name: `Target${i}` },
+              relation: 'RELATES_TO',
+              confidence: 0.9,
+            })),
+          },
+          'test'
+        )
+      );
 
       // get_episodes - larger payload
-      allMetrics.push(measureSavings('get_episodes', {
-        episodes: Array.from({ length: 5 }, (_, i) => ({
-          uuid: `550e8400-e29b-41d4-a716-44665544020${i}`,
-          name: `Episode ${i}`,
-          content: `This is the content for episode ${i} with detailed information.`,
-          created_at: new Date(Date.now() - i * 3600000).toISOString(),
-          source_description: 'test',
-        })),
-      }));
+      allMetrics.push(
+        measureSavings('get_episodes', {
+          episodes: Array.from({ length: 5 }, (_, i) => ({
+            uuid: `550e8400-e29b-41d4-a716-44665544020${i}`,
+            name: `Episode ${i}`,
+            content: `This is the content for episode ${i} with detailed information.`,
+            created_at: new Date(Date.now() - i * 3600000).toISOString(),
+            source_description: 'test',
+          })),
+        })
+      );
 
       // Generate report
       const report = generateBenchmarkReport(allMetrics);
@@ -237,7 +256,11 @@ describe('wrapper-benchmark', () => {
 
     test('summary includes all measured operations', () => {
       const metrics: TokenMetrics[] = [
-        measureSavings('search_nodes', { nodes: [{ name: 'A', entity_type: 'T', summary: 'S' }] }, 'q'),
+        measureSavings(
+          'search_nodes',
+          { nodes: [{ name: 'A', entity_type: 'T', summary: 'S' }] },
+          'q'
+        ),
         measureSavings('get_status', { status: 'OK', entity_count: 1, episode_count: 1 }),
       ];
 
@@ -252,9 +275,37 @@ describe('wrapper-benchmark', () => {
   describe('performance thresholds', () => {
     test('all operations complete under 50ms', () => {
       const operations = [
-        { op: 'search_nodes', data: { nodes: Array.from({ length: 20 }, (_, i) => ({ name: `N${i}`, entity_type: 'T', summary: 'S'.repeat(100) })) } },
-        { op: 'search_facts', data: { facts: Array.from({ length: 20 }, (_, i) => ({ source: { name: `S${i}` }, target: { name: `T${i}` }, relation: 'r', confidence: 0.5 })) } },
-        { op: 'get_episodes', data: { episodes: Array.from({ length: 20 }, (_, i) => ({ name: `E${i}`, content: 'C'.repeat(100), created_at: new Date().toISOString() })) } },
+        {
+          op: 'search_nodes',
+          data: {
+            nodes: Array.from({ length: 20 }, (_, i) => ({
+              name: `N${i}`,
+              entity_type: 'T',
+              summary: 'S'.repeat(100),
+            })),
+          },
+        },
+        {
+          op: 'search_facts',
+          data: {
+            facts: Array.from({ length: 20 }, (_, i) => ({
+              source: { name: `S${i}` },
+              target: { name: `T${i}` },
+              relation: 'r',
+              confidence: 0.5,
+            })),
+          },
+        },
+        {
+          op: 'get_episodes',
+          data: {
+            episodes: Array.from({ length: 20 }, (_, i) => ({
+              name: `E${i}`,
+              content: 'C'.repeat(100),
+              created_at: new Date().toISOString(),
+            })),
+          },
+        },
         { op: 'get_status', data: { status: 'OK', entity_count: 1000, episode_count: 500 } },
       ];
 

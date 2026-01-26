@@ -5,9 +5,14 @@
  * with mocked system dependencies.
  */
 
-import { setupTestEnvironment, createMockContainerManager, createMockConfigLoader, cleanupTests } from "../setup.js";
+import {
+  setupTestEnvironment,
+  createMockContainerManager,
+  createMockConfigLoader,
+  cleanupTests,
+} from '../setup.js';
 
-describe("Tool Scripts Integration", () => {
+describe('Tool Scripts Integration', () => {
   let ctx: ReturnType<typeof setupTestEnvironment>;
 
   beforeEach(() => {
@@ -18,31 +23,34 @@ describe("Tool Scripts Integration", () => {
     cleanupTests();
   });
 
-  describe("Diagnose Script Workflow", () => {
-    it("should perform all 7 diagnostic checks", async () => {
+  describe('Diagnose Script Workflow', () => {
+    it('should perform all 7 diagnostic checks', async () => {
       const mockManager = createMockContainerManager();
       const mockConfig = createMockConfigLoader();
 
       let checksCompleted = 0;
 
       // Check 1: Podman Installation
-      ctx.mockExec(["--version"], {
+      ctx.mockExec(['--version'], {
         success: true,
-        stdout: "podman version 4.0.0",
+        stdout: 'podman version 4.0.0',
       });
       checksCompleted++;
 
       // Check 2: Configuration File
-      ctx.mockFile("config/.env", "OPENAI_API_KEY=sk-test\n");
+      ctx.mockFile('config/.env', 'OPENAI_API_KEY=sk-test\n');
       expect(mockConfig.envExists()).toBe(true);
       checksCompleted++;
 
       // Check 3: Container Status
-      ctx.mockExec(["ps", "--filter", "name=graphiti-knowledge-graph-mcp", "--format", "{{.Status}}"], {
-        success: true,
-        stdout: "running",
-      });
-      const isRunning = await mockManager.isContainerRunning("graphiti-knowledge-graph-mcp");
+      ctx.mockExec(
+        ['ps', '--filter', 'name=graphiti-knowledge-graph-mcp', '--format', '{{.Status}}'],
+        {
+          success: true,
+          stdout: 'running',
+        }
+      );
+      const isRunning = await mockManager.isContainerRunning('graphiti-knowledge-graph-mcp');
       expect(isRunning).toBe(true);
       checksCompleted++;
 
@@ -51,7 +59,7 @@ describe("Tool Scripts Integration", () => {
       checksCompleted++;
 
       // Check 5: PAI Skill Installation
-      ctx.mockDirectory("/.claude/Skills");
+      ctx.mockDirectory('/.claude/Skills');
       checksCompleted++;
 
       // Check 6: Port Availability
@@ -59,16 +67,16 @@ describe("Tool Scripts Integration", () => {
       checksCompleted++;
 
       // Check 7: Resource Usage
-      ctx.mockExec(["stats", "graphiti-knowledge-graph-mcp", "--no-stream", "--format", "json"], {
+      ctx.mockExec(['stats', 'graphiti-knowledge-graph-mcp', '--no-stream', '--format', 'json'], {
         success: true,
-        stdout: "[]",
+        stdout: '[]',
       });
       checksCompleted++;
 
       expect(checksCompleted).toBe(7);
     });
 
-    it("should detect missing Podman installation", async () => {
+    it('should detect missing Podman installation', async () => {
       const mockManager = createMockContainerManager();
 
       // Podman not found
@@ -77,7 +85,7 @@ describe("Tool Scripts Integration", () => {
       expect(isAvailable).toBeDefined();
     });
 
-    it("should detect missing .env file", () => {
+    it('should detect missing .env file', () => {
       const mockConfig = createMockConfigLoader();
 
       const exists = mockConfig.envExists();
@@ -85,20 +93,23 @@ describe("Tool Scripts Integration", () => {
       expect(exists).toBe(false);
     });
 
-    it("should detect stopped containers", async () => {
+    it('should detect stopped containers', async () => {
       const mockManager = createMockContainerManager();
 
-      ctx.mockExec(["ps", "--filter", "name=graphiti-knowledge-graph-mcp", "--format", "{{.Status}}"], {
-        success: true,
-        stdout: "exited (0) 1 hour ago",
-      });
+      ctx.mockExec(
+        ['ps', '--filter', 'name=graphiti-knowledge-graph-mcp', '--format', '{{.Status}}'],
+        {
+          success: true,
+          stdout: 'exited (0) 1 hour ago',
+        }
+      );
 
-      const isRunning = await mockManager.isContainerRunning("graphiti-knowledge-graph-mcp");
+      const isRunning = await mockManager.isContainerRunning('graphiti-knowledge-graph-mcp');
 
       expect(isRunning).toBe(false);
     });
 
-    it("should provide diagnostic summary", () => {
+    it('should provide diagnostic summary', () => {
       // This would test the summary formatting
       const issues = 0;
       const total = 7;
@@ -108,13 +119,13 @@ describe("Tool Scripts Integration", () => {
     });
   });
 
-  describe("Install Script Workflow", () => {
-    it("should verify prerequisites", async () => {
+  describe('Install Script Workflow', () => {
+    it('should verify prerequisites', async () => {
       const mockManager = createMockContainerManager();
 
-      ctx.mockExec(["--version"], {
+      ctx.mockExec(['--version'], {
         success: true,
-        stdout: "podman version 4.0.0",
+        stdout: 'podman version 4.0.0',
       });
 
       const isAvailable = mockManager.isRuntimeAvailable();
@@ -122,102 +133,102 @@ describe("Tool Scripts Integration", () => {
       expect(isAvailable).toBe(true);
     });
 
-    it("should collect API keys for selected provider", async () => {
+    it('should collect API keys for selected provider', async () => {
       const mockConfig = createMockConfigLoader();
 
       // Simulate OpenAI key collection
-      const openAIKey = "sk-test-openai-key-1234567890";
+      const openAIKey = 'sk-test-openai-key-1234567890';
 
       const config = {
         OPENAI_API_KEY: openAIKey,
-        LLM_PROVIDER: "openai",
-        MODEL_NAME: "gpt-4o-mini",
+        LLM_PROVIDER: 'openai',
+        MODEL_NAME: 'gpt-4o-mini',
       };
 
       await mockConfig.save(config);
 
       const files = ctx.getMockFiles();
-      expect(files["config/.env"]).toBeDefined();
-      expect(files["config/.env"]).toContain(openAIKey);
+      expect(files['config/.env']).toBeDefined();
+      expect(files['config/.env']).toContain(openAIKey);
     });
 
-    it("should handle Anthropic provider", async () => {
+    it('should handle Anthropic provider', async () => {
       const mockConfig = createMockConfigLoader();
 
       const config = {
-        ANTHROPIC_API_KEY: "sk-ant-test-key",
-        LLM_PROVIDER: "anthropic",
-        MODEL_NAME: "claude-sonnet-4-20250514",
+        ANTHROPIC_API_KEY: 'sk-ant-test-key',
+        LLM_PROVIDER: 'anthropic',
+        MODEL_NAME: 'claude-sonnet-4-20250514',
       };
 
       await mockConfig.save(config);
 
       const files = ctx.getMockFiles();
-      expect(files["config/.env"]).toContain("ANTHROPIC_API_KEY=sk-ant-test-key");
-      expect(files["config/.env"]).toContain("LLM_PROVIDER=anthropic");
+      expect(files['config/.env']).toContain('ANTHROPIC_API_KEY=sk-ant-test-key');
+      expect(files['config/.env']).toContain('LLM_PROVIDER=anthropic');
     });
 
-    it("should handle Groq provider", async () => {
+    it('should handle Groq provider', async () => {
       const mockConfig = createMockConfigLoader();
 
       const config = {
-        OPENAI_API_KEY: "sk-openai-for-embeddings",
-        GROQ_API_KEY: "gq-groq-test-key",
-        LLM_PROVIDER: "groq",
-        MODEL_NAME: "llama-3.3-70b-versatile",
+        OPENAI_API_KEY: 'sk-openai-for-embeddings',
+        GROQ_API_KEY: 'gq-groq-test-key',
+        LLM_PROVIDER: 'groq',
+        MODEL_NAME: 'llama-3.3-70b-versatile',
       };
 
       await mockConfig.save(config);
 
       const files = ctx.getMockFiles();
-      expect(files["config/.env"]).toContain("GROQ_API_KEY=gq-groq-test-key");
-      expect(files["config/.env"]).toContain("LLM_PROVIDER=groq");
+      expect(files['config/.env']).toContain('GROQ_API_KEY=gq-groq-test-key');
+      expect(files['config/.env']).toContain('LLM_PROVIDER=groq');
     });
 
-    it("should configure concurrency based on API tier", async () => {
+    it('should configure concurrency based on API tier', async () => {
       const mockConfig = createMockConfigLoader();
 
       // Simulate Tier 3 (500 requests/minute)
       const config = {
-        OPENAI_API_KEY: "sk-test",
-        LLM_PROVIDER: "openai",
-        SEMAPHORE_LIMIT: "10", // Tier 3 default
+        OPENAI_API_KEY: 'sk-test',
+        LLM_PROVIDER: 'openai',
+        SEMAPHORE_LIMIT: '10', // Tier 3 default
       };
 
       await mockConfig.save(config);
 
       const files = ctx.getMockFiles();
-      expect(files["config/.env"]).toContain("SEMAPHORE_LIMIT=10");
+      expect(files['config/.env']).toContain('SEMAPHORE_LIMIT=10');
     });
 
-    it("should create .env with MADEINOZ_KNOWLEDGE_ prefixes", async () => {
+    it('should create .env with MADEINOZ_KNOWLEDGE_ prefixes', async () => {
       const mockConfig = createMockConfigLoader();
 
       const config = {
-        OPENAI_API_KEY: "sk-test",
-        LLM_PROVIDER: "openai",
-        MODEL_NAME: "gpt-4o-mini",
-        SEMAPHORE_LIMIT: "10",
-        GROUP_ID: "main",
-        DATABASE_TYPE: "falkordb",
+        OPENAI_API_KEY: 'sk-test',
+        LLM_PROVIDER: 'openai',
+        MODEL_NAME: 'gpt-4o-mini',
+        SEMAPHORE_LIMIT: '10',
+        GROUP_ID: 'main',
+        DATABASE_TYPE: 'falkordb',
       };
 
       await mockConfig.save(config);
 
       const files = ctx.getMockFiles();
-      const envContent = files["config/.env"];
+      const envContent = files['config/.env'];
 
-      expect(envContent).toContain("MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=sk-test");
-      expect(envContent).toContain("MADEINOZ_KNOWLEDGE_LLM_PROVIDER=openai");
-      expect(envContent).toContain("MADEINOZ_KNOWLEDGE_MODEL_NAME=gpt-4o-mini");
-      expect(envContent).toContain("MADEINOZ_KNOWLEDGE_SEMAPHORE_LIMIT=10");
+      expect(envContent).toContain('MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=sk-test');
+      expect(envContent).toContain('MADEINOZ_KNOWLEDGE_LLM_PROVIDER=openai');
+      expect(envContent).toContain('MADEINOZ_KNOWLEDGE_MODEL_NAME=gpt-4o-mini');
+      expect(envContent).toContain('MADEINOZ_KNOWLEDGE_SEMAPHORE_LIMIT=10');
     });
 
-    it("should backup existing .env before overwriting", async () => {
+    it('should backup existing .env before overwriting', async () => {
       // This would test the backup functionality
-      const existingEnv = "OPENAI_API_KEY=old-key\n";
+      const existingEnv = 'OPENAI_API_KEY=old-key\n';
 
-      ctx.mockFile("config/.env", existingEnv);
+      ctx.mockFile('config/.env', existingEnv);
 
       const mockConfig = createMockConfigLoader();
       expect(mockConfig.envExists()).toBe(true);
@@ -225,33 +236,33 @@ describe("Tool Scripts Integration", () => {
       // Backup would be handled in the actual script
       // Here we just verify the file exists
       const files = ctx.getMockFiles();
-      expect(files["config/.env"]).toBeDefined();
+      expect(files['config/.env']).toBeDefined();
     });
 
-    it("should start services after configuration", async () => {
+    it('should start services after configuration', async () => {
       const mockManager = createMockContainerManager();
 
       // Simulate starting containers
-      ctx.mockExec(["start", "madeinoz-knowledge-falkordb"], {
+      ctx.mockExec(['start', 'madeinoz-knowledge-falkordb'], {
         success: true,
-        stdout: "madeinoz-knowledge-falkordb",
+        stdout: 'madeinoz-knowledge-falkordb',
       });
 
-      ctx.mockExec(["start", "madeinoz-knowledge-graph-mcp"], {
+      ctx.mockExec(['start', 'madeinoz-knowledge-graph-mcp'], {
         success: true,
-        stdout: "madeinoz-knowledge-graph-mcp",
+        stdout: 'madeinoz-knowledge-graph-mcp',
       });
 
-      const result1 = await mockManager.startContainer("madeinoz-knowledge-falkordb");
-      const result2 = await mockManager.startContainer("madeinoz-knowledge-graph-mcp");
+      const result1 = await mockManager.startContainer('madeinoz-knowledge-falkordb');
+      const result2 = await mockManager.startContainer('madeinoz-knowledge-graph-mcp');
 
       expect(result1.success).toBe(true);
       expect(result2.success).toBe(true);
     });
 
-    it("should install PAI skill", () => {
+    it('should install PAI skill', () => {
       // This would test skill installation
-      const skillsDir = "/.claude/Skills";
+      const skillsDir = '/.claude/Skills';
 
       ctx.mockDirectory(skillsDir);
       const dirs = ctx.getMockDirectories();
@@ -260,13 +271,13 @@ describe("Tool Scripts Integration", () => {
     });
   });
 
-  describe("MCP Wrapper Script Workflow", () => {
-    it("should add episode to knowledge graph", () => {
+  describe('MCP Wrapper Script Workflow', () => {
+    it('should add episode to knowledge graph', () => {
       // This would test the add_episode command
       const episode = {
-        name: "Test Episode",
-        episode_body: "This is test content for the knowledge graph",
-        source: "text",
+        name: 'Test Episode',
+        episode_body: 'This is test content for the knowledge graph',
+        source: 'text',
       };
 
       expect(episode.name).toBeDefined();
@@ -274,8 +285,8 @@ describe("Tool Scripts Integration", () => {
       expect(episode.source).toBeDefined();
     });
 
-    it("should search nodes in knowledge graph", () => {
-      const searchQuery = "test query";
+    it('should search nodes in knowledge graph', () => {
+      const searchQuery = 'test query';
       const limit = 10;
 
       expect(searchQuery).toBeDefined();
@@ -283,48 +294,48 @@ describe("Tool Scripts Integration", () => {
       expect(limit).toBeLessThanOrEqual(100);
     });
 
-    it("should search facts in knowledge graph", () => {
-      const searchQuery = "relationship test";
+    it('should search facts in knowledge graph', () => {
+      const searchQuery = 'relationship test';
       const maxFacts = 5;
 
       expect(searchQuery).toBeDefined();
       expect(maxFacts).toBeGreaterThan(0);
     });
 
-    it("should get recent episodes", () => {
+    it('should get recent episodes', () => {
       const lastN = 20;
 
       expect(lastN).toBeGreaterThan(0);
       expect(lastN).toBeLessThanOrEqual(100);
     });
 
-    it("should get graph status", () => {
+    it('should get graph status', () => {
       // This would test the get_status command
-      const expectedFields = ["entity_count", "episode_count"];
+      const expectedFields = ['entity_count', 'episode_count'];
 
       expectedFields.forEach((field) => {
         expect(field).toBeDefined();
       });
     });
 
-    it("should require --force flag to clear graph", () => {
-      const forceFlag = "--force";
+    it('should require --force flag to clear graph', () => {
+      const forceFlag = '--force';
 
-      expect(forceFlag).toBe("--force");
+      expect(forceFlag).toBe('--force');
     });
 
-    it("should check server health", () => {
+    it('should check server health', () => {
       // This would test the health command
-      const healthEndpoint = "http://localhost:8000/health";
+      const healthEndpoint = 'http://localhost:8000/health';
 
-      expect(healthEndpoint).toContain("/health");
-      expect(healthEndpoint).toContain("localhost:8000");
+      expect(healthEndpoint).toContain('/health');
+      expect(healthEndpoint).toContain('localhost:8000');
     });
 
-    it("should handle command errors gracefully", () => {
+    it('should handle command errors gracefully', () => {
       const errorResponse = {
         success: false,
-        error: "Invalid command or parameters",
+        error: 'Invalid command or parameters',
       };
 
       expect(errorResponse.success).toBe(false);
@@ -332,47 +343,50 @@ describe("Tool Scripts Integration", () => {
     });
   });
 
-  describe("Cross-Tool Integration", () => {
-    it("should support complete install-diagnose cycle", async () => {
+  describe('Cross-Tool Integration', () => {
+    it('should support complete install-diagnose cycle', async () => {
       const mockConfig = createMockConfigLoader();
       const mockManager = createMockContainerManager();
 
       // Install phase
       const config = {
-        OPENAI_API_KEY: "sk-test",
-        LLM_PROVIDER: "openai",
+        OPENAI_API_KEY: 'sk-test',
+        LLM_PROVIDER: 'openai',
       };
 
       await mockConfig.save(config);
 
       // Diagnose phase
-      ctx.mockExec(["--version"], {
+      ctx.mockExec(['--version'], {
         success: true,
-        stdout: "podman 4.0.0",
+        stdout: 'podman 4.0.0',
       });
 
       const isAvailable = mockManager.isRuntimeAvailable();
 
       const files = ctx.getMockFiles();
-      expect(files["config/.env"]).toBeDefined();
+      expect(files['config/.env']).toBeDefined();
       expect(isAvailable).toBe(true);
     });
 
-    it("should support diagnose-mcp-wrapper workflow", async () => {
+    it('should support diagnose-mcp-wrapper workflow', async () => {
       const mockManager = createMockContainerManager();
 
       // Diagnose checks
-      ctx.mockExec(["ps", "--filter", "name=graphiti-knowledge-graph-mcp", "--format", "{{.Status}}"], {
-        success: true,
-        stdout: "running",
-      });
+      ctx.mockExec(
+        ['ps', '--filter', 'name=graphiti-knowledge-graph-mcp', '--format', '{{.Status}}'],
+        {
+          success: true,
+          stdout: 'running',
+        }
+      );
 
-      const isRunning = await mockManager.isContainerRunning("graphiti-knowledge-graph-mcp");
+      const isRunning = await mockManager.isContainerRunning('graphiti-knowledge-graph-mcp');
 
       // MCP wrapper operations
       if (isRunning) {
         // Would perform MCP operations
-        const operation = "search_nodes";
+        const operation = 'search_nodes';
         expect(operation).toBeDefined();
       }
 
@@ -380,47 +394,50 @@ describe("Tool Scripts Integration", () => {
     });
   });
 
-  describe("Error Recovery", () => {
-    it("should handle installation failure gracefully", async () => {
-      const mockConfig = createMockConfigLoader();
+  describe('Error Recovery', () => {
+    it('should handle installation failure gracefully', async () => {
+      const _mockConfig = createMockConfigLoader();
 
       // Simulate failed save
       const invalidConfig = {
-        OPENAI_API_KEY: "", // Invalid empty key
+        OPENAI_API_KEY: '', // Invalid empty key
       };
 
       // Should handle gracefully
-      expect(invalidConfig.OPENAI_API_KEY).toBe("");
+      expect(invalidConfig.OPENAI_API_KEY).toBe('');
     });
 
-    it("should handle missing containers in diagnose", async () => {
+    it('should handle missing containers in diagnose', async () => {
       const mockManager = createMockContainerManager();
 
-      ctx.mockExec(["ps", "-a", "--filter", "name=graphiti-knowledge-graph-mcp", "--format", "{{.Names}}"], {
-        success: true,
-        stdout: "", // Empty means not found
-      });
+      ctx.mockExec(
+        ['ps', '-a', '--filter', 'name=graphiti-knowledge-graph-mcp', '--format', '{{.Names}}'],
+        {
+          success: true,
+          stdout: '', // Empty means not found
+        }
+      );
 
-      const exists = await mockManager.containerExists("graphiti-knowledge-graph-mcp");
+      const exists = await mockManager.containerExists('graphiti-knowledge-graph-mcp');
 
       expect(exists).toBe(false);
     });
 
-    it("should handle MCP server connection failures", () => {
+    it('should handle MCP server connection failures', () => {
       // This would test connection error handling
-      const connectionError = "ECONNREFUSED";
+      const connectionError = 'ECONNREFUSED';
 
-      expect(connectionError).toContain("REFUSED");
+      expect(connectionError).toContain('REFUSED');
     });
   });
 
-  describe("User Interaction", () => {
-    it("should prompt for confirmation before destructive actions", () => {
+  describe('User Interaction', () => {
+    it('should prompt for confirmation before destructive actions', () => {
       const confirmationPrompts = [
-        "Backup and replace",
-        "Remove and recreate",
-        "Use this key",
-        "Continue with installation",
+        'Backup and replace',
+        'Remove and recreate',
+        'Use this key',
+        'Continue with installation',
       ];
 
       confirmationPrompts.forEach((prompt) => {
@@ -429,13 +446,13 @@ describe("Tool Scripts Integration", () => {
       });
     });
 
-    it("should provide clear progress indicators", () => {
+    it('should provide clear progress indicators', () => {
       const steps = [
-        "Verifying prerequisites",
-        "Collecting API keys",
-        "Creating configuration",
-        "Starting services",
-        "Installing PAI skill",
+        'Verifying prerequisites',
+        'Collecting API keys',
+        'Creating configuration',
+        'Starting services',
+        'Installing PAI skill',
       ];
 
       steps.forEach((step) => {
@@ -444,12 +461,12 @@ describe("Tool Scripts Integration", () => {
       });
     });
 
-    it("should display helpful error messages", () => {
+    it('should display helpful error messages', () => {
       const errorMessages = [
-        "Podman is not installed",
-        "No API keys found in .env",
-        "Container not running",
-        "Server not responding",
+        'Podman is not installed',
+        'No API keys found in .env',
+        'Container not running',
+        'Server not responding',
       ];
 
       errorMessages.forEach((msg) => {
@@ -459,43 +476,43 @@ describe("Tool Scripts Integration", () => {
     });
   });
 
-  describe("Configuration Persistence", () => {
-    it("should preserve configuration across restarts", async () => {
+  describe('Configuration Persistence', () => {
+    it('should preserve configuration across restarts', async () => {
       const mockConfig = createMockConfigLoader();
 
       // Initial save
       const config1 = {
-        OPENAI_API_KEY: "sk-test-key",
-        LLM_PROVIDER: "openai",
+        OPENAI_API_KEY: 'sk-test-key',
+        LLM_PROVIDER: 'openai',
       };
 
       await mockConfig.save(config1);
 
       // Load and verify
       const files = ctx.getMockFiles();
-      expect(files["config/.env"]).toContain("sk-test-key");
+      expect(files['config/.env']).toContain('sk-test-key');
 
       // Would reload and verify in actual test
     });
 
-    it("should support configuration updates", async () => {
+    it('should support configuration updates', async () => {
       const mockConfig = createMockConfigLoader();
 
       // Save initial config
       await mockConfig.save({
-        MODEL_NAME: "gpt-4o-mini",
-        SEMAPHORE_LIMIT: "10",
+        MODEL_NAME: 'gpt-4o-mini',
+        SEMAPHORE_LIMIT: '10',
       });
 
       // Update config
       await mockConfig.save({
-        MODEL_NAME: "gpt-4o",
-        SEMAPHORE_LIMIT: "20",
+        MODEL_NAME: 'gpt-4o',
+        SEMAPHORE_LIMIT: '20',
       });
 
       const files = ctx.getMockFiles();
-      expect(files["config/.env"]).toContain("MODEL_NAME=gpt-4o");
-      expect(files["config/.env"]).toContain("SEMAPHORE_LIMIT=20");
+      expect(files['config/.env']).toContain('MODEL_NAME=gpt-4o');
+      expect(files['config/.env']).toContain('SEMAPHORE_LIMIT=20');
     });
   });
 });
