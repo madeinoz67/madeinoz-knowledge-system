@@ -66,10 +66,19 @@ source_description: "Technical learning about Podman"
 bun run src/server/knowledge.ts add_episode "Episode Title" "Content to store" "Source description"
 ```
 
+**CRITICAL: This command requires TWO separate quoted arguments (title AND body).**
+
+Passing a single argument will fail with: `Usage: add_episode <title> <body> [source_description]`
+
 **Arguments:**
-1. Title (required) - Brief title describing the content
-2. Body (required) - The full content to store in the graph
-3. Source description (optional) - Where this came from
+1. **Title** (required) - Brief title describing the content (extract from user's request)
+2. **Body** (required) - The full content to store in the graph
+3. **Source description** (optional) - Where this came from
+
+**When user says "remember that X":**
+- Extract a short title from the content (e.g., "Podman Volume Syntax")
+- Use the full content as the body
+- Pass both as separate quoted strings
 
 **Options:**
 - `--raw` - Output raw JSON instead of compact format
@@ -204,7 +213,7 @@ add_episode({
 
 **Error: "Connection refused"**
 - Graphiti MCP server is not running
-- Start server: `bun run src/server/run.ts`
+- Start server: `bun run server-cli start`
 
 **Error: "API key not configured"**
 - MADEINOZ_KNOWLEDGE_OPENAI_API_KEY is missing or invalid

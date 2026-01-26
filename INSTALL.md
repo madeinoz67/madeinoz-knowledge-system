@@ -2,6 +2,162 @@
 
 **This guide is designed for AI agents installing this pack into a user's infrastructure.**
 
+## Environment Variable Configuration
+
+### Madeinoz Knowledge System Variable Prefix
+
+All configuration variables use the `MADEINOZ_KNOWLEDGE_` prefix to avoid conflicts with other PAI packs. The `entrypoint.sh` script automatically maps these prefixed variables to unprefixed container variables at startup.
+
+**How the mapping works:**
+
+| Prefixed Variable (in `~/.claude/.env`) | Unprefixed Variable (inside container) |
+|----------------------------------------|----------------------------------------|
+| `MADEINOZ_KNOWLEDGE_LLM_PROVIDER` | `LLM_PROVIDER` |
+| `MADEINOZ_KNOWLEDGE_MODEL_NAME` | `MODEL_NAME` |
+| `MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER` | `EMBEDDER_PROVIDER` |
+| `MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL` | `EMBEDDER_MODEL` |
+| `MADEINOZ_KNOWLEDGE_OPENAI_API_KEY` | `OPENAI_API_KEY` |
+| `MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL` | `OPENAI_BASE_URL` |
+| `MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL` | `OLLAMA_BASE_URL` |
+| `MADEINOZ_KNOWLEDGE_ANTHROPIC_API_KEY` | `ANTHROPIC_API_KEY` |
+| `MADEINOZ_KNOWLEDGE_GOOGLE_API_KEY` | `GOOGLE_API_KEY` |
+| `MADEINOZ_KNOWLEDGE_GROQ_API_KEY` | `GROQ_API_KEY` |
+| `MADEINOZ_KNOWLEDGE_VOYAGE_API_KEY` | `VOYAGE_API_KEY` |
+| `MADEINOZ_KNOWLEDGE_NEO4J_URI` | `NEO4J_URI` |
+| `MADEINOZ_KNOWLEDGE_NEO4J_USER` | `NEO4J_USER` |
+| `MADEINOZ_KNOWLEDGE_NEO4J_PASSWORD` | `NEO4J_PASSWORD` |
+| `MADEINOZ_KNOWLEDGE_FALKORDB_HOST` | `FALKORDB_HOST` |
+| `MADEINOZ_KNOWLEDGE_FALKORDB_PORT` | `FALKORDB_PORT` |
+| `MADEINOZ_KNOWLEDGE_SEMAPHORE_LIMIT` | `SEMAPHORE_LIMIT` |
+| `MADEINOZ_KNOWLEDGE_GROUP_ID` | `GRAPHITI_GROUP_ID` |
+
+**Benefits of the prefix system:**
+
+- **Clear ownership:** Each variable is pack-specific
+- **No conflicts:** Different packs can use different API keys and models
+- **Separate billing:** Track costs per pack
+- **Independent rate limits:** One pack does not affect another
+- **Clean .env:** Only prefixed variables needed, no duplication
+
+### Setting Up Configuration
+
+To configure the Madeinoz Knowledge System:
+
+1. **Copy the environment template:**
+   ```bash
+   cp config/.env.example ~/.claude/.env
+   ```
+
+2. **Edit your PAI configuration:**
+   ```bash
+   nano ~/.claude/.env
+   ```
+
+3. **Configure your API keys with the `MADEINOZ_KNOWLEDGE_` prefix:**
+   ```bash
+   # Example configuration
+   MADEINOZ_KNOWLEDGE_LLM_PROVIDER=openai
+   MADEINOZ_KNOWLEDGE_MODEL_NAME=openai/gpt-4o-mini
+   MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=sk-or-v1-your-key-here
+   MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL=https://openrouter.ai/api/v1
+   MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER=ollama
+   MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL=mxbai-embed-large
+   MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL=http://host.containers.internal:11434
+   ```
+
+4. **The entrypoint.sh script handles mapping automatically at container startup.** You do not need to set unprefixed variables.
+
+### Applied Patches
+
+This system includes three patches to the upstream Graphiti MCP server:
+
+#### Patch 1: entrypoint.sh - Variable Mapping
+
+**Location:** `src/server/entrypoint.sh`
+
+**Purpose:** Maps `MADEINOZ_KNOWLEDGE_*` prefixed environment variables to unprefixed container variables.
+
+**How it works:**
+- Runs before the main container command
+- Tests each prefixed variable and exports the unprefixed version if set
+- Clean one-way mapping (prefixed -> unprefixed)
+
+**Example:**
+```bash
+# In ~/.claude/.env
+MADEINOZ_KNOWLEDGE_LLM_PROVIDER=openai
+
+# Inside container (mapped by entrypoint.sh)
+LLM_PROVIDER=openai
+```
+
+#### Patch 2: graphiti_mcp_server.py - Search All Groups
+
+**Location:** `src/server/patches/graphiti_mcp_server.py`
+
+**Purpose:** Enables searching across ALL groups when no `group_ids` are specified.
+
+**Behavior:**
+- When `GRAPHITI_SEARCH_ALL_GROUPS=true`: Searches all available groups
+- When `GRAPHITI_SEARCH_ALL_GROUPS=false` or unset: Uses original behavior (default group only)
+- Uses a 30-second cache for group discovery to balance performance and freshness
+
+**Configuration:**
+```bash
+# In ~/.claude/.env
+GRAPHITI_SEARCH_ALL_GROUPS=true   # Enable (default)
+GRAPHITI_SEARCH_ALL_GROUPS=false  # Disable (original behavior)
+```
+
+**Why this matters:**
+- Knowledge stored in different groups (e.g., `osint-profiles`, `main`, `research`) becomes discoverable
+- No need to explicitly specify groups in every search query
+
+#### Patch 3: factories.py - Ollama and OpenAI-Compatible Support
+
+**Location:** `src/server/patches/factories.py`
+
+**Purpose:** Enables support for:
+- **Ollama** (local, no API key required)
+- **OpenAI-compatible providers** (OpenRouter, Together AI, Fireworks AI, DeepInfra)
+
+**How it works:**
+- Detects provider by URL (e.g., `openrouter.ai`, `api.together.xyz`)
+- Local providers (localhost/LAN): No API key required
+- Cloud providers: Requires provider-specific API key
+- Uses `OpenAIGenericClient` with `/v1/chat/completions` endpoint (compatible everywhere)
+
+**Configuration:**
+```bash
+# Ollama (local, free)
+MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL=http://host.containers.internal:11434
+
+# OpenRouter (recommended)
+MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL=https://openrouter.ai/api/v1
+MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=sk-or-v1-your-key-here
+
+# Together AI
+MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL=https://api.together.xyz/v1
+MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=your-together-key-here
+```
+
+### Ollama Configuration
+
+For local Ollama deployments, set the `MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL` variable:
+
+```bash
+# Docker/Podman containers (default)
+MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL=http://host.containers.internal:11434
+
+# Same machine (no container)
+MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL=http://localhost:11434
+
+# Remote Ollama server
+MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL=http://10.0.0.150:11434
+```
+
+**Note:** The `OLLAMA_BASE_URL` variable is automatically mapped by entrypoint.sh when using the prefixed `MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL`.
+
 ---
 
 **FOR AI AGENTS:** This installation MUST be completed exactly as specified. Follow these rules:
@@ -433,7 +589,7 @@ Based on the detection above, follow the appropriate path:
 |----------|---------------|--------|
 | **Clean Install** | No MCP server, ports available, no existing skill | Proceed normally with Step 1 |
 | **Server Running** | MCP server already running | Decide: keep existing (skip to Step 4) or stop/reinstall |
-| **Port Conflict (FalkorDB)** | Ports 8000 or 6379 in use | Stop conflicting services or change ports in run.ts |
+| **Port Conflict (FalkorDB)** | Ports 8000 or 6379 in use | Stop conflicting services or change ports in Docker Compose files |
 | **Port Conflict (Neo4j)** | Ports 7474 or 7687 in use | Stop conflicting services or use FalkorDB backend |
 | **Skill Exists** | Knowledge skill already installed | Backup old skill, compare versions, then replace |
 | **Missing Dependencies** | Podman or Bun not installed | Install dependencies first, then retry |
@@ -577,7 +733,7 @@ echo "Checking pack contents..."
 REQUIRED_FILES=(
     "README.md"
     "SKILL.md"
-    "src/server/run.ts"
+    "src/server/server-cli.ts"
     "src/server/podman-compose-falkordb.yml"
     "src/server/podman-compose-neo4j.yml"
     "src/server/docker-compose-falkordb.yml"
@@ -1032,7 +1188,7 @@ echo ""
 echo "🚀 Starting MCP Server"
 echo "======================"
 echo ""
-bun run src/server/run.ts
+bun run server-cli start
 
 # Wait for server to initialize
 echo ""
@@ -1086,12 +1242,12 @@ The Neo4j docker-compose includes a patch that can search across ALL groups when
 **Configuration:**
 ```bash
 # In PAI config ($PAI_DIR/.env or ~/.claude/.env) - set to enable/disable the patch
-MADEINOZ_KNOWLEDGE_SEARCH_ALL_GROUPS=true   # Enable (default)
-MADEINOZ_KNOWLEDGE_SEARCH_ALL_GROUPS=false  # Disable (original behavior)
+GRAPHITI_SEARCH_ALL_GROUPS=true   # Enable (default)
+GRAPHITI_SEARCH_ALL_GROUPS=false  # Disable (original behavior)
 ```
 
 The patch:
-- Controlled by `MADEINOZ_KNOWLEDGE_SEARCH_ALL_GROUPS` environment variable
+- Controlled by `GRAPHITI_SEARCH_ALL_GROUPS` environment variable
 - Dynamically queries all available group_ids at search time
 - Uses a 30-second cache to balance performance and freshness
 - Ensures new groups are searchable within 30 seconds of creation
@@ -1111,7 +1267,7 @@ When using Neo4j backend, you can access the Neo4j Browser at http://localhost:7
 
 **Troubleshooting:**
 - If server fails to start, check logs: `bun run src/skills/tools/logs.ts`
-- If port is already in use, stop conflicting service or modify `src/server/run.ts` to use different ports
+- If port is already in use, stop conflicting service or modify the Docker Compose files to use different ports
 - If API key validation fails, verify your API key has available credits/quota
 
 ---
@@ -1995,7 +2151,7 @@ The hook tracks which files have been synced in `~/.claude/MEMORY/STATE/knowledg
 
 ### Server Won't Start
 
-**Symptoms:** `bun run src/server/run.ts` fails or container exits immediately
+**Symptoms:** `bun run server-cli start` fails or container exits immediately
 
 **Diagnosis:**
 ```bash
@@ -2008,7 +2164,7 @@ lsof -i :6379
 ```
 
 **Solutions:**
-1. **Port conflict:** Stop conflicting service or modify ports in `src/server/run.ts`
+1. **Port conflict:** Stop conflicting service or modify ports in Docker Compose files
 2. **API key invalid:** Verify API key in PAI config (`$PAI_DIR/.env` or `~/.claude/.env`) has credits/quota
 3. **Image pull failed:** Check internet connection and try again
 4. **Resource limits:** Ensure system has at least 2GB RAM available

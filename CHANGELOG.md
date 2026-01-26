@@ -51,7 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Affected lines 62 and 88 in docker-compose file
   - Resolved authentication failures
 
-- **Volume Mount Conflict** - Removed read-only volume mounts in `run.ts`
+- **Volume Mount Conflict** - Removed read-only volume mounts in `server-cli.ts`
   - Custom image has configs and patches baked in
   - Entrypoint now copies correct config based on `DATABASE_TYPE`
   - Fixed crash-loop with "Read-only file system" error
@@ -61,7 +61,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added defensive `if result:` check before async iteration
   - Prevents crashes when `get_all_group_ids()` returns None
 
-- **Network Alias for Podman** - Added explicit DNS aliases in `run.ts`
+- **Network Alias for Podman** - Added explicit DNS aliases in `server-cli.ts`
   - Added `--network-alias=falkordb` for FalkorDB container
   - Added `--network-alias=neo4j` for Neo4j container
   - Fixed "Error -2 connecting to falkordb:6379" on Podman

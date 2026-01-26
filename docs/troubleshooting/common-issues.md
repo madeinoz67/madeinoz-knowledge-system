@@ -15,7 +15,7 @@ Before diving into specific problems, run these checks:
 
 ```bash
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
-bun run src/server/status.ts
+bun run server-cli status
 ```
 
 Expected output:
@@ -33,7 +33,7 @@ MCP Server: http://localhost:8000/sse
 ### 2. Check Logs
 
 ```bash
-bun run src/server/logs.ts
+bun run server-cli logs
 ```
 
 Look for errors (lines with ERROR or WARN).
@@ -69,7 +69,7 @@ If nothing shows up, the server isn't running.
 **Start the server:**
 ```bash
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
-bun run src/server/start.ts
+bun run server-cli start
 ```
 
 **Check if port 8000 is in use:**
@@ -80,7 +80,7 @@ lsof -i :8000
 If another service is using port 8000, you need to either stop that service or change the knowledge system port.
 
 **To change the port:**
-Edit `src/server/run.ts` and change the port number, then restart.
+Edit the Docker Compose files (`docker-compose-neo4j.yml` or `docker-compose-falkordb.yml`) and change the port number, then restart.
 
 ### "API key not configured" or "Invalid API key"
 
@@ -107,8 +107,7 @@ MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=sk-your-actual-key-here
 
 4. Restart the server:
 ```bash
-bun run src/server/stop.ts
-bun run src/server/start.ts
+bun run server-cli restart
 ```
 
 **Verify your key has credits:**
@@ -184,7 +183,7 @@ Wait 30 seconds, then try starting the server again.
 
 **Check logs for specific errors:**
 ```bash
-bun run src/server/logs.ts
+bun run server-cli logs
 ```
 
 **Common specific issues:**
@@ -371,9 +370,9 @@ Consider upgrading your OpenAI tier or capturing knowledge less frequently.
 **This is the MCP transport layer having issues.**
 
 **Quick fix:**
-1. Stop the server: `bun run src/server/stop.ts`
+1. Stop the server: `bun run server-cli stop`
 2. Wait 10 seconds
-3. Start again: `bun run src/server/start.ts`
+3. Start again: `bun run server-cli start`
 4. Restart your AI assistant (Claude Code, etc.)
 
 **If that doesn't work:**
@@ -388,7 +387,7 @@ Should see event-stream data.
 **If curl fails:**
 The MCP server isn't running properly. Check logs:
 ```bash
-bun run src/server/logs.ts
+bun run server-cli logs
 ```
 
 Look for startup errors.
@@ -481,7 +480,7 @@ podman ps | grep falkordb
 
 **If not running:**
 ```bash
-bun run src/server/start.ts
+bun run server-cli start
 ```
 
 **Check ports aren't blocked:**
@@ -516,8 +515,7 @@ Shows CPU and memory usage of containers.
 
 **Option 1: Restart containers**
 ```bash
-bun run src/server/stop.ts
-bun run src/server/start.ts
+bun run server-cli restart
 ```
 
 **Option 2: Clear old data**
@@ -697,13 +695,13 @@ Quick reference for troubleshooting:
 
 ```bash
 # Check status
-bun run src/server/status.ts
+bun run server-cli status
 
 # View logs
-bun run src/server/logs.ts
+bun run server-cli logs
 
 # Restart everything
-bun run src/server/stop.ts && bun run src/server/start.ts
+bun run server-cli restart
 
 # Check configuration
 cat "${PAI_DIR:-$HOME/.claude}/.env" | grep MADEINOZ_KNOWLEDGE
@@ -757,13 +755,13 @@ Create a diagnostic report:
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
 
 echo "=== System Status ===" > diagnostic.txt
-bun run src/server/status.ts >> diagnostic.txt
+bun run server-cli status >> diagnostic.txt
 
 echo "\n=== Configuration ===" >> diagnostic.txt
 cat "${PAI_DIR:-$HOME/.claude}/.env" | grep MADEINOZ_KNOWLEDGE | grep -v API_KEY >> diagnostic.txt
 
 echo "\n=== Recent Logs ===" >> diagnostic.txt
-bun run src/server/logs.ts | tail -100 >> diagnostic.txt
+bun run server-cli logs | tail -100 >> diagnostic.txt
 
 echo "\n=== Container Info ===" >> diagnostic.txt
 podman ps --all | grep madeinoz-knowledge >> diagnostic.txt

@@ -446,7 +446,7 @@ async function logs(): Promise<void> {
  */
 function showHelp(): void {
   console.log(`
-Usage: bun run server.ts <command> [options]
+Usage: bun run server-cli <command> [options]
 
 Commands:
   start     Start the server containers
@@ -463,12 +463,12 @@ Options:
   --no-follow   (logs) Don't follow log output
 
 Examples:
-  bun run server.ts start
-  bun run server.ts stop
-  bun run server.ts restart
-  bun run server.ts status
-  bun run server.ts logs --mcp --tail 50
-  bun run server.ts logs --db --no-follow
+  bun run server-cli start
+  bun run server-cli stop
+  bun run server-cli restart
+  bun run server-cli status
+  bun run server-cli logs --mcp --tail 50
+  bun run server-cli logs --db --no-follow
 `);
 }
 

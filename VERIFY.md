@@ -192,7 +192,7 @@ ls -1 src/skills/lib/
 
 Pack-level files in `src/server/` (not installed with skill):
 
-- [ ] `run.ts` - Initial setup script
+- [ ] `server-cli.ts` - Unified server CLI (start, stop, restart, status, logs)
 - [ ] `install.ts` - Interactive installation wizard
 - [ ] `diagnose.ts` - Diagnostic and troubleshooting tool
 - [ ] `mcp-wrapper.ts` - MCP protocol wrapper
@@ -209,7 +209,7 @@ ls -la src/server/
 ls -la src/server/lib/
 ```
 
-**Expected result:** run.ts, install.ts, diagnose.ts, mcp-wrapper.ts, compose files for both backends, config-neo4j.yaml, and lib/ directory
+**Expected result:** server-cli.ts, install.ts, diagnose.ts, mcp-wrapper.ts, compose files for both backends, config-neo4j.yaml, and lib/ directory
 
 ---
 
@@ -1342,7 +1342,7 @@ grep -i "beyond.*scope\|implement.*your.*own\|left as.*exercise" \
 
 ### 10.3 Complete Component List
 
-- [ ] **MCP Server included** (`src/server/run.ts` and compose files)
+- [ ] **MCP Server included** (`src/server/server-cli.ts` and compose files)
 - [ ] **FalkorDB compose files included** (`docker-compose-falkordb.yml`, `podman-compose-falkordb.yml`)
 - [ ] **Neo4j compose files included** (`docker-compose-neo4j.yml`, `podman-compose-neo4j.yml`, `config-neo4j.yaml`)
 - [ ] **PAI Skill included** (`SKILL.md` with workflows)

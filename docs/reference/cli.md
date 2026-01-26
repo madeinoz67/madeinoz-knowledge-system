@@ -14,7 +14,7 @@ The Madeinoz Knowledge System provides command-line tools for managing the knowl
 ### Start Server
 
 ```bash
-bun run src/server/run.ts
+bun run server-cli start
 ```
 
 Launches the Graphiti MCP server with the configured database backend (Neo4j or FalkorDB).
@@ -463,7 +463,7 @@ lsof -i :8000
 # Kill process if needed
 kill -9 [PID]
 
-# Or use different port by modifying src/server/run.ts
+# Or use different port by modifying the Docker Compose files
 ```
 
 ### "Container not found"
@@ -494,7 +494,7 @@ curl --max-time 5 http://localhost:8000/health
 curl http://localhost:8000/health
 
 # If unavailable, start server
-bun run src/server/run.ts
+bun run server-cli start
 ```
 
 ## Configuration Files

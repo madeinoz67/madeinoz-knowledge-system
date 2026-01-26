@@ -449,7 +449,7 @@ Based on the detection above, follow the appropriate path:
 |----------|---------------|--------|
 | **Clean Install** | No MCP server, ports available, no existing skill | Proceed normally with Step 1 |
 | **Server Running** | MCP server already running | Decide: keep existing (skip to Step 4) or stop/reinstall |
-| **Port Conflict (FalkorDB)** | Ports 8000 or 6379 in use | Stop conflicting services or change ports in run.ts |
+| **Port Conflict (FalkorDB)** | Ports 8000 or 6379 in use | Stop conflicting services or change ports in Docker Compose files |
 | **Port Conflict (Neo4j)** | Ports 7474 or 7687 in use | Stop conflicting services or use FalkorDB backend |
 | **Skill Exists** | Knowledge skill already installed | Backup old skill, compare versions, then replace |
 | **Missing Dependencies** | Podman or Bun not installed | Install dependencies first, then retry |
@@ -593,7 +593,7 @@ echo "Checking pack contents..."
 REQUIRED_FILES=(
     "README.md"
     "SKILL.md"
-    "src/server/run.ts"
+    "src/server/server-cli.ts"
     "src/server/podman-compose-falkordb.yml"
     "src/server/podman-compose-neo4j.yml"
     "src/server/docker-compose-falkordb.yml"
@@ -690,10 +690,10 @@ fi
 
 ### Server Won't Start
 
-**Symptoms:** `bun run src/server/run.ts` fails or container exits immediately
+**Symptoms:** `bun run server-cli start` fails or container exits immediately
 
 **Solutions:**
-1. **Port conflict:** Stop conflicting service or modify ports in `src/server/run.ts`
+1. **Port conflict:** Stop conflicting service or modify ports in Docker Compose files
 2. **API key invalid:** Verify API key in PAI config has credits/quota
 3. **Image pull failed:** Check internet connection and try again
 4. **Resource limits:** Ensure system has at least 2GB RAM available

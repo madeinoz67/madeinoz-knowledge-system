@@ -246,7 +246,7 @@ When adding a new config variable:
 
 **Issue:** Podman requires explicit `--network-alias` for DNS service discovery
 **Impact:** MCP container couldn't resolve `bolt://neo4j:7687` or `redis://falkordb:6379`
-**Fixed in:** `src/server/run.ts`
+**Fixed in:** `src/server/server-cli.ts`
 
 **Solution:**
 ```typescript
@@ -265,7 +265,7 @@ Docker handles this automatically, but Podman requires explicit aliases.
 
 **Issue:** Read-only volume mounts conflicted with entrypoint.sh config selection
 **Impact:** MCP container crash-looped with "Read-only file system" error
-**Fixed in:** `src/server/run.ts` lines 290-291
+**Fixed in:** `src/server/server-cli.ts`
 
 **Before (broken):**
 ```typescript

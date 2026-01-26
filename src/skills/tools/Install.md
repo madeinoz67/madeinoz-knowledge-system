@@ -34,7 +34,7 @@ Before installation, verify:
 
 ```bash
 cd /path/to/madeinoz-knowledge-system
-bun run src/server/run.ts
+bun run server-cli start
 ```
 
 ### Step 2: Verify Server Health
@@ -82,7 +82,7 @@ After installation, test with:
 
 | Issue | Solution |
 |-------|----------|
-| Server won't start | Check logs: `bun run src/server/logs.ts` |
+| Server won't start | Check logs: `bun run server-cli logs` |
 | MCP tools not available | Verify `~/.claude.json` has madeinoz-knowledge entry |
 | API errors | Check API key is valid and has quota |
 

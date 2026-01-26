@@ -41,7 +41,7 @@ bun run diagnose              # System diagnostics
 ```
 src/
 ├── server/                   # MCP server orchestration
-│   ├── run.ts               # Main entry - starts containers (Neo4j or FalkorDB)
+│   ├── server-cli.ts        # Main entry - starts containers (Neo4j or FalkorDB)
 │   ├── install.ts           # Interactive installer with backend selection
 │   ├── diagnose.ts          # System diagnostics
 │   ├── knowledge.ts         # Knowledge CLI (token-efficient wrapper)

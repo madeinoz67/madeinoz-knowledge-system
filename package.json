@@ -27,9 +27,9 @@
     "pai"
   ],
   "scripts": {
-    "build": "bun build ./src/skills/server/run.ts --outdir ./dist --target bun",
+    "build": "bun build ./src/skills/tools/server-cli.ts --outdir ./dist --target bun",
     "typecheck": "tsc --noEmit",
-    "dev": "bun run --watch src/skills/server/run.ts",
+    "dev": "bun run --watch src/skills/tools/server-cli.ts",
     "test": "bun test",
     "test:unit": "bun test tests/unit",
     "test:integration": "bun test tests/integration",
@@ -41,7 +41,7 @@
     "format:check": "biome format .",
     "check": "biome check .",
     "check:fix": "biome check --write .",
-    "server": "bun run src/skills/tools/server-cli.ts",
+    "server-cli": "bun run src/skills/tools/server-cli.ts",
     "start": "bun run src/skills/tools/server-cli.ts start",
     "stop": "bun run src/skills/tools/server-cli.ts stop",
     "restart": "bun run src/skills/tools/server-cli.ts restart",

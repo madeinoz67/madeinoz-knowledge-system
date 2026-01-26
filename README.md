@@ -112,7 +112,7 @@ Please follow the installation instructions below to integrate this pack into yo
 | Install Tool | `src/skills/tools/Install.md` | Complete installation workflow |
 | **Memory Sync Hook** | `src/hooks/sync-memory-to-knowledge.ts` | Auto-sync learnings/research from PAI Memory System |
 | Hook Libraries | `src/hooks/lib/*.ts` | Frontmatter parser, sync state, knowledge client, Lucene sanitization |
-| MCP Server Launcher | `src/server/run.ts` | Graphiti server launcher with container orchestration |
+| MCP Server Launcher | `src/server/server-cli.ts` | Graphiti server launcher with container orchestration |
 | Server Management | `src/skills/tools/{start,stop,status,logs}.ts` | Container management scripts |
 | Configuration Template | `config/.env.example` | API keys and model settings template (reference only) |
 | Docker Compose (FalkorDB) | `src/server/docker-compose-falkordb.yml` | Docker Compose for FalkorDB backend |
@@ -464,7 +464,7 @@ Result: Successful search
 **7. End-to-End Completeness**
 
 Every component is included:
-- ✅ MCP Server: `run.ts` starts Graphiti + Neo4j/FalkorDB
+- ✅ MCP Server: `bun run server-cli start` starts Graphiti + Neo4j/FalkorDB
 - ✅ PAI Skill: `SKILL.md` with intent routing
 - ✅ Workflows: 7 complete operational procedures
 - ✅ Installation: Step-by-step in `tools/Install.md`
@@ -770,7 +770,7 @@ Remember that I prefer gpt-4o for complex reasoning tasks
    podman ps | grep madeinoz-knowledge-graph-mcp
 
 2. If not running, start the server:
-   bun run src/server/run.ts
+   bun run server-cli start
 
 3. Check server logs:
    bun run src/skills/tools/logs.ts
@@ -918,8 +918,8 @@ To switch backends, update your configuration:
 MADEINOZ_KNOWLEDGE_DATABASE_TYPE=neo4j  # or falkordb
 
 # Then restart services
-bun run src/server/stop.ts
-bun run src/server/run.ts
+bun run server-cli stop
+bun run server-cli start
 ```
 
 ---
@@ -1060,8 +1060,8 @@ For more details on Cypher and Neo4j, see the [Neo4j Documentation](https://neo4
 | **Multiple Knowledge Graphs** | PAI config: `MADEINOZ_KNOWLEDGE_GROUP_ID` | Create isolated graphs for different domains (work, personal, research) |
 | **Custom Entity Types** | Graphiti configuration | Add domain-specific entity types beyond defaults (Preferences, Requirements, Procedures, etc.) |
 | **Vector Embedding Model** | PAI config: `MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER` | Use different embedding models for semantic search |
-| **Web UI Configuration** | `src/server/run.ts` | Change FalkorDB web UI port (default: 3000) |
-| **Database Persistence** | `src/server/run.ts` | Add volume mounts for persistent data storage |
+| **Web UI Configuration** | Docker Compose files | Change FalkorDB web UI port (default: 3000) |
+| **Database Persistence** | Docker Compose files | Add volume mounts for persistent data storage |
 
 ---
 
@@ -1367,7 +1367,7 @@ The hook is designed for graceful degradation:
 - FalkorDB remains the default backend
 - Added `docker-compose-neo4j.yml` and `config-neo4j.yaml` for Neo4j deployment
 - Updated `install.ts` with database backend selection step
-- Added backend-specific container orchestration in `run.ts`
+- Added backend-specific container orchestration in `server-cli.ts`
 - Neo4j uses native Cypher queries (no Lucene escaping needed)
 - Updated all documentation (README, INSTALL, VERIFY) with backend selection
 - Conditional Lucene sanitization: only applied for FalkorDB backend
