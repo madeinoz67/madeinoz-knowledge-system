@@ -43,20 +43,29 @@ Persistent personal knowledge system powered by Graphiti knowledge graph with Fa
 
 **Required Setup:**
 
-The pack is installed at `~/.claude/Packs/madeinoz-knowledge-system/` (or `$PAI_DIR/Packs/madeinoz-knowledge-system/`).
+The skill is installed at `~/.claude/skills/Knowledge/` (or `$PAI_DIR/skills/Knowledge/`).
 
 1. **Start the Graphiti MCP server:**
    ```bash
-   cd ~/.claude/Packs/madeinoz-knowledge-system
-   bun run src/server/run.ts
+   cd ~/.claude/skills/Knowledge
+   bun run tools/server.ts start
    ```
 
 2. **Verify server is running:**
    ```bash
-   cd ~/.claude/Packs/madeinoz-knowledge-system && bun run src/server/knowledge.ts health
+   cd ~/.claude/skills/Knowledge && bun run tools/server.ts status
    ```
 
-3. **Configure API key** (in PAI .env `~/.claude/.env`):
+3. **Other server commands:**
+   ```bash
+   bun run tools/server.ts stop      # Stop containers
+   bun run tools/server.ts restart   # Restart containers
+   bun run tools/server.ts logs      # View logs
+   bun run tools/server.ts logs --mcp  # MCP server logs only
+   bun run tools/server.ts logs --db   # Database logs only
+   ```
+
+4. **Configure API key** (in PAI .env `~/.claude/.env`):
    ```bash
    MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=sk-your-key-here
    ```
@@ -65,33 +74,33 @@ The pack is installed at `~/.claude/Packs/madeinoz-knowledge-system/` (or `$PAI_
 
 The Knowledge CLI provides token-efficient, human-readable output. **Always use the Knowledge CLI instead of direct MCP tool calls** for better readability and reduced token consumption.
 
-**Run commands from the pack directory:**
+**Run commands from the skill directory:**
 ```bash
-cd ~/.claude/Packs/madeinoz-knowledge-system
+cd ~/.claude/skills/Knowledge
 ```
 
 **Commands:**
 ```bash
-# Add knowledge
-bun run src/server/knowledge.ts add_episode "Title" "Body" "Source"
+# Add knowledge (REQUIRES both title AND body as separate quoted strings)
+bun run server/knowledge.ts add_episode "Short Title" "Full content body text here" "Source"
 
 # Search entities (30%+ token savings)
-bun run src/server/knowledge.ts search_nodes "query" 10
+bun run server/knowledge.ts search_nodes "query" 10
 
 # Search relationships (30%+ token savings)
-bun run src/server/knowledge.ts search_facts "query" 10
+bun run server/knowledge.ts search_facts "query" 10
 
 # Get recent episodes (25%+ token savings)
-bun run src/server/knowledge.ts get_episodes 10
+bun run server/knowledge.ts get_episodes 10
 
 # Get system status
-bun run src/server/knowledge.ts get_status
+bun run server/knowledge.ts get_status
 
 # Clear graph (destructive - requires --force)
-bun run src/server/knowledge.ts clear_graph --force
+bun run server/knowledge.ts clear_graph --force
 
 # Check server health
-bun run src/server/knowledge.ts health
+bun run server/knowledge.ts health
 ```
 
 **Options:**
@@ -114,6 +123,13 @@ bun run src/server/knowledge.ts health
 User: "Remember that when using Podman volumes, you should always mount to /container/path not host/path"
 
 → Invokes CaptureEpisode workflow
+→ **AI extracts title from content and calls CLI with TWO arguments:**
+```bash
+bun run server/knowledge.ts add_episode \
+  "Podman Volume Mounting Syntax" \
+  "When using Podman volumes, always mount to /container/path not host/path. The left side is host path, right side is container path." \
+  "User learning"
+```
 → Stores episode with extracted entities:
   - Entity: "Podman volumes" (Topic)
   - Entity: "volume mounting" (Procedure)

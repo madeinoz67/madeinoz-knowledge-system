@@ -27,23 +27,36 @@
     "pai"
   ],
   "scripts": {
-    "build": "bun build ./src/server/run.ts --outdir ./dist --target bun",
+    "build": "bun build ./src/skills/server/run.ts --outdir ./dist --target bun",
     "typecheck": "tsc --noEmit",
-    "dev": "bun run --watch src/server/run.ts",
+    "dev": "bun run --watch src/skills/server/run.ts",
     "test": "bun test",
     "test:unit": "bun test tests/unit",
     "test:integration": "bun test tests/integration",
     "test:watch": "bun test --watch",
     "test:coverage": "bun test --coverage",
-    "start": "bun run src/server/run.ts",
-    "stop": "bun run src/skills/tools/stop.ts",
-    "status": "bun run src/skills/tools/status.ts",
-    "logs": "bun run src/skills/tools/logs.ts",
-    "install:system": "bun run src/server/install.ts",
-    "diagnose": "bun run src/server/diagnose.ts"
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "check": "biome check .",
+    "check:fix": "biome check --write .",
+    "server": "bun run src/skills/tools/server.ts",
+    "start": "bun run src/skills/tools/server.ts start",
+    "stop": "bun run src/skills/tools/server.ts stop",
+    "restart": "bun run src/skills/tools/server.ts restart",
+    "status": "bun run src/skills/tools/server.ts status",
+    "logs": "bun run src/skills/tools/server.ts logs",
+    "install:system": "bun run src/skills/server/install.ts",
+    "diagnose": "bun run src/skills/server/diagnose.ts"
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
     "bun-types": "latest",
     "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "chalk": "^5.6.2",
+    "inquirer": "^13.2.1"
   }
 }
