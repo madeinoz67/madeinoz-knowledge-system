@@ -10,35 +10,14 @@ on:
     branches:
       - '**'
 
+env:
+  REGISTRY_GHCR: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
 jobs:
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Install dependencies
-        run: bun install
-
-      - name: Run ESLint
-        run: bun run lint
-
-      - name: Run TypeScript check
-        run: bun run typecheck
-        continue-on-error: true  # TODO: Fix existing type errors
-
   security:
     name: Security Scan
     runs-on: ubuntu-latest
-    needs: [lint]
     permissions:
       contents: read
     steps:
@@ -62,6 +41,30 @@ jobs:
           base: ''
           head: HEAD
           extra_args: --only-verified
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    needs: [security]
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run ESLint
+        run: bun run lint
+
+      - name: Run TypeScript check
+        run: bun run typecheck
 
   test:
     name: Test
@@ -87,9 +90,10 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    needs: [security, test]
+    needs: [lint, test]
     permissions:
       contents: read
+      packages: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -102,7 +106,7 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      - name: Build
+      - name: Build TypeScript
         run: bun run build
 
       - name: Upload build artifacts
@@ -110,6 +114,190 @@ jobs:
         with:
           name: dist
           path: dist/
+
+      # Build Docker image (validate only, don't push)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./docker/Dockerfile
+          platforms: linux/amd64
+          push: false
+          tags: ${{ env.IMAGE_NAME }}:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Build documentation (validate only)
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install MkDocs Material
+        run: pip install mkdocs-material
+
+      - name: Build documentation
+        run: mkdocs build --strict
+
+      - name: Upload docs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs
+          path: site/
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+      packages: write
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate changelog for this release
+        uses: orhun/git-cliff-action@v4
+        id: git-cliff
+        with:
+          config: cliff.toml
+          args: --latest --strip header
+        env:
+          OUTPUT: RELEASE_NOTES.md
+
+      - name: Update full CHANGELOG.md
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: cliff.toml
+          args: --verbose
+        env:
+          OUTPUT: CHANGELOG.md
+
+      - name: Commit CHANGELOG.md
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git diff --staged --quiet || git commit -m "docs: update CHANGELOG.md for ${{ github.ref_name }} [skip ci]"
+          git push origin HEAD:main
+
+      - name: Append Docker info to release notes
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          cat >> RELEASE_NOTES.md << EOF
+
+          ### Docker Images
+
+          **GitHub Container Registry:**
+          \`\`\`bash
+          docker pull ghcr.io/madeinoz67/madeinoz-knowledge-system:${VERSION}
+          docker pull ghcr.io/madeinoz67/madeinoz-knowledge-system:latest
+          \`\`\`
+
+          ### Quick Start
+
+          \`\`\`bash
+          # Neo4j backend (default)
+          bun run server-cli start
+
+          # FalkorDB backend
+          DATABASE_TYPE=falkordb bun run server-cli start
+          \`\`\`
+
+          ### Documentation
+          - [Getting Started](https://madeinoz67.github.io/madeinoz-knowledge-system/getting-started/)
+          - [Configuration](https://madeinoz67.github.io/madeinoz-knowledge-system/reference/configuration/)
+          EOF
+
+      # Build and push Docker image
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY_GHCR }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ env.REGISTRY_GHCR }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest
+          labels: |
+            org.opencontainers.image.title=Madeinoz Knowledge System
+            org.opencontainers.image.description=Graphiti MCP with Ollama/OpenRouter support, Neo4j + FalkorDB backends
+            org.opencontainers.image.vendor=madeinoz67
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./docker/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Build and deploy documentation
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install MkDocs Material
+        run: pip install mkdocs-material
+
+      - name: Build documentation
+        run: mkdocs build --strict
+
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      # Create GitHub Release
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: RELEASE_NOTES.md
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release summary
+        run: |
+          echo "## Release ${{ github.ref_name }} Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Artifacts Published" >> $GITHUB_STEP_SUMMARY
+          echo "- GitHub Release: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Docker Image: ghcr.io/${{ github.repository }}:${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Documentation: https://madeinoz67.github.io/madeinoz-knowledge-system/" >> $GITHUB_STEP_SUMMARY
 
   update-unreleased:
     name: Update Unreleased Changes
