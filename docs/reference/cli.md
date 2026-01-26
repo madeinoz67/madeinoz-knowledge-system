@@ -160,10 +160,10 @@ The `knowledge` CLI provides a token-efficient wrapper around MCP operations wit
 **Run from the project directory:**
 
 ```bash
-bun run src/skills/tools/knowledge-cli.ts <command> [args...] [options]
+bun run tools/knowledge-cli.ts <command> [args...] [options]
 ```
 
-**Note:** All CLI commands must be run from the project source directory (e.g., `/path/to/madeinoz-knowledge-system`), not from the installed pack location (`~/.claude/skills/Knowledge`).
+**Note:** All CLI commands should be run from the installed skill directory (`~/.claude/skills/Knowledge/`) where tools are available at `tools/knowledge-cli.ts`.
 
 ### Commands
 
@@ -172,13 +172,13 @@ bun run src/skills/tools/knowledge-cli.ts <command> [args...] [options]
 Add knowledge to the graph:
 
 ```bash
-bun run src/skills/tools/knowledge-cli.ts add_episode "Episode title" "Episode body content"
+bun run tools/knowledge-cli.ts add_episode "Episode title" "Episode body content"
 ```
 
 With optional source description:
 
 ```bash
-bun run src/skills/tools/knowledge-cli.ts add_episode "CTI Research" "Analysis of threat actor" "osint-recon"
+bun run tools/knowledge-cli.ts add_episode "CTI Research" "Analysis of threat actor" "osint-recon"
 ```
 
 **Arguments:**
@@ -191,13 +191,13 @@ bun run src/skills/tools/knowledge-cli.ts add_episode "CTI Research" "Analysis o
 Search for entities in the knowledge graph:
 
 ```bash
-bun run src/skills/tools/knowledge-cli.ts search_nodes "container orchestration"
+bun run tools/knowledge-cli.ts search_nodes "container orchestration"
 ```
 
 Limit results:
 
 ```bash
-bun run src/skills/tools/knowledge-cli.ts search_nodes "container orchestration" 10
+bun run tools/knowledge-cli.ts search_nodes "container orchestration" 10
 ```
 
 **Arguments:**
@@ -213,13 +213,13 @@ bun run src/skills/tools/knowledge-cli.ts search_nodes "container orchestration"
 Find relationships between entities:
 
 ```bash
-bun run src/skills/tools/knowledge-cli.ts search_facts "Podman"
+bun run tools/knowledge-cli.ts search_facts "Podman"
 ```
 
 Limit facts returned:
 
 ```bash
-bun run src/skills/tools/knowledge-cli.ts search_facts "Podman" 10
+bun run tools/knowledge-cli.ts search_facts "Podman" 10
 ```
 
 **Arguments:**
@@ -235,13 +235,13 @@ bun run src/skills/tools/knowledge-cli.ts search_facts "Podman" 10
 Retrieve recent episodes from the knowledge graph:
 
 ```bash
-bun run src/skills/tools/knowledge-cli.ts get_episodes
+bun run tools/knowledge-cli.ts get_episodes
 ```
 
 Limit number of episodes:
 
 ```bash
-bun run src/skills/tools/knowledge-cli.ts get_episodes 10
+bun run tools/knowledge-cli.ts get_episodes 10
 ```
 
 **Arguments:**
@@ -256,7 +256,7 @@ bun run src/skills/tools/knowledge-cli.ts get_episodes 10
 Get knowledge graph status and health:
 
 ```bash
-bun run src/skills/tools/knowledge-cli.ts get_status
+bun run tools/knowledge-cli.ts get_status
 ```
 
 **Output includes:**
@@ -270,7 +270,7 @@ bun run src/skills/tools/knowledge-cli.ts get_status
 Delete all knowledge from the graph (destructive operation):
 
 ```bash
-bun run src/skills/tools/knowledge-cli.ts clear_graph --force
+bun run tools/knowledge-cli.ts clear_graph --force
 ```
 
 **Safety:**
@@ -283,7 +283,7 @@ bun run src/skills/tools/knowledge-cli.ts clear_graph --force
 Check MCP server health:
 
 ```bash
-bun run src/skills/tools/knowledge-cli.ts health
+bun run tools/knowledge-cli.ts health
 ```
 
 **Output:**
@@ -299,15 +299,33 @@ All commands support the following flags:
 --raw              # Output raw JSON instead of compact format
 --metrics          # Display token metrics after operation
 --metrics-file <p> # Write metrics to JSONL file
+--since <date>     # Filter results created after this date
+--until <date>     # Filter results created before this date
 -h, --help         # Show help message
 ```
+
+**Temporal Filter Options:**
+
+The `--since` and `--until` flags enable date-based filtering for `search_nodes` and `search_facts` commands.
+
+**Supported date formats:**
+
+| Format | Example | Description |
+|--------|---------|-------------|
+| `today` | `--since today` | Start of current day (UTC) |
+| `yesterday` | `--since yesterday` | Start of previous day (UTC) |
+| `Nd` | `--since 7d` | N days ago |
+| `Nw` | `--since 2w` | N weeks ago |
+| `Nm` | `--since 1m` | N months ago (30 days per month) |
+| ISO 8601 | `--since 2026-01-15` | Specific date |
+| ISO 8601 | `--since 2026-01-15T14:30:00Z` | Specific datetime |
 
 ### Examples
 
 **Add knowledge with metrics:**
 
 ```bash
-bun run src/skills/tools/knowledge-cli.ts add_episode \
+bun run tools/knowledge-cli.ts add_episode \
   "Test Episode" \
   "This is a test episode" \
   --metrics
@@ -316,20 +334,58 @@ bun run src/skills/tools/knowledge-cli.ts add_episode \
 **Search with raw JSON output:**
 
 ```bash
-bun run src/skills/tools/knowledge-cli.ts search_nodes "PAI" --raw
+bun run tools/knowledge-cli.ts search_nodes "PAI" --raw
 ```
 
 **Search with metrics logging:**
 
 ```bash
-bun run src/skills/tools/knowledge-cli.ts search_nodes "PAI" 10 \
+bun run tools/knowledge-cli.ts search_nodes "PAI" 10 \
   --metrics-file ~/.madeinoz-knowledge/metrics.jsonl
 ```
 
 **Get status and track metrics:**
 
 ```bash
-bun run src/skills/tools/knowledge-cli.ts get_status --metrics
+bun run tools/knowledge-cli.ts get_status --metrics
+```
+
+### Temporal Search Examples
+
+**Search for today's knowledge:**
+
+```bash
+bun run tools/knowledge-cli.ts search_nodes "PAI" --since today
+```
+
+**Search from the last 7 days:**
+
+```bash
+bun run tools/knowledge-cli.ts search_facts "decisions" --since 7d
+```
+
+**Search within a specific date range:**
+
+```bash
+bun run tools/knowledge-cli.ts search_nodes "project" --since 2026-01-01 --until 2026-01-15
+```
+
+**Search yesterday's knowledge:**
+
+```bash
+bun run tools/knowledge-cli.ts search_nodes "learning" --since yesterday --until today
+```
+
+**Search from last month:**
+
+```bash
+bun run tools/knowledge-cli.ts search_facts "architecture" --since 1m
+```
+
+**Combine temporal filters with other options:**
+
+```bash
+bun run tools/knowledge-cli.ts search_nodes "AI" 20 --since 7d --metrics
 ```
 
 ### Environment Variables
@@ -361,7 +417,7 @@ export MADEINOZ_WRAPPER_TIMEOUT=100
 When `--metrics` flag is enabled or `MADEINOZ_WRAPPER_METRICS=true`, the CLI displays token usage statistics:
 
 ```bash
-bun run src/skills/tools/knowledge-cli.ts search_nodes "AI models" --metrics
+bun run tools/knowledge-cli.ts search_nodes "AI models" --metrics
 ```
 
 **Metrics output includes:**
@@ -401,8 +457,8 @@ This format is ideal for:
 ## Interactive Installation
 
 ```bash
-cd src/server
-bun run install.ts
+cd ~/.claude/skills/Knowledge
+bun run tools/install.ts
 ```
 
 Guides through:
@@ -515,10 +571,10 @@ Contains all Madeinoz Knowledge System configuration:
 
 ### Docker Compose Files
 
-- `src/server/docker-compose-falkordb.yml` - FalkorDB backend (Docker)
-- `src/server/docker-compose-neo4j.yml` - Neo4j backend (Docker)
-- `src/server/podman-compose-falkordb.yml` - FalkorDB backend (Podman)
-- `src/server/podman-compose-neo4j.yml` - Neo4j backend (Podman)
+- `docker/docker-compose-falkordb.yml` - FalkorDB backend (Docker)
+- `docker/docker-compose-neo4j.yml` - Neo4j backend (Docker)
+- `docker/podman-compose-falkordb.yml` - FalkorDB backend (Podman)
+- `docker/podman-compose-neo4j.yml` - Neo4j backend (Podman)
 
 ### Configuration Template
 
@@ -533,7 +589,7 @@ Complete example of all available configuration options.
 ls -la ~/.claude/skills/Knowledge/workflows/
 
 # Test LLM connectivity
-bun run src/skills/server/install.ts
+bun run tools/install.ts
 
 # Export knowledge data
 # (Via MCP: get_episodes with limit=999999)

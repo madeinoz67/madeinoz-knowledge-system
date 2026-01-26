@@ -139,6 +139,23 @@ bun run tools/knowledge-cli.ts health
 - `--raw` - Output raw JSON instead of compact format
 - `--metrics` - Display token metrics after each operation
 - `--metrics-file <path>` - Append metrics to JSONL file
+- `--since <date>` - Filter results created after this date
+- `--until <date>` - Filter results created before this date
+
+**Temporal Search (date filtering):**
+
+```bash
+# Today's knowledge
+bun run tools/knowledge-cli.ts search_nodes "query" --since today
+
+# Last 7 days
+bun run tools/knowledge-cli.ts search_facts "query" --since 7d
+
+# Date range
+bun run tools/knowledge-cli.ts search_nodes "query" --since 2026-01-01 --until 2026-01-15
+```
+
+**Date formats:** `today`, `yesterday`, `7d`, `1w`, `1m`, or ISO dates (`2026-01-26`)
 
 **What Gets Captured:**
 

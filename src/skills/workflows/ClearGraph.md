@@ -143,12 +143,14 @@ Do you want to create a backup before clearing?
 
 ---
 
-## Step 5: Execute Clear Operation
+## Step 5: Execute Clear Operation (CLI-First, MCP-Fallback)
 
-**After explicit confirmation, use the Knowledge CLI:**
+### Primary: Knowledge CLI (via Bash)
+
+**ALWAYS try CLI first - it's more reliable:**
 
 ```bash
-bun run src/skills/tools/knowledge-cli.ts clear_graph --force
+bun run tools/knowledge-cli.ts clear_graph --force
 ```
 
 **Note:** The `--force` flag is required as a safety measure. Without it, the command will fail with a warning.
@@ -157,7 +159,9 @@ bun run src/skills/tools/knowledge-cli.ts clear_graph --force
 - `--raw` - Output raw JSON instead of compact format
 - `--metrics` - Display token metrics after operation
 
-**Alternative: Direct MCP Tool Call (for programmatic access):**
+### Fallback: MCP Tool (Only if CLI fails)
+
+**⚠️ Only use MCP if CLI returns connection/execution errors.**
 
 ```typescript
 // Use the clear_graph tool

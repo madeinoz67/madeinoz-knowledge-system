@@ -114,9 +114,32 @@ const importManifest = [
 
 ---
 
-## Step 5: Execute Import Batches
+## Step 5: Execute Import Batches (CLI-First, MCP-Fallback)
 
-**Process files in batches:**
+### Primary: Knowledge CLI (via Bash)
+
+**ALWAYS try CLI first for each file - it's more reliable:**
+
+```bash
+# For each file in the batch
+bun run tools/knowledge-cli.ts add_episode "Episode Title" "$(cat /path/to/file.md)" "Imported from /path/to/file.md"
+```
+
+**For scripted batch imports:**
+
+```bash
+# Process files in a directory
+for file in /path/to/docs/*.md; do
+  title=$(basename "$file" .md)
+  content=$(cat "$file")
+  bun run tools/knowledge-cli.ts add_episode "$title" "$content" "Imported from $file"
+  sleep 2  # Rate limiting
+done
+```
+
+### Fallback: MCP Tool (Only if CLI fails)
+
+**⚠️ Only use MCP if CLI returns connection/execution errors.**
 
 ```typescript
 // For each batch of files
@@ -125,7 +148,7 @@ for (const batch of batches) {
     // Read file content
     const content = await readFile(file.path);
 
-    // Create episode
+    // Create episode via MCP (fallback)
     await add_episode({
       name: file.name || generateNameFromPath(file.path),
       episode_body: content,

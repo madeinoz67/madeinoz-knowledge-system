@@ -58,12 +58,14 @@ source_description: "Technical learning about Podman"
 
 ---
 
-## Step 4: Call Knowledge CLI
+## Step 4: Add Episode (CLI-First, MCP-Fallback)
 
-**Use the Knowledge CLI (preferred - 25%+ token savings):**
+### Primary: Knowledge CLI (via Bash)
+
+**ALWAYS try CLI first - it's more reliable and token-efficient:**
 
 ```bash
-bun run src/skills/tools/knowledge-cli.ts add_episode "Episode Title" "Content to store" "Source description"
+bun run tools/knowledge-cli.ts add_episode "Episode Title" "Content to store" "Source description"
 ```
 
 **CRITICAL: This command requires TWO separate quoted arguments (title AND body).**
@@ -84,7 +86,9 @@ Passing a single argument will fail with: `Usage: add_episode <title> <body> [so
 - `--raw` - Output raw JSON instead of compact format
 - `--metrics` - Display token metrics after operation
 
-**Alternative: Direct MCP Tool Call (for programmatic access):**
+### Fallback: MCP Tool (Only if CLI fails)
+
+**⚠️ Only use MCP if CLI returns connection/execution errors.**
 
 > **MCP Tool:** `add_memory` (internally adds an "episode" to the graph)
 

@@ -72,7 +72,7 @@ Running the **SearchFacts** workflow from the **MadeinozKnowledgeSystem** skill.
 **ALWAYS try CLI first - it's more reliable and token-efficient (30%+ savings):**
 
 ```bash
-bun run src/skills/tools/knowledge-cli.ts search_facts "relationship query" 15
+bun run tools/knowledge-cli.ts search_facts "relationship query" 15
 ```
 
 **Arguments:**
@@ -288,16 +288,16 @@ query: "components of PAI skill structure"
 **Temporal Searches (with date filters):**
 ```bash
 # Facts from today
-bun run src/skills/tools/knowledge-cli.ts search_facts "decisions" --since today
+bun run tools/knowledge-cli.ts search_facts "decisions" --since today
 
 # Relationships from last 7 days
-bun run src/skills/tools/knowledge-cli.ts search_facts "architecture" --since 7d
+bun run tools/knowledge-cli.ts search_facts "architecture" --since 7d
 
 # Within a date range
-bun run src/skills/tools/knowledge-cli.ts search_facts "integration" --since 2026-01-01 --until 2026-01-15
+bun run tools/knowledge-cli.ts search_facts "integration" --since 2026-01-01 --until 2026-01-15
 
 # Yesterday's relationships
-bun run src/skills/tools/knowledge-cli.ts search_facts "learning" --since yesterday --until today
+bun run tools/knowledge-cli.ts search_facts "learning" --since yesterday --until today
 ```
 
 ---

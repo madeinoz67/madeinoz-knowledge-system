@@ -406,13 +406,13 @@ Should see a hook definition.
 **If nothing shows:**
 The hook isn't installed. Install it:
 ```bash
-cd ~/.config/pai/Packs/madeinoz-knowledge-system
-bun run src/skills/server/install.ts
+cd ~/.claude/skills/Knowledge
+bun run tools/install.ts
 ```
 
 **Manually trigger sync:**
 ```bash
-bun run src/hooks/sync-memory-to-knowledge.ts --verbose
+bun run ~/.claude/hooks/sync-memory-to-knowledge.ts --verbose
 ```
 
 This shows what's being synced (or why not).
@@ -427,7 +427,7 @@ Shows what's already been synced.
 **Force re-sync everything:**
 ```bash
 rm ~/.claude/MEMORY/STATE/knowledge-sync/sync-state.json
-bun run src/hooks/sync-memory-to-knowledge.ts --all --verbose
+bun run ~/.claude/hooks/sync-memory-to-knowledge.ts --all --verbose
 ```
 
 ### High API Costs
@@ -715,7 +715,7 @@ lsof -i :6379    # FalkorDB/Redis
 lsof -i :3000    # FalkorDB UI
 
 # Manual sync test
-bun run src/hooks/sync-memory-to-knowledge.ts --dry-run --verbose
+bun run ~/.claude/hooks/sync-memory-to-knowledge.ts --dry-run --verbose
 
 # View container logs directly
 podman logs madeinoz-knowledge-graph-mcp

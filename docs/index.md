@@ -87,6 +87,7 @@ The system responds to natural conversation:
 | "Remember that..." | Captures knowledge with entity extraction |
 | "What do I know about X?" | Searches knowledge base semantically |
 | "How are X and Y related?" | Finds relationships between concepts |
+| "What did I learn today?" | **Temporal search** - filter by date |
 | "What did I learn recently?" | Shows recent knowledge additions |
 | "Knowledge status" | Displays system health and statistics |
 
@@ -120,11 +121,11 @@ bun run logs
 ### Memory Sync
 
 ```bash
-# Manual sync
-bun run src/hooks/sync-memory-to-knowledge.ts
+# Manual sync (from installed location)
+bun run ~/.claude/hooks/sync-memory-to-knowledge.ts
 
 # Dry run (see what would sync)
-bun run src/hooks/sync-memory-to-knowledge.ts --dry-run
+bun run ~/.claude/hooks/sync-memory-to-knowledge.ts --dry-run
 ```
 
 ## Need Help?

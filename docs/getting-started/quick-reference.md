@@ -259,27 +259,29 @@ Per operation:
 
 - `$PAI_DIR/.env` (defaults to `~/.claude/.env`) - All configuration
 
-**Pack Directory:**
+**Installed Skill Directory:**
 
 ```
-~/.config/pai/Packs/madeinoz-knowledge-system/
+~/.claude/skills/Knowledge/
+├── SKILL.md                 # Skill definition with routing
 ├── config/.env.example      # Configuration template (reference only)
-├── src/server/              # Server scripts
+├── tools/                   # Server and CLI tools
 │   ├── server-cli.ts       # Unified server CLI (start, stop, restart, status, logs)
-│   ├── start.ts            # Start containers (deprecated, use server-cli.ts)
-│   ├── stop.ts             # Stop containers (deprecated, use server-cli.ts)
-│   ├── status.ts           # Check status (deprecated, use server-cli.ts)
-│   └── logs.ts             # View logs (deprecated, use server-cli.ts)
-├── src/skills/              # PAI skill files
-│   ├── SKILL.md            # Skill definition
-│   └── workflows/*.md      # Workflow definitions
-├── src/hooks/               # Integration hooks
-└── docs/                    # User documentation
-    ├── getting-started/    # Getting started guides
-    ├── installation.md     # Setup guide
-    ├── usage.md            # How-to guide
-    ├── concepts.md         # Deep dive
-    └── troubleshooting.md  # Fix problems
+│   ├── knowledge-cli.ts    # Knowledge CLI (add, search, status)
+│   └── install.ts          # Interactive installer
+├── workflows/               # Workflow definitions
+│   ├── CaptureEpisode.md   # Store knowledge
+│   ├── SearchKnowledge.md  # Search entities
+│   ├── SearchFacts.md      # Find relationships
+│   ├── SearchByDate.md     # Temporal search
+│   ├── GetRecent.md        # Recent additions
+│   ├── GetStatus.md        # System health
+│   ├── ClearGraph.md       # Clear knowledge
+│   └── BulkImport.md       # Bulk import
+├── docker/                  # Container configuration
+│   ├── docker-compose-*.yml
+│   └── podman-compose-*.yml
+└── lib/                     # Shared libraries
 ```
 
 ## Keyboard Shortcuts
@@ -313,13 +315,13 @@ Learnings and research automatically sync from `~/.claude/MEMORY/` to knowledge 
 **Manual sync:**
 
 ```bash
-bun run src/hooks/sync-memory-to-knowledge.ts
+bun run ~/.claude/hooks/sync-memory-to-knowledge.ts
 ```
 
 **Check what will sync:**
 
 ```bash
-bun run src/hooks/sync-memory-to-knowledge.ts --dry-run
+bun run ~/.claude/hooks/sync-memory-to-knowledge.ts --dry-run
 ```
 
 ## Backup and Restore

@@ -143,8 +143,8 @@ The Madeinoz Knowledge System requires **two AI components**:
 The easiest way to configure providers is through the interactive installer:
 
 ```bash
-cd src/server
-bun run install.ts
+cd ~/.claude/skills/Knowledge
+bun run tools/install.ts
 ```
 
 The installer guides you through:
@@ -593,20 +593,21 @@ echo "Checking pack contents..."
 REQUIRED_FILES=(
     "README.md"
     "SKILL.md"
-    "src/skills/tools/server-cli.ts"
-    "src/server/podman-compose-falkordb.yml"
-    "src/server/podman-compose-neo4j.yml"
-    "src/server/docker-compose-falkordb.yml"
-    "src/server/docker-compose-neo4j.yml"
+    "tools/server-cli.ts"
+    "docker/podman-compose-falkordb.yml"
+    "docker/podman-compose-neo4j.yml"
+    "docker/docker-compose-falkordb.yml"
+    "docker/docker-compose-neo4j.yml"
     "config/.env.example"
-    "src/skills/workflows/CaptureEpisode.md"
-    "src/skills/workflows/SearchKnowledge.md"
-    "src/skills/workflows/SearchFacts.md"
-    "src/skills/workflows/GetRecent.md"
-    "src/skills/workflows/GetStatus.md"
-    "src/skills/workflows/ClearGraph.md"
-    "src/skills/workflows/BulkImport.md"
-    "src/skills/tools/Install.md"
+    "workflows/CaptureEpisode.md"
+    "workflows/SearchKnowledge.md"
+    "workflows/SearchFacts.md"
+    "workflows/SearchByDate.md"
+    "workflows/GetRecent.md"
+    "workflows/GetStatus.md"
+    "workflows/ClearGraph.md"
+    "workflows/BulkImport.md"
+    "tools/Install.md"
 )
 
 ALL_FOUND=true
@@ -703,7 +704,7 @@ fi
 **Solutions:**
 1. **Restart Claude Code** - Skills are loaded on startup
 2. **Check SKILL.md format** - Ensure frontmatter is valid YAML
-3. **Verify file paths** - All workflows and tools should be in `src/skills/`
+3. **Verify file paths** - All workflows should be in `workflows/` and tools in `tools/`
 
 ### Knowledge Not Being Captured
 

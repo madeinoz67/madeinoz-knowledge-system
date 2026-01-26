@@ -101,15 +101,33 @@ The skill triggers automatically based on natural language:
 | "remember that X" | Capture knowledge with entity extraction |
 | "what do I know about X" | Semantic search for related entities |
 | "how are X and Y related" | Find relationships between concepts |
+| "what did I learn today" | **Temporal search** - filter by date |
 | "recent learnings" | Retrieve recent knowledge additions |
 | "knowledge status" | Check system health |
+
+### Temporal Search
+
+Filter search results by date with `--since` and `--until`:
+
+```bash
+# Today's knowledge
+bun run tools/knowledge-cli.ts search_nodes "topic" --since today
+
+# Last 7 days
+bun run tools/knowledge-cli.ts search_facts "decisions" --since 7d
+
+# Date range
+bun run tools/knowledge-cli.ts search_nodes "project" --since 2026-01-01 --until 2026-01-15
+```
+
+**Date formats:** `today`, `yesterday`, `7d`, `1w`, `1m`, or ISO dates (`2026-01-26`)
 
 ## What's Included
 
 | Component | Purpose |
 |-----------|---------|
 | `SKILL.md` | PAI skill with intent-based routing |
-| `src/skills/workflows/` | 7 workflows (Capture, Search, Facts, Recent, Status, Clear, BulkImport) |
+| `src/skills/workflows/` | 8 workflows (Capture, Search, SearchByDate, Facts, Recent, Status, Clear, BulkImport) |
 | `src/skills/tools/` | Server management scripts (start, stop, status, logs) |
 | `src/hooks/` | Memory sync hook for automatic knowledge capture |
 | `docker/` | Docker/Podman compose files for Neo4j and FalkorDB |
