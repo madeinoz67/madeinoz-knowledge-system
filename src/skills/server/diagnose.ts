@@ -6,9 +6,9 @@
  * Performs comprehensive health checks on the system.
  */
 
-import { createContainerManager } from './lib/container.js';
-import { createConfigLoader } from './lib/config.js';
-import { cli } from './lib/cli.js';
+import { createContainerManager } from '../lib/container';
+import { createConfigLoader } from '../lib/config';
+import { cli } from '../lib/cli';
 import { $ } from 'bun';
 
 /**
@@ -97,7 +97,7 @@ class Diagnostics {
 
     const configLoader = createConfigLoader();
 
-    if (configLoader.envExists()) {
+    if (await configLoader.envExists()) {
       this.addResult({
         name: '.env File',
         passed: true,
@@ -284,7 +284,7 @@ class Diagnostics {
     for (const path of possiblePaths) {
       try {
         const file = Bun.file(path);
-        if (file.exists()) {
+        if (await file.exists()) {
           this.addResult({
             name: 'PAI Skill',
             passed: true,

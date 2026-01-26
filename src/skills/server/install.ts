@@ -25,9 +25,9 @@
 const isUpdateMode = process.argv.includes('--update') || process.argv.includes('-u');
 const isNonInteractive = process.argv.includes('--yes') || process.argv.includes('-y');
 
-import { createContainerManager } from './lib/container.js';
-import { createConfigLoader } from './lib/config.js';
-import { cli } from './lib/cli.js';
+import { createContainerManager } from '../lib/container';
+import { createConfigLoader } from '../lib/config';
+import { cli } from '../lib/cli';
 import inquirer from 'inquirer';
 
 /**
@@ -487,7 +487,7 @@ class Installer {
     for (const path of possiblePaths) {
       try {
         const file = Bun.file(path);
-        if (file.exists()) {
+        if (await file.exists()) {
           paiEnvPath = path;
           break;
         }
@@ -585,7 +585,7 @@ class Installer {
       process.exit(1);
     }
 
-    const versionResult = await this.containerManager.exec(['--version'], { quiet: true });
+    const versionResult = await this.containerManager.exec(['--version'], { silent: true });
     if (versionResult.success) {
       cli.success(`Podman is installed: ${versionResult.stdout.trim()}`);
     }
@@ -1096,7 +1096,7 @@ class Installer {
     cli.blank();
 
     // Backup existing PAI .env
-    if (this.configLoader.envExists()) {
+    if (await this.configLoader.envExists()) {
       cli.warning(`Found existing PAI .env: ${this.configLoader.getEnvFile()}`);
 
       const shouldBackup = await confirmWithDefault('Backup and replace?', true);
@@ -1258,7 +1258,7 @@ class Installer {
     for (const path of possiblePaths) {
       try {
         const dir = Bun.file(path);
-        if (dir.exists()) {
+        if (await dir.exists()) {
           paiSkillsDir = path;
           break;
         }
@@ -1304,9 +1304,9 @@ class Installer {
       const existingPath = `${paiSkillsDir}/madeinoz-knowledge-system`;
       try {
         const existing = Bun.file(existingPath);
-        if (existing.exists()) {
+        if (await existing.exists()) {
           cli.warning('Removing existing installation');
-          await this.containerManager.exec(['rm', '-rf', existingPath], { quiet: true });
+          await this.containerManager.exec(['rm', '-rf', existingPath], { silent: true });
         }
       } catch {
         // Continue
@@ -1320,7 +1320,7 @@ class Installer {
         await this.containerManager.exec(
           ['cp', '-r', skillSource, `${paiSkillsDir}/madeinoz-knowledge-system`],
           {
-            quiet: false,
+            silent: false,
           }
         );
         cli.success('Madeinoz Knowledge System skill installed');

@@ -136,7 +136,7 @@ export class ConfigLoader {
   /**
    * Check if .env file exists
    */
-  envExists(): boolean {
+  async envExists(): Promise<boolean> {
     const file = Bun.file(this.envFile);
     return file.exists();
   }
@@ -146,10 +146,17 @@ export class ConfigLoader {
    * PAI .env (${PAI_DIR}/.env or ~/.claude/.env) is the ONLY source of truth
    */
   async loadEnv(): Promise<Record<string, string>> {
-    const env: Record<string, string> = { ...process.env };
+    const env: Record<string, string> = {};
+
+    // Copy process.env (filtering out undefined values)
+    for (const [key, value] of Object.entries(process.env)) {
+      if (value !== undefined) {
+        env[key] = value;
+      }
+    }
 
     // Load from PAI .env (the ONLY source of truth)
-    if (this.envExists()) {
+    if (await this.envExists()) {
       const file = Bun.file(this.envFile);
       const content = await file.text();
       this.parseEnvFile(content, env);

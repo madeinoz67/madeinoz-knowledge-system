@@ -67,6 +67,8 @@ export interface SearchFactsParams {
   max_facts?: number;
   /** Filter by entity type (e.g., "Preference", "Procedure", "Learning", "Research", "Decision") */
   entity?: string;
+  /** Center the search on a specific entity UUID */
+  center_node_uuid?: string;
 }
 
 export interface GetEpisodesParams {
@@ -441,7 +443,7 @@ export class MCPClient {
    * Add an episode to the knowledge graph
    */
   async addEpisode(params: AddEpisodeParams): Promise<MCPClientResponse<{ uuid: string }>> {
-    return await this.callTool<{ uuid: string }>(MCP_TOOLS.ADD_EPISODE, params);
+    return await this.callTool<{ uuid: string }>(MCP_TOOLS.ADD_EPISODE, params as unknown as Record<string, unknown>);
   }
 
   /**
@@ -575,7 +577,7 @@ export class MCPClient {
   async deleteEpisode(
     params: DeleteEpisodeParams
   ): Promise<MCPClientResponse<{ success: boolean }>> {
-    return await this.callTool<{ success: boolean }>(MCP_TOOLS.DELETE_EPISODE, params);
+    return await this.callTool<{ success: boolean }>(MCP_TOOLS.DELETE_EPISODE, params as unknown as Record<string, unknown>);
   }
 
   /**
@@ -584,14 +586,14 @@ export class MCPClient {
   async deleteEntityEdge(
     params: DeleteEntityEdgeParams
   ): Promise<MCPClientResponse<{ success: boolean }>> {
-    return await this.callTool<{ success: boolean }>(MCP_TOOLS.DELETE_ENTITY_EDGE, params);
+    return await this.callTool<{ success: boolean }>(MCP_TOOLS.DELETE_ENTITY_EDGE, params as unknown as Record<string, unknown>);
   }
 
   /**
    * Get an entity edge from the knowledge graph
    */
   async getEntityEdge(params: GetEntityEdgeParams): Promise<MCPClientResponse<unknown>> {
-    return await this.callTool<unknown>(MCP_TOOLS.GET_ENTITY_EDGE, params);
+    return await this.callTool<unknown>(MCP_TOOLS.GET_ENTITY_EDGE, params as unknown as Record<string, unknown>);
   }
 
   /**

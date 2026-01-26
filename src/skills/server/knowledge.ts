@@ -16,9 +16,9 @@
  *   --metrics-file Write metrics to JSONL file
  */
 
-import { createMCPClient } from './lib/mcp-client.js';
-import { cli } from './lib/cli.js';
-import { formatOutput, type FormatOptions } from './lib/output-formatter.js';
+import { createMCPClient } from '../lib/mcp-client';
+import { cli } from '../lib/cli';
+import { formatOutput, type FormatOptions } from '../lib/output-formatter';
 
 /**
  * Command definitions
@@ -422,7 +422,7 @@ class MCPWrapper {
               })}\n`;
               await appendFile(this.flags.metricsFile, metricsLine, 'utf-8');
             } catch (error) {
-              cli.warn(`Failed to write metrics: ${error}`);
+              cli.warning(`Failed to write metrics: ${error}`);
             }
           }
         }

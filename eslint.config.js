@@ -31,5 +31,10 @@ export default tseslint.config(
       '@typescript-eslint/no-unused-vars': 'off',
       'no-empty': 'off',
     },
+    languageOptions: {
+      parserOptions: {
+        project: null,
+      },
+    },
   }
 );

@@ -281,9 +281,7 @@ describe('MCPClient', () => {
       const malformedResponse = {
         jsonrpc: '2.0',
         id: 1,
-        result: {
-          // Missing 'content' field
-        },
+        result: {} as Record<string, unknown>,
       };
 
       expect(malformedResponse.result).toBeDefined();
