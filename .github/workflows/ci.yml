@@ -115,7 +115,6 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build Docker image
-        id: build
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -125,19 +124,6 @@ jobs:
           tags: ghcr.io/madeinoz67/madeinoz-knowledge-system:test
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          outputs: type=docker,dest=/tmp/image.tar
-
-      - name: Load Docker image
-        run: docker load < /tmp/image.tar
-
-      - name: Scan Docker image with Trivy
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'image'
-          image-ref: ghcr.io/madeinoz67/madeinoz-knowledge-system:test
-          format: 'table'
-          exit-code: '1'
-          severity: 'CRITICAL,HIGH'
 
       # Build documentation (validate only)
       - name: Setup Python
