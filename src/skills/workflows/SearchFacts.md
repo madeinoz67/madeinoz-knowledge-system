@@ -70,7 +70,7 @@ Running the **SearchFacts** workflow from the **MadeinozKnowledgeSystem** skill.
 **Use the Knowledge CLI (preferred - 30%+ token savings):**
 
 ```bash
-bun run src/skills/server/knowledge.ts search_facts "relationship query" 15
+bun run src/skills/tools/knowledge-cli.ts search_facts "relationship query" 15
 ```
 
 **Arguments:**

@@ -4,18 +4,15 @@ version: 1.2.8
 description: Personal knowledge management using Graphiti knowledge graph with Neo4j/FalkorDB. USE WHEN 'store this', 'remember this', 'add to knowledge', 'search my knowledge', 'what do I know about', 'find in knowledge base', 'save to memory', 'graphiti', 'knowledge graph', 'entity extraction', 'relationship mapping', 'semantic search', 'episode', 'install knowledge', 'setup knowledge system', 'configure knowledge graph', knowledge capture, retrieval, synthesis.
 tools:
   # MCP Wrapper CLI (76%+ token savings vs direct MCP calls)
-  - Bash(bun run */knowledge.ts add_episode *)
-  - Bash(bun run */knowledge.ts search_nodes *)
-  - Bash(bun run */knowledge.ts search_facts *)
-  - Bash(bun run */knowledge.ts get_episodes *)
-  - Bash(bun run */knowledge.ts get_status)
-  - Bash(bun run */knowledge.ts clear_graph *)
-  - Bash(bun run */knowledge.ts health)
+  - Bash(bun run */knowledge-cli.ts add_episode *)
+  - Bash(bun run */knowledge-cli.ts search_nodes *)
+  - Bash(bun run */knowledge-cli.ts search_facts *)
+  - Bash(bun run */knowledge-cli.ts get_episodes *)
+  - Bash(bun run */knowledge-cli.ts get_status)
+  - Bash(bun run */knowledge-cli.ts clear_graph *)
+  - Bash(bun run */knowledge-cli.ts health)
   # Server management
   - Bash(bun run server-cli *)
-  # Codanna code intelligence (for codebase exploration)
-  - mcp__plugin_codanna-cc_codanna-cc__semantic_search_docs
-  - mcp__plugin_codanna-cc_codanna-cc__search_documents
 ---
 
 # Knowledge
@@ -38,6 +35,7 @@ Persistent personal knowledge system powered by Graphiti knowledge graph with Ne
 ## Core Capabilities
 
 **Knowledge Graph Features:**
+
 - **Automatic Entity Extraction** - Identifies people, organizations, locations, concepts, preferences, requirements
 - **Relationship Mapping** - Tracks how entities connect with temporal context
 - **Semantic Search** - Finds relevant knowledge using vector embeddings
@@ -45,6 +43,7 @@ Persistent personal knowledge system powered by Graphiti knowledge graph with Ne
 - **Multi-Source Input** - Accepts text, JSON, messages, and structured data
 
 **Built-in Entity Types:**
+
 - **Preferences** - User choices, opinions, configurations
 - **Requirements** - Features, needs, specifications
 - **Procedures** - SOPs, workflows, how-to guides
@@ -60,17 +59,20 @@ Persistent personal knowledge system powered by Graphiti knowledge graph with Ne
 The skill is installed at `~/.claude/skills/Knowledge/` (or `$PAI_DIR/skills/Knowledge/`).
 
 1. **Start the Graphiti MCP server:**
+
    ```bash
    cd ~/.claude/skills/Knowledge
    bun run server-cli start
    ```
 
 2. **Verify server is running:**
+
    ```bash
    cd ~/.claude/skills/Knowledge && bun run server-cli status
    ```
 
 3. **Other server commands:**
+
    ```bash
    bun run server-cli stop      # Stop containers
    bun run server-cli restart   # Restart containers
@@ -80,6 +82,7 @@ The skill is installed at `~/.claude/skills/Knowledge/` (or `$PAI_DIR/skills/Kno
    ```
 
 4. **Configure API key** (in PAI .env `~/.claude/.env`):
+
    ```bash
    MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=sk-your-key-here
    ```
@@ -89,40 +92,44 @@ The skill is installed at `~/.claude/skills/Knowledge/` (or `$PAI_DIR/skills/Kno
 The Knowledge CLI provides token-efficient, human-readable output. **Always use the Knowledge CLI instead of direct MCP tool calls** for better readability and reduced token consumption.
 
 **Run commands from the skill directory:**
+
 ```bash
 cd ~/.claude/skills/Knowledge
 ```
 
 **Commands:**
+
 ```bash
 # Add knowledge (REQUIRES both title AND body as separate quoted strings)
-bun run server/knowledge.ts add_episode "Short Title" "Full content body text here" "Source"
+bun run tools/knowledge-cli.ts add_episode "Short Title" "Full content body text here" "Source"
 
 # Search entities (30%+ token savings)
-bun run server/knowledge.ts search_nodes "query" 10
+bun run tools/knowledge-cli.ts search_nodes "query" 10
 
 # Search relationships (30%+ token savings)
-bun run server/knowledge.ts search_facts "query" 10
+bun run tools/knowledge-cli.ts search_facts "query" 10
 
 # Get recent episodes (25%+ token savings)
-bun run server/knowledge.ts get_episodes 10
+bun run tools/knowledge-cli.ts get_episodes 10
 
 # Get system status
-bun run server/knowledge.ts get_status
+bun run tools/knowledge-cli.ts get_status
 
 # Clear graph (destructive - requires --force)
-bun run server/knowledge.ts clear_graph --force
+bun run tools/knowledge-cli.ts clear_graph --force
 
 # Check server health
-bun run server/knowledge.ts health
+bun run tools/knowledge-cli.ts health
 ```
 
 **Options:**
+
 - `--raw` - Output raw JSON instead of compact format
 - `--metrics` - Display token metrics after each operation
 - `--metrics-file <path>` - Append metrics to JSONL file
 
 **What Gets Captured:**
+
 - Conversations and insights from work sessions
 - Research findings and web content
 - Code snippets and technical decisions
@@ -138,16 +145,19 @@ User: "Remember that when using Podman volumes, you should always mount to /cont
 
 → Invokes CaptureEpisode workflow
 → **AI extracts title from content and calls CLI with TWO arguments:**
+
 ```bash
-bun run server/knowledge.ts add_episode \
+bun run tools/knowledge-cli.ts add_episode \
   "Podman Volume Mounting Syntax" \
   "When using Podman volumes, always mount to /container/path not host/path. The left side is host path, right side is container path." \
   "User learning"
 ```
+
 → Stores episode with extracted entities:
-  - Entity: "Podman volumes" (Topic)
-  - Entity: "volume mounting" (Procedure)
-  - Fact: "Podman volumes use /container/path syntax"
+
+- Entity: "Podman volumes" (Topic)
+- Entity: "volume mounting" (Procedure)
+- Fact: "Podman volumes use /container/path syntax"
 → User receives: "✓ Captured: Podman volume mounting syntax"
 
 **Example 2: Search Knowledge**
@@ -190,6 +200,7 @@ User: "Clear my knowledge graph and start fresh"
 ## MCP Integration
 
 **MCP Server Endpoint:**
+
 ```
 http://localhost:8000/mcp/
 ```
@@ -209,12 +220,14 @@ http://localhost:8000/mcp/
 | `get_status` | - | "Check knowledge status" |
 
 **Naming Convention (Hybrid Approach):**
+
 - **User-facing (Skills/Workflows):** Knowledge-friendly language ("store knowledge", "search my knowledge")
 - **Internal (TypeScript):** Graphiti-native methods (`addEpisode`, `searchNodes`, `searchFacts`)
 - **MCP Layer:** Actual tool names (`add_memory`, `search_nodes`, `search_memory_facts`)
 
 **Response Caching:**
 Search operations (`search_nodes`, `search_memory_facts`) are cached to improve performance:
+
 - **TTL:** 5 minutes (configurable via `cacheTtlMs`)
 - **Max entries:** 100 (configurable via `cacheMaxSize`)
 - **Scope:** Per-client instance (not shared across sessions)
@@ -252,11 +265,13 @@ MADEINOZ_KNOWLEDGE_GRAPHITI_TELEMETRY_ENABLED=false
 **Model Recommendations:**
 
 *Via OpenRouter (Recommended):*
+
 - **openai/gpt-4o-mini** - Most reliable, $0.129/1K ops
 - **google/gemini-2.0-flash-001** - Best value, $0.125/1K ops
 - **openai/gpt-4o** - Fastest, $2.155/1K ops
 
 *Direct OpenAI:*
+
 - **gpt-4o-mini** - Fast, cost-effective for daily use
 - **gpt-4o** - Better for complex reasoning
 

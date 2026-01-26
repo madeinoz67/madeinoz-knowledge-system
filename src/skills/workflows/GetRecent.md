@@ -76,7 +76,7 @@ Running the **GetRecent** workflow from the **MadeinozKnowledgeSystem** skill...
 **Use the Knowledge CLI (preferred - 25%+ token savings):**
 
 ```bash
-bun run src/skills/server/knowledge.ts get_episodes 20
+bun run src/skills/tools/knowledge-cli.ts get_episodes 20
 ```
 
 **Arguments:**

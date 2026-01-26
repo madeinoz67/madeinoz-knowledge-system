@@ -6,9 +6,9 @@
  * It handles JSON-RPC communication and provides compact, token-efficient output.
  *
  * Usage:
- *   bun run src/server/knowledge.ts add_episode "Episode title" "Episode body"
- *   bun run src/server/knowledge.ts search_nodes "search query"
- *   bun run src/server/knowledge.ts get_status
+ *   bun run src/skills/tools/knowledge-cli.ts add_episode "Episode title" "Episode body"
+ *   bun run src/skills/tools/knowledge-cli.ts search_nodes "search query"
+ *   bun run src/skills/tools/knowledge-cli.ts get_status
  *
  * Flags:
  *   --raw          Output raw JSON instead of compact format
@@ -289,7 +289,7 @@ class MCPWrapper {
     cli.info('Achieves 25-35% token savings through compact output formatting.');
     cli.blank();
     cli.info('Usage:');
-    cli.dim('  bun run src/server/knowledge.ts <command> [args...] [options]');
+    cli.dim('  bun run src/skills/tools/knowledge-cli.ts <command> [args...] [options]');
     cli.blank();
     cli.info('Commands:');
     cli.blank();
@@ -323,31 +323,31 @@ class MCPWrapper {
     cli.blank();
     cli.dim('  # Add knowledge to graph');
     cli.dim(
-      '  bun run src/server/knowledge.ts add_episode "Test Episode" "This is a test episode"'
+      '  bun run src/skills/tools/knowledge-cli.ts add_episode "Test Episode" "This is a test episode"'
     );
     cli.blank();
     cli.dim('  # Search for entities (compact output, 30%+ token savings)');
-    cli.dim('  bun run src/server/knowledge.ts search_nodes "PAI" 10');
+    cli.dim('  bun run src/skills/tools/knowledge-cli.ts search_nodes "PAI" 10');
     cli.blank();
     cli.dim('  # Search with raw JSON output');
-    cli.dim('  bun run src/server/knowledge.ts search_nodes "PAI" --raw');
+    cli.dim('  bun run src/skills/tools/knowledge-cli.ts search_nodes "PAI" --raw');
     cli.blank();
     cli.dim('  # Search with metrics display');
-    cli.dim('  bun run src/server/knowledge.ts search_nodes "PAI" --metrics');
+    cli.dim('  bun run src/skills/tools/knowledge-cli.ts search_nodes "PAI" --metrics');
     cli.blank();
     cli.dim('  # Save metrics to file for analysis');
     cli.dim(
-      '  bun run src/server/knowledge.ts search_nodes "PAI" --metrics-file ~/.madeinoz-knowledge/metrics.jsonl'
+      '  bun run src/skills/tools/knowledge-cli.ts search_nodes "PAI" --metrics-file ~/.madeinoz-knowledge/metrics.jsonl'
     );
     cli.blank();
     cli.dim('  # Get graph status');
-    cli.dim('  bun run src/server/knowledge.ts get_status');
+    cli.dim('  bun run src/skills/tools/knowledge-cli.ts get_status');
     cli.blank();
     cli.dim('  # Check server health');
-    cli.dim('  bun run src/server/knowledge.ts health');
+    cli.dim('  bun run src/skills/tools/knowledge-cli.ts health');
     cli.blank();
     cli.dim('  # Clear graph (destructive - requires --force)');
-    cli.dim('  bun run src/server/knowledge.ts clear_graph --force');
+    cli.dim('  bun run src/skills/tools/knowledge-cli.ts clear_graph --force');
     cli.blank();
   }
 

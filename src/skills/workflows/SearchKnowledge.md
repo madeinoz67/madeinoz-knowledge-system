@@ -70,7 +70,7 @@ Running the **SearchKnowledge** workflow from the **MadeinozKnowledgeSystem** sk
 **Use the Knowledge CLI (preferred - 30%+ token savings):**
 
 ```bash
-bun run src/skills/server/knowledge.ts search_nodes "search query" 10
+bun run src/skills/tools/knowledge-cli.ts search_nodes "search query" 10
 ```
 
 **Parameters:**
