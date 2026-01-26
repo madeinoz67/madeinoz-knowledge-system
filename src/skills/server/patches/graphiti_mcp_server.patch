@@ -54,7 +54,7 @@ SEMAPHORE_LIMIT = int(os.getenv('SEMAPHORE_LIMIT', 10))
 
 # Madeinoz Patch: Enable searching across ALL groups when no group_ids specified
 # Set to 'true' to enable, any other value (or unset) to disable
-SEARCH_ALL_GROUPS = os.getenv('MADEINOZ_KNOWLEDGE_SEARCH_ALL_GROUPS', 'false').lower() == 'true'
+SEARCH_ALL_GROUPS = os.getenv('GRAPHITI_SEARCH_ALL_GROUPS', 'false').lower() == 'true'
 
 
 # Configure structured logging with timestamps
@@ -122,8 +122,12 @@ async def get_all_group_ids(client: Graphiti) -> list[str]:
             result = await session.run(
                 'MATCH (n) WHERE n.group_id IS NOT NULL RETURN DISTINCT n.group_id AS group_id'
             )
-            records = [record async for record in result]
-            group_ids = [record['group_id'] for record in records if record['group_id']]
+            # Check if result is None before attempting iteration
+            if result:
+                records = [record async for record in result]
+                group_ids = [record['group_id'] for record in records if record['group_id']]
+            else:
+                group_ids = []
 
         # Update cache
         _group_ids_cache = group_ids
@@ -146,7 +150,7 @@ async def get_effective_group_ids(
     """
     Get the effective group_ids for a search operation.
 
-    Madeinoz Patch: When no group_ids are provided AND MADEINOZ_KNOWLEDGE_SEARCH_ALL_GROUPS=true,
+    Madeinoz Patch: When no group_ids are provided AND GRAPHITI_SEARCH_ALL_GROUPS=true,
     fetches ALL groups dynamically instead of falling back to a single default group.
 
     Args:
@@ -346,7 +350,7 @@ class GraphitiService:
             if SEARCH_ALL_GROUPS:
                 logger.info('Madeinoz Patch: Search will query ALL groups when none specified')
             else:
-                logger.info('Madeinoz Patch: Search-all-groups DISABLED (set MADEINOZ_KNOWLEDGE_SEARCH_ALL_GROUPS=true to enable)')
+                logger.info('Madeinoz Patch: Search-all-groups DISABLED (set GRAPHITI_SEARCH_ALL_GROUPS=true to enable)')
 
             if llm_client:
                 logger.info(

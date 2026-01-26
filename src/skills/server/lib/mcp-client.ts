@@ -3,9 +3,10 @@
  *
  * HTTP client for communicating with the Graphiti MCP server.
  * Handles JSON-RPC 2.0 requests for all MCP tools.
+ *
+ * NOTE: Lucene sanitization is now handled server-side by the Python patch
+ * (falkordb_lucene.py). The TypeScript client passes values directly to the server.
  */
-
-import { sanitizeGroupIds, sanitizeGroupId, sanitizeSearchQuery } from './lucene.js';
 
 /**
  * MCP tool names (Graphiti MCP server)
@@ -449,14 +450,15 @@ export class MCPClient {
    */
   async searchNodes(params: SearchNodesParams): Promise<MCPClientResponse<unknown[]>> {
     // Build server params with correct field names
+    // Sanitization is handled server-side by falkordb_lucene.py patch
     const serverParams: Record<string, unknown> = {
-      query: sanitizeSearchQuery(params.query),
+      query: params.query,
     };
     if (params.limit !== undefined) {
       serverParams.max_nodes = params.limit;
     }
     if (params.group_ids) {
-      serverParams.group_ids = sanitizeGroupIds(params.group_ids);
+      serverParams.group_ids = params.group_ids;
     }
     if (params.entity_types) {
       serverParams.entity_types = params.entity_types;
@@ -484,20 +486,29 @@ export class MCPClient {
   /**
    * Search for facts (relationships) in the knowledge graph
    * Results are cached for repeated queries
+   *
+   * NOTE: Sanitization is handled server-side by falkordb_lucene.py patch
    */
   async searchFacts(params: SearchFactsParams): Promise<MCPClientResponse<unknown[]>> {
-    // Sanitize query and group_ids to avoid RediSearch/Lucene syntax errors
-    const sanitizedParams: SearchFactsParams = {
-      ...params,
-      query: sanitizeSearchQuery(params.query),
-      group_ids: sanitizeGroupIds(params.group_ids),
+    // Server-side sanitization handles Lucene escaping
+    const serverParams: Record<string, unknown> = {
+      query: params.query,
     };
+    if (params.max_facts !== undefined) {
+      serverParams.max_facts = params.max_facts;
+    }
+    if (params.group_ids) {
+      serverParams.group_ids = params.group_ids;
+    }
+    if (params.center_node_uuid) {
+      serverParams.center_node_uuid = params.center_node_uuid;
+    }
 
     // Check cache first
     if (this.cache) {
       const cacheKey = this.getCacheKey(
         MCP_TOOLS.SEARCH_FACTS,
-        sanitizedParams as Record<string, unknown>
+        serverParams
       );
       const cached = this.cache.get(cacheKey);
       if (cached) {
@@ -505,30 +516,34 @@ export class MCPClient {
       }
 
       // Fetch and cache
-      const result = await this.callTool<unknown[]>(MCP_TOOLS.SEARCH_FACTS, sanitizedParams);
+      const result = await this.callTool<unknown[]>(MCP_TOOLS.SEARCH_FACTS, serverParams);
       if (result.success && result.data) {
         this.cache.set(cacheKey, result.data);
       }
       return result;
     }
 
-    return await this.callTool<unknown[]>(MCP_TOOLS.SEARCH_FACTS, sanitizedParams);
+    return await this.callTool<unknown[]>(MCP_TOOLS.SEARCH_FACTS, serverParams);
   }
 
   /**
    * Get recent episodes from the knowledge graph
+   *
+   * NOTE: Sanitization is handled server-side by falkordb_lucene.py patch
    */
   async getEpisodes(params: GetEpisodesParams = {}): Promise<MCPClientResponse<unknown[]>> {
     // Build server params with correct field names
+    // Server-side sanitization handles Lucene escaping
     const serverParams: Record<string, unknown> = {};
     if (params.limit !== undefined) {
       serverParams.max_episodes = params.limit;
     }
     // Support both group_id (single) and group_ids (multiple)
     if (params.group_ids) {
-      serverParams.group_ids = sanitizeGroupIds(params.group_ids);
+      serverParams.group_ids = params.group_ids;
     } else if (params.group_id) {
-      serverParams.group_ids = [sanitizeGroupId(params.group_id)!];
+      // Server-side sanitization handles Lucene escaping
+      serverParams.group_ids = [params.group_id];
     }
     return await this.callTool<unknown[]>(MCP_TOOLS.GET_EPISODES, serverParams);
   }

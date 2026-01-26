@@ -251,34 +251,9 @@ class LLMClientFactory:
 
                 from graphiti_core.llm_client.config import LLMConfig as CoreLLMConfig
 
-                # Determine appropriate small model based on main model type
-                is_reasoning_model = (
-                    config.model.startswith('gpt-5')
-                    or config.model.startswith('o1')
-                    or config.model.startswith('o3')
-                )
-                small_model = (
-                    'gpt-5-nano' if is_reasoning_model else 'gpt-4.1-mini'
-                )
-
-                # Madeinoz Patch v2: For custom endpoints, determine small model strategy
-                if is_custom:
-                    if is_local:
-                        # Local LLMs - use same model (no small variants)
-                        small_model = config.model
-                        logger.info(f'Local endpoint: using same model for small tasks: {small_model}')
-                    else:
-                        # Cloud provider - they typically have small model variants
-                        # Map to common small models for different providers
-                        if 'openrouter' in (api_url or '').lower():
-                            # OpenRouter has access to many models - use efficient ones
-                            small_model = 'meta-llama/llama-3.1-8b-instruct'
-                        elif 'together' in (api_url or '').lower():
-                            small_model = 'meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo'
-                        else:
-                            # Default: use same model
-                            small_model = config.model
-                        logger.info(f'{provider_name}: using {small_model} for small tasks')
+                # Madeinoz Patch Simplified: Use same model for all tasks (main + small)
+                # No separate small model - user configures one LLM model in env
+                small_model = config.model
 
                 # Madeinoz Patch v2: Include base_url in config for all custom endpoints
                 llm_config = CoreLLMConfig(
@@ -556,6 +531,30 @@ class EmbedderFactory:
                     embedding_dim=config.dimensions or 1024,
                 )
                 return VoyageAIEmbedder(config=voyage_config)
+
+            case 'ollama':
+                # Madeinoz Patch: Ollama embedder support
+                # Ollama provides an OpenAI-compatible embeddings API
+                import os
+                logger.info('Creating Ollama embedder client')
+
+                # Read OLLAMA_BASE_URL directly from environment (set by entrypoint.sh)
+                # This avoids issues with YAML variable substitution timing
+                api_url = os.environ.get('OLLAMA_BASE_URL', 'http://host.docker.internal:11434/v1')
+
+                logger.info(f'Ollama embedder URL: {api_url}')
+
+                from graphiti_core.embedder.openai import OpenAIEmbedderConfig
+
+                embedder_config = OpenAIEmbedderConfig(
+                    api_key='ollama',  # Dummy key for Ollama
+                    embedding_model=config.model or 'mxbai-embed-large',
+                    base_url=api_url,
+                    embedding_dim=config.dimensions or 1024,
+                )
+
+                logger.info(f'Madeinoz Patch: Ollama embedder using model {config.model}, dimensions {config.dimensions}')
+                return OpenAIEmbedder(config=embedder_config)
 
             case _:
                 raise ValueError(f'Unsupported Embedder provider: {provider}')
