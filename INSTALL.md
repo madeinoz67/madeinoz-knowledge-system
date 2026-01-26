@@ -170,6 +170,54 @@ MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER_URL=http://10.0.0.150:11434
 
 ---
 
+## Performance Benchmarks
+
+> **Key for choosing providers:** Real-world performance data from Graphiti MCP testing across 15 LLM models.
+
+### Recommended LLM Models
+
+**Best for Price/Performance:**
+
+| Model | Provider | Cost/1K Ops | Why Choose It |
+|-------|----------|------------|--------------|
+| **OpenRouter GPT-4o Mini** | OpenRouter | $0.129 | ✅ **MOST STABLE** - Reliable entity extraction, best balance of cost and quality |
+| OpenRouter Gemini 2.0 Flash | OpenRouter | $0.125 | ⚠️ **BEST VALUE** - Cheapest option, but may have occasional validation errors |
+
+**Models to Avoid:**
+
+| Model | Status | Issues |
+|-------|--------|--------|
+| All Llama models (3.1 8B, 3.3 70B) | ❌ Fails | Pydantic validation errors |
+| Mistral 7B | ❌ Fails | Pydantic validation errors |
+| DeepSeek V3 | ❌ Fails | Pydantic validation errors |
+| Grok 4 Fast, 4.1 Fast, 3 Mini, Grok 4 | ❌ Issues | Validation/timeout problems |
+| Claude Sonnet 4 | ❌ Issues | Processing timeout |
+
+### LLM Provider Comparison
+
+| Provider | Model | Cost/1K | Status | Notes |
+|----------|-------|---------|--------|-------|
+| **OpenRouter** (recommended) | GPT-4o Mini | $0.129 | ✅ **MOST STABLE** | Reliable entity extraction, best balance |
+| OpenRouter | Gemini 2.0 Flash | $0.125 | ⚠️ **BEST VALUE** | Cheapest but may have occasional validation errors |
+| OpenRouter | Qwen 2.5 72B | $0.126 | ✅ Works | Good quality, slower (30s) |
+| OpenRouter | Claude 3.5 Haiku | $0.816 | ✅ Works | 6x more expensive |
+| OpenRouter | GPT-4o | $2.155 | ✅ **FASTEST** | Best speed (12s) |
+| OpenRouter | Grok 3 | $2.163 | ✅ Works | xAI option, 22s |
+| OpenAI Direct | gpt-4o-mini | ~$0.15 | ✅ Works | Proven stable |
+
+### Embedding Options
+
+| Provider | Model | Quality | Speed | Cost | Notes |
+|----------|-------|---------|-------|------|-------|
+| **Ollama** (recommended) | mxbai-embed-large | 73.9% | 87ms | FREE | Best value |
+| OpenRouter | text-embedding-3-small | 78.2% | 824ms | $0.02/1M | Highest quality |
+| Ollama | nomic-embed-text | 63.5% | 93ms | FREE | Alternative |
+
+**Testing Methodology:**
+
+All benchmark results were obtained from real-world Graphiti MCP testing involving entity extraction and relationship detection across various document types. Testing methodology and detailed results available upon request.
+
+---
 
 ## Prerequisites
 
@@ -1769,60 +1817,6 @@ else
     fi
 fi
 
-# Test 4: Verify Lucene sanitization for hyphenated group_ids (FalkorDB only)
-echo ""
-echo "Test 4: Testing Lucene query sanitization..."
-
-# Only run Lucene tests for FalkorDB backend
-if [ -n "$MADEINOZ_KNOWLEDGE_DATABASE_TYPE" ] && [ "$MADEINOZ_KNOWLEDGE_DATABASE_TYPE" = "neo4j" ]; then
-    echo "✓ Skipping Lucene tests (Neo4j uses Cypher, not RediSearch)"
-    echo "  Neo4j handles special characters natively without escaping"
-else
-    echo "This test verifies that hyphens in group_ids are properly escaped"
-    echo "to prevent RediSearch Lucene syntax errors."
-
-    # Create a test script that calls the MCP server with a hyphenated group_id
-    cat > /tmp/test_lucene_sanitization.ts << 'EOF'
-import { sanitizeGroupId } from './src/skills/server/lib/lucene';
-
-// Test cases with various hyphenated patterns
-const testCases = [
-  'test-group',
-  'my-knowledge-base',
-  'madeinoz-history-system',
-  'multi-hyphen-group-id',
-  'group-with-dashes-123',
-];
-
-console.log('Testing Lucene query sanitization for hyphenated group_ids:\n');
-
-let allPassed = true;
-testCases.forEach(group => {
-  try {
-    const sanitized = sanitizeGroupId(group);
-    console.log(`✓ ${group} → "${sanitized}"`);
-  } catch (error) {
-    console.log(`✗ ${group} → ERROR: ${error}`);
-    allPassed = false;
-  }
-});
-
-console.log('\n' + (allPassed ? '✓ All sanitization tests passed!' : '✗ Some tests failed'));
-process.exit(allPassed ? 0 : 1);
-EOF
-
-    # Run the test
-    if bun run /tmp/test_lucene_sanitization.ts 2>&1; then
-        echo "✓ Lucene sanitization is working correctly"
-        echo "  Hyphenated group_ids will be properly escaped in queries"
-    else
-        echo "⚠️  Lucene sanitization test failed"
-        echo "  Check that src/skills/server/lib/lucene.ts exists and exports sanitizeGroupId"
-    fi
-
-    # Clean up test file
-    rm -f /tmp/test_lucene_sanitization.ts
-fi
 
 echo ""
 echo "Testing complete!"
@@ -2086,7 +2080,6 @@ echo "Checking hook lib files..."
 REQUIRED_LIB_FILES=(
     "frontmatter-parser.ts"
     "knowledge-client.ts"
-    "lucene.ts"
     "sync-state.ts"
 )
 
@@ -2238,22 +2231,6 @@ grep SEMAPHORE_LIMIT "${PAI_DIR:-$HOME/.claude}/.env"
 2. **Upgrade API tier:** Higher tiers allow more concurrent requests
 3. **Add delay:** Workflows automatically retry with exponential backoff
 4. **Switch model:** gpt-4o-mini has higher rate limits than gpt-4o
-
-### Lucene Query Errors with Hyphenated Groups
-
-**Symptoms:** Search fails with "Lucene query syntax error" when using hyphenated group_ids like "test-group"
-
-**Diagnosis:**
-```bash
-# Check if lucene.ts exists and exports sanitizeGroupId
-cat src/skills/server/lib/lucene.ts | grep -A 5 "sanitizeGroupId"
-```
-
-**Solutions:**
-1. **Verify sanitization function exists:** The `sanitizeGroupId()` function should escape hyphens
-2. **Update client code:** Ensure all search calls use `sanitizeGroupId()` on group_id parameters
-3. **Check imports:** Verify both `knowledge-client.ts` and `mcp-client.ts` import and use the sanitization function
-4. **Test manually:** Run the sanitization test in Step 7 above
 
 ---
 

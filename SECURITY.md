@@ -28,7 +28,7 @@ madeinoz-knowledge-system includes the following security measures:
 
 - **Container isolation**: Database and MCP server run in isolated containers
 - **Network segmentation**: Containers communicate via private bridge network
-- **Input validation**: Query inputs are sanitized (Lucene escaping for FalkorDB)
+- **Input validation**: Query inputs are validated and sanitized appropriately
 - **Environment variables**: Credentials stored in environment, not in code
 - **No default passwords**: Installation requires explicit credential configuration
 

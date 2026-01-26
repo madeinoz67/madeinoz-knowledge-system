@@ -17,13 +17,13 @@ Before starting, make sure you have:
 - At least 2GB of free RAM
 - At least 1GB of disk space
 
-2. **Software installed:**
+1. **Software installed:**
 
    - Podman or Docker (for running containers)
    - Bun (JavaScript runtime)
    - An OpenAI API key (or compatible service)
 
-3. **Dependent systems:**
+2. **Dependent systems:**
 
    - None (PAI Memory System is built-in to Claude Code)
 
@@ -39,7 +39,7 @@ The system uses AI to understand your knowledge, so you need an API key from an 
 
 **For OpenAI (Recommended):**
 
-1. Go to https://platform.openai.com/api-keys
+1. Go to <https://platform.openai.com/api-keys>
 2. Sign in or create an account
 3. Click "Create new secret key"
 4. Copy the key (it starts with `sk-`)
@@ -93,6 +93,7 @@ bun --version
 **If you see "command not found":**
 
 Install Bun:
+
 ```bash
 curl -fsSL https://bun.sh/install | bash
 ```
@@ -112,6 +113,7 @@ cd ~/.config/pai/Packs/madeinoz-knowledge-system
 ### Step 5: Configure Your API Key
 
 Add your API key to your PAI configuration file. The config file location is:
+
 - `$PAI_DIR/.env` if PAI_DIR is set, OR
 - `~/.claude/.env` (default)
 
@@ -133,6 +135,7 @@ MADEINOZ_KNOWLEDGE_LLM_PROVIDER=openai
 Replace `sk-your-openai-api-key-here` with your actual API key.
 
 **Save the file:**
+
 - Press `Ctrl + O` to save
 - Press `Enter` to confirm
 - Press `Ctrl + X` to exit
@@ -146,6 +149,7 @@ bun run server-cli start
 ```
 
 You'll see output like:
+
 ```
 Starting Madeinoz Knowledge System...
 Creating network: madeinoz-knowledge-net
@@ -168,6 +172,7 @@ bun run server-cli status
 ```
 
 You should see:
+
 ```
 Madeinoz Knowledge System Status:
 
@@ -189,6 +194,7 @@ bun run tools/install.ts
 ```
 
 Follow the prompts to:
+
 1. Verify your memory directory location (~/.claude/MEMORY)
 2. Install the sync hook
 3. Configure automatic syncing
@@ -245,6 +251,7 @@ All of these work together so you can simply say "remember this" and have your A
 In the terminal where it's running, press `Ctrl + C`.
 
 Or from another terminal:
+
 ```bash
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
 bun run server-cli stop
@@ -266,6 +273,7 @@ bun run server-cli status
 ### View Logs
 
 If something goes wrong:
+
 ```bash
 bun run server-cli logs
 ```
@@ -288,10 +296,12 @@ fi
 ### Using a Different AI Model
 
 The default model is `gpt-4o-mini` (fast and cheap). You can change it to:
+
 - `gpt-4o` - More accurate but costs more
 - `gpt-3.5-turbo` - Cheaper but less accurate
 
 Edit your PAI config (`$PAI_DIR/.env` or `~/.claude/.env`):
+
 ```bash
 MADEINOZ_KNOWLEDGE_MODEL_NAME=gpt-4o
 ```
@@ -303,11 +313,13 @@ Then restart the server.
 Want separate graphs for work and personal? Use group IDs:
 
 In your PAI config (`$PAI_DIR/.env` or `~/.claude/.env`):
+
 ```bash
 MADEINOZ_KNOWLEDGE_GROUP_ID=work
 ```
 
 Or specify when capturing:
+
 ```
 Remember this in my work knowledge: [your information]
 ```
@@ -317,6 +329,7 @@ Remember this in my work knowledge: [your information]
 If you hit API rate limits, reduce the concurrent requests:
 
 In your PAI config (`$PAI_DIR/.env` or `~/.claude/.env`):
+
 ```bash
 MADEINOZ_KNOWLEDGE_SEMAPHORE_LIMIT=5
 ```
@@ -334,19 +347,23 @@ Now that everything is installed:
 ## Troubleshooting
 
 **Problem: "Port already in use"**
+
 - Another service is using port 8000 or 7687 (Neo4j)
 - Stop the other service or change ports in the Docker Compose files
 
 **Problem: "API key invalid"**
+
 - Check your API key in PAI config (`$PAI_DIR/.env` or `~/.claude/.env`)
-- Verify it has credits at https://platform.openai.com/usage
+- Verify it has credits at <https://platform.openai.com/usage>
 
 **Problem: "Container won't start"**
+
 - Check Docker/Podman is running: `podman ps`
 - View logs: `bun run server-cli logs`
 - Try restarting: `bun run server-cli restart`
 
 **Problem: "No entities extracted"**
+
 - Add more detail to what you're capturing
 - Try a different model (gpt-4o instead of gpt-4o-mini)
 - Make sure your content has clear concepts and relationships

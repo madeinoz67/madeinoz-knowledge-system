@@ -7,7 +7,7 @@ description: "Complete configuration guide for the Madeinoz Knowledge System"
 
 ## Overview
 
-All Madeinoz Knowledge System configuration is managed through your PAI environment file. This document describes every available configuration option.
+All Knowledge System configuration is managed through your PAI environment file. This document describes every available configuration option.
 
 ## Configuration Location
 
@@ -36,11 +36,12 @@ MADEINOZ_KNOWLEDGE_LLM_PROVIDER=openai
 ```
 
 **Valid values:**
+
 - `openai` - OpenAI API or OpenAI-compatible providers (OpenRouter, Together, etc.)
 - `anthropic` - Anthropic Claude API
 - `gemini` - Google Gemini API
 - `groq` - Groq API
-- `ollama` - Local Ollama server
+- `ollama` - Local Ollama server or Ollama-compatible provider (apikey required)
 
 ### Model Selection
 
@@ -49,6 +50,7 @@ MADEINOZ_KNOWLEDGE_MODEL_NAME=gpt-4o-mini
 ```
 
 **Recommended models:**
+
 - `gpt-4o-mini` (OpenAI) - Best balance of cost and quality
 - `google/gemini-2.0-flash-001` (OpenRouter) - Cheapest working model
 - `openai/gpt-4o` (OpenRouter) - Fastest extraction
@@ -72,6 +74,7 @@ MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL=https://openrouter.ai/api/v1
 ```
 
 **Common values:**
+
 - `https://openrouter.ai/api/v1` - OpenRouter
 - `https://api.together.xyz/v1` - Together AI
 - `https://api.fireworks.ai/inference/v1` - Fireworks AI
@@ -79,6 +82,7 @@ MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL=https://openrouter.ai/api/v1
 - `http://localhost:11434/v1` - Local Ollama
 
 **For Ollama, use:**
+
 ```bash
 MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL=http://host.docker.internal:11434/v1
 # On Linux, replace host.docker.internal with your Ollama server IP
@@ -93,6 +97,7 @@ MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER=openai
 ```
 
 **Valid values:**
+
 - `openai` - OpenAI API or OpenAI-compatible providers
 - `anthropic` - Anthropic (limited embedding support)
 - `ollama` - Local Ollama embeddings (recommended for cost)
@@ -104,6 +109,7 @@ MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL=mxbai-embed-large
 ```
 
 **Recommended models:**
+
 - `mxbai-embed-large` (Ollama) - FREE, 87ms, 73.9% quality
 - `text-embedding-3-small` (OpenAI) - $0.02/1M, 78.2% quality
 - `BAAI/bge-large-en-v1.5` (Together AI) - Fast, high quality
@@ -115,6 +121,7 @@ MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS=1024
 ```
 
 **Important:** Must match the embedding model's output dimensions:
+
 - `mxbai-embed-large` → `1024`
 - `text-embedding-3-small` → `1536`
 - `text-embedding-3-large` → `3072`
@@ -139,6 +146,7 @@ MADEINOZ_KNOWLEDGE_DATABASE_TYPE=neo4j
 ```
 
 **Valid values:**
+
 - `neo4j` (default) - Native graph database, better special character handling
 - `falkordb` - Redis-based, simpler setup, lower resources
 
@@ -154,6 +162,7 @@ MADEINOZ_KNOWLEDGE_NEO4J_DATABASE=neo4j
 **Default values work with docker-compose setup.**
 
 **For external Neo4j:**
+
 ```bash
 MADEINOZ_KNOWLEDGE_NEO4J_URI=bolt://neo4j:7687
 MADEINOZ_KNOWLEDGE_NEO4J_USER=neo4j
@@ -183,6 +192,7 @@ This design ensures that your credentials remain consistent with your data, and 
 The Neo4j Browser provides a web interface for database administration.
 
 1. **Open Neo4j Browser:**
+
    ```
    http://localhost:7474
    ```
@@ -192,6 +202,7 @@ The Neo4j Browser provides a web interface for database administration.
    - Password: (your current password, default: `madeinozknowledge`)
 
 3. **Run the official password change command:**
+
    ```cypher
    ALTER CURRENT USER SET PASSWORD FROM 'current-password' TO 'new-password'
    ```
@@ -199,6 +210,7 @@ The Neo4j Browser provides a web interface for database administration.
    This command requires you to know your current password and changes it atomically in the `system` database.
 
 4. **Update your `.env` file to match:**
+
    ```bash
    # Edit ~/.claude/.env
    MADEINOZ_KNOWLEDGE_NEO4J_PASSWORD=new-password
@@ -207,6 +219,7 @@ The Neo4j Browser provides a web interface for database administration.
    **Important:** The `.env` file must match the database password for the MCP server to connect.
 
 5. **Restart the MCP server to apply the new password:**
+
    ```bash
    bun run server-cli stop
    bun run server-cli start
@@ -217,16 +230,19 @@ The Neo4j Browser provides a web interface for database administration.
 For users who prefer command-line administration.
 
 1. **Connect to the Neo4j container:**
+
    ```bash
    docker exec -it madeinoz-knowledge-neo4j cypher-shell -u neo4j -p 'current-password'
    ```
 
 2. **Run the official password change command:**
+
    ```cypher
    ALTER CURRENT USER SET PASSWORD FROM 'current-password' TO 'new-password';
    ```
 
    Then exit the shell:
+
    ```
    :exit
    ```
@@ -258,6 +274,7 @@ ALTER USER username SET PASSWORD 'new-password' CHANGE REQUIRED
 **NEVER use `docker compose down -v` or `podman compose down -v` to "reset" a forgotten password.** The `-v` flag deletes all data volumes, permanently destroying your knowledge graph. This data is irreplaceable.
 
 If you've forgotten your password:
+
 1. Try the default password: `madeinozknowledge`
 2. Check your `~/.claude/.env` for `MADEINOZ_KNOWLEDGE_NEO4J_PASSWORD`
 3. Use Method 1 or Method 2 above with a password you remember having set
@@ -267,12 +284,14 @@ If you've forgotten your password:
 
 **"AuthenticationRateLimit" error:**
 Neo4j blocks connections after too many failed attempts. Wait 30 seconds or restart the Neo4j container:
+
 ```bash
 docker restart madeinoz-knowledge-neo4j
 ```
 
 **"Authentication failed" after password change:**
 The MCP server is using the old password. Ensure:
+
 1. `.env` file has the new password
 2. MCP server was restarted after the change
 3. No shell environment variable is overriding the `.env` value
@@ -285,6 +304,7 @@ MADEINOZ_KNOWLEDGE_FALKORDB_PORT=6379
 ```
 
 **For external FalkorDB:**
+
 ```bash
 MADEINOZ_KNOWLEDGE_FALKORDB_HOST=your-redis-server
 MADEINOZ_KNOWLEDGE_FALKORDB_PORT=6379
@@ -328,6 +348,7 @@ Controls concurrent API requests to LLM provider. Tune based on API rate limits:
 | Tier 4 | 5000+ RPM | 20-50 | $250/month |
 
 **If experiencing rate limit errors:**
+
 1. Lower this value (e.g., 5)
 2. Upgrade your API tier
 3. Check `MADEINOZ_KNOWLEDGE_OPENAI_API_KEY` has credits/quota
@@ -371,6 +392,7 @@ For FalkorDB backend, special characters in group_ids and search queries are aut
 **Escaped characters:** `+ - && || ! ( ) { } [ ] ^ " ~ * ? : \ /`
 
 Example:
+
 ```
 Input:  group_id:madeinoz-threat-intel
 Output: group_id:"madeinoz-threat-intel"
@@ -393,6 +415,7 @@ MADEINOZ_KNOWLEDGE_ANTHROPIC_API_KEY=sk-ant-your-key
 ```
 
 **Benefits of migration:**
+
 - Isolated configuration per pack
 - No conflicts with other tools
 - Better organization in .env file
@@ -484,18 +507,21 @@ curl http://localhost:8000/health
 To update configuration after installation:
 
 1. **Edit PAI .env file:**
+
    ```bash
    nano ~/.claude/.env
    # or: vim ~/.claude/.env
    ```
 
 2. **Restart the server:**
+
    ```bash
    bun run server-cli stop
    bun run server-cli start
    ```
 
 3. **Verify changes:**
+
    ```bash
    curl http://localhost:8000/health
    ```

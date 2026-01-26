@@ -21,10 +21,11 @@ The knowledge system uses two types of AI models:
 For cost savings while maintaining reliability, we recommend a **hybrid setup**:
 
 ```env
-# LLM: OpenAI (reliable JSON output for entity extraction)
-MADEINOZ_KNOWLEDGE_LLM_PROVIDER=openai
-MADEINOZ_KNOWLEDGE_MODEL_NAME=gpt-4o-mini
-# No MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL = use real OpenAI API
+# LLM: gemini-2.0-Flash (reliable JSON output for entity extraction)
+MADEINOZ_KNOWLEDGE_LLM_PROVIDER=openrouter
+MADEINOZ_KNOWLEDGE_MODEL_NAME=google/gemini-2.0-flash-001
+MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL=https://openrouter.ai/api/v1
+MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=your-openrouter-api-key
 
 # Embedder: Ollama (free local embeddings)
 MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER=openai
@@ -34,9 +35,20 @@ MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS=1024
 ```
 
 This configuration:
-- Uses OpenAI for LLM (better JSON output, more reliable)
+
+- Uses gemini-2.0-flash-001 via openrouter for LLM (reliable and cost effective)
 - Uses Ollama for embeddings (free, runs locally)
 - Reduces cloud costs while maintaining extraction quality
+
+## Cost Comparison
+
+| Configuration | LLM Cost | Embedding Cost | Total |
+|---------------|----------|----------------|-------|
+| Full OpenAI | ~$0.15/1M tokens | ~$0.02/1M tokens | $$$ |
+| Hybrid (recommended) | ~$0.15/1M tokens | Free | $$ |
+| Full Ollama | Free | Free | Free* |
+
+*Full Ollama has reliability trade-offs for entity extraction.
 
 ## Model Test Results
 
@@ -86,11 +98,13 @@ We tested 16 Ollama LLM models for basic JSON extraction capability. This test u
 | Mistral | ✅ | ❌ | Malformed JSON on ExtractedEdges |
 
 **Latest Test (2026-01-18)**: Deepseek-r1:8b tested with actual Graphiti schemas:
+
 ```
 Error processing queued episode: 1 validation error for NodeResolutions
 entity_resolutions
   Field required [type=missing, input_value={'$defs': {'NodeDuplicate...
 ```
+
 The model outputs JSON schema definitions instead of data conforming to the schema.
 
 **Recommendation**: For production LLM use, stick with OpenAI models (gpt-4o-mini, gpt-4o) which reliably produce valid JSON matching Graphiti's Pydantic schemas.
@@ -119,6 +133,7 @@ MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS=1024
 ```
 
 **Why mxbai-embed-large?**
+
 - **Fastest** response time (156ms avg)
 - **Highest** semantic quality (77.0%)
 - Higher dimensions (1024) capture more nuance
@@ -222,16 +237,6 @@ Check that Ollama is running and accessible:
 curl http://your-ollama-server:11434/api/tags
 ```
 
-## Cost Comparison
-
-| Configuration | LLM Cost | Embedding Cost | Total |
-|---------------|----------|----------------|-------|
-| Full OpenAI | ~$0.15/1M tokens | ~$0.02/1M tokens | $$$ |
-| Hybrid (recommended) | ~$0.15/1M tokens | Free | $$ |
-| Full Ollama | Free | Free | Free* |
-
-*Full Ollama has reliability trade-offs for entity extraction.
-
 ## OpenAI-Compatible Cloud Providers
 
 In addition to Ollama (local), the Madeinoz patch supports OpenAI-compatible cloud providers:
@@ -262,6 +267,7 @@ MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS=1024
 ```
 
 This configuration:
+
 - Uses OpenRouter for LLM (access to Claude, GPT-4, etc.)
 - Uses Ollama for embeddings (free, runs locally)
 - Gives you flexibility to choose any model on OpenRouter
@@ -276,6 +282,7 @@ bun run install.ts
 ```
 
 The installer will:
+
 1. Ask you to select "OpenAI-compatible (OpenRouter, Together, etc.)"
 2. Let you choose a specific provider
 3. Prompt for the API key

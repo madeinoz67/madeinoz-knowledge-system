@@ -9,6 +9,8 @@ Auto-generated from all feature plans. Last updated: 2026-01-18
 - Neo4j (default) or FalkorDB backend via Docker/Podman containers (003-fix-issue-2)
 - YAML (Docker/Podman Compose v2.x) + Docker Compose v2.x or Podman Compose (004-fix-env-file-loading)
 - N/A (configuration files only) (004-fix-env-file-loading)
+- Markdown (documentation), YAML (Docker/Podman Compose v2.x) + Docker Compose v2.x or Podman Compose (001-docs-compose-updates)
+- N/A (documentation and configuration files only) (001-docs-compose-updates)
 
 - TypeScript (ES modules, strict mode), Bun runtime + @modelcontextprotocol/sdk (existing), mcp-client.ts library (existing) (001-mcp-wrapper)
 
@@ -28,9 +30,9 @@ npm test && npm run lint
 TypeScript (ES modules, strict mode), Bun runtime: Follow standard conventions
 
 ## Recent Changes
+- 001-docs-compose-updates: Added Markdown (documentation), YAML (Docker/Podman Compose v2.x) + Docker Compose v2.x or Podman Compose
 - 004-fix-env-file-loading: Added YAML (Docker/Podman Compose v2.x) + Docker Compose v2.x or Podman Compose
 - 003-fix-issue-2: Added TypeScript (ES modules, strict mode), Bun runtime + @modelcontextprotocol/sdk (existing), existing mcp-client.ts library
-- 002-mkdocs-documentation: Added Python 3.x (MkDocs), YAML (configuration), Markdown (content) + MkDocs 1.6+, mkdocs-material 9.5+, GitHub Actions
 
 
 <!-- MANUAL ADDITIONS START -->

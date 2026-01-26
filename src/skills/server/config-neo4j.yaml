@@ -2,7 +2,6 @@
 # This configuration is used with docker-compose-neo4j.yml
 #
 # Neo4j advantages over FalkorDB:
-#   - Native Cypher queries (no Lucene/RediSearch escaping issues)
 #   - Mature ecosystem with Neo4j Browser visualization
 #   - Better handling of special characters in identifiers
 #   - APOC procedures for advanced graph operations

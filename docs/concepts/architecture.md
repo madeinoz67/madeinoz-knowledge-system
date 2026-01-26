@@ -1,11 +1,11 @@
 ---
 title: "Architecture"
-description: "Deep dive into the Madeinoz Knowledge System architecture, component stack, and how information flows through the system"
+description: "Deep dive into the ßKnowledge System architecture, component stack, and how information flows through the system"
 ---
 
 # Architecture
 
-The Madeinoz Knowledge System solves the problem of amnesiac AI through **automatic knowledge graph construction**. Instead of requiring manual note-taking, it extracts and structures knowledge as a natural byproduct of conversation.
+The Knowledge System solves the problem of amnesiac AI through **automatic knowledge graph construction**. Instead of requiring manual note-taking, it extracts and structures knowledge as a natural byproduct of conversation.
 
 ## Core Architecture
 
@@ -73,7 +73,7 @@ flowchart TB
 
 ??? note "ASCII Diagram (Text-Only View)"
     ```
-    User Conversation/Document
+User Conversation/Document
              │
              ▼
     ┌─────────────────────────────────┐
@@ -128,6 +128,7 @@ flowchart TB
 ### 1. Natural Capture
 
 Say "remember that Podman volumes use host:container syntax" and the system:
+
 - Extracts entities: "Podman", "volume mounting"
 - Identifies relationship: "uses", "syntax rule"
 - Creates episode with full context
@@ -136,6 +137,7 @@ Say "remember that Podman volumes use host:container syntax" and the system:
 ### 2. Semantic Search
 
 Ask "what do I know about container orchestration?" and the system:
+
 - Searches vector embeddings for related concepts
 - Returns entities: "Podman", "Kubernetes", "Docker Compose"
 - Shows relationships: "alternatives to", "similar tools"
@@ -144,6 +146,7 @@ Ask "what do I know about container orchestration?" and the system:
 ### 3. Relationship Discovery
 
 Ask "how are FalkorDB and Graphiti connected?" and the system:
+
 - Traverses graph edges between entities
 - Returns: "FalkorDB is the graph database backend for Graphiti"
 - Shows temporal context: "learned on 2025-01-03"
@@ -240,7 +243,7 @@ flowchart TB
 
 ??? note "ASCII Diagram (Text-Only View)"
     ```
-    ┌─────────────────────────────────────────────────────────────┐
+┌─────────────────────────────────────────────────────────────┐
     │                    User Intent Layer                        │
     │  Natural language triggers: "remember this", "what do I     │
     │  know about X", "how are X and Y related"                  │
@@ -336,6 +339,7 @@ flowchart TB
 ### 1. Separation of Concerns
 
 Each layer has a single responsibility:
+
 - **Intent Layer**: Natural language understanding
 - **Routing Layer**: Direct user intent to workflow
 - **Workflow Layer**: Operational procedures
@@ -344,6 +348,7 @@ Each layer has a single responsibility:
 - **Database Layer**: Persistent storage
 
 This is FUNDAMENTALLY DIFFERENT from "just storing notes" because:
+
 - Progressive abstraction (not everything in one layer)
 - Explicit intent routing (not fuzzy keyword matching)
 - Separation of operations (capture, search, retrieve distinct)
@@ -381,7 +386,7 @@ flowchart TB
 
 ??? note "ASCII Diagram (Text-Only View)"
     ```
-    User → "Remember X" → Capture Episode → Extract Entities → Create Relationships → Store in Graph
+User → "Remember X" → Capture Episode → Extract Entities → Create Relationships → Store in Graph
                                                                                   ↓
     User ← "What about X" ← Search Results ← Vector Search ← Semantic Similarity ← Graph Query
     ```
@@ -402,6 +407,7 @@ Knowledge graph: Three retrieval dimensions
 ### 4. Automatic Entity Extraction
 
 LLM-powered extraction identifies:
+
 - **Named Entities**: People, organizations, locations
 - **Abstract Concepts**: Technologies, methodologies, patterns
 - **Procedural Knowledge**: Workflows, SOPs, how-to guides
@@ -413,6 +419,7 @@ This happens AUTOMATICALLY - no manual tagging required.
 ### 5. Temporal Context Tracking
 
 Every episode includes:
+
 - Timestamp: When knowledge was added
 - Source: Conversation or document
 - Entity State: How understanding evolved
@@ -449,10 +456,12 @@ NOT: "Handle special characters manually" - Lucene sanitization built-in
 The key insight is that **knowledge is relational, not transactional**. Traditional note-taking treats each piece of information as an isolated transaction. The Madeinoz Knowledge System treats knowledge as a graph of interconnected entities with temporal context.
 
 This isn't just "better search" - it's a fundamentally different paradigm:
+
 - **Transaction**: "Note about Podman volumes" (isolated, static)
 - **Relational**: "Podman → uses → volume mounting → syntax → host:container" (connected, queryable, temporal)
 
 The graph structure allows queries impossible with flat notes:
+
 - "Show me all technologies related to container orchestration I learned about in the past month"
 - "What debugging solutions led to architectural decisions?"
 - "How do my preferences for dev tools relate to past troubleshooting sessions?"

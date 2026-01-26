@@ -10,6 +10,7 @@ One-page reference for the Madeinoz Knowledge System.
 ## Natural Language Commands
 
 ### Capture Knowledge
+
 ```
 "Remember that [your knowledge]"
 "Store this: [information]"
@@ -18,6 +19,7 @@ One-page reference for the Madeinoz Knowledge System.
 ```
 
 ### Search Knowledge
+
 ```
 "What do I know about [topic]?"
 "Search my knowledge for [subject]"
@@ -26,6 +28,7 @@ One-page reference for the Madeinoz Knowledge System.
 ```
 
 ### Filter by Entity Type
+
 ```
 "Find my procedures about [topic]"
 "Search for learnings about [subject]"
@@ -35,6 +38,7 @@ One-page reference for the Madeinoz Knowledge System.
 ```
 
 ### Find Connections
+
 ```
 "How are [X] and [Y] related?"
 "What's the connection between [A] and [B]?"
@@ -42,6 +46,7 @@ One-page reference for the Madeinoz Knowledge System.
 ```
 
 ### Review Recent
+
 ```
 "What did I learn recently?"
 "Show me recent knowledge"
@@ -49,6 +54,7 @@ One-page reference for the Madeinoz Knowledge System.
 ```
 
 ### System Status
+
 ```
 "Knowledge graph status"
 "Show me knowledge stats"
@@ -58,27 +64,32 @@ One-page reference for the Madeinoz Knowledge System.
 ## Server Management
 
 ### Status
+
 ```bash
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
 bun run server-cli status
 ```
 
 ### Start
+
 ```bash
 bun run server-cli start
 ```
 
 ### Stop
+
 ```bash
 bun run server-cli stop
 ```
 
 ### Logs
+
 ```bash
 bun run server-cli logs
 ```
 
 ### Restart
+
 ```bash
 bun run server-cli restart
 ```
@@ -88,6 +99,7 @@ bun run server-cli restart
 Location: `$PAI_DIR/.env` (defaults to `~/.claude/.env`)
 
 Key settings:
+
 ```bash
 # Required: Your API key
 MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=sk-your-key-here
@@ -174,6 +186,7 @@ Use these types to filter searches: "Find my procedures about X"
 ## Troubleshooting Checklist
 
 ### Issue: Can't connect
+
 ```bash
 # Check if running
 bun run server-cli status
@@ -248,10 +261,10 @@ Per operation:
 
 ## URLs
 
-- MCP Server: http://localhost:8000/sse
-- Neo4j Browser: http://localhost:7474 (default backend)
-- FalkorDB UI: http://localhost:3000 (if using FalkorDB)
-- OpenAI Usage: https://platform.openai.com/usage
+- MCP Server: <http://localhost:8000/sse>
+- Neo4j Browser: <http://localhost:7474> (default backend)
+- FalkorDB UI: <http://localhost:3000> (if using FalkorDB)
+- OpenAI Usage: <https://platform.openai.com/usage>
 
 ## File Locations
 
@@ -295,6 +308,7 @@ When editing config:
 ## Docker vs Podman
 
 The system works with both:
+
 ```bash
 # Check which you have
 podman --version
@@ -329,6 +343,7 @@ bun run ~/.claude/hooks/sync-memory-to-knowledge.ts --dry-run
 ### Neo4j (Default Backend)
 
 **Podman:**
+
 ```bash
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
 mkdir -p backups
@@ -406,6 +421,7 @@ See the [Backup & Restore Guide](../usage/backup-restore.md) for detailed instru
 
 System: Madeinoz Knowledge System v1.1.0
 Components:
+
 - Graphiti (MCP server)
 - Neo4j (default graph database) or FalkorDB
 - OpenAI (LLM and embeddings)

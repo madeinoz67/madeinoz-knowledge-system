@@ -19,6 +19,7 @@ bun run server-cli status
 ```
 
 Expected output:
+
 ```
 Madeinoz Knowledge System Status:
 
@@ -53,6 +54,7 @@ Should see some response about the endpoint.
 **Symptom:** Commands fail with connection errors
 
 **Possible Causes:**
+
 1. Server not running
 2. Wrong port
 3. Firewall blocking connection
@@ -60,6 +62,7 @@ Should see some response about the endpoint.
 **Solutions:**
 
 **Check if server is running:**
+
 ```bash
 podman ps | grep madeinoz-knowledge
 ```
@@ -67,12 +70,14 @@ podman ps | grep madeinoz-knowledge
 If nothing shows up, the server isn't running.
 
 **Start the server:**
+
 ```bash
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
 bun run server-cli start
 ```
 
 **Check if port 8000 is in use:**
+
 ```bash
 lsof -i :8000
 ```
@@ -87,6 +92,7 @@ Edit the Docker Compose files (`docker-compose-neo4j.yml` or `docker-compose-fal
 **Symptom:** Error messages about API keys
 
 **Check your configuration:**
+
 ```bash
 cat "${PAI_DIR:-$HOME/.claude}/.env" | grep MADEINOZ_KNOWLEDGE_OPENAI_API_KEY
 ```
@@ -94,30 +100,34 @@ cat "${PAI_DIR:-$HOME/.claude}/.env" | grep MADEINOZ_KNOWLEDGE_OPENAI_API_KEY
 **If the key is missing or wrong:**
 
 1. Edit the config file:
+
 ```bash
 nano "${PAI_DIR:-$HOME/.claude}/.env"
 ```
 
-2. Add or fix your API key:
+1. Add or fix your API key:
+
 ```
 MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=sk-your-actual-key-here
 ```
 
-3. Save (Ctrl+O, Enter, Ctrl+X)
+1. Save (Ctrl+O, Enter, Ctrl+X)
 
-4. Restart the server:
+2. Restart the server:
+
 ```bash
 bun run server-cli restart
 ```
 
 **Verify your key has credits:**
-Visit https://platform.openai.com/usage to check your API usage and credits.
+Visit <https://platform.openai.com/usage> to check your API usage and credits.
 
 ### "No entities extracted" or Poor Extraction Quality
 
 **Symptom:** System captures knowledge but extracts no or few entities
 
 **Causes:**
+
 1. Content too short or vague
 2. Model not powerful enough
 3. Content lacks clear concepts
@@ -127,11 +137,13 @@ Visit https://platform.openai.com/usage to check your API usage and credits.
 **Add more detail:**
 
 Instead of:
+
 ```
 Remember Docker
 ```
 
 Try:
+
 ```
 Remember that Docker is a container runtime that requires a daemon
 process running as root, which manages container lifecycles and images.
@@ -140,6 +152,7 @@ process running as root, which manages container lifecycles and images.
 **Use a better model:**
 
 Edit your PAI config (`$PAI_DIR/.env` or `~/.claude/.env`):
+
 ```bash
 MADEINOZ_KNOWLEDGE_MODEL_NAME=gpt-4o
 ```
@@ -151,11 +164,13 @@ Restart the server after changing.
 **Be explicit about relationships:**
 
 Instead of:
+
 ```
 Remember Podman and Docker
 ```
 
 Try:
+
 ```
 Remember that Podman is an alternative to Docker, designed to be
 daemonless and rootless for better security.
@@ -166,6 +181,7 @@ daemonless and rootless for better security.
 **Symptom:** Server fails to start, containers exit immediately
 
 **Check Docker/Podman is running:**
+
 ```bash
 podman ps
 # or
@@ -175,6 +191,7 @@ docker ps
 **If "Cannot connect to Podman socket":**
 
 On macOS:
+
 ```bash
 podman machine start
 ```
@@ -182,6 +199,7 @@ podman machine start
 Wait 30 seconds, then try starting the server again.
 
 **Check logs for specific errors:**
+
 ```bash
 bun run server-cli logs
 ```
@@ -192,6 +210,7 @@ bun run server-cli logs
 Another service is using port 8000 or 7687 (Neo4j) or 6379 (FalkorDB).
 
 Find what's using the port:
+
 ```bash
 lsof -i :8000
 lsof -i :7687  # Neo4j Bolt
@@ -202,15 +221,18 @@ Kill the process or change the knowledge system ports.
 
 **Error: "image not found"**
 The container image needs to be pulled:
+
 ```bash
 podman pull falkordb/graphiti-knowledge-graph-mcp:latest
 ```
 
 **Error: "network not found"**
 Recreate the network:
+
 ```bash
 podman network rm madeinoz-knowledge-net
 ```
+
 Then start the server again (it will recreate the network).
 
 ### Search Returns No Results
@@ -218,6 +240,7 @@ Then start the server again (it will recreate the network).
 **Symptom:** Searches return empty or "No knowledge found"
 
 **Check if knowledge has been captured:**
+
 ```bash
 # In your AI assistant
 Show me recent knowledge additions
@@ -228,11 +251,13 @@ If nothing recent, you need to capture knowledge first.
 **Try a broader search:**
 
 Instead of:
+
 ```
 What do I know about Podman volume mounting syntax?
 ```
 
 Try:
+
 ```
 What do I know about Podman?
 ```
@@ -242,6 +267,7 @@ What do I know about Podman?
 If you've set a custom group ID, make sure searches use the same group.
 
 Verify your group setting:
+
 ```bash
 grep MADEINOZ_KNOWLEDGE_GROUP_ID "${PAI_DIR:-$HOME/.claude}/.env"
 ```
@@ -257,6 +283,7 @@ Look at a recent capture - did it show "Entities extracted: 0"? If so, see the "
 **Cause:** Data was indexed with one embedding model, but searches use a different model with incompatible vector dimensions.
 
 **Common scenarios that cause this:**
+
 1. Changed `EMBEDDER_MODEL` in config after data was already indexed
 2. Tested multiple embedding models without clearing data between tests
 3. Migrated from one embedding provider to another
@@ -285,6 +312,7 @@ clear_graph with group_ids: ["group1", "group2"]
 ```
 
 Or identify test groups by checking episodes:
+
 ```bash
 # Via Claude Code / MCP
 get_episodes with max_episodes: 50
@@ -306,6 +334,7 @@ This deletes ALL data. You'll need to re-add any knowledge you want to keep.
 **Verify the fix:**
 
 After clearing, test that searches work:
+
 ```bash
 # Via Claude Code / MCP
 search_nodes with query: "test"
@@ -319,6 +348,7 @@ Should return `"No relevant nodes found"` (empty but no error), not a dimension 
 2. **Use separate group_ids for testing** - e.g., `test-llama`, `test-openai`, then clear test groups after
 3. **Document your embedding config** - Note which model was used to index production data
 4. **Keep `EMBEDDER_DIMENSIONS` in sync** - Must match your model:
+
    ```bash
    # Example for mxbai-embed-large
    EMBEDDER_MODEL=mxbai-embed-large
@@ -342,6 +372,7 @@ There's no way to "migrate" vectors - the embeddings are fundamentally different
 **Immediate fix:**
 
 Reduce concurrent requests in your PAI config (`$PAI_DIR/.env` or `~/.claude/.env`):
+
 ```bash
 MADEINOZ_KNOWLEDGE_SEMAPHORE_LIMIT=3
 ```
@@ -352,9 +383,10 @@ Restart the server after changing.
 
 **Permanent solution:**
 
-Check your OpenAI tier at https://platform.openai.com/account/rate-limits
+Check your OpenAI tier at <https://platform.openai.com/account/rate-limits>
 
 Adjust SEMAPHORE_LIMIT based on your tier:
+
 - Free tier: 1-2
 - Tier 1: 3-5
 - Tier 2: 8
@@ -370,6 +402,7 @@ Consider upgrading your OpenAI tier or capturing knowledge less frequently.
 **This is the MCP transport layer having issues.**
 
 **Quick fix:**
+
 1. Stop the server: `bun run server-cli stop`
 2. Wait 10 seconds
 3. Start again: `bun run server-cli start`
@@ -378,6 +411,7 @@ Consider upgrading your OpenAI tier or capturing knowledge less frequently.
 **If that doesn't work:**
 
 Check if the SSE endpoint responds at all:
+
 ```bash
 curl -N -H "Accept: text/event-stream" http://localhost:8000/sse
 ```
@@ -386,6 +420,7 @@ Should see event-stream data.
 
 **If curl fails:**
 The MCP server isn't running properly. Check logs:
+
 ```bash
 bun run server-cli logs
 ```
@@ -397,6 +432,7 @@ Look for startup errors.
 **Symptom:** Memory captures aren't appearing in knowledge graph
 
 **Check if the hook is installed:**
+
 ```bash
 cat ~/.claude/settings.json | grep sync-memory-to-knowledge
 ```
@@ -405,12 +441,14 @@ Should see a hook definition.
 
 **If nothing shows:**
 The hook isn't installed. Install it:
+
 ```bash
 cd ~/.claude/skills/Knowledge
 bun run tools/install.ts
 ```
 
 **Manually trigger sync:**
+
 ```bash
 bun run ~/.claude/hooks/sync-memory-to-knowledge.ts --verbose
 ```
@@ -418,6 +456,7 @@ bun run ~/.claude/hooks/sync-memory-to-knowledge.ts --verbose
 This shows what's being synced (or why not).
 
 **Check sync state:**
+
 ```bash
 cat ~/.claude/MEMORY/STATE/knowledge-sync/sync-state.json
 ```
@@ -425,6 +464,7 @@ cat ~/.claude/MEMORY/STATE/knowledge-sync/sync-state.json
 Shows what's already been synced.
 
 **Force re-sync everything:**
+
 ```bash
 rm ~/.claude/MEMORY/STATE/knowledge-sync/sync-state.json
 bun run ~/.claude/hooks/sync-memory-to-knowledge.ts --all --verbose
@@ -435,22 +475,25 @@ bun run ~/.claude/hooks/sync-memory-to-knowledge.ts --all --verbose
 **Symptom:** Your OpenAI bill is higher than expected
 
 **Check usage:**
-https://platform.openai.com/usage
+<https://platform.openai.com/usage>
 
 **Reduce costs:**
 
 **1. Use cheaper model:**
 
 In your PAI config (`$PAI_DIR/.env` or `~/.claude/.env`):
+
 ```bash
 MADEINOZ_KNOWLEDGE_MODEL_NAME=gpt-4o-mini
 ```
+
 (gpt-4o-mini is 10x cheaper than gpt-4o)
 
 **2. Capture less:**
 Only capture truly valuable knowledge, not every conversation.
 
 **3. Reduce concurrency:**
+
 ```bash
 MADEINOZ_KNOWLEDGE_SEMAPHORE_LIMIT=3
 ```
@@ -459,6 +502,7 @@ MADEINOZ_KNOWLEDGE_SEMAPHORE_LIMIT=3
 Check your API usage weekly to catch cost spikes early.
 
 **Typical costs:**
+
 - Light use: $0.50-1.00/month
 - Moderate use: $1.00-3.00/month
 - Heavy use: $3.00-10.00/month
@@ -467,9 +511,10 @@ Using gpt-4o-mini, not gpt-4o.
 
 ### Database Web UI Not Accessible
 
-**Symptom:** Can't access database UI (Neo4j: http://localhost:7474, FalkorDB: http://localhost:3000)
+**Symptom:** Can't access database UI (Neo4j: <http://localhost:7474>, FalkorDB: <http://localhost:3000>)
 
 **Check if database container is running:**
+
 ```bash
 # For Neo4j (default)
 podman ps | grep neo4j
@@ -479,17 +524,20 @@ podman ps | grep falkordb
 ```
 
 **If not running:**
+
 ```bash
 bun run server-cli start
 ```
 
 **Check ports aren't blocked:**
+
 ```bash
 lsof -i :7474  # Neo4j Browser
 lsof -i :3000  # FalkorDB UI
 ```
 
 **Try accessing the graph directly:**
+
 ```bash
 # For Neo4j (default)
 podman exec madeinoz-knowledge-neo4j cypher-shell -u neo4j -p password "RETURN 1"
@@ -505,6 +553,7 @@ Should respond with `1` (Neo4j) or "PONG" (FalkorDB).
 **Symptom:** System is slow or running out of memory
 
 **Check system resources:**
+
 ```bash
 podman stats
 ```
@@ -514,12 +563,14 @@ Shows CPU and memory usage of containers.
 **If memory usage is high:**
 
 **Option 1: Restart containers**
+
 ```bash
 bun run server-cli restart
 ```
 
 **Option 2: Clear old data**
 If you have a lot of episodes you no longer need:
+
 ```
 # In your AI assistant
 Clear my knowledge graph
@@ -546,6 +597,7 @@ Or similar errors for `ExtractedEntities`, `EntitySummary`, or other Pydantic mo
 **Root Cause:**
 
 The LLM returns a JSON schema definition instead of actual field values. This happens because:
+
 1. Some LLM providers don't fully support structured output/parse API
 2. The `OpenAIGenericClient` uses basic `json_object` mode which is less strict
 3. Complex multi-entity content triggers edge deduplication which is more prone to this error
@@ -567,11 +619,13 @@ The Madeinoz Knowledge System v1.2.4+ includes a patch that uses `OpenAIClient` 
 **Verify the patch is active:**
 
 Check container logs after startup:
+
 ```bash
 podman logs madeinoz-knowledge-graph-mcp 2>&1 | grep "Patch v3"
 ```
 
 Should show:
+
 ```
 Madeinoz Patch v3: Using OpenAIClient for cloud openrouter
 ```
@@ -584,11 +638,12 @@ Madeinoz Patch v3: Using OpenAIClient for cloud openrouter
 
 **Tracking:**
 
-This issue is tracked at: https://github.com/getzep/graphiti/issues/912
+This issue is tracked at: <https://github.com/getzep/graphiti/issues/912>
 
 **Technical Details:**
 
 The fix differentiates between:
+
 - **Cloud providers** (OpenRouter, Together, etc.) → Use `OpenAIClient` with parse API
 - **Local endpoints** (Ollama) → Use `OpenAIGenericClient` with json_object mode
 
@@ -606,7 +661,7 @@ The parse API provides stricter schema enforcement, which prevents the LLM from 
 Restart your AI assistant (Claude Code). This resets the MCP connection.
 
 **Tracking:**
-This issue is tracked at: https://github.com/getzep/graphiti/issues/840
+This issue is tracked at: <https://github.com/getzep/graphiti/issues/840>
 
 **Not a critical issue:**
 This warning usually doesn't break functionality, but restarting helps if you see repeated failures.
@@ -644,6 +699,7 @@ FalkorDB uses RediSearch for fulltext indexing, which interprets certain charact
 **Example of the bug:**
 
 When you search for `madeinoz-threat-intel`:
+
 - RediSearch interprets this as: `pai AND NOT threat AND NOT intel`
 - This returns wrong results or a syntax error
 
@@ -652,6 +708,7 @@ When you search for `madeinoz-threat-intel`:
 Graphiti's FalkorDB driver has a `sanitize()` method that replaces special characters with whitespace. However, this sanitization is **not applied to group_ids** in search queries. When you use a group_id like `my-knowledge-base`, the hyphen is passed directly to RediSearch and interpreted as negation.
 
 **Related Issues:**
+
 - [RediSearch #2628](https://github.com/RediSearch/RediSearch/issues/2628) - Can't search text with hyphens
 - [RediSearch #4092](https://github.com/RediSearch/RediSearch/issues/4092) - Escaping filter values
 - [Graphiti #815](https://github.com/getzep/graphiti/issues/815) - FalkorDB query syntax errors
@@ -672,6 +729,7 @@ The Madeinoz Knowledge System Docker container handles sanitization automaticall
 **If you encounter syntax errors:**
 
 1. Check if your group_id contains special characters:
+
    ```bash
    grep MADEINOZ_KNOWLEDGE_GROUP_ID "${PAI_DIR:-$HOME/.claude}/.env"
    ```
@@ -737,10 +795,10 @@ If these solutions don't work:
    `/Users/seaton/.config/pai/Packs/madeinoz-knowledge-system/VERIFY.md`
 
 4. **Check Graphiti documentation:**
-   https://help.getzep.com/graphiti
+   <https://help.getzep.com/graphiti>
 
 5. **Check FalkorDB documentation:**
-   https://docs.falkordb.com/
+   <https://docs.falkordb.com/>
 
 ## Still Stuck?
 

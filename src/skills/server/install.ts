@@ -278,7 +278,7 @@ const DATABASE_BACKENDS: DatabaseBackend[] = [
   {
     id: 'falkordb',
     name: 'FalkorDB',
-    description: 'Redis-based graph database with RediSearch. Simpler setup, lower resource usage.',
+    description: 'Redis-based graph database. Simpler setup, lower resource usage.',
   },
 ];
 
@@ -654,14 +654,12 @@ class Installer {
       cli.blank();
       cli.info('Neo4j provides:');
       cli.dim('  - Native Cypher query language');
-      cli.dim('  - No Lucene/RediSearch escaping needed');
       cli.dim('  - Neo4j Browser UI at http://localhost:7474');
       cli.dim('  - Bolt protocol at port 7687');
     } else {
       cli.blank();
       cli.info('FalkorDB provides:');
       cli.dim('  - Redis-based graph database');
-      cli.dim('  - RediSearch for full-text search');
       cli.dim('  - FalkorDB UI at http://localhost:3000');
       cli.dim('  - Lower memory footprint');
     }

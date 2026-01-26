@@ -14,6 +14,7 @@ Your knowledge graph is stored in Neo4j (the default) or FalkorDB. Here's how to
 Create a backup of your entire knowledge graph:
 
 **Neo4j (Default) - Podman:**
+
 ```bash
 # Navigate to pack directory
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
@@ -28,6 +29,7 @@ echo "✓ Backup created"
 ```
 
 **Neo4j (Default) - Docker:**
+
 ```bash
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
 mkdir -p backups
@@ -38,6 +40,7 @@ echo "✓ Backup created"
 ```
 
 **FalkorDB Backend - Podman:**
+
 ```bash
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
 mkdir -p backups
@@ -51,6 +54,7 @@ echo "✓ Backup created"
 ```
 
 **FalkorDB Backend - Docker:**
+
 ```bash
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
 mkdir -p backups
@@ -67,6 +71,7 @@ echo "✓ Backup created"
 Create a cron job for automatic daily backups:
 
 **Neo4j (Default) - Podman:**
+
 ```bash
 # Edit crontab
 crontab -e
@@ -76,6 +81,7 @@ crontab -e
 ```
 
 **Neo4j (Default) - Docker:**
+
 ```bash
 crontab -e
 
@@ -84,6 +90,7 @@ crontab -e
 ```
 
 **FalkorDB Backend - Podman:**
+
 ```bash
 crontab -e
 
@@ -92,6 +99,7 @@ crontab -e
 ```
 
 **FalkorDB Backend - Docker:**
+
 ```bash
 crontab -e
 
@@ -104,6 +112,7 @@ crontab -e
 To restore your knowledge graph from a backup:
 
 **Neo4j (Default) - Podman:**
+
 ```bash
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
 
@@ -125,6 +134,7 @@ bun run status
 ```
 
 **Neo4j (Default) - Docker:**
+
 ```bash
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
 
@@ -148,6 +158,7 @@ bun run status
 Replace `knowledge-YYYYMMDD-HHMMSS.dump` with your actual backup filename.
 
 **FalkorDB Backend - Podman:**
+
 ```bash
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
 
@@ -169,6 +180,7 @@ bun run status
 ```
 
 **FalkorDB Backend - Docker:**
+
 ```bash
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
 
@@ -196,6 +208,7 @@ Replace `knowledge-YYYYMMDD-HHMMSS.rdb` with your actual backup filename.
 For a human-readable backup or migration to another system:
 
 **Neo4j (Default) - Podman/Docker:**
+
 ```bash
 # Connect to Neo4j and export graph data using cypher-shell
 podman exec madeinoz-knowledge-neo4j cypher-shell -u neo4j -p password \
@@ -211,6 +224,7 @@ podman exec madeinoz-knowledge-neo4j cypher-shell -u neo4j -p password \
 ```
 
 **FalkorDB Backend - Podman:**
+
 ```bash
 # Connect to FalkorDB and export graph data
 podman exec madeinoz-knowledge-falkordb redis-cli GRAPH.QUERY graphiti \
@@ -226,6 +240,7 @@ podman exec madeinoz-knowledge-falkordb redis-cli GRAPH.QUERY graphiti \
 ```
 
 **FalkorDB Backend - Docker:**
+
 ```bash
 # Connect to FalkorDB and export graph data
 docker exec madeinoz-knowledge-falkordb redis-cli GRAPH.QUERY graphiti \
@@ -245,6 +260,7 @@ docker exec madeinoz-knowledge-falkordb redis-cli GRAPH.QUERY graphiti \
 For a complete backup including all container data:
 
 **Podman:**
+
 ```bash
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
 
@@ -261,6 +277,7 @@ echo "✓ Full volume backup created"
 ```
 
 **Docker:**
+
 ```bash
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
 
@@ -280,6 +297,7 @@ echo "✓ Full volume backup created"
 ## Restore from Volume Backup
 
 **Podman:**
+
 ```bash
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
 
@@ -301,6 +319,7 @@ bun run status
 ```
 
 **Docker:**
+
 ```bash
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
 
@@ -327,6 +346,7 @@ bun run status
 To move your knowledge graph to a new computer:
 
 **Podman - On the old machine:**
+
 ```bash
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
 
@@ -340,6 +360,7 @@ scp knowledge-migration.tar user@newmachine:~/
 ```
 
 **Podman - On the new machine:**
+
 ```bash
 # After installing madeinoz-knowledge-system
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
@@ -354,6 +375,7 @@ bun run status
 ```
 
 **Docker - On the old machine:**
+
 ```bash
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
 
@@ -368,6 +390,7 @@ scp knowledge-migration.tar user@newmachine:~/
 ```
 
 **Docker - On the new machine:**
+
 ```bash
 # After installing madeinoz-knowledge-system
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
@@ -395,6 +418,7 @@ bun run status
 ## Quick Reference
 
 **Neo4j (Default) - Podman:**
+
 ```bash
 # Backup commands
 podman exec madeinoz-knowledge-neo4j neo4j-admin database dump neo4j --to-stdout > backup.dump
@@ -408,6 +432,7 @@ podman exec madeinoz-knowledge-neo4j cypher-shell -u neo4j -p password "MATCH (n
 ```
 
 **Neo4j (Default) - Docker:**
+
 ```bash
 # Backup commands
 docker exec madeinoz-knowledge-neo4j neo4j-admin database dump neo4j --to-stdout > backup.dump
@@ -421,6 +446,7 @@ docker exec madeinoz-knowledge-neo4j cypher-shell -u neo4j -p password "MATCH (n
 ```
 
 **FalkorDB Backend - Podman:**
+
 ```bash
 # Backup commands
 podman exec madeinoz-knowledge-falkordb redis-cli BGSAVE              # Trigger save
@@ -437,6 +463,7 @@ podman exec madeinoz-knowledge-falkordb redis-cli GRAPH.LIST          # List gra
 ```
 
 **FalkorDB Backend - Docker:**
+
 ```bash
 # Backup commands
 docker exec madeinoz-knowledge-falkordb redis-cli BGSAVE              # Trigger save
