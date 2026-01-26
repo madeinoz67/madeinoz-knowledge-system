@@ -7,21 +7,20 @@ FROM zepai/knowledge-graph-mcp:standalone
 LABEL description="Madeinoz Knowledge System - Graphiti MCP with Ollama/OpenRouter support, Neo4j + FalkorDB, Lucene sanitization"
 LABEL version="1.1.0"
 
-# Copy patches from src/server/patches directory
-# Note: These are .py files that get copied into the patches/ directory
-# The patches are imported at runtime to monkey-patch Graphiti
-COPY src/server/patches/factories.py /app/mcp/patches/
-COPY src/server/patches/graphiti_mcp_server.py /app/mcp/patches/
-COPY src/server/patches/falkordb_lucene.py /app/mcp/patches/
+# Copy patches directory
+# Note: These are .py files that monkey-patch Graphiti at runtime
+COPY docker/patches/factories.py /app/mcp/patches/
+COPY docker/patches/graphiti_mcp_server.py /app/mcp/patches/
+COPY docker/patches/falkordb_lucene.py /app/mcp/patches/
 
 # Copy both Neo4j and FalkorDB configs
-COPY src/server/config-neo4j.yaml /tmp/config-neo4j.yaml
-COPY src/server/config-falkordb.yaml /tmp/config-falkordb.yaml
+COPY src/skills/server/config-neo4j.yaml /tmp/config-neo4j.yaml
+COPY src/skills/server/config-falkordb.yaml /tmp/config-falkordb.yaml
 
 # Copy and configure entrypoint script for config selection
 # Note: Environment variables are provided by docker compose via env_file
 # The entrypoint only selects the appropriate config file (neo4j/falkordb)
-COPY src/server/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY src/skills/server/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Set default environment variables (can be overridden at runtime)
