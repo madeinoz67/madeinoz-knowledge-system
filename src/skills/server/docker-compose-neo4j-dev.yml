@@ -55,7 +55,7 @@ services:
 
   # Graphiti MCP Server (Development)
   graphiti-mcp:
-    image: madeinoz-knowledge-system:latest
+    image: ghcr.io/madeinoz67/madeinoz-knowledge-system:latest
     container_name: madeinoz-knowledge-graph-mcp-dev
     restart: unless-stopped
     networks:

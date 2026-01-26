@@ -81,7 +81,7 @@ DATABASE_TYPE=falkordb bun run server-cli start
 bun run server-cli status
 ```
 
-See [INSTALL.md](INSTALL.md) for complete installation instructions and [VERIFY.md](VERIFY.md) for verification checklist.
+See [INSTALL.md](INSTALL.md) for complete installation instructions, performance benchmarks, and [VERIFY.md](VERIFY.md) for verification checklist.
 
 ## Features
 

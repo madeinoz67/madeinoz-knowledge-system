@@ -44,7 +44,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: madeinoz-knowledge-system:latest
+    image: ghcr.io/madeinoz67/madeinoz-knowledge-system:latest
     container_name: madeinoz-knowledge-graph-mcp
     restart: unless-stopped
     networks:

@@ -65,12 +65,12 @@ Based on your detected backend:
 
 **FalkorDB Backend:**
 - Check ports: 3000 (UI), 8000 (MCP)
-- Run Section 6 (Lucene sanitization tests)
+- Skip query syntax testing (handled internally)
 - Skip Neo4j-specific checks in Section 2
 
 **Neo4j Backend:**
 - Check ports: 7474 (Browser), 7687 (Bolt), 8000 (MCP)
-- Skip Section 6 (Lucene tests - not applicable)
+- Query syntax is handled internally
 - Run Section 6-ALT (Neo4j Cypher tests)
 
 ---
@@ -241,7 +241,6 @@ ls -la src/hooks/
 ls -la src/hooks/lib/
 ```
 
-**Expected result:** Hook scripts and lib directory with frontmatter-parser.ts, knowledge-client.ts, lucene.ts, sync-state.ts
 
 ---
 
@@ -830,158 +829,7 @@ curl -s -X POST http://localhost:8000/mcp/ \
 
 ---
 
-## Section 6: Lucene Query Sanitization (FalkorDB Only)
-
-> **FOR AI AGENTS:** This section is ONLY for FalkorDB backend.
-> **Skip this section if using Neo4j backend** - go to Section 6-ALT instead.
-> This verifies that hyphenated group_ids work correctly with RediSearch queries.
-
-Verify that Lucene query sanitization handles special characters correctly.
-
-### 6.1 Hyphenated Group ID Capture
-
-- [ ] **Can capture knowledge with hyphenated group_id**
-
-**Verification commands:**
-```bash
-curl -s -X POST http://localhost:8000/mcp/ \
-    -H "Content-Type: application/json" \
-    -d '{
-        "jsonrpc":"2.0",
-        "id":5,
-        "method":"tools/call",
-        "params":{
-            "name":"add_memory",
-            "arguments":{
-                "name":"Lucene Sanitization Test",
-                "episode_body":"Testing Lucene query sanitization with hyphenated group_id",
-                "source":"text",
-                "source_description":"lucene test",
-                "group_id":"test-group-123"
-            }
-        }
-    }' | head -20
-```
-
-**Expected result:** JSON response with success indication, no RediSearch syntax errors
-
-**Success indicators:**
-- Response contains episode UUID
-- No "Syntax error" in response
-- No "Query syntax error" in server logs
-
----
-
-### 6.2 Search with Hyphenated Group ID
-
-- [ ] **Can search knowledge using hyphenated group_id**
-
-**Verification commands:**
-```bash
-curl -s -X POST http://localhost:8000/mcp/ \
-    -H "Content-Type: application/json" \
-    -d '{
-        "jsonrpc":"2.0",
-        "id":6,
-        "method":"tools/call",
-        "params":{
-            "name":"search_memory_nodes",
-            "arguments":{
-                "query":"lucene sanitization",
-                "max_nodes":5,
-                "group_id":"test-group-123"
-            }
-        }
-    }' | head -20
-```
-
-**Expected result:** JSON response with search results, no query syntax errors
-
-**Success indicators:**
-- Response contains nodes array
-- No "Syntax error" in response
-- No "Query syntax error" in server logs
-- Results include the test episode from 6.1
-
----
-
-### 6.3 Verify No RediSearch Syntax Errors
-
-- [ ] **Server logs show no RediSearch syntax errors**
-
-**Verification commands:**
-```bash
-# Check recent logs for syntax errors
-bun run src/skills/tools/logs.ts 2>&1 | grep -i "syntax error" | tail -10
-
-# Or check container logs directly
-podman logs madeinoz-knowledge-graph-mcp 2>&1 | grep -i "syntax error" | tail -10
-
-# For Docker
-docker logs madeinoz-knowledge-graph-mcp 2>&1 | grep -i "syntax error" | tail -10
-```
-
-**Expected result:** No output (no syntax errors)
-
----
-
-### 6.4 Multiple Hyphens in Group ID
-
-- [ ] **Can handle multiple consecutive hyphens in group_id**
-
-**Verification commands:**
-```bash
-curl -s -X POST http://localhost:8000/mcp/ \
-    -H "Content-Type: application/json" \
-    -d '{
-        "jsonrpc":"2.0",
-        "id":7,
-        "method":"tools/call",
-        "params":{
-            "name":"add_memory",
-            "arguments":{
-                "name":"Multiple Hyphen Test",
-                "episode_body":"Testing multiple hyphens in group_id",
-                "source":"text",
-                "source_description":"hyphen test",
-                "group_id":"test--multiple---hyphens"
-            }
-        }
-    }' | head -20
-```
-
-**Expected result:** JSON response with success indication, no errors
-
----
-
-### 6.5 Special Characters in Group ID
-
-- [ ] **Can handle various special characters in group_id**
-
-**Verification commands:**
-```bash
-curl -s -X POST http://localhost:8000/mcp/ \
-    -H "Content-Type: application/json" \
-    -d '{
-        "jsonrpc":"2.0",
-        "id":8,
-        "method":"tools/call",
-        "params":{
-            "name":"Special Character Test",
-            "episode_body":"Testing special characters in group_id",
-            "source":"text",
-            "source_description":"special char test",
-                "group_id":"test_group_123"
-            }
-        }
-    }' | head -20
-```
-
-**Expected result:** JSON response with success indication, no query syntax errors
-
----
-
-## Section 6-ALT: Neo4j Cypher Verification (Neo4j Only)
+## Section 6: Neo4j Cypher Verification (Neo4j Only)
 
 > **FOR AI AGENTS:** This section is ONLY for Neo4j backend.
 > **Skip this section if using FalkorDB backend** - you should have run Section 6 instead.
@@ -1090,7 +938,7 @@ curl -s -X POST http://localhost:8000/mcp/ \
 
 **Expected result:** JSON response with success indication, no errors
 
-**Note:** Neo4j handles these characters without the Lucene escaping required by FalkorDB's RediSearch.
+**Note:** Neo4j handles special characters natively in Cypher queries.
 
 ---
 
@@ -1163,7 +1011,6 @@ ls -la "$PAI_HOOKS/lib/"
 **Expected result:** sync-memory-to-knowledge.ts, sync-learning-realtime.ts, and lib/ directory with:
 - frontmatter-parser.ts
 - knowledge-client.ts
-- lucene.ts (Lucene query sanitization for hyphenated group_ids)
 - sync-state.ts
 
 ---
@@ -1434,7 +1281,7 @@ For a successful installation, you must have:
 - PAI skill installed with flat structure (Section 3)
 - Configuration complete with valid API key (Section 4)
 - End-to-end functionality working (Section 5)
-- Query handling verified (Section 6 for FalkorDB Lucene OR Section 6-ALT for Neo4j Cypher)
+- Query handling verified (Section 6 for Neo4j Cypher)
 - MCP configured in ~/.claude.json (Section 4.3)
 - No "beyond scope" gaps (Section 10)
 

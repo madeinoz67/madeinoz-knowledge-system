@@ -3,7 +3,6 @@
 #
 # FalkorDB advantages:
 #   - Redis-based (lighter resource footprint)
-#   - Built-in RediSearch for full-text search
 #   - Simple deployment (single container)
 #   - Web UI at http://localhost:3000
 
