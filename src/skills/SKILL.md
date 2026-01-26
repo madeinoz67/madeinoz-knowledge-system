@@ -27,6 +27,7 @@ Persistent personal knowledge system powered by Graphiti knowledge graph with Ne
 | **Capture Episode** | "remember this", "store this", "add to knowledge", "save this", "log this" | `workflows/CaptureEpisode.md` |
 | **Search Knowledge** | "search my knowledge", "what do I know about", "find in my knowledge base", "recall" | `workflows/SearchKnowledge.md` |
 | **Search Facts** | "what's the connection", "how are these related", "show relationships" | `workflows/SearchFacts.md` |
+| **Search By Date** | "what did I learn today", "knowledge from last week", "show January entries", "yesterday's knowledge" | `workflows/SearchByDate.md` |
 | **Get Recent Episodes** | "what did I learn", "recent additions", "latest knowledge" | `workflows/GetRecent.md` |
 | **Get Status** | "knowledge status", "graph health", "knowledge stats" | `workflows/GetStatus.md` |
 | **Clear Graph** | "clear knowledge", "reset graph", "delete all knowledge" | `workflows/ClearGraph.md` |
@@ -87,9 +88,20 @@ The skill is installed at `~/.claude/skills/Knowledge/` (or `$PAI_DIR/skills/Kno
    MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=sk-your-key-here
    ```
 
-## Knowledge CLI (Preferred Interface)
+## Interface Priority: CLI-First, MCP-Fallback
 
-The Knowledge CLI provides token-efficient, human-readable output. **Always use the Knowledge CLI instead of direct MCP tool calls** for better readability and reduced token consumption.
+**ALWAYS use this execution order:**
+
+1. **PRIMARY: Knowledge CLI** (via Bash) - Reliable, token-efficient, human-readable
+2. **FALLBACK: MCP Tools** - Only if CLI fails or for programmatic access
+
+**Why CLI-first?**
+- MCP tools may have session/connection issues in Claude Code
+- CLI provides 25-35% token savings with compact output
+- CLI has better error messages and troubleshooting
+- CLI works reliably via direct Bash execution
+
+### Knowledge CLI (Primary Interface)
 
 **Run commands from the skill directory:**
 
@@ -197,7 +209,9 @@ User: "Clear my knowledge graph and start fresh"
 → Rebuilds indices
 → User receives: "✓ Knowledge graph cleared. Ready for fresh knowledge capture."
 
-## MCP Integration
+## MCP Integration (Fallback Only)
+
+**⚠️ Use MCP tools only when CLI fails or for programmatic TypeScript access.**
 
 **MCP Server Endpoint:**
 
@@ -205,7 +219,7 @@ User: "Clear my knowledge graph and start fresh"
 http://localhost:8000/mcp/
 ```
 
-**Available MCP Tools:**
+**Available MCP Tools (Fallback):**
 
 | MCP Tool | Graphiti Concept | User-Friendly Action |
 |----------|------------------|----------------------|

@@ -58,6 +58,10 @@ export interface SearchNodesParams {
   group_ids?: string[];
   /** Filter by entity type names (e.g., ["Preference", "Procedure"]) */
   entity_types?: string[];
+  /** Return nodes created after this date (ISO 8601 or relative: "today", "7d", "1 week ago") */
+  since?: string;
+  /** Return nodes created before this date (ISO 8601 or relative) */
+  until?: string;
 }
 
 export interface SearchFactsParams {
@@ -69,6 +73,10 @@ export interface SearchFactsParams {
   entity?: string;
   /** Center the search on a specific entity UUID */
   center_node_uuid?: string;
+  /** Return facts created after this date (ISO 8601 or relative: "today", "7d", "1 week ago") */
+  since?: string;
+  /** Return facts created before this date (ISO 8601 or relative) */
+  until?: string;
 }
 
 export interface GetEpisodesParams {
@@ -465,6 +473,13 @@ export class MCPClient {
     if (params.entity_types) {
       serverParams.entity_types = params.entity_types;
     }
+    // Temporal filters (Madeinoz Patch)
+    if (params.since) {
+      serverParams.created_after = params.since;
+    }
+    if (params.until) {
+      serverParams.created_before = params.until;
+    }
 
     // Check cache first
     if (this.cache) {
@@ -504,6 +519,13 @@ export class MCPClient {
     }
     if (params.center_node_uuid) {
       serverParams.center_node_uuid = params.center_node_uuid;
+    }
+    // Temporal filters (Madeinoz Patch)
+    if (params.since) {
+      serverParams.created_after = params.since;
+    }
+    if (params.until) {
+      serverParams.created_before = params.until;
     }
 
     // Check cache first

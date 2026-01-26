@@ -65,9 +65,11 @@ Running the **SearchFacts** workflow from the **MadeinozKnowledgeSystem** skill.
 
 ---
 
-## Step 4: Execute Fact Search
+## Step 4: Execute Fact Search (CLI-First, MCP-Fallback)
 
-**Use the Knowledge CLI (preferred - 30%+ token savings):**
+### Primary: Knowledge CLI (via Bash)
+
+**ALWAYS try CLI first - it's more reliable and token-efficient (30%+ savings):**
 
 ```bash
 bun run src/skills/tools/knowledge-cli.ts search_facts "relationship query" 15
@@ -80,8 +82,14 @@ bun run src/skills/tools/knowledge-cli.ts search_facts "relationship query" 15
 **Options:**
 - `--raw` - Output raw JSON instead of compact format
 - `--metrics` - Display token metrics after operation
+- `--since <date>` - Filter to facts created after this date
+- `--until <date>` - Filter to facts created before this date
 
-**Alternative: Direct MCP Tool Call (for programmatic access):**
+**Date formats:** `today`, `yesterday`, `7d`, `1w`, `1m`, `2026-01-26`
+
+### Fallback: MCP Tool (Only if CLI fails)
+
+**⚠️ Only use MCP if CLI returns connection/execution errors.**
 
 ```typescript
 search_facts({
@@ -275,6 +283,21 @@ query: "what caused the decision to use Graphiti"
 ```typescript
 // Find component relationships
 query: "components of PAI skill structure"
+```
+
+**Temporal Searches (with date filters):**
+```bash
+# Facts from today
+bun run src/skills/tools/knowledge-cli.ts search_facts "decisions" --since today
+
+# Relationships from last 7 days
+bun run src/skills/tools/knowledge-cli.ts search_facts "architecture" --since 7d
+
+# Within a date range
+bun run src/skills/tools/knowledge-cli.ts search_facts "integration" --since 2026-01-01 --until 2026-01-15
+
+# Yesterday's relationships
+bun run src/skills/tools/knowledge-cli.ts search_facts "learning" --since yesterday --until today
 ```
 
 ---

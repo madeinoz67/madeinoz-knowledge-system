@@ -39,6 +39,8 @@ interface CLIFlags {
   metrics: boolean;
   metricsFile?: string;
   help: boolean;
+  since?: string;
+  until?: string;
 }
 
 /**
@@ -50,6 +52,8 @@ function parseFlags(args: string[]): { flags: CLIFlags; positionalArgs: string[]
     metrics: false,
     metricsFile: undefined,
     help: false,
+    since: undefined,
+    until: undefined,
   };
   const positionalArgs: string[] = [];
 
@@ -64,6 +68,10 @@ function parseFlags(args: string[]): { flags: CLIFlags; positionalArgs: string[]
       flags.metricsFile = args[++i];
     } else if (arg === '-h' || arg === '--help') {
       flags.help = true;
+    } else if (arg === '--since') {
+      flags.since = args[++i];
+    } else if (arg === '--until') {
+      flags.until = args[++i];
     } else if (!arg.startsWith('--')) {
       positionalArgs.push(arg);
     }
@@ -189,7 +197,7 @@ class MCPWrapper {
     if (args.length < 1) {
       return {
         success: false,
-        error: 'Usage: search_nodes <query> [limit]',
+        error: 'Usage: search_nodes <query> [limit] [--since <date>] [--until <date>]',
       };
     }
 
@@ -197,7 +205,12 @@ class MCPWrapper {
     const limit = args.length > 1 ? Number.parseInt(args[1], 10) : 5;
 
     const client = createMCPClient();
-    const result = await client.searchNodes({ query, limit });
+    const result = await client.searchNodes({
+      query,
+      limit,
+      since: this.flags.since,
+      until: this.flags.until,
+    });
 
     return { ...result, query };
   }
@@ -211,7 +224,7 @@ class MCPWrapper {
     if (args.length < 1) {
       return {
         success: false,
-        error: 'Usage: search_facts <query> [limit]',
+        error: 'Usage: search_facts <query> [limit] [--since <date>] [--until <date>]',
       };
     }
 
@@ -219,7 +232,12 @@ class MCPWrapper {
     const limit = args.length > 1 ? Number.parseInt(args[1], 10) : 5;
 
     const client = createMCPClient();
-    const result = await client.searchFacts({ query, limit });
+    const result = await client.searchFacts({
+      query,
+      max_facts: limit,
+      since: this.flags.since,
+      until: this.flags.until,
+    });
 
     return { ...result, query };
   }
@@ -308,7 +326,16 @@ class MCPWrapper {
     cli.dim('  --raw              Output raw JSON instead of compact format');
     cli.dim('  --metrics          Display token metrics after each operation');
     cli.dim('  --metrics-file <p> Write metrics to JSONL file');
+    cli.dim('  --since <date>     Filter results created after this date');
+    cli.dim('  --until <date>     Filter results created before this date');
     cli.dim('  -h, --help         Show this help message');
+    cli.blank();
+    cli.info('Date Formats (for --since/--until):');
+    cli.blank();
+    cli.dim('  ISO 8601:  2026-01-26, 2026-01-26T00:00:00Z');
+    cli.dim('  Relative:  today, yesterday, now');
+    cli.dim('  Duration:  7d, 7 days, 1w, 1 week, 1m, 1 month');
+    cli.dim('             (all relative dates look backward from now)');
     cli.blank();
     cli.info('Environment Variables:');
     cli.blank();
@@ -348,6 +375,23 @@ class MCPWrapper {
     cli.blank();
     cli.dim('  # Clear graph (destructive - requires --force)');
     cli.dim('  bun run src/skills/tools/knowledge-cli.ts clear_graph --force');
+    cli.blank();
+    cli.info('Temporal Search Examples:');
+    cli.blank();
+    cli.dim("  # Search nodes from today");
+    cli.dim('  bun run src/skills/tools/knowledge-cli.ts search_nodes "PAI" --since today');
+    cli.blank();
+    cli.dim("  # Search facts from last 7 days");
+    cli.dim('  bun run src/skills/tools/knowledge-cli.ts search_facts "decisions" --since 7d');
+    cli.blank();
+    cli.dim("  # Search within a date range");
+    cli.dim('  bun run src/skills/tools/knowledge-cli.ts search_nodes "project" --since 2026-01-01 --until 2026-01-15');
+    cli.blank();
+    cli.dim("  # Yesterday's knowledge only");
+    cli.dim('  bun run src/skills/tools/knowledge-cli.ts search_nodes "learning" --since yesterday --until today');
+    cli.blank();
+    cli.dim("  # Last month's architecture decisions");
+    cli.dim('  bun run src/skills/tools/knowledge-cli.ts search_facts "architecture" --since 1m');
     cli.blank();
   }
 

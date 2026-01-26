@@ -12,9 +12,11 @@ import argparse
 import asyncio
 import logging
 import os
+import re
 import sys
 import time
 from collections import defaultdict
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Optional
 
@@ -43,6 +45,67 @@ from models.response_types import (
 from services.factories import DatabaseDriverFactory, EmbedderFactory, LLMClientFactory
 from services.queue_service import QueueService
 from utils.formatting import format_fact_result
+
+# ============================================================================
+# Madeinoz Patch: Date Input Parsing for Temporal Search
+# ============================================================================
+def parse_date_input(date_str: str | None) -> datetime | None:
+    """
+    Parse ISO 8601 or relative date strings to datetime.
+
+    Supports:
+    - ISO 8601: "2026-01-26", "2026-01-26T00:00:00Z"
+    - Relative: "today", "yesterday"
+    - Duration: "7d", "7 days", "7 days ago", "1w", "1 week", "1m", "1 month"
+
+    Args:
+        date_str: Date string to parse (ISO or relative)
+
+    Returns:
+        datetime object in UTC, or None if input is None/empty
+
+    Raises:
+        ValueError: If date string cannot be parsed
+    """
+    if not date_str:
+        return None
+
+    # Try ISO format first
+    try:
+        # Handle ISO with or without Z suffix
+        normalized = date_str.replace('Z', '+00:00')
+        # Handle date-only format (add time)
+        if 'T' not in normalized and len(normalized) == 10:
+            normalized = f"{normalized}T00:00:00+00:00"
+        return datetime.fromisoformat(normalized)
+    except ValueError:
+        pass
+
+    # Relative date parsing
+    date_str_lower = date_str.lower().strip()
+    now = datetime.now(timezone.utc)
+
+    if date_str_lower == 'today':
+        return now.replace(hour=0, minute=0, second=0, microsecond=0)
+    if date_str_lower == 'yesterday':
+        return (now - timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    if date_str_lower == 'now':
+        return now
+
+    # Parse "Nd", "N days", "N days ago", "1w", "1 week", "1m", "1 month"
+    match = re.match(r'(\d+)\s*(d|days?|w|weeks?|m|months?)(\s+ago)?', date_str_lower)
+    if match:
+        num = int(match.group(1))
+        unit = match.group(2)[0]  # d, w, or m
+        if unit == 'd':
+            return now - timedelta(days=num)
+        elif unit == 'w':
+            return now - timedelta(weeks=num)
+        elif unit == 'm':
+            return now - timedelta(days=num * 30)  # Approximate month
+
+    raise ValueError(f"Cannot parse date: {date_str}")
+
 
 # ============================================================================
 # Madeinoz Patch: FalkorDB Lucene Sanitization
@@ -734,14 +797,18 @@ async def search_nodes(
     group_ids: list[str] | None = None,
     max_nodes: int = 10,
     entity_types: list[str] | None = None,
+    created_after: str | None = None,
+    created_before: str | None = None,
 ) -> NodeSearchResponse | ErrorResponse:
-    """Search for nodes in the graph memory.
+    """Search for nodes in the graph memory with optional temporal filtering.
 
     Args:
         query: The search query
         group_ids: Optional list of group IDs to filter results
         max_nodes: Maximum number of nodes to return (default: 10)
         entity_types: Optional list of entity type names to filter by
+        created_after: Return nodes created after this date (ISO 8601 or relative: "today", "7d", "1 week ago")
+        created_before: Return nodes created before this date (ISO 8601 or relative)
     """
     global graphiti_service
 
@@ -756,6 +823,11 @@ async def search_nodes(
             client, group_ids, config.graphiti.group_id
         )
 
+        # Madeinoz Patch: Parse temporal filters
+        after_date = parse_date_input(created_after)
+        before_date = parse_date_input(created_before)
+        has_temporal_filter = after_date is not None or before_date is not None
+
         # Create search filters
         search_filters = SearchFilters(
             node_labels=entity_types,
@@ -763,6 +835,9 @@ async def search_nodes(
 
         # Use the search_ method with node search config
         from graphiti_core.search.search_config_recipes import NODE_HYBRID_SEARCH_RRF
+
+        # If temporal filtering is needed, fetch more results to filter
+        fetch_limit = max_nodes * 3 if has_temporal_filter else max_nodes
 
         results = await client.search_(
             query=query,
@@ -772,7 +847,30 @@ async def search_nodes(
         )
 
         # Extract nodes from results
-        nodes = results.nodes[:max_nodes] if results.nodes else []
+        nodes = results.nodes if results.nodes else []
+
+        # Madeinoz Patch: Apply temporal filtering if specified
+        if has_temporal_filter and nodes:
+            filtered_nodes = []
+            for node in nodes:
+                if node.created_at is None:
+                    continue  # Skip nodes without creation date
+                node_date = node.created_at
+                # Make sure node_date is timezone-aware for comparison
+                if node_date.tzinfo is None:
+                    node_date = node_date.replace(tzinfo=timezone.utc)
+                # Apply after filter
+                if after_date and node_date < after_date:
+                    continue
+                # Apply before filter
+                if before_date and node_date > before_date:
+                    continue
+                filtered_nodes.append(node)
+            nodes = filtered_nodes
+            logger.debug(f'Madeinoz Patch: Temporal filter applied, {len(nodes)} nodes remaining')
+
+        # Apply limit after filtering
+        nodes = nodes[:max_nodes]
 
         if not nodes:
             return NodeSearchResponse(message='No relevant nodes found', nodes=[])
@@ -808,14 +906,18 @@ async def search_memory_facts(
     group_ids: list[str] | None = None,
     max_facts: int = 10,
     center_node_uuid: str | None = None,
+    created_after: str | None = None,
+    created_before: str | None = None,
 ) -> FactSearchResponse | ErrorResponse:
-    """Search the graph memory for relevant facts.
+    """Search the graph memory for relevant facts with optional temporal filtering.
 
     Args:
         query: The search query
         group_ids: Optional list of group IDs to filter results
         max_facts: Maximum number of facts to return (default: 10)
         center_node_uuid: Optional UUID of a node to center the search around
+        created_after: Return facts created after this date (ISO 8601 or relative: "today", "7d", "1 week ago")
+        created_before: Return facts created before this date (ISO 8601 or relative)
     """
     global graphiti_service
 
@@ -833,12 +935,45 @@ async def search_memory_facts(
             client, group_ids, config.graphiti.group_id
         )
 
+        # Madeinoz Patch: Parse temporal filters
+        after_date = parse_date_input(created_after)
+        before_date = parse_date_input(created_before)
+        has_temporal_filter = after_date is not None or before_date is not None
+
+        # If temporal filtering is needed, fetch more results to filter
+        fetch_limit = max_facts * 3 if has_temporal_filter else max_facts
+
         relevant_edges = await client.search(
             group_ids=effective_group_ids,
             query=query,
-            num_results=max_facts,
+            num_results=fetch_limit,
             center_node_uuid=center_node_uuid,
         )
+
+        if not relevant_edges:
+            return FactSearchResponse(message='No relevant facts found', facts=[])
+
+        # Madeinoz Patch: Apply temporal filtering if specified
+        if has_temporal_filter:
+            filtered_edges = []
+            for edge in relevant_edges:
+                if edge.created_at is None:
+                    continue  # Skip edges without creation date
+                edge_date = edge.created_at
+                # Make sure edge_date is timezone-aware for comparison
+                if edge_date.tzinfo is None:
+                    edge_date = edge_date.replace(tzinfo=timezone.utc)
+                # Apply after filter
+                if after_date and edge_date < after_date:
+                    continue
+                # Apply before filter
+                if before_date and edge_date > before_date:
+                    continue
+                filtered_edges.append(edge)
+            relevant_edges = filtered_edges[:max_facts]
+            logger.debug(f'Madeinoz Patch: Temporal filter applied, {len(relevant_edges)} facts remaining')
+        else:
+            relevant_edges = relevant_edges[:max_facts]
 
         if not relevant_edges:
             return FactSearchResponse(message='No relevant facts found', facts=[])
