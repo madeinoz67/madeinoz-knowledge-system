@@ -10,10 +10,6 @@ on:
     branches:
       - '**'
 
-env:
-  REGISTRY_GHCR: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-
 jobs:
   security:
     name: Security Scan
@@ -156,11 +152,6 @@ jobs:
     permissions:
       contents: write
       packages: write
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -192,42 +183,24 @@ jobs:
           git diff --staged --quiet || git commit -m "docs: update CHANGELOG.md for ${{ github.ref_name }} [skip ci]"
           git push origin HEAD:main
 
-      - name: Append Docker info to release notes
-        run: |
-          VERSION=${GITHUB_REF_NAME#v}
-          cat >> RELEASE_NOTES.md << EOF
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
 
-          ### Docker Images
+      - name: Install dependencies
+        run: bun install
 
-          **GitHub Container Registry:**
-          \`\`\`bash
-          docker pull ghcr.io/madeinoz67/madeinoz-knowledge-system:${VERSION}
-          docker pull ghcr.io/madeinoz67/madeinoz-knowledge-system:latest
-          \`\`\`
+      - name: Build
+        run: bun run build
 
-          ### Quick Start
-
-          \`\`\`bash
-          # Neo4j backend (default)
-          bun run server-cli start
-
-          # FalkorDB backend
-          DATABASE_TYPE=falkordb bun run server-cli start
-          \`\`\`
-
-          ### Documentation
-          - [Getting Started](https://madeinoz67.github.io/madeinoz-knowledge-system/getting-started/)
-          - [Configuration](https://madeinoz67.github.io/madeinoz-knowledge-system/reference/configuration/)
-          EOF
-
-      # Build and push Docker image
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY_GHCR }}
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -235,17 +208,12 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: |
-            ${{ env.REGISTRY_GHCR }}/${{ env.IMAGE_NAME }}
+          images: ghcr.io/madeinoz67/madeinoz-knowledge-system
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=raw,value=latest
-          labels: |
-            org.opencontainers.image.title=Madeinoz Knowledge System
-            org.opencontainers.image.description=Graphiti MCP with Ollama/OpenRouter support, Neo4j + FalkorDB backends
-            org.opencontainers.image.vendor=madeinoz67
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -259,28 +227,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # Build and deploy documentation
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
-
-      - name: Install MkDocs Material
-        run: pip install mkdocs-material
-
-      - name: Build documentation
-        run: mkdocs build --strict
-
-      - name: Upload pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: site
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-
-      # Create GitHub Release
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -289,15 +235,6 @@ jobs:
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Release summary
-        run: |
-          echo "## Release ${{ github.ref_name }} Complete" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Artifacts Published" >> $GITHUB_STEP_SUMMARY
-          echo "- GitHub Release: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Docker Image: ghcr.io/${{ github.repository }}:${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Documentation: https://madeinoz67.github.io/madeinoz-knowledge-system/" >> $GITHUB_STEP_SUMMARY
 
   update-unreleased:
     name: Update Unreleased Changes
