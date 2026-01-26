@@ -9,98 +9,6 @@ This page documents known issues with the Madeinoz Knowledge System, including t
 
 ---
 
-## Lucene Query Sanitization
-
-The knowledge system includes automatic query sanitization to handle special characters in search terms. This is particularly important for CTI/OSINT data with hyphenated identifiers.
-
-### The Problem
-
-FalkorDB uses RediSearch, which implements Lucene query syntax. In Lucene, certain characters have special meaning:
-
-| Character | Lucene Meaning |
-|-----------|----------------|
-| `-` (hyphen) | Negation operator (NOT) |
-| `"` (quotes) | Phrase query delimiters |
-| `*`, `?` | Wildcards for pattern matching |
-| `+` | Required term operator |
-| `&&`, `\|\|` | Boolean operators |
-
-!!! warning "Query Interpretation Issue"
-    When searching for hyphenated group_ids like `madeinoz-threat-intel`, Lucene interprets this as:
-
-    ```
-    madeinoz AND NOT threat AND NOT intel
-    ```
-
-    This causes query syntax errors because the negation operators are incomplete.
-
-### The Solution
-
-A centralized sanitization module automatically escapes special characters before queries reach FalkorDB.
-
-**Location:** `src/server/lib/lucene.ts`
-
-### Sanitization Functions
-
-| Function | Purpose | Example Input | Example Output |
-|----------|---------|---------------|----------------|
-| `luceneSanitize(value)` | Escape a value by wrapping in quotes and escaping special characters | `madeinoz-threat-intel` | `"madeinoz-threat-intel"` |
-| `sanitizeGroupId(groupId)` | Convenience function for sanitizing group_ids | `madeinoz-threat-intel` | `"madeinoz-threat-intel"` |
-| `sanitizeGroupIds(groupIds)` | Sanitize an array of group_ids | `["group-1", "group-2"]` | `["group-1", "group-2"]` |
-| `sanitizeSearchQuery(query)` | Escape special characters while preserving multi-word searches | `apt-28 threat` | `apt\-28 threat` |
-
-### Characters That Get Escaped
-
-The following Lucene special characters are automatically escaped:
-
-```
-+ - && || ! ( ) { } [ ] ^ " ~ * ? : \ /
-```
-
-### Root Cause Analysis
-
-=== "Unsanitized Query"
-
-    ```
-    Query: group_id:madeinoz-threat-intel
-    Lucene interprets: group_id:madeinoz AND NOT threat AND NOT intel
-    Result: Syntax error (incomplete negation)
-    ```
-
-=== "Sanitized Query"
-
-    ```
-    Query: group_id:"madeinoz-threat-intel"
-    Lucene interprets: group_id equals literal string "madeinoz-threat-intel"
-    Result: Successful search
-    ```
-
-### Impact on Users
-
-!!! success "Automatic Handling"
-    This sanitization happens automatically in all server operations and hooks. You don't need to manually escape your queries - the system handles it for you.
-
-If you're experiencing unexpected search behavior with hyphenated terms or special characters, the sanitization should already be handling it. If issues persist, please check:
-
-1. You're using the latest version of the knowledge system
-2. The `lucene.ts` module is present in `src/server/lib/`
-3. Your queries aren't double-escaping characters
-
-!!! tip "Recommendation: Use Neo4j Backend"
-    The Neo4j database backend does **not** have this Lucene query syntax issue. Neo4j uses Cypher queries which handle special characters natively without requiring sanitization. If you frequently work with hyphenated identifiers (CTI/OSINT data, kebab-case naming), consider using the Neo4j backend instead of FalkorDB.
-
-    To switch backends, update your configuration:
-    ```bash
-    MADEINOZ_KNOWLEDGE_BACKEND=neo4j
-    ```
-
-    See the [Configuration Reference](../reference/configuration.md) for details.
-
-!!! info "Upstream Tracking"
-    This sanitization is a local workaround for FalkorDB users. For upstream improvements to Graphiti's query handling, see the [Graphiti GitHub Issues](https://github.com/getzep/graphiti/issues) page. Relevant issues include query escaping, special character handling, and FalkorDB/RediSearch compatibility.
-
----
-
 ## Pydantic Validation Errors with OpenAI-Compatible APIs
 
 When using OpenAI-compatible API providers (OpenRouter, Together AI, Fireworks, etc.), users may encounter intermittent Pydantic validation errors during entity extraction and relationship mapping.
@@ -125,9 +33,7 @@ Graphiti uses structured output (JSON schema validation) to ensure LLM responses
 
 ### The Solution
 
-A patched factory module automatically selects the appropriate client based on the endpoint type.
-
-**Location:** `src/server/patches/factories.py`
+The Docker container includes a patched factory module applied at image build time that automatically selects the appropriate client based on the endpoint type.
 
 ### Client Selection Logic
 

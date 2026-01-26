@@ -148,7 +148,7 @@ Do you want to create a backup before clearing?
 **After explicit confirmation, use the Knowledge CLI:**
 
 ```bash
-bun run src/server/knowledge.ts clear_graph --force
+bun run src/skills/server/knowledge.ts clear_graph --force
 ```
 
 **Note:** The `--force` flag is required as a safety measure. Without it, the command will fail with a warning.

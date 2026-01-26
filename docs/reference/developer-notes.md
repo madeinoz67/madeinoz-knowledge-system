@@ -12,10 +12,9 @@ This project currently uses a custom Docker image (`madeinoz-knowledge-system:fi
 
 ### Patches Applied
 
-The custom image includes three critical patches that fix upstream issues:
+The custom Docker image includes three critical patches applied at image build time:
 
 #### 1. Async Iteration Bug Fix
-**File:** `src/server/patches/graphiti_mcp_server.patch`
 **Issue:** [Upstream GitHub Issue - async iteration on NoneType]
 **Fix:** Added None check before async for loop in `get_all_group_ids()`
 
@@ -31,7 +30,6 @@ else:
 ```
 
 #### 2. Ollama/Custom Endpoint Support
-**File:** `src/server/patches/factories.py`
 **Issue:** [Upstream GitHub Issue #1116](https://github.com/getzep/graphiti/issues/1116)
 **Fix:** Added explicit Ollama embedder client and OpenAI-compatible API support
 
@@ -41,14 +39,13 @@ This enables:
 - Custom embedding dimensions
 
 #### 3. Search All Groups Functionality
-**File:** `src/server/patches/graphiti_mcp_server.patch`
 **Issue:** Default behavior only searches specified group_ids, making cross-group discovery impossible
 **Fix:** When no `group_ids` are specified, search queries ALL groups in the knowledge graph
 
 This is essential for PAI pack usage where knowledge may be stored across multiple groups (e.g., `osint-profiles`, `main`, `research`).
 
 ### Configuration Selection
-**File:** `src/server/entrypoint.sh`
+**File:** `src/skills/server/entrypoint.sh` (development) or baked into image
 **Purpose:** Dynamically select the correct config file based on `DATABASE_TYPE` environment variable
 
 ```bash
@@ -73,17 +70,17 @@ Both config files are baked into the image at build time:
 docker build -t madeinoz-knowledge-system:fixed .
 ```
 
-The Dockerfile:
-1. Copies patches from `src/server/patches/`
+The Dockerfile applies patches during the image build process:
+1. Copies patch files from the patches directory
 2. Copies both config files
 3. Copies `entrypoint.sh` for runtime config selection
-4. Applies all patches during image build
+4. Applies all patches to the upstream source code during build
 
 ### Migration Path to Official Images
 
 **When upstream merges these fixes**, we will:
 
-1. Update `src/server/lib/container.ts` to use official images:
+1. Update `src/skills/server/lib/container.ts` to use official images:
 ```typescript
 static readonly IMAGES = {
   falkordb: {
@@ -98,7 +95,7 @@ static readonly IMAGES = {
 ```
 
 2. Remove custom image build from documentation
-3. Archive patches to `src/server/patches/archived/` for reference
+3. Archive patches to `src/skills/server/patches/archived/` for reference
 4. Update this document with migration completion date
 
 **Status:** Waiting for upstream to merge fixes. Track progress at:
@@ -246,7 +243,7 @@ When adding a new config variable:
 
 **Issue:** Podman requires explicit `--network-alias` for DNS service discovery
 **Impact:** MCP container couldn't resolve `bolt://neo4j:7687` or `redis://falkordb:6379`
-**Fixed in:** `src/server/server-cli.ts`
+**Fixed in:** `src/skills/server/server-cli.ts`
 
 **Solution:**
 ```typescript
@@ -265,7 +262,7 @@ Docker handles this automatically, but Podman requires explicit aliases.
 
 **Issue:** Read-only volume mounts conflicted with entrypoint.sh config selection
 **Impact:** MCP container crash-looped with "Read-only file system" error
-**Fixed in:** `src/server/server-cli.ts`
+**Fixed in:** `src/skills/server/server-cli.ts`
 
 **Before (broken):**
 ```typescript

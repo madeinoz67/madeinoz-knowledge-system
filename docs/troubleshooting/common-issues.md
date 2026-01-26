@@ -407,7 +407,7 @@ Should see a hook definition.
 The hook isn't installed. Install it:
 ```bash
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
-bun run src/server/install.ts
+bun run src/skills/server/install.ts
 ```
 
 **Manually trigger sync:**
@@ -594,7 +594,7 @@ The fix differentiates between:
 
 The parse API provides stricter schema enforcement, which prevents the LLM from returning JSON schema definitions instead of actual values.
 
-**Code reference:** `src/server/patches/factories.py` (Madeinoz Patch v3)
+**Note:** This fix is applied at Docker image build time as part of the container configuration.
 
 ### "Initialization not complete" Warning
 
@@ -657,22 +657,17 @@ Graphiti's FalkorDB driver has a `sanitize()` method that replaces special chara
 - [Graphiti #815](https://github.com/getzep/graphiti/issues/815) - FalkorDB query syntax errors
 - [Graphiti #1118](https://github.com/getzep/graphiti/pull/1118) - Fix forward slash handling
 
-**Our Local Workaround:**
+**Our Solution:**
 
-The Madeinoz Knowledge System implements client-side sanitization in `src/server/lib/lucene.ts`:
+The Madeinoz Knowledge System Docker container handles sanitization automatically at runtime:
 
-1. **For group_ids:** Hyphens are converted to underscores before sending to Graphiti
+1. **For group_ids:** Special characters are properly escaped in queries
    - `madeinoz-threat-intel` → `pai_threat_intel`
    - This avoids the Graphiti bug where group_ids aren't escaped
 
-2. **For search queries:** Special characters are escaped with backslashes
-   - `user@domain` → `user\@domain`
-   - `50%` → `50\%`
+2. **For search queries:** Special characters are handled by the container's query processor
 
-**Full list of escaped characters:**
-```
-+ - && || ! ( ) { } [ ] ^ " ~ * ? : \ / @ # $ % < > =
-```
+**Note:** The sanitization is built into the Docker container and applied automatically.
 
 **If you encounter syntax errors:**
 
@@ -687,7 +682,7 @@ The Madeinoz Knowledge System implements client-side sanitization in `src/server
 
 3. The sanitization is automatic for MCP tool calls, but if you're calling Graphiti directly, ensure you sanitize inputs.
 
-**Code reference:** `src/server/lib/lucene.ts:158-182` (sanitizeSearchQuery function)
+**Recommendation:** For the best experience with special characters, consider using the Neo4j backend instead of FalkorDB, as Neo4j handles special characters natively.
 
 ## Diagnostic Commands Summary
 

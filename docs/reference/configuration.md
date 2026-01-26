@@ -145,7 +145,7 @@ MADEINOZ_KNOWLEDGE_DATABASE_TYPE=neo4j
 ### Neo4j Configuration
 
 ```bash
-MADEINOZ_KNOWLEDGE_NEO4J_URI=bolt://madeinoz-knowledge-neo4j:7687
+MADEINOZ_KNOWLEDGE_NEO4J_URI=bolt://neo4j:7687
 MADEINOZ_KNOWLEDGE_NEO4J_USER=neo4j
 MADEINOZ_KNOWLEDGE_NEO4J_PASSWORD=madeinozknowledge
 MADEINOZ_KNOWLEDGE_NEO4J_DATABASE=neo4j
@@ -155,9 +155,9 @@ MADEINOZ_KNOWLEDGE_NEO4J_DATABASE=neo4j
 
 **For external Neo4j:**
 ```bash
-MADEINOZ_KNOWLEDGE_NEO4J_URI=bolt://your-neo4j-server:7687
-MADEINOZ_KNOWLEDGE_NEO4J_USER=your-username
-MADEINOZ_KNOWLEDGE_NEO4J_PASSWORD=your-password
+MADEINOZ_KNOWLEDGE_NEO4J_URI=bolt://neo4j:7687
+MADEINOZ_KNOWLEDGE_NEO4J_USER=neo4j
+MADEINOZ_KNOWLEDGE_NEO4J_PASSWORD=madeinozknowledge
 ```
 
 ### Changing Neo4j Password
@@ -208,8 +208,8 @@ The Neo4j Browser provides a web interface for database administration.
 
 5. **Restart the MCP server to apply the new password:**
    ```bash
-   bun run src/skills/tools/stop.ts
-   bun run src/skills/tools/start.ts
+   bun run server-cli stop
+   bun run server-cli start
    ```
 
 #### Method 2: Using Cypher Shell (Command Line)
@@ -454,7 +454,7 @@ MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL=mxbai-embed-large
 
 # Database - Neo4j for hyphenated identifiers
 MADEINOZ_KNOWLEDGE_DATABASE_TYPE=neo4j
-MADEINOZ_KNOWLEDGE_NEO4J_URI=bolt://madeinoz-knowledge-neo4j:7687
+MADEINOZ_KNOWLEDGE_NEO4J_URI=bolt://neo4j:7687
 
 # Multiple groups for CTI domains
 MADEINOZ_KNOWLEDGE_GROUP_ID=main
@@ -491,8 +491,8 @@ To update configuration after installation:
 
 2. **Restart the server:**
    ```bash
-   bun run src/skills/tools/stop.ts
-   bun run src/skills/tools/start.ts
+   bun run server-cli stop
+   bun run server-cli start
    ```
 
 3. **Verify changes:**

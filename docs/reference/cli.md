@@ -32,7 +32,7 @@ Launches the Graphiti MCP server with the configured database backend (Neo4j or 
 ### Start Services
 
 ```bash
-bun run src/skills/tools/start.ts
+bun run server-cli start
 ```
 
 Starts the containerized MCP server and database backend.
@@ -40,7 +40,7 @@ Starts the containerized MCP server and database backend.
 ### Stop Services
 
 ```bash
-bun run src/skills/tools/stop.ts
+bun run server-cli stop
 ```
 
 Stops and removes the running containers.
@@ -48,7 +48,7 @@ Stops and removes the running containers.
 ### Check Status
 
 ```bash
-bun run src/skills/tools/status.ts
+bun run server-cli status
 ```
 
 Displays current container status and server health.
@@ -62,7 +62,7 @@ Displays current container status and server health.
 ### View Logs
 
 ```bash
-bun run src/skills/tools/logs.ts
+bun run server-cli logs
 ```
 
 Streams logs from the running MCP server container.
@@ -70,10 +70,10 @@ Streams logs from the running MCP server container.
 **Usage:**
 ```bash
 # Follow logs in real-time
-bun run src/skills/tools/logs.ts
+bun run server-cli logs
 
 # View last N lines
-bun run src/skills/tools/logs.ts --lines 100
+bun run server-cli logs --lines 100
 ```
 
 ## Knowledge Operations
@@ -157,9 +157,13 @@ The `knowledge` CLI provides a token-efficient wrapper around MCP operations wit
 
 ### Syntax
 
+**Run from the project directory:**
+
 ```bash
-bun run src/server/knowledge.ts <command> [args...] [options]
+bun run src/skills/server/knowledge.ts <command> [args...] [options]
 ```
+
+**Note:** All CLI commands must be run from the project source directory (e.g., `/path/to/madeinoz-knowledge-system`), not from the installed pack location (`~/.claude/skills/Knowledge`).
 
 ### Commands
 
@@ -168,13 +172,13 @@ bun run src/server/knowledge.ts <command> [args...] [options]
 Add knowledge to the graph:
 
 ```bash
-bun run src/server/knowledge.ts add_episode "Episode title" "Episode body content"
+bun run src/skills/server/knowledge.ts add_episode "Episode title" "Episode body content"
 ```
 
 With optional source description:
 
 ```bash
-bun run src/server/knowledge.ts add_episode "CTI Research" "Analysis of threat actor" "osint-recon"
+bun run src/skills/server/knowledge.ts add_episode "CTI Research" "Analysis of threat actor" "osint-recon"
 ```
 
 **Arguments:**
@@ -187,13 +191,13 @@ bun run src/server/knowledge.ts add_episode "CTI Research" "Analysis of threat a
 Search for entities in the knowledge graph:
 
 ```bash
-bun run src/server/knowledge.ts search_nodes "container orchestration"
+bun run src/skills/server/knowledge.ts search_nodes "container orchestration"
 ```
 
 Limit results:
 
 ```bash
-bun run src/server/knowledge.ts search_nodes "container orchestration" 10
+bun run src/skills/server/knowledge.ts search_nodes "container orchestration" 10
 ```
 
 **Arguments:**
@@ -209,13 +213,13 @@ bun run src/server/knowledge.ts search_nodes "container orchestration" 10
 Find relationships between entities:
 
 ```bash
-bun run src/server/knowledge.ts search_facts "Podman"
+bun run src/skills/server/knowledge.ts search_facts "Podman"
 ```
 
 Limit facts returned:
 
 ```bash
-bun run src/server/knowledge.ts search_facts "Podman" 10
+bun run src/skills/server/knowledge.ts search_facts "Podman" 10
 ```
 
 **Arguments:**
@@ -231,13 +235,13 @@ bun run src/server/knowledge.ts search_facts "Podman" 10
 Retrieve recent episodes from the knowledge graph:
 
 ```bash
-bun run src/server/knowledge.ts get_episodes
+bun run src/skills/server/knowledge.ts get_episodes
 ```
 
 Limit number of episodes:
 
 ```bash
-bun run src/server/knowledge.ts get_episodes 10
+bun run src/skills/server/knowledge.ts get_episodes 10
 ```
 
 **Arguments:**
@@ -252,7 +256,7 @@ bun run src/server/knowledge.ts get_episodes 10
 Get knowledge graph status and health:
 
 ```bash
-bun run src/server/knowledge.ts get_status
+bun run src/skills/server/knowledge.ts get_status
 ```
 
 **Output includes:**
@@ -266,7 +270,7 @@ bun run src/server/knowledge.ts get_status
 Delete all knowledge from the graph (destructive operation):
 
 ```bash
-bun run src/server/knowledge.ts clear_graph --force
+bun run src/skills/server/knowledge.ts clear_graph --force
 ```
 
 **Safety:**
@@ -279,7 +283,7 @@ bun run src/server/knowledge.ts clear_graph --force
 Check MCP server health:
 
 ```bash
-bun run src/server/knowledge.ts health
+bun run src/skills/server/knowledge.ts health
 ```
 
 **Output:**
@@ -303,7 +307,7 @@ All commands support the following flags:
 **Add knowledge with metrics:**
 
 ```bash
-bun run src/server/knowledge.ts add_episode \
+bun run src/skills/server/knowledge.ts add_episode \
   "Test Episode" \
   "This is a test episode" \
   --metrics
@@ -312,20 +316,20 @@ bun run src/server/knowledge.ts add_episode \
 **Search with raw JSON output:**
 
 ```bash
-bun run src/server/knowledge.ts search_nodes "PAI" --raw
+bun run src/skills/server/knowledge.ts search_nodes "PAI" --raw
 ```
 
 **Search with metrics logging:**
 
 ```bash
-bun run src/server/knowledge.ts search_nodes "PAI" 10 \
+bun run src/skills/server/knowledge.ts search_nodes "PAI" 10 \
   --metrics-file ~/.madeinoz-knowledge/metrics.jsonl
 ```
 
 **Get status and track metrics:**
 
 ```bash
-bun run src/server/knowledge.ts get_status --metrics
+bun run src/skills/server/knowledge.ts get_status --metrics
 ```
 
 ### Environment Variables
@@ -357,7 +361,7 @@ export MADEINOZ_WRAPPER_TIMEOUT=100
 When `--metrics` flag is enabled or `MADEINOZ_WRAPPER_METRICS=true`, the CLI displays token usage statistics:
 
 ```bash
-bun run src/server/knowledge.ts search_nodes "AI models" --metrics
+bun run src/skills/server/knowledge.ts search_nodes "AI models" --metrics
 ```
 
 **Metrics output includes:**
@@ -474,14 +478,14 @@ podman ps -a
 # or: docker ps -a
 
 # Start services
-bun run src/skills/tools/start.ts
+bun run server-cli start
 ```
 
 ### "Health check failed"
 
 ```bash
 # Check logs
-bun run src/skills/tools/logs.ts
+bun run server-cli logs
 
 # Verify server is responding
 curl --max-time 5 http://localhost:8000/health
@@ -525,11 +529,11 @@ Complete example of all available configuration options.
 ## Related Commands
 
 ```bash
-# View all available skills
-ls -la ~/.claude/skills/Knowledge/src/skills/workflows/
+# View all available skills (from installed location)
+ls -la ~/.claude/skills/Knowledge/workflows/
 
 # Test LLM connectivity
-bun run src/server/install.ts
+bun run src/skills/server/install.ts
 
 # Export knowledge data
 # (Via MCP: get_episodes with limit=999999)

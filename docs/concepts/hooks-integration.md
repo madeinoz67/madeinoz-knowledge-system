@@ -386,7 +386,7 @@ The hooks automatically apply **conditional query sanitization** based on databa
 **FalkorDB (Lucene/RediSearch):**
 - Special characters are escaped: `+ - && || ! ( ) { } [ ] ^ " ~ * ? : \ /`
 - Critical for CTI/OSINT data with hyphenated identifiers (e.g., `apt-28`, `CVE-2024-1234`)
-- Applied via `sanitizeGroupId()` utility from `lucene.ts`
+- Applied automatically by the Docker container at runtime
 
 **Neo4j (Cypher):**
 - No escaping needed - native Cypher queries handle special characters naturally

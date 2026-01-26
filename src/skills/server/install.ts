@@ -419,14 +419,15 @@ class Installer {
     // In non-interactive mode without existing key, check environment
     if (isNonInteractive) {
       // Try to get from environment variables
+      // MADEINOZ_KNOWLEDGE_* prefixed variables take PRECEDENCE over unprefixed variables
       const envKey = keyName.includes('OpenAI')
-        ? process.env.OPENAI_API_KEY || process.env.MADEINOZ_KNOWLEDGE_OPENAI_API_KEY
+        ? process.env.MADEINOZ_KNOWLEDGE_OPENAI_API_KEY || process.env.OPENAI_API_KEY
         : keyName.includes('Anthropic')
-          ? process.env.ANTHROPIC_API_KEY || process.env.MADEINOZ_KNOWLEDGE_ANTHROPIC_API_KEY
+          ? process.env.MADEINOZ_KNOWLEDGE_ANTHROPIC_API_KEY || process.env.ANTHROPIC_API_KEY
           : keyName.includes('Google')
-            ? process.env.GOOGLE_API_KEY || process.env.MADEINOZ_KNOWLEDGE_GOOGLE_API_KEY
+            ? process.env.MADEINOZ_KNOWLEDGE_GOOGLE_API_KEY || process.env.GOOGLE_API_KEY
             : keyName.includes('Groq')
-              ? process.env.GROQ_API_KEY || process.env.MADEINOZ_KNOWLEDGE_GROQ_API_KEY
+              ? process.env.MADEINOZ_KNOWLEDGE_GROQ_API_KEY || process.env.GROQ_API_KEY
               : undefined;
 
       if (envKey) {

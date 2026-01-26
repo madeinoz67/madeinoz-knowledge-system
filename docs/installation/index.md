@@ -92,9 +92,9 @@ These providers use the same API format as OpenAI but with different base URLs:
 
 **Note:** The `mxbai-embed-large` model provides the best balance of quality (77%) and speed (156ms) among tested Ollama embedders. See `docs/OLLAMA-MODEL-GUIDE.md` for detailed comparisons.
 
-**Madeinoz Patch (Ollama + OpenAI-Compatible Support):**
+**Madeinoz Patches (Applied at Image Build Time):**
 
-This pack includes a patch (`src/server/patches/factories.py`) that enables support for:
+The custom Docker image includes patches that enable support for:
 - **Ollama** (local, no API key required)
 - **OpenAI-compatible providers** (OpenRouter, Together AI, Fireworks AI, DeepInfra)
 
@@ -284,8 +284,8 @@ To change providers after initial setup:
 
 2. **Edit the configuration:**
    ```bash
-   # Edit src/server/.env (or wherever your config is)
-   nano src/server/.env
+   # Edit ~/.claude/.env (or wherever your config is)
+   nano ~/.claude/.env
    ```
 
 3. **Update the relevant variables** (see examples above)
@@ -593,7 +593,7 @@ echo "Checking pack contents..."
 REQUIRED_FILES=(
     "README.md"
     "SKILL.md"
-    "src/server/server-cli.ts"
+    "src/skills/tools/server-cli.ts"
     "src/server/podman-compose-falkordb.yml"
     "src/server/podman-compose-neo4j.yml"
     "src/server/docker-compose-falkordb.yml"
@@ -708,7 +708,7 @@ fi
 ### Knowledge Not Being Captured
 
 **Solutions:**
-1. **Server not running:** Start with `bun run src/skills/tools/start.ts`
+1. **Server not running:** Start with `bun run server-cli start`
 2. **API quota exceeded:** Check OpenAI usage dashboard
 3. **Content too brief:** Add more context and detail
 
@@ -720,7 +720,7 @@ To completely remove the Knowledge skill:
 
 ```bash
 # 1. Stop and remove container
-bun run src/skills/tools/stop.ts
+bun run server-cli stop
 podman rm madeinoz-knowledge-graph-mcp
 
 # 2. Remove Knowledge skill
@@ -733,8 +733,8 @@ rm -rf ~/.claude/skills/Knowledge
 
 If you encounter issues not covered here:
 
-1. **Check logs:** `bun run src/skills/tools/logs.ts`
-2. **Check status:** `bun run src/skills/tools/status.ts`
+1. **Check logs:** `bun run server-cli logs`
+2. **Check status:** `bun run server-cli status`
 3. **Review documentation:**
    - `README.md` - Complete pack documentation
    - `../verification.md` - Verification checklist

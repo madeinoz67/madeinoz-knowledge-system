@@ -184,7 +184,7 @@ MCP Server: http://localhost:8000/sse
 This hook automatically syncs your learning captures from the PAI Memory System to your knowledge graph:
 
 ```bash
-bun run src/server/install.ts
+bun run src/skills/server/install.ts
 ```
 
 Follow the prompts to:
