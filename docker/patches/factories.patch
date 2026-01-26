@@ -538,9 +538,9 @@ class EmbedderFactory:
                 import os
                 logger.info('Creating Ollama embedder client')
 
-                # Read OLLAMA_BASE_URL directly from environment (set by entrypoint.sh)
+                # Read EMBEDDER_PROVIDER_URL directly from environment (set by container env)
                 # This avoids issues with YAML variable substitution timing
-                api_url = os.environ.get('OLLAMA_BASE_URL', 'http://host.docker.internal:11434/v1')
+                api_url = os.environ.get('EMBEDDER_PROVIDER_URL', 'http://host.docker.internal:11434')
 
                 logger.info(f'Ollama embedder URL: {api_url}')
 

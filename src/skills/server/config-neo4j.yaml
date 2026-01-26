@@ -52,11 +52,11 @@ embedder:
   providers:
     openai:
       api_key: ${OPENAI_API_KEY}
-      api_url: ${OLLAMA_BASE_URL:-${EMBEDDER_BASE_URL:-https://api.openai.com/v1}}  # Ollama embeddings or OpenAI default
+      api_url: ${EMBEDDER_PROVIDER_URL:-https://api.openai.com/v1}  # Custom embedder URL or OpenAI default
       organization_id: ${OPENAI_ORGANIZATION_ID:}
 
     ollama:
-      api_url: ${OLLAMA_BASE_URL:http://host.containers.internal:11434}
+      api_url: ${EMBEDDER_PROVIDER_URL:http://host.containers.internal:11434}
 
     azure_openai:
       api_key: ${AZURE_OPENAI_API_KEY}

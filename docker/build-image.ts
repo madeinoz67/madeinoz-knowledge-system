@@ -59,7 +59,7 @@ if (exitCode === 0) {
   cli.dim("  MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER=ollama");
   cli.dim("  MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL=mxbai-embed-large");
   cli.dim("  MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS=1024");
-  cli.dim("  MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL=http://YOUR_IP:11434/v1");
+  cli.dim("  MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER_URL=http://YOUR_IP:11434");
   cli.blank();
   cli.dim("  # Neo4j Configuration (UNPREFIXED, shared infrastructure)");
   cli.dim("  NEO4J_URI=bolt://neo4j:7687");

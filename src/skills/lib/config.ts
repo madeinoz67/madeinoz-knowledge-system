@@ -29,11 +29,11 @@ export interface KnowledgeConfig {
   EMBEDDER_PROVIDER: string;
   MODEL_NAME: string;
 
-  // Ollama/Custom Endpoint Configuration
-  OPENAI_BASE_URL?: string; // For Ollama: http://host.docker.internal:11434/v1
-  OLLAMA_BASE_URL?: string; // For Ollama embedder: http://host.docker.internal:11434
+  // Custom Endpoint Configuration
+  OPENAI_BASE_URL?: string; // For Ollama LLM: http://host.docker.internal:11434/v1
+  EMBEDDER_PROVIDER_URL?: string; // For custom embedder endpoint (Ollama, etc.)
   EMBEDDER_MODEL?: string; // For Ollama: nomic-embed-text
-  EMBEDDER_DIMENSIONS?: string; // For Ollama embedder: 1024
+  EMBEDDER_DIMENSIONS?: string; // For embedder: 1024 for mxbai, 1536 for OpenAI
 
   // Performance Configuration
   SEMAPHORE_LIMIT: string;
@@ -76,8 +76,8 @@ const DEFAULTS: Record<string, string> = {
   LLM_PROVIDER: 'ollama',
   EMBEDDER_PROVIDER: 'ollama',
   MODEL_NAME: 'llama3.2',
-  OPENAI_BASE_URL: 'http://host.docker.internal:11434/v1', // Ollama default (Docker)
-  OLLAMA_BASE_URL: 'http://host.containers.internal:11434', // Ollama embedder
+  OPENAI_BASE_URL: 'http://host.docker.internal:11434/v1', // Ollama LLM default (Docker)
+  EMBEDDER_PROVIDER_URL: 'http://host.containers.internal:11434', // Embedder endpoint (Ollama, etc.)
   EMBEDDER_MODEL: 'nomic-embed-text', // Ollama embedding model
   EMBEDDER_DIMENSIONS: '512', // nomic-embed-text dimensions
   SEMAPHORE_LIMIT: '10',
@@ -199,6 +199,7 @@ export class ConfigLoader {
 
   /**
    * Map MADEINOZ_KNOWLEDGE_* prefixed variables to standard names
+   * MADEINOZ_KNOWLEDGE_* variables take PRECEDENCE over unprefixed variables
    */
   private mapPrefixes(env: Record<string, string>): {
     mapped: Record<string, string>;
@@ -219,9 +220,9 @@ export class ConfigLoader {
       MADEINOZ_KNOWLEDGE_LLM_PROVIDER: 'LLM_PROVIDER',
       MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER: 'EMBEDDER_PROVIDER',
       MADEINOZ_KNOWLEDGE_MODEL_NAME: 'MODEL_NAME',
-      // Ollama/Custom Endpoint Configuration
+      // Custom Endpoint Configuration
       MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL: 'OPENAI_BASE_URL',
-      MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL: 'OLLAMA_BASE_URL',
+      MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER_URL: 'EMBEDDER_PROVIDER_URL',
       MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL: 'EMBEDDER_MODEL',
       MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS: 'EMBEDDER_DIMENSIONS',
       // Performance
@@ -238,19 +239,19 @@ export class ConfigLoader {
       MADEINOZ_KNOWLEDGE_NEO4J_URI: 'NEO4J_URI',
       MADEINOZ_KNOWLEDGE_NEO4J_USER: 'NEO4J_USER',
       MADEINOZ_KNOWLEDGE_NEO4J_PASSWORD: 'NEO4J_PASSWORD',
+      MADEINOZ_KNOWLEDGE_NEO4J_DATABASE: 'NEO4J_DATABASE',
     };
 
-    // Apply mappings
+    // Apply mappings - MADEINOZ_KNOWLEDGE_* takes PRECEDENCE over unprefixed variables
     for (const [paiVar, standardVar] of Object.entries(mappings)) {
       const paiValue = env[paiVar];
       if (paiValue) {
         // Store original for reference
         originals[paiVar] = paiValue;
 
-        // Only map if standard variable not already set
-        if (!mapped[standardVar]) {
-          mapped[standardVar] = paiValue;
-        }
+        // ALWAYS use MADEINOZ_KNOWLEDGE_* value, overriding any unprefixed variable
+        // This ensures prefixed vars take precedence as the primary configuration
+        mapped[standardVar] = paiValue;
       }
     }
 
@@ -296,9 +297,9 @@ export class ConfigLoader {
       EMBEDDER_PROVIDER: this.getEnvValue(mapped, 'EMBEDDER_PROVIDER', DEFAULTS.EMBEDDER_PROVIDER),
       MODEL_NAME: this.getEnvValue(mapped, 'MODEL_NAME', DEFAULTS.MODEL_NAME),
 
-      // Ollama/Custom Endpoint Configuration
+      // Custom Endpoint Configuration
       OPENAI_BASE_URL: this.getEnvValue(mapped, 'OPENAI_BASE_URL', ''),
-      OLLAMA_BASE_URL: this.getEnvValue(mapped, 'OLLAMA_BASE_URL', ''),
+      EMBEDDER_PROVIDER_URL: this.getEnvValue(mapped, 'EMBEDDER_PROVIDER_URL', ''),
       EMBEDDER_MODEL: this.getEnvValue(mapped, 'EMBEDDER_MODEL', ''),
       EMBEDDER_DIMENSIONS: this.getEnvValue(mapped, 'EMBEDDER_DIMENSIONS', ''),
 
@@ -411,7 +412,8 @@ export class ConfigLoader {
       FALKORDB_HOST: config.FALKORDB_HOST || config.FALKORDB_CONTAINER,
       FALKORDB_PORT: config.FALKORDB_PORT || '6379',
       FALKORDB_PASSWORD: config.FALKORDB_PASSWORD || '',
-      NEO4J_URI: config.NEO4J_URI || 'bolt://localhost:7687',
+      // For containers, use container hostname 'neo4j' not 'localhost'
+      NEO4J_URI: config.NEO4J_URI || 'bolt://neo4j:7687',
       NEO4J_USER: config.NEO4J_USER || 'neo4j',
       NEO4J_PASSWORD: config.NEO4J_PASSWORD || 'demodemo',
       SEMAPHORE_LIMIT: config.SEMAPHORE_LIMIT,
@@ -421,27 +423,31 @@ export class ConfigLoader {
       EMBEDDER_PROVIDER: config.EMBEDDER_PROVIDER,
       EMBEDDER_MODEL: config.EMBEDDER_MODEL || '',
       EMBEDDER_DIMENSIONS: config.EMBEDDER_DIMENSIONS || '',
-      OLLAMA_BASE_URL: config.OLLAMA_BASE_URL || '',
+      EMBEDDER_PROVIDER_URL: config.EMBEDDER_PROVIDER_URL || '',
       GROUP_ID: config.GROUP_ID,
     };
 
-    // Ollama/Custom endpoint configuration
-    // For Ollama: Use "openai" as provider with custom base URL
-    const isOllama = config.LLM_PROVIDER === 'ollama';
-    if (isOllama) {
-      // Ollama uses OpenAI-compatible API, so we tell Graphiti to use "openai" provider
-      // but with a custom base URL pointing to Ollama
+    // LLM provider configuration
+    // For Ollama LLM: Use "openai" as provider with custom base URL (OpenAI-compatible API)
+    const isOllamaLLM = config.LLM_PROVIDER === 'ollama';
+    if (isOllamaLLM) {
       env.LLM_PROVIDER = 'openai';
-      env.EMBEDDER_PROVIDER = 'openai';
-      env.OPENAI_API_KEY = 'ollama'; // Ollama doesn't need a real key
+      env.OPENAI_API_KEY = config.OPENAI_API_KEY || 'ollama'; // Ollama doesn't need a real key
       env.OPENAI_BASE_URL = config.OPENAI_BASE_URL || DEFAULTS.OPENAI_BASE_URL;
-      env.EMBEDDER_MODEL = config.EMBEDDER_MODEL || DEFAULTS.EMBEDDER_MODEL;
     } else if (config.OPENAI_BASE_URL) {
       // Custom OpenAI endpoint (e.g., Azure, local proxy)
       env.OPENAI_BASE_URL = config.OPENAI_BASE_URL;
     }
 
-    if (config.EMBEDDER_MODEL) {
+    // Embedder provider configuration (independent from LLM provider)
+    const isOllamaEmbedder = config.EMBEDDER_PROVIDER === 'ollama';
+    if (isOllamaEmbedder) {
+      // Ollama embedder uses native 'ollama' provider in Graphiti
+      env.EMBEDDER_PROVIDER = 'ollama';
+      env.EMBEDDER_PROVIDER_URL = config.EMBEDDER_PROVIDER_URL || DEFAULTS.EMBEDDER_PROVIDER_URL;
+      env.EMBEDDER_MODEL = config.EMBEDDER_MODEL || DEFAULTS.EMBEDDER_MODEL;
+      env.EMBEDDER_DIMENSIONS = config.EMBEDDER_DIMENSIONS || DEFAULTS.EMBEDDER_DIMENSIONS;
+    } else if (config.EMBEDDER_MODEL) {
       env.EMBEDDER_MODEL = config.EMBEDDER_MODEL;
     }
 

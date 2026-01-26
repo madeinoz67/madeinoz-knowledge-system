@@ -94,8 +94,8 @@ async function generateEnvFiles(
   if (containerEnv.EMBEDDER_MODEL) mcpLines.push(`EMBEDDER_MODEL=${containerEnv.EMBEDDER_MODEL}`);
   if (containerEnv.EMBEDDER_DIMENSIONS)
     mcpLines.push(`EMBEDDER_DIMENSIONS=${containerEnv.EMBEDDER_DIMENSIONS}`);
-  if (containerEnv.OLLAMA_BASE_URL)
-    mcpLines.push(`OLLAMA_BASE_URL=${containerEnv.OLLAMA_BASE_URL}`);
+  if (containerEnv.EMBEDDER_PROVIDER_URL)
+    mcpLines.push(`EMBEDDER_PROVIDER_URL=${containerEnv.EMBEDDER_PROVIDER_URL}`);
 
   mcpLines.push('');
   mcpLines.push('# Database Configuration');

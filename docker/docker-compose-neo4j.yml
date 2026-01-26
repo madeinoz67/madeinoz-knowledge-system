@@ -101,7 +101,7 @@ services:
       - EMBEDDER_MODEL=${MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL:-mxbai-embed-large}
       - OPENAI_API_KEY=${MADEINOZ_KNOWLEDGE_OPENAI_API_KEY}
       - OPENAI_BASE_URL=${MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL:-https://openrouter.ai/api/v1}
-      - OLLAMA_BASE_URL=${MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL:-http://host.containers.internal:11434}
+      - EMBEDDER_PROVIDER_URL=${MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER_URL:-http://host.containers.internal:11434}
     volumes:
       - ./config-neo4j.yaml:/app/mcp/config/config.yaml:ro
       # Madeinoz Patch: Search ALL groups by default when no group_ids specified

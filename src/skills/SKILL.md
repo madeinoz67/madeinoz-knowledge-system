@@ -1,12 +1,26 @@
 ---
 name: Knowledge
-version: 1.2.5
-description: Personal knowledge management system using Graphiti knowledge graph with FalkorDB. USE WHEN user says 'store this', 'remember this', 'add to knowledge', 'search my knowledge', 'what do I know about', 'find in my knowledge base', 'organize my information', 'install knowledge', 'setup knowledge system', 'configure knowledge graph', or requests knowledge capture, retrieval, synthesis, installation, or configuration of their personal knowledge graph system.
+version: 1.2.8
+description: Personal knowledge management using Graphiti knowledge graph with Neo4j/FalkorDB. USE WHEN 'store this', 'remember this', 'add to knowledge', 'search my knowledge', 'what do I know about', 'find in knowledge base', 'save to memory', 'graphiti', 'knowledge graph', 'entity extraction', 'relationship mapping', 'semantic search', 'episode', 'install knowledge', 'setup knowledge system', 'configure knowledge graph', knowledge capture, retrieval, synthesis.
+tools:
+  # MCP Wrapper CLI (76%+ token savings vs direct MCP calls)
+  - Bash(bun run */knowledge.ts add_episode *)
+  - Bash(bun run */knowledge.ts search_nodes *)
+  - Bash(bun run */knowledge.ts search_facts *)
+  - Bash(bun run */knowledge.ts get_episodes *)
+  - Bash(bun run */knowledge.ts get_status)
+  - Bash(bun run */knowledge.ts clear_graph *)
+  - Bash(bun run */knowledge.ts health)
+  # Server management
+  - Bash(bun run server-cli *)
+  # Codanna code intelligence (for codebase exploration)
+  - mcp__plugin_codanna-cc_codanna-cc__semantic_search_docs
+  - mcp__plugin_codanna-cc_codanna-cc__search_documents
 ---
 
 # Knowledge
 
-Persistent personal knowledge system powered by Graphiti knowledge graph with FalkorDB backend. Automatically extracts entities, relationships, and temporal context from conversations, documents, and ideas.
+Persistent personal knowledge system powered by Graphiti knowledge graph with Neo4j (default) or FalkorDB backend. Automatically extracts entities, relationships, and temporal context from conversations, documents, and ideas.
 
 ## Workflow Routing
 
@@ -185,7 +199,7 @@ http://localhost:8000/mcp/
 | MCP Tool | Graphiti Concept | User-Friendly Action |
 |----------|------------------|----------------------|
 | `add_memory` | Episode | "Store this knowledge" |
-| `search_memory_nodes` | Nodes/Entities | "Search my knowledge" |
+| `search_nodes` | Nodes/Entities | "Search my knowledge" |
 | `search_memory_facts` | Facts/Edges | "Find relationships" |
 | `get_episodes` | Episodes | "Show recent additions" |
 | `delete_episode` | Episode | "Remove this entry" |
@@ -197,10 +211,10 @@ http://localhost:8000/mcp/
 **Naming Convention (Hybrid Approach):**
 - **User-facing (Skills/Workflows):** Knowledge-friendly language ("store knowledge", "search my knowledge")
 - **Internal (TypeScript):** Graphiti-native methods (`addEpisode`, `searchNodes`, `searchFacts`)
-- **MCP Layer:** Actual tool names (`add_memory`, `search_memory_nodes`, `search_memory_facts`)
+- **MCP Layer:** Actual tool names (`add_memory`, `search_nodes`, `search_memory_facts`)
 
 **Response Caching:**
-Search operations (`search_memory_nodes`, `search_memory_facts`) are cached to improve performance:
+Search operations (`search_nodes`, `search_memory_facts`) are cached to improve performance:
 - **TTL:** 5 minutes (configurable via `cacheTtlMs`)
 - **Max entries:** 100 (configurable via `cacheMaxSize`)
 - **Scope:** Per-client instance (not shared across sessions)
@@ -213,11 +227,17 @@ To disable caching, initialize the client with `enableCache: false`.
 **Environment Variables** (set in PAI config: `$PAI_DIR/.env` or `~/.claude/.env`):
 
 ```bash
-# LLM Configuration
-MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=sk-your-key-here
-MADEINOZ_KNOWLEDGE_MODEL_NAME=gpt-4o-mini
+# LLM Configuration (OpenRouter recommended)
+MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=sk-or-v1-your-key-here
+MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL=https://openrouter.ai/api/v1
+MADEINOZ_KNOWLEDGE_MODEL_NAME=openai/gpt-4o-mini
 MADEINOZ_KNOWLEDGE_LLM_PROVIDER=openai
-MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER=openai
+
+# Embedder Configuration (Ollama recommended - free & fast)
+MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER=ollama
+MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER_URL=http://host.containers.internal:11434
+MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL=mxbai-embed-large
+MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS=1024
 
 # Concurrency (adjust based on API tier)
 MADEINOZ_KNOWLEDGE_SEMAPHORE_LIMIT=10
@@ -230,9 +250,17 @@ MADEINOZ_KNOWLEDGE_GRAPHITI_TELEMETRY_ENABLED=false
 ```
 
 **Model Recommendations:**
+
+*Via OpenRouter (Recommended):*
+- **openai/gpt-4o-mini** - Most reliable, $0.129/1K ops
+- **google/gemini-2.0-flash-001** - Best value, $0.125/1K ops
+- **openai/gpt-4o** - Fastest, $2.155/1K ops
+
+*Direct OpenAI:*
 - **gpt-4o-mini** - Fast, cost-effective for daily use
 - **gpt-4o** - Better for complex reasoning
-- **gpt-3.5-turbo** - Economy option, may miss some entities
+
+⚠️ **Known Failures:** Llama, Mistral, DeepSeek models fail Graphiti Pydantic validation
 
 ## Related Documentation
 
@@ -241,4 +269,4 @@ MADEINOZ_KNOWLEDGE_GRAPHITI_TELEMETRY_ENABLED=false
 - [Graphiti Documentation](https://help.getzep.com/graphiti)
 - [Podman Configuration](../README.md)
 
-**Last Updated:** 2025-01-03
+**Last Updated:** 2026-01-26

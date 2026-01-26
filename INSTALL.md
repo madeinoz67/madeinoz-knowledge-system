@@ -18,7 +18,7 @@ All configuration variables use the `MADEINOZ_KNOWLEDGE_` prefix to avoid confli
 | `MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL` | `EMBEDDER_MODEL` |
 | `MADEINOZ_KNOWLEDGE_OPENAI_API_KEY` | `OPENAI_API_KEY` |
 | `MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL` | `OPENAI_BASE_URL` |
-| `MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL` | `OLLAMA_BASE_URL` |
+| `MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER_URL` | `EMBEDDER_PROVIDER_URL` |
 | `MADEINOZ_KNOWLEDGE_ANTHROPIC_API_KEY` | `ANTHROPIC_API_KEY` |
 | `MADEINOZ_KNOWLEDGE_GOOGLE_API_KEY` | `GOOGLE_API_KEY` |
 | `MADEINOZ_KNOWLEDGE_GROQ_API_KEY` | `GROQ_API_KEY` |
@@ -62,7 +62,7 @@ To configure the Madeinoz Knowledge System:
    MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL=https://openrouter.ai/api/v1
    MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER=ollama
    MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL=mxbai-embed-large
-   MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL=http://host.containers.internal:11434
+   MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER_URL=http://host.containers.internal:11434
    ```
 
 4. **The entrypoint.sh script handles mapping automatically at container startup.** You do not need to set unprefixed variables.
@@ -73,7 +73,7 @@ This system includes three patches to the upstream Graphiti MCP server:
 
 #### Patch 1: entrypoint.sh - Variable Mapping
 
-**Location:** `src/server/entrypoint.sh`
+**Location:** `src/skills/server/entrypoint.sh`
 
 **Purpose:** Maps `MADEINOZ_KNOWLEDGE_*` prefixed environment variables to unprefixed container variables.
 
@@ -93,7 +93,7 @@ LLM_PROVIDER=openai
 
 #### Patch 2: graphiti_mcp_server.py - Search All Groups
 
-**Location:** `src/server/patches/graphiti_mcp_server.py`
+**Location:** `src/skills/server/patches/graphiti_mcp_server.py`
 
 **Purpose:** Enables searching across ALL groups when no `group_ids` are specified.
 
@@ -115,7 +115,7 @@ GRAPHITI_SEARCH_ALL_GROUPS=false  # Disable (original behavior)
 
 #### Patch 3: factories.py - Ollama and OpenAI-Compatible Support
 
-**Location:** `src/server/patches/factories.py`
+**Location:** `src/skills/server/patches/factories.py`
 
 **Purpose:** Enables support for:
 - **Ollama** (local, no API key required)
@@ -129,34 +129,34 @@ GRAPHITI_SEARCH_ALL_GROUPS=false  # Disable (original behavior)
 
 **Configuration:**
 ```bash
-# Ollama (local, free)
-MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL=http://host.containers.internal:11434
+# Ollama embedder (local, free)
+MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER_URL=http://host.containers.internal:11434
 
-# OpenRouter (recommended)
+# OpenRouter LLM (recommended)
 MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL=https://openrouter.ai/api/v1
 MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=sk-or-v1-your-key-here
 
-# Together AI
+# Together AI LLM
 MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL=https://api.together.xyz/v1
 MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=your-together-key-here
 ```
 
-### Ollama Configuration
+### Embedder Provider URL Configuration
 
-For local Ollama deployments, set the `MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL` variable:
+For custom embedder endpoints (like Ollama), set the `MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER_URL` variable:
 
 ```bash
 # Docker/Podman containers (default)
-MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL=http://host.containers.internal:11434
+MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER_URL=http://host.containers.internal:11434
 
 # Same machine (no container)
-MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL=http://localhost:11434
+MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER_URL=http://localhost:11434
 
 # Remote Ollama server
-MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL=http://10.0.0.150:11434
+MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER_URL=http://10.0.0.150:11434
 ```
 
-**Note:** The `OLLAMA_BASE_URL` variable is automatically mapped by entrypoint.sh when using the prefixed `MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL`.
+**Note:** The `EMBEDDER_PROVIDER_URL` variable is automatically mapped from the prefixed `MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER_URL`.
 
 ---
 
@@ -241,7 +241,7 @@ These providers use the same API format as OpenAI but with different base URLs:
 
 **Madeinoz Patch (Ollama + OpenAI-Compatible Support):**
 
-This pack includes a patch (`src/server/patches/factories.py`) that enables support for:
+This pack includes a patch (`src/skills/server/patches/factories.py`) that enables support for:
 - **Ollama** (local, no API key required)
 - **OpenAI-compatible providers** (OpenRouter, Together AI, Fireworks AI, DeepInfra)
 
@@ -424,8 +424,8 @@ To change providers after initial setup:
 
 2. **Edit the configuration:**
    ```bash
-   # Edit src/server/.env (or wherever your config is)
-   nano src/server/.env
+   # Edit src/skills/server/.env (or wherever your config is)
+   nano src/skills/server/.env
    ```
 
 3. **Update the relevant variables** (see examples above)
@@ -733,11 +733,11 @@ echo "Checking pack contents..."
 REQUIRED_FILES=(
     "README.md"
     "SKILL.md"
-    "src/server/server-cli.ts"
-    "src/server/podman-compose-falkordb.yml"
-    "src/server/podman-compose-neo4j.yml"
-    "src/server/docker-compose-falkordb.yml"
-    "src/server/docker-compose-neo4j.yml"
+    "src/skills/server/server-cli.ts"
+    "src/skills/server/podman-compose-falkordb.yml"
+    "src/skills/server/podman-compose-neo4j.yml"
+    "src/skills/server/docker-compose-falkordb.yml"
+    "src/skills/server/docker-compose-neo4j.yml"
     "config/.env.example"
     "src/skills/workflows/CaptureEpisode.md"
     "src/skills/workflows/SearchKnowledge.md"
@@ -1222,10 +1222,10 @@ If you prefer Docker Compose, use the appropriate compose file for your backend:
 set -a; source ~/.claude/.env; set +a
 
 # For Neo4j backend (default - includes search-all-groups patch)
-docker compose -f src/server/docker-compose-neo4j.yml up -d
+docker compose -f src/skills/server/docker-compose-neo4j.yml up -d
 
 # For FalkorDB backend (alternative)
-docker compose -f src/server/docker-compose-falkordb.yml up -d
+docker compose -f src/skills/server/docker-compose-falkordb.yml up -d
 
 # Check status
 bun run src/skills/tools/status.ts
@@ -1251,7 +1251,7 @@ The patch:
 - Dynamically queries all available group_ids at search time
 - Uses a 30-second cache to balance performance and freshness
 - Ensures new groups are searchable within 30 seconds of creation
-- Located at: `src/server/patches/graphiti_mcp_server.py`
+- Located at: `src/skills/server/patches/graphiti_mcp_server.py`
 
 **Verify patch status:**
 ```bash
@@ -1366,7 +1366,7 @@ echo "  Pack:  $PACK_INSTALL_DIR"
 echo "  Skill: $PAI_SKILLS_DIR/Knowledge"
 echo ""
 echo "Installed files:"
-echo "  ├── src/server/    (docker-compose, patches, CLI)"
+echo "  ├── src/skills/server/    (docker-compose, patches, CLI)"
 echo "  ├── src/skills/    (workflows, tools)"
 echo "  ├── src/hooks/     (memory sync hooks)"
 echo "  └── config/        (.env.example)"
@@ -1783,7 +1783,7 @@ else
 
     # Create a test script that calls the MCP server with a hyphenated group_id
     cat > /tmp/test_lucene_sanitization.ts << 'EOF'
-import { sanitizeGroupId } from './src/server/lib/lucene';
+import { sanitizeGroupId } from './src/skills/server/lib/lucene';
 
 // Test cases with various hyphenated patterns
 const testCases = [
@@ -1817,7 +1817,7 @@ EOF
         echo "  Hyphenated group_ids will be properly escaped in queries"
     else
         echo "⚠️  Lucene sanitization test failed"
-        echo "  Check that src/server/lib/lucene.ts exists and exports sanitizeGroupId"
+        echo "  Check that src/skills/server/lib/lucene.ts exists and exports sanitizeGroupId"
     fi
 
     # Clean up test file
@@ -1913,18 +1913,24 @@ echo "🔗 Installing Memory Sync Hook"
 echo "================================"
 echo ""
 
-# Determine PAI directory and installed pack location
+# Determine PAI directory and pack location
 PAI_DIR="${PAI_DIR:-$HOME/.claude}"
 PACK_INSTALL_DIR="$PAI_DIR/Packs/madeinoz-knowledge-system"
+PACK_SOURCE_DIR="$(pwd)"
 
-# Check if pack is installed (Step 4 must be completed first)
-if [[ ! -d "$PACK_INSTALL_DIR" ]]; then
-    echo "❌ Pack not installed at: $PACK_INSTALL_DIR"
-    echo "   Run Step 4 first to install the full pack."
+# Try installed pack first, fall back to source directory
+if [[ -d "$PACK_INSTALL_DIR" ]]; then
+    echo "Using installed pack: $PACK_INSTALL_DIR"
+    HOOK_SOURCE_DIR="$PACK_INSTALL_DIR/src/hooks"
+elif [[ -d "$PACK_SOURCE_DIR/src/hooks" ]]; then
+    echo "Using source directory: $PACK_SOURCE_DIR"
+    HOOK_SOURCE_DIR="$PACK_SOURCE_DIR/src/hooks"
+else
+    echo "❌ Pack not found at: $PACK_INSTALL_DIR"
+    echo "❌ Source hooks not found at: $PACK_SOURCE_DIR/src/hooks"
+    echo "   Ensure you're in the madeinoz-knowledge-system repository"
     exit 1
 fi
-
-echo "Using installed pack: $PACK_INSTALL_DIR"
 
 # Verify memory system directory exists
 MEMORY_DIR="$PAI_DIR/MEMORY"
@@ -1941,10 +1947,10 @@ mkdir -p "$PAI_HOOKS_DIR/lib"
 
 echo "Installing hook files to: $PAI_HOOKS_DIR"
 
-# Copy hook implementation files FROM INSTALLED PACK
-cp "$PACK_INSTALL_DIR/src/hooks/sync-memory-to-knowledge.ts" "$PAI_HOOKS_DIR/"
-cp "$PACK_INSTALL_DIR/src/hooks/sync-learning-realtime.ts" "$PAI_HOOKS_DIR/"
-cp -r "$PACK_INSTALL_DIR/src/hooks/lib/"* "$PAI_HOOKS_DIR/lib/"
+# Copy hook implementation files FROM SOURCE
+cp "$HOOK_SOURCE_DIR/sync-memory-to-knowledge.ts" "$PAI_HOOKS_DIR/"
+cp "$HOOK_SOURCE_DIR/sync-learning-realtime.ts" "$PAI_HOOKS_DIR/"
+cp -r "$HOOK_SOURCE_DIR/lib/"* "$PAI_HOOKS_DIR/lib/"
 
 echo "✓ Hook files installed"
 
@@ -1958,8 +1964,8 @@ SETTINGS_FILE="$HOME/.claude/settings.json"
 echo ""
 echo "Registering hooks in: $SETTINGS_FILE"
 
-# Use bun/node to merge hook configuration
-bun << 'SCRIPT_EOF'
+# Use node to merge hook configuration (bun heredoc doesn't work properly)
+node << 'SCRIPT_EOF'
 const fs = require('fs');
 const path = require('path');
 
@@ -2240,7 +2246,7 @@ grep SEMAPHORE_LIMIT "${PAI_DIR:-$HOME/.claude}/.env"
 **Diagnosis:**
 ```bash
 # Check if lucene.ts exists and exports sanitizeGroupId
-cat src/server/lib/lucene.ts | grep -A 5 "sanitizeGroupId"
+cat src/skills/server/lib/lucene.ts | grep -A 5 "sanitizeGroupId"
 ```
 
 **Solutions:**
