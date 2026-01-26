@@ -6,7 +6,7 @@
  * mapped to unprefixed container variables.
  */
 
-import { describe, it, expect, beforeEach } from 'bun:test';
+import { describe, it, expect } from 'bun:test';
 
 /**
  * Simulates the environment variable generation from start.sh
@@ -25,7 +25,9 @@ function generateContainerEnv(sourceEnv: Record<string, string>): string {
   // OpenAI/OpenRouter API Configuration
   lines.push('# OpenAI/OpenRouter API Configuration');
   lines.push(`OPENAI_API_KEY=${sourceEnv.MADEINOZ_KNOWLEDGE_OPENAI_API_KEY || ''}`);
-  lines.push(`OPENAI_BASE_URL=${sourceEnv.MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL || 'https://openrouter.ai/api/v1'}`);
+  lines.push(
+    `OPENAI_BASE_URL=${sourceEnv.MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL || 'https://openrouter.ai/api/v1'}`
+  );
   lines.push(`OPENAI_ORGANIZATION_ID=${sourceEnv.MADEINOZ_KNOWLEDGE_OPENAI_ORGANIZATION_ID || ''}`);
   lines.push('');
 
@@ -52,28 +54,40 @@ function generateContainerEnv(sourceEnv: Record<string, string>): string {
   lines.push('# Azure OpenAI Configuration');
   lines.push(`AZURE_OPENAI_API_KEY=${sourceEnv.MADEINOZ_KNOWLEDGE_AZURE_OPENAI_API_KEY || ''}`);
   lines.push(`AZURE_OPENAI_ENDPOINT=${sourceEnv.MADEINOZ_KNOWLEDGE_AZURE_OPENAI_ENDPOINT || ''}`);
-  lines.push(`AZURE_OPENAI_API_VERSION=${sourceEnv.MADEINOZ_KNOWLEDGE_AZURE_OPENAI_API_VERSION || ''}`);
-  lines.push(`AZURE_OPENAI_DEPLOYMENT=${sourceEnv.MADEINOZ_KNOWLEDGE_AZURE_OPENAI_DEPLOYMENT || ''}`);
+  lines.push(
+    `AZURE_OPENAI_API_VERSION=${sourceEnv.MADEINOZ_KNOWLEDGE_AZURE_OPENAI_API_VERSION || ''}`
+  );
+  lines.push(
+    `AZURE_OPENAI_DEPLOYMENT=${sourceEnv.MADEINOZ_KNOWLEDGE_AZURE_OPENAI_DEPLOYMENT || ''}`
+  );
   lines.push(`USE_AZURE_AD=${sourceEnv.MADEINOZ_KNOWLEDGE_USE_AZURE_AD || ''}`);
   lines.push('');
 
   // Embedder Configuration
   lines.push('# Embedder Configuration');
   lines.push(`EMBEDDER_PROVIDER=${sourceEnv.MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER || 'ollama'}`);
-  lines.push(`EMBEDDER_MODEL=${sourceEnv.MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL || 'mxbai-embed-large'}`);
+  lines.push(
+    `EMBEDDER_MODEL=${sourceEnv.MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL || 'mxbai-embed-large'}`
+  );
   lines.push(`EMBEDDER_DIMENSIONS=${sourceEnv.MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS || '1024'}`);
   lines.push(`EMBEDDER_BASE_URL=${sourceEnv.MADEINOZ_KNOWLEDGE_EMBEDDER_BASE_URL || ''}`);
   lines.push('');
 
   // Ollama Configuration
   lines.push('# Ollama Configuration');
-  lines.push(`OLLAMA_BASE_URL=${sourceEnv.MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL || 'http://host.containers.internal:11434'}`);
+  lines.push(
+    `OLLAMA_BASE_URL=${sourceEnv.MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL || 'http://host.containers.internal:11434'}`
+  );
   lines.push('');
 
   // Azure OpenAI Embeddings Configuration
   lines.push('# Azure OpenAI Embeddings Configuration');
-  lines.push(`AZURE_OPENAI_EMBEDDINGS_ENDPOINT=${sourceEnv.MADEINOZ_KNOWLEDGE_AZURE_OPENAI_EMBEDDINGS_ENDPOINT || ''}`);
-  lines.push(`AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT=${sourceEnv.MADEINOZ_KNOWLEDGE_AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT || ''}`);
+  lines.push(
+    `AZURE_OPENAI_EMBEDDINGS_ENDPOINT=${sourceEnv.MADEINOZ_KNOWLEDGE_AZURE_OPENAI_EMBEDDINGS_ENDPOINT || ''}`
+  );
+  lines.push(
+    `AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT=${sourceEnv.MADEINOZ_KNOWLEDGE_AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT || ''}`
+  );
   lines.push('');
 
   // Voyage AI Configuration
@@ -88,7 +102,9 @@ function generateContainerEnv(sourceEnv: Record<string, string>): string {
   lines.push(`EPISODE_ID_PREFIX=${sourceEnv.MADEINOZ_KNOWLEDGE_EPISODE_ID_PREFIX || ''}`);
   lines.push(`USER_ID=${sourceEnv.MADEINOZ_KNOWLEDGE_USER_ID || ''}`);
   lines.push(`SEMAPHORE_LIMIT=${sourceEnv.MADEINOZ_KNOWLEDGE_SEMAPHORE_LIMIT || '10'}`);
-  lines.push(`GRAPHITI_TELEMETRY_ENABLED=${sourceEnv.MADEINOZ_KNOWLEDGE_GRAPHITI_TELEMETRY_ENABLED || 'false'}`);
+  lines.push(
+    `GRAPHITI_TELEMETRY_ENABLED=${sourceEnv.MADEINOZ_KNOWLEDGE_GRAPHITI_TELEMETRY_ENABLED || 'false'}`
+  );
   lines.push(`GRAPHITI_SEARCH_ALL_GROUPS=${sourceEnv.GRAPHITI_SEARCH_ALL_GROUPS || 'false'}`);
   lines.push(`DATABASE_TYPE=${sourceEnv.MADEINOZ_KNOWLEDGE_DATABASE_TYPE || 'neo4j'}`);
   lines.push('');

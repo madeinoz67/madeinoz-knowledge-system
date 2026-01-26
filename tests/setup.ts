@@ -315,9 +315,7 @@ export function createMockConfigLoader() {
           env.MADEINOZ_KNOWLEDGE_GRAPHITI_TELEMETRY_ENABLED ||
           'false',
         GRAPHITI_SEARCH_ALL_GROUPS:
-          env.GRAPHITI_SEARCH_ALL_GROUPS ||
-          env.MADEINOZ_KNOWLEDGE_SEARCH_ALL_GROUPS ||
-          'false',
+          env.GRAPHITI_SEARCH_ALL_GROUPS || env.MADEINOZ_KNOWLEDGE_SEARCH_ALL_GROUPS || 'false',
         PAI_PREFIXES: Object.fromEntries(
           Object.keys(env)
             .filter((k) => k.startsWith('MADEINOZ_KNOWLEDGE_'))

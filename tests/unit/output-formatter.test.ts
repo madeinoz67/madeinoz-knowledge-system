@@ -15,7 +15,7 @@ import {
   formatDelete,
   formatClearGraph,
   formatOutput,
-} from '../../src/skills/server/lib/output-formatter';
+} from '../../src/skills/lib/output-formatter';
 
 describe('output-formatter', () => {
   describe('utility functions', () => {

@@ -561,6 +561,12 @@ export const cli = {
   blank: CLIOutput.blank,
   separator: CLIOutput.separator,
   clear: CLIOutput.clear,
+  url: CLIOutput.url,
+  kv: CLIOutput.kv,
+  list: CLIOutput.list,
+  table: CLIOutput.table,
+  hint: CLIOutput.hint,
+  hints: CLIOutput.hints,
 };
 
 export const fmt = {

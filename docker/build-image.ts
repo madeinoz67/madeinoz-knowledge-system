@@ -15,7 +15,7 @@
  *   bun run build-image.ts
  */
 
-import { cli } from "../src/skills/server/lib/cli.js";
+import { cli } from "../src/skills/lib/cli.js";
 
 cli.blank();
 cli.header("Building Custom Docker Image");

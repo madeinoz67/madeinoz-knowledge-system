@@ -5,13 +5,9 @@
  * @module src/skills/tools/server-cli.ts
  */
 import { join } from 'node:path';
-import {
-  createComposeManager,
-  ComposeManager,
-  type DatabaseBackend,
-} from '../server/lib/container.js';
-import { createConfigLoader, loadConfig, type KnowledgeConfig } from '../server/lib/config.js';
-import { cli } from '../server/lib/cli.js';
+import { createComposeManager, ComposeManager, type DatabaseBackend } from '../lib/container.js';
+import { createConfigLoader, loadConfig, type KnowledgeConfig } from '../lib/config.js';
+import { cli } from '../lib/cli.js';
 
 const serverDir = join(import.meta.dir, '../server');
 
@@ -28,7 +24,7 @@ const flags = {
   tail: (() => {
     const tailIdx = args.indexOf('--tail');
     if (tailIdx !== -1 && args[tailIdx + 1]) {
-      return parseInt(args[tailIdx + 1], 10);
+      return Number.parseInt(args[tailIdx + 1], 10);
     }
     return 100;
   })(),
@@ -84,7 +80,8 @@ async function generateEnvFiles(
 
   // Add API keys (only if set)
   if (containerEnv.OPENAI_API_KEY) mcpLines.push(`OPENAI_API_KEY=${containerEnv.OPENAI_API_KEY}`);
-  if (containerEnv.OPENAI_BASE_URL) mcpLines.push(`OPENAI_BASE_URL=${containerEnv.OPENAI_BASE_URL}`);
+  if (containerEnv.OPENAI_BASE_URL)
+    mcpLines.push(`OPENAI_BASE_URL=${containerEnv.OPENAI_BASE_URL}`);
   if (containerEnv.ANTHROPIC_API_KEY)
     mcpLines.push(`ANTHROPIC_API_KEY=${containerEnv.ANTHROPIC_API_KEY}`);
   if (containerEnv.GOOGLE_API_KEY) mcpLines.push(`GOOGLE_API_KEY=${containerEnv.GOOGLE_API_KEY}`);
@@ -97,7 +94,8 @@ async function generateEnvFiles(
   if (containerEnv.EMBEDDER_MODEL) mcpLines.push(`EMBEDDER_MODEL=${containerEnv.EMBEDDER_MODEL}`);
   if (containerEnv.EMBEDDER_DIMENSIONS)
     mcpLines.push(`EMBEDDER_DIMENSIONS=${containerEnv.EMBEDDER_DIMENSIONS}`);
-  if (containerEnv.OLLAMA_BASE_URL) mcpLines.push(`OLLAMA_BASE_URL=${containerEnv.OLLAMA_BASE_URL}`);
+  if (containerEnv.OLLAMA_BASE_URL)
+    mcpLines.push(`OLLAMA_BASE_URL=${containerEnv.OLLAMA_BASE_URL}`);
 
   mcpLines.push('');
   mcpLines.push('# Database Configuration');
@@ -340,7 +338,7 @@ async function status(): Promise<void> {
 
   // Determine ports based on database type and mode
   const mcpPort = flags.dev ? 8001 : 8000;
-  const dbPort = databaseType === 'neo4j' ? (flags.dev ? 7475 : 7474) : (flags.dev ? 3001 : 3000);
+  const dbPort = databaseType === 'neo4j' ? (flags.dev ? 7475 : 7474) : flags.dev ? 3001 : 3000;
   const dbName = databaseType === 'neo4j' ? 'Neo4j Browser' : 'FalkorDB UI';
 
   // Test health endpoint

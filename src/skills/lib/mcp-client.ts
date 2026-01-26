@@ -506,10 +506,7 @@ export class MCPClient {
 
     // Check cache first
     if (this.cache) {
-      const cacheKey = this.getCacheKey(
-        MCP_TOOLS.SEARCH_FACTS,
-        serverParams
-      );
+      const cacheKey = this.getCacheKey(MCP_TOOLS.SEARCH_FACTS, serverParams);
       const cached = this.cache.get(cacheKey);
       if (cached) {
         return { success: true, data: cached as unknown[] };
