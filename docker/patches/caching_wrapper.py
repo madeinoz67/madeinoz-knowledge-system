@@ -61,13 +61,14 @@ def wrap_openai_client_for_caching(client: Any, model: str) -> Any:
         is_openrouter = False
         if hasattr(underlying_client, 'base_url'):
             base_url = str(underlying_client.base_url)
-            # Use urlparse for proper hostname validation (satisfies CodeQL)
+            # Use urlparse for proper hostname validation
+            # Check exact match or subdomain (with leading dot) to satisfy CodeQL
             parsed = urlparse(base_url)
             hostname = (parsed.hostname or "").lower()
-            if hostname.endswith('openrouter.ai') or hostname == 'openrouter.ai':
+            if hostname == 'openrouter.ai' or hostname.endswith('.openrouter.ai'):
                 provider_name = "OpenRouter"
                 is_openrouter = True
-            elif hostname.endswith('api.openai.com') or hostname == 'api.openai.com':
+            elif hostname == 'api.openai.com' or hostname.endswith('.api.openai.com'):
                 provider_name = "OpenAI"
             logger.info(f"Detected provider: {provider_name} (base_url: {base_url})")
 
