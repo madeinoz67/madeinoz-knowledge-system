@@ -9,6 +9,12 @@ on:
   pull_request:
     branches:
       - '**'
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Git ref to build (tag or branch)'
+        required: false
+        default: ''
 
 jobs:
   lint:
