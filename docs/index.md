@@ -82,6 +82,7 @@ Learn how to use the system:
 
 - **[Basic Usage](usage/basic-usage.md)** - Capturing and searching knowledge
 - **[Advanced Usage](usage/advanced.md)** - Bulk import, backup, multiple graphs
+- **[Monitoring](usage/monitoring.md)** - Prometheus and Grafana dashboards
 
 ### Concepts
 
