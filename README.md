@@ -3,10 +3,10 @@
 name: Madeinoz Knowledge System
 
 # pack-id: (format) {author}-{pack-name}-{variant}-v{version}
-pack-id: madeinoz67-madeinoz-knowledge-system-core-v1.3.1
+pack-id: madeinoz67-madeinoz-knowledge-system-core-v1.4.0
 
 # version: (format) SemVer major.minor.patch
-version: 1.3.1
+version: 1.4.0
 
 # author: (1 word) GitHub username or organization
 author: madeinoz67
@@ -36,9 +36,9 @@ keywords: [knowledge, graph, memory, semantic search, entity extraction, relatio
 
 > Persistent personal knowledge management system powered by Graphiti knowledge graph - automatically extracts entities, relationships, and temporal context from conversations and documents.
 
-[![Docker Build](https://github.com/madeinoz67/madeinoz-knowledge-system/actions/workflows/docker-build.yml/badge.svg)](https://github.com/madeinoz67/madeinoz-knowledge-system/actions/workflows/docker-build.yml)
+[![CI](https://github.com/madeinoz67/madeinoz-knowledge-system/actions/workflows/ci.yml/badge.svg)](https://github.com/madeinoz67/madeinoz-knowledge-system/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/madeinoz67/madeinoz-knowledge-system/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/madeinoz67/madeinoz-knowledge-system/security/code-scanning)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/madeinoz67/madeinoz-knowledge-system)](https://github.com/madeinoz67/madeinoz-knowledge-system/releases/latest)
-[![Docker Pulls](https://img.shields.io/docker/pulls/madeinoz-knowledge-system?label=Docker%20Hub)](https://hub.docker.com/r/madeinoz-knowledge-system)
 [![GitHub Container Registry](https://img.shields.io/badge/ghcr.io-madeinoz--knowledge--system-blue?logo=docker)](https://ghcr.io/madeinoz67/madeinoz-knowledge-system)
 
 ## Documentation

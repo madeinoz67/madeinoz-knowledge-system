@@ -4,8 +4,8 @@
 
 FROM zepai/knowledge-graph-mcp:standalone
 
-LABEL description="Madeinoz Knowledge System - Graphiti MCP with Ollama/OpenRouter support, Neo4j + FalkorDB, Lucene sanitization"
-LABEL version="1.1.0"
+LABEL description="Madeinoz Knowledge System - Graphiti MCP with Ollama/OpenRouter support, Neo4j + FalkorDB, Lucene sanitization, Prompt Caching"
+LABEL version="1.4.0-dev"
 
 # Apply patches by replacing original files
 # factories.py - Adds Ollama/OpenRouter support (fixes GitHub #1116)
@@ -16,6 +16,20 @@ COPY docker/patches/graphiti_mcp_server.py /app/mcp/src/graphiti_mcp_server.py
 
 # falkordb_lucene.py - Lucene query sanitization (new file, not a replacement)
 COPY docker/patches/falkordb_lucene.py /app/mcp/src/utils/falkordb_lucene.py
+
+# Install prompt caching dependencies (OpenTelemetry + Prometheus)
+# Add to uv project dependencies
+WORKDIR /app/mcp
+RUN uv add "opentelemetry-api>=1.20.0" "opentelemetry-sdk>=1.20.0" "opentelemetry-exporter-prometheus>=0.41b0" "prometheus-client>=0.17.0"
+
+# Prompt caching implementation (Feature 006)
+COPY docker/patches/cache_metrics.py /app/mcp/src/utils/cache_metrics.py
+COPY docker/patches/session_metrics.py /app/mcp/src/utils/session_metrics.py
+COPY docker/patches/message_formatter.py /app/mcp/src/utils/message_formatter.py
+COPY docker/patches/caching_wrapper.py /app/mcp/src/utils/caching_wrapper.py
+COPY docker/patches/caching_llm_client.py /app/mcp/src/utils/caching_llm_client.py
+COPY docker/patches/metrics_exporter.py /app/mcp/src/utils/metrics_exporter.py
+COPY docker/patches/diagnostic_wrapper.py /app/mcp/src/utils/diagnostic_wrapper.py
 
 # Copy both Neo4j and FalkorDB configs
 COPY src/skills/server/config-neo4j.yaml /tmp/config-neo4j.yaml
@@ -35,7 +49,7 @@ ENV GRAPHITI_GROUP_ID=main \
     DATABASE_TYPE=neo4j
 
 # Expose ports
-EXPOSE 8000
+EXPOSE 8000 9090
 
 # Set entrypoint to select appropriate config based on DATABASE_TYPE
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

@@ -75,3 +75,16 @@ credentials/
 # MkDocs build output
 site/
 WORK/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/

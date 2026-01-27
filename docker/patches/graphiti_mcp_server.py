@@ -46,6 +46,13 @@ from services.factories import DatabaseDriverFactory, EmbedderFactory, LLMClient
 from services.queue_service import QueueService
 from utils.formatting import format_fact_result
 
+# Feature 006: Gemini Prompt Caching - Initialize metrics exporter
+try:
+    from utils.metrics_exporter import initialize_metrics_exporter
+    _metrics_exporter_available = True
+except ImportError:
+    _metrics_exporter_available = False
+
 # ============================================================================
 # Madeinoz Patch: Date Input Parsing for Temporal Search
 # ============================================================================
@@ -115,7 +122,7 @@ def parse_date_input(date_str: str | None) -> datetime | None:
 # and episode content. Addresses Graphiti issues #815, #1118.
 try:
     # Try to import from patches directory (for Docker builds)
-    from patches.falkordb_lucene import patch_falkor_driver
+    from utils.falkordb_lucene import patch_falkor_driver
     _lucene_patch_applied = patch_falkor_driver()
 except ImportError:
     # Patches directory not available (development mode)
@@ -678,7 +685,7 @@ class GraphitiService:
             # Log Lucene patch status - check if sanitization is actually active
             # Import the detection function to check runtime behavior
             try:
-                from patches.falkordb_lucene import requires_lucene_sanitization, get_database_backend
+                from utils.falkordb_lucene import requires_lucene_sanitization, get_database_backend
 
                 lucene_active = requires_lucene_sanitization()
                 detected_backend = get_database_backend()
@@ -1279,6 +1286,8 @@ async def initialize_server() -> ServerConfig:
     logger.info(f'  - Group ID: {config.graphiti.group_id}')
     logger.info(f'  - Transport: {config.server.transport}')
     logger.info('  - Madeinoz Patch: Search ALL groups when none specified (enabled)')
+    if _metrics_exporter_available:
+        logger.info('  - Madeinoz Patch: Feature 006 - Gemini prompt caching (enabled)')
 
     # SECURITY: Warn about API keys in environment variables
     logger.warning('=' * 60)
@@ -1400,6 +1409,17 @@ async def run_mcp_server():
 
 def main():
     """Main function to run the Graphiti MCP server."""
+    # Feature 006: Initialize Gemini Prompt Caching metrics exporter
+    if _metrics_exporter_available:
+        try:
+            metrics_port = int(os.getenv("MADEINOZ_KNOWLEDGE_METRICS_PORT", "9090"))
+            metrics_enabled = os.getenv("MADEINOZ_KNOWLEDGE_PROMPT_CACHE_METRICS_ENABLED", "true").lower() == "true"
+            initialize_metrics_exporter(enabled=metrics_enabled, port=metrics_port)
+            logger.info("Madeinoz Patch: Feature 006 - Gemini prompt caching with cost tracking and Prometheus metrics (active)")
+            logger.info(f"Prompt caching metrics exporter initialized (enabled={metrics_enabled}, port={metrics_port})")
+        except Exception as e:
+            logger.warning(f"Failed to initialize metrics exporter: {e}")
+
     try:
         asyncio.run(run_mcp_server())
     except KeyboardInterrupt:

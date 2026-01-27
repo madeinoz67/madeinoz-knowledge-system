@@ -1,0 +1,65 @@
+# Git
+.git/
+.gitignore
+
+# Documentation
+docs/
+*.md
+CHANGELOG.md
+LICENSE
+
+# Development
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Tests
+tests/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.mypy_cache/
+
+# Environment
+.env
+.env.*
+*.env
+
+# Logs
+*.log
+logs/
+
+# macOS
+.DS_Store
+
+# Node/Bun (if any)
+node_modules/
+
+# Build artifacts
+dist/
+build/
+out/
+
+# Temporary
+tmp/
+temp/
+*.tmp
+
+# Cache
+.cache/
+.codanna/
+.fastembed_cache/
+
+# PAI
+.claude/pai_updates/
+.claude/pai_backups/
+
+# Specs (planning artifacts - not needed in container)
+specs/

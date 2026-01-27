@@ -1,15 +1,28 @@
 # Docker Compose configuration for Madeinoz Knowledge System - DEVELOPMENT
 # Isolated from production with different ports, volumes, and container names
 #
+# Build local image FIRST (includes Feature 006 prompt caching):
+#   docker build -t madeinoz-knowledge-system:dev -f docker/Dockerfile .
+#
 # Usage:
-#   ./start.sh --dev     # Start dev environment
-#   ./start.sh           # Start production environment
+#   docker compose -f src/skills/server/docker-compose-neo4j-dev.yml up -d
+#   docker compose -f src/skills/server/docker-compose-neo4j-dev.yml down
+#
+# Access points:
+#   - Neo4j Browser: http://localhost:7475
+#   - MCP Server: http://localhost:8001
+#   - Prometheus Metrics: http://localhost:9091/metrics
+#   - Prometheus UI: http://localhost:9092
+#   - Grafana: http://localhost:3002 (admin/admin)
 #
 # Port Mapping (Dev vs Prod):
 #   Dev  -> Prod
 #   7475 -> 7474  (Neo4j Browser)
 #   7688 -> 7687  (Neo4j Bolt)
 #   8001 -> 8000  (MCP Server)
+#   9091 -> 9090  (Prometheus Metrics)
+#   9092 -> 9092  (Prometheus UI)
+#   3002 -> 3001  (Grafana)
 #
 # Volumes are prefixed with 'dev-' to isolate from production data
 
@@ -23,6 +36,10 @@ volumes:
   dev-neo4j-data:
     driver: local
   dev-neo4j-logs:
+    driver: local
+  dev-prometheus-data:
+    driver: local
+  dev-grafana-data:
     driver: local
 
 services:
@@ -54,16 +71,23 @@ services:
       start_period: 60s
 
   # Graphiti MCP Server (Development)
+  # Uses locally built image with Feature 006 prompt caching
   graphiti-mcp:
-    image: ghcr.io/madeinoz67/madeinoz-knowledge-system:latest
+    image: madeinoz-knowledge-system:dev
     container_name: madeinoz-knowledge-graph-mcp-dev
     restart: unless-stopped
     networks:
       - madeinoz-knowledge-dev-net
     ports:
       - "8001:8000"  # MCP HTTP endpoint (dev port)
+      - "9091:9090"  # Prometheus metrics endpoint (dev port)
     env_file:
-      - /tmp/madeinoz-knowledge-mcp-dev.env
+      - /tmp/madeinoz-knowledge-mcp.env
+    environment:
+      # Override production env_file with dev-specific Neo4j connection
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-devpassword}
+      - DATABASE_TYPE=neo4j
     depends_on:
       neo4j:
         condition: service_healthy
@@ -74,3 +98,55 @@ services:
       retries: 3
       start_period: 40s
     command: ["uv", "run", "main.py"]
+
+  # Prometheus Metrics Server (Development)
+  # Scrapes metrics from graphiti-mcp service
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: madeinoz-knowledge-prometheus-dev
+    restart: unless-stopped
+    networks:
+      - madeinoz-knowledge-dev-net
+    ports:
+      - "9092:9090"  # Prometheus UI (dev port)
+    volumes:
+      - dev-prometheus-data:/prometheus
+      - ../../../config/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+      - '--storage.tsdb.retention.time=15d'
+    depends_on:
+      graphiti-mcp:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Grafana Dashboard (Development)
+  # Pre-configured with Prometheus datasource and dashboards
+  grafana:
+    image: grafana/grafana:latest
+    container_name: madeinoz-knowledge-grafana-dev
+    restart: unless-stopped
+    networks:
+      - madeinoz-knowledge-dev-net
+    ports:
+      - "3002:3000"  # Grafana UI (dev port)
+    volumes:
+      - dev-grafana-data:/var/lib/grafana
+      - ../../../config/monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ../../../config/monitoring/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ../../../config/monitoring/grafana/provisioning/dashboards:/var/lib/grafana/dashboards:ro
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3002
+    depends_on:
+      prometheus:
+        condition: service_healthy
