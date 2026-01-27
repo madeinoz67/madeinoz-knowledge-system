@@ -12,6 +12,8 @@
 #   - Neo4j Browser: http://localhost:7475
 #   - MCP Server: http://localhost:8001
 #   - Prometheus Metrics: http://localhost:9091/metrics
+#   - Prometheus UI: http://localhost:9092
+#   - Grafana: http://localhost:3002 (admin/admin)
 #
 # Port Mapping (Dev vs Prod):
 #   Dev  -> Prod
@@ -19,6 +21,8 @@
 #   7688 -> 7687  (Neo4j Bolt)
 #   8001 -> 8000  (MCP Server)
 #   9091 -> 9090  (Prometheus Metrics)
+#   9092 -> 9092  (Prometheus UI)
+#   3002 -> 3001  (Grafana)
 #
 # Volumes are prefixed with 'dev-' to isolate from production data
 
@@ -32,6 +36,10 @@ volumes:
   dev-neo4j-data:
     driver: local
   dev-neo4j-logs:
+    driver: local
+  dev-prometheus-data:
+    driver: local
+  dev-grafana-data:
     driver: local
 
 services:
@@ -90,3 +98,55 @@ services:
       retries: 3
       start_period: 40s
     command: ["uv", "run", "main.py"]
+
+  # Prometheus Metrics Server (Development)
+  # Scrapes metrics from graphiti-mcp service
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: madeinoz-knowledge-prometheus-dev
+    restart: unless-stopped
+    networks:
+      - madeinoz-knowledge-dev-net
+    ports:
+      - "9092:9090"  # Prometheus UI (dev port)
+    volumes:
+      - dev-prometheus-data:/prometheus
+      - ../../../config/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+      - '--storage.tsdb.retention.time=15d'
+    depends_on:
+      graphiti-mcp:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Grafana Dashboard (Development)
+  # Pre-configured with Prometheus datasource and dashboards
+  grafana:
+    image: grafana/grafana:latest
+    container_name: madeinoz-knowledge-grafana-dev
+    restart: unless-stopped
+    networks:
+      - madeinoz-knowledge-dev-net
+    ports:
+      - "3002:3000"  # Grafana UI (dev port)
+    volumes:
+      - dev-grafana-data:/var/lib/grafana
+      - ../../../config/monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ../../../config/monitoring/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ../../../config/monitoring/grafana/provisioning/dashboards:/var/lib/grafana/dashboards:ro
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3002
+    depends_on:
+      prometheus:
+        condition: service_healthy

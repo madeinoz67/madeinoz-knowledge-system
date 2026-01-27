@@ -312,7 +312,112 @@ graphiti_api_cost_per_request_USD_bucket{le="0.0005"} 5.0
 
 ## Grafana Dashboard
 
-A basic Grafana dashboard can be created with these panels:
+The system includes a pre-configured Grafana dashboard with comprehensive monitoring panels.
+
+### Quick Start (Development)
+
+The development environment includes Prometheus and Grafana by default:
+
+```bash
+# Start dev environment with monitoring
+docker compose -f src/skills/server/docker-compose-neo4j-dev.yml up -d
+
+# Access points:
+# - Grafana: http://localhost:3002 (login: admin/admin)
+# - Prometheus UI: http://localhost:9092
+```
+
+### Production Setup (Optional)
+
+Production monitoring uses Docker Compose profiles and is disabled by default:
+
+```bash
+# Start with monitoring enabled
+docker compose -f src/skills/server/docker-compose-neo4j.yml --profile monitoring up -d
+
+# Start without monitoring (default)
+docker compose -f src/skills/server/docker-compose-neo4j.yml up -d
+
+# Access points (when enabled):
+# - Grafana: http://localhost:3001 (login: admin/admin or custom password)
+# - Prometheus UI: http://localhost:9092
+```
+
+!!! tip "Custom Grafana Password"
+    Set `GRAFANA_ADMIN_PASSWORD` environment variable for a secure password:
+    ```bash
+    export GRAFANA_ADMIN_PASSWORD=your-secure-password
+    docker compose -f src/skills/server/docker-compose-neo4j.yml --profile monitoring up -d
+    ```
+
+### Dashboard Panels
+
+The pre-configured dashboard includes these sections:
+
+**Overview Row:**
+
+- Total API Cost (USD)
+- Total Tokens Used
+- Cache Status (Enabled/Disabled)
+- Cache Hit Rate (%)
+- Total Errors
+
+**Token Usage Row:**
+
+- Token Usage Rate (by Model) - Time series
+- Prompt vs Completion Tokens - Stacked area
+
+**Cost Tracking Row:**
+
+- Cost Rate ($/hour by Model) - Time series
+- Cost by Model - Pie chart
+- Input vs Output Cost - Donut chart
+
+**Request Duration Row:**
+
+- Request Duration Percentiles (P50, P95, P99) - Time series
+- Average Request Duration (by Model) - Bar chart
+
+**Cache Performance Row:**
+
+- Cache Hit Rate Over Time - Time series
+- Cache Cost Savings Rate - Time series
+- Cache Hits vs Misses - Stacked area
+
+**Errors Row:**
+
+- Error Rate (by Model & Type) - Stacked bars
+- Errors by Type - Pie chart
+
+### Port Assignments
+
+| Environment | Service | Port | Notes |
+|-------------|---------|------|-------|
+| Development | Grafana | 3002 | Neo4j backend |
+| Development | Grafana | 3003 | FalkorDB backend (avoids UI conflict) |
+| Development | Prometheus UI | 9092 | Query interface |
+| Production | Grafana | 3001 | Neo4j backend |
+| Production | Grafana | 3002 | FalkorDB backend |
+| Production | Prometheus UI | 9092 | Query interface |
+
+### Customizing the Dashboard
+
+The dashboard configuration is stored at:
+
+```
+config/monitoring/grafana/provisioning/dashboards/madeinoz-knowledge.json
+```
+
+To customize:
+
+1. Open Grafana and make changes via the UI
+2. Export the dashboard JSON (Share > Export > Save to file)
+3. Replace the provisioned dashboard file
+4. Restart Grafana to apply changes
+
+### Manual Panel Examples
+
+If building a custom dashboard, use these PromQL queries:
 
 **Usage & Cost:**
 

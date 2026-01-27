@@ -1,0 +1,13 @@
+# Prometheus configuration for Madeinoz Knowledge System
+# Scrapes metrics from the Graphiti MCP server
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'graphiti-mcp'
+    static_configs:
+      - targets: ['graphiti-mcp:9090']
+    metrics_path: '/metrics'
+    scrape_timeout: 10s
