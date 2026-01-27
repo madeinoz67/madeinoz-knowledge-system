@@ -16,10 +16,14 @@ def is_caching_enabled() -> bool:
     """
     Check if prompt caching is enabled via environment variable.
 
+    Feature 006: Prompt caching is now functional for Gemini models on OpenRouter
+    since we route them through OpenAIGenericClient (/chat/completions endpoint)
+    which supports multipart format with cache_control markers.
+
     Returns:
         True if MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED is true, False otherwise
     """
-    return os.getenv("MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED", "true").lower() == "true"
+    return os.getenv("MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED", "false").lower() == "true"
 
 
 def is_gemini_model(model: str) -> bool:

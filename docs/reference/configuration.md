@@ -411,16 +411,16 @@ Enables detailed per-request metrics logging. When `true` and `LOG_LEVEL=DEBUG`,
 
 Default is `false` (disabled).
 
-### Prompt Caching (Experimental)
+### Prompt Caching
 
 ```bash
-MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED=false
+MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED=true
 ```
 
 Controls prompt caching for Gemini models via OpenRouter. Default is `false` (disabled).
 
-!!! warning "Currently Blocked"
-    Prompt caching is blocked due to an OpenRouter API limitation. The `/responses` endpoint does not support the multipart format required for cache control markers. Metrics collection works regardless of this setting.
+!!! success "Now Available for Gemini"
+    Prompt caching is now functional for Gemini models on OpenRouter. The system routes Gemini models through the `/chat/completions` endpoint which supports multipart format with cache control markers. Set to `true` to enable caching and reduce costs on repeated prompts.
 
 For detailed metrics documentation, see the [Observability & Metrics](observability.md) reference.
 

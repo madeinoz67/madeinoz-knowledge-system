@@ -2,15 +2,19 @@
 
 **Feature Branch**: `006-gemini-prompt-caching`
 **Created**: 2026-01-27
-**Status**: Blocked Indefinitely (Research Complete - No Viable Resolution)
+**Status**: Ready for Testing (Solution Implemented)
 **Input**: User description: "I want to use the recent research on prompt caching to implement in the Docker image for gemini, as well as reporting, OpenAI includes costs and cache savings in their response"
 
-**CRITICAL NOTE (2026-01-27)**: Feature infrastructure complete but caching disabled due to OpenRouter `/responses` endpoint incompatibility with multipart format. Research (T059) completed - all three paths non-viable. See `resolution-research.md` for full analysis.
+**RESOLUTION (2026-01-27)**: Implemented client routing solution. Gemini models on OpenRouter now use `OpenAIGenericClient` which routes requests through `/chat/completions` endpoint instead of `/responses`. The `/chat/completions` endpoint supports both multipart format (for `cache_control` markers) AND `json_schema` response format (for structured outputs). This enables full prompt caching functionality for Gemini models.
 
-**Resolution Options**:
-- Short-term: Keep disabled (current state)
-- Medium-term: Monitor OpenRouter quarterly for API updates
-- Long-term: Consider native Gemini API migration (40-80 hours, 75-90% savings)
+**Implementation Details**:
+- Modified `factories.py` to detect Gemini models on OpenRouter
+- Route Gemini → `OpenAIGenericClient` (uses `/chat/completions`)
+- Route other models → `OpenAIClient` (uses `/responses`)
+- Caching disabled by default (`MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED=false`)
+- Enable with `MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED=true`
+
+**Previous Status**: Blocked due to OpenRouter `/responses` endpoint incompatibility with multipart format. See `resolution-research.md` for the investigation that led to this solution.
 
 ## User Scenarios & Testing *(mandatory)*
 

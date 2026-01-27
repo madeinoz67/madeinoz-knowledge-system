@@ -152,8 +152,8 @@ These metrics populate when `MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED=true`:
 | `graphiti_cache_tokens_saved_total` | `model` | Tokens saved via caching |
 | `graphiti_cache_cost_saved_total` | `model` | Cost savings from caching (USD) |
 
-!!! note "Caching Status"
-    Prompt caching is currently disabled due to an OpenRouter API limitation. The `/responses` endpoint used by Graphiti does not support the multipart format required for cache control markers. Metrics collection works regardless of caching status.
+!!! success "Caching Now Available for Gemini"
+    **Prompt caching is now functional for Gemini models on OpenRouter.** The system routes Gemini models through the `/chat/completions` endpoint which supports multipart format with cache control markers. To enable caching, set `MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED=true`. Other models continue using the `/responses` endpoint where caching is not yet supported.
 
 ## Prometheus Integration
 

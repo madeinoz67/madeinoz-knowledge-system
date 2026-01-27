@@ -129,6 +129,25 @@ LOCAL_PROVIDERS = [
 ]
 
 
+def _is_gemini_model(model: str | None) -> bool:
+    """Check if the model is a Gemini model.
+
+    Feature 006: Gemini Prompt Caching - Gemini models on OpenRouter need
+    OpenAIGenericClient to use /chat/completions endpoint which supports
+    multipart format with cache_control markers.
+
+    Args:
+        model: Model identifier (e.g., 'google/gemini-2.0-flash-001')
+
+    Returns:
+        True if this is a Gemini model
+    """
+    if not model:
+        return False
+    model_lower = model.lower()
+    return 'gemini' in model_lower or model_lower.startswith('google/')
+
+
 def _validate_api_key(provider_name: str, api_key: str | None, logger) -> str:
     """Validate API key is present.
 
@@ -279,11 +298,14 @@ class LLMClientFactory:
                     max_tokens=config.max_tokens,
                 )
 
-                # Madeinoz Patch v3: Use OpenAIClient for cloud providers, OpenAIGenericClient for local
-                # Per GitHub issue #912, OpenAIClient has better structured output support
-                # which prevents EdgeDuplicate Pydantic validation errors.
-                # - OpenAIClient: Uses parse API with strict schema enforcement (better for OpenRouter)
-                # - OpenAIGenericClient: Uses basic json_object mode (needed for Ollama)
+                # Madeinoz Patch v3: Client selection based on endpoint type and model
+                # - OpenAIClient: Uses responses.parse() with strict schema (better for most models)
+                # - OpenAIGenericClient: Uses chat.completions.create() with json_schema
+                #
+                # Feature 006: Gemini models on OpenRouter need OpenAIGenericClient because:
+                # 1. OpenRouter's /responses endpoint rejects multipart format (needed for caching)
+                # 2. /chat/completions endpoint supports BOTH multipart AND json_schema
+                # 3. This enables prompt caching for Gemini models via cache_control markers
                 if is_custom:
                     if is_local:
                         # Local endpoints (Ollama) - use generic client
@@ -299,8 +321,28 @@ class LLMClientFactory:
                         if _diagnostic_wrapper_available:
                             client = add_comprehensive_instrumentation(client, config.model)
                         return client
+                    elif _is_gemini_model(config.model) and 'openrouter' in provider_name.lower():
+                        # Feature 006: Gemini on OpenRouter - use generic client for caching support
+                        # OpenAIGenericClient uses /chat/completions which supports:
+                        # - Multipart messages with cache_control markers
+                        # - json_schema response_format for structured outputs
+                        if not HAS_GENERIC_CLIENT:
+                            raise ValueError(
+                                'OpenAIGenericClient not available. '
+                                'Gemini caching requires graphiti-core >= 0.5.0'
+                            )
+                        logger.info(
+                            f'Feature 006: Using OpenAIGenericClient for {provider_name} Gemini '
+                            f'(enables prompt caching via /chat/completions)'
+                        )
+                        client = OpenAIGenericClient(config=llm_config)
+                        if _caching_wrapper_available:
+                            client = wrap_openai_client_for_caching(client, config.model)
+                        if _diagnostic_wrapper_available:
+                            client = add_comprehensive_instrumentation(client, config.model)
+                        return client
                     else:
-                        # Cloud providers (OpenRouter, Together, etc.) - use standard OpenAI client
+                        # Other cloud providers (Together, etc.) - use standard OpenAI client
                         # These providers proxy to OpenAI models and support the parse API
                         logger.info(f'Madeinoz Patch v3: Using OpenAIClient for cloud {provider_name}')
                         client = OpenAIClient(config=llm_config)
@@ -311,6 +353,10 @@ class LLMClientFactory:
                         return client
 
                 # Standard OpenAI endpoint - use regular client
+                # Check if this is a reasoning model (o1, o3, etc.) that needs special handling
+                is_reasoning_model = config.model and any(
+                    r in config.model.lower() for r in ['o1-', 'o3-', '-o1', '-o3']
+                )
                 if is_reasoning_model:
                     client = OpenAIClient(config=llm_config, reasoning='minimal', verbosity='low')
                 else:
