@@ -46,6 +46,13 @@ from services.factories import DatabaseDriverFactory, EmbedderFactory, LLMClient
 from services.queue_service import QueueService
 from utils.formatting import format_fact_result
 
+# Feature 006: Gemini Prompt Caching - Initialize metrics exporter
+try:
+    from patches.metrics_exporter import initialize_metrics_exporter
+    _metrics_exporter_available = True
+except ImportError:
+    _metrics_exporter_available = False
+
 # ============================================================================
 # Madeinoz Patch: Date Input Parsing for Temporal Search
 # ============================================================================
@@ -1400,6 +1407,16 @@ async def run_mcp_server():
 
 def main():
     """Main function to run the Graphiti MCP server."""
+    # Feature 006: Initialize Gemini Prompt Caching metrics exporter
+    if _metrics_exporter_available:
+        try:
+            metrics_port = int(os.getenv("MADEINOZ_KNOWLEDGE_METRICS_PORT", "9090"))
+            metrics_enabled = os.getenv("MADEINOZ_KNOWLEDGE_PROMPT_CACHE_METRICS_ENABLED", "true").lower() == "true"
+            initialize_metrics_exporter(enabled=metrics_enabled, port=metrics_port)
+            logger.info(f"Prompt caching metrics exporter initialized (enabled={metrics_enabled}, port={metrics_port})")
+        except Exception as e:
+            logger.warning(f"Failed to initialize metrics exporter: {e}")
+
     try:
         asyncio.run(run_mcp_server())
     except KeyboardInterrupt:

@@ -32,6 +32,13 @@ from graphiti_core.embedder import EmbedderClient, OpenAIEmbedder
 from graphiti_core.llm_client import LLMClient, OpenAIClient
 from graphiti_core.llm_client.config import LLMConfig as GraphitiLLMConfig
 
+# Feature 006: Gemini Prompt Caching - Import caching wrapper
+try:
+    from patches.caching_wrapper import wrap_openai_client_for_caching
+    _caching_wrapper_available = True
+except ImportError:
+    _caching_wrapper_available = False
+
 # Madeinoz Patch: Import OpenAIGenericClient for Ollama/custom endpoint support
 try:
     from graphiti_core.llm_client.openai_generic_client import OpenAIGenericClient
@@ -279,18 +286,28 @@ class LLMClientFactory:
                                 'Local endpoints require graphiti-core >= 0.5.0'
                             )
                         logger.info(f'Madeinoz Patch v3: Using OpenAIGenericClient for local {provider_name}')
-                        return OpenAIGenericClient(config=llm_config)
+                        client = OpenAIGenericClient(config=llm_config)
+                        if _caching_wrapper_available:
+                            client = wrap_openai_client_for_caching(client, config.model)
+                        return client
                     else:
                         # Cloud providers (OpenRouter, Together, etc.) - use standard OpenAI client
                         # These providers proxy to OpenAI models and support the parse API
                         logger.info(f'Madeinoz Patch v3: Using OpenAIClient for cloud {provider_name}')
-                        return OpenAIClient(config=llm_config)
+                        client = OpenAIClient(config=llm_config)
+                        if _caching_wrapper_available:
+                            client = wrap_openai_client_for_caching(client, config.model)
+                        return client
 
                 # Standard OpenAI endpoint - use regular client
                 if is_reasoning_model:
-                    return OpenAIClient(config=llm_config, reasoning='minimal', verbosity='low')
+                    client = OpenAIClient(config=llm_config, reasoning='minimal', verbosity='low')
                 else:
-                    return OpenAIClient(config=llm_config, reasoning=None, verbosity=None)
+                    client = OpenAIClient(config=llm_config, reasoning=None, verbosity=None)
+
+                if _caching_wrapper_available:
+                    client = wrap_openai_client_for_caching(client, config.model)
+                return client
 
             case 'azure_openai':
                 if not HAS_AZURE_LLM:
@@ -334,11 +351,14 @@ class LLMClientFactory:
                     max_tokens=config.max_tokens,
                 )
 
-                return AzureOpenAILLMClient(
+                client = AzureOpenAILLMClient(
                     azure_client=azure_client,
                     config=llm_config,
                     max_tokens=config.max_tokens,
                 )
+                if _caching_wrapper_available:
+                    client = wrap_openai_client_for_caching(client, config.model)
+                return client
 
             case 'anthropic':
                 if not HAS_ANTHROPIC:
@@ -392,7 +412,10 @@ class LLMClientFactory:
                     temperature=config.temperature,
                     max_tokens=config.max_tokens,
                 )
-                return GroqClient(config=llm_config)
+                client = GroqClient(config=llm_config)
+                if _caching_wrapper_available:
+                    client = wrap_openai_client_for_caching(client, config.model)
+                return client
 
             case _:
                 raise ValueError(f'Unsupported LLM provider: {provider}')

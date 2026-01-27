@@ -17,6 +17,10 @@ COPY docker/patches/graphiti_mcp_server.py /app/mcp/src/graphiti_mcp_server.py
 # falkordb_lucene.py - Lucene query sanitization (new file, not a replacement)
 COPY docker/patches/falkordb_lucene.py /app/mcp/src/utils/falkordb_lucene.py
 
+# Install prompt caching dependencies (OpenTelemetry + Prometheus)
+COPY docker/patches/requirements-cache.txt /tmp/requirements-cache.txt
+RUN pip install --no-cache-dir -r /tmp/requirements-cache.txt && rm /tmp/requirements-cache.txt
+
 # Copy both Neo4j and FalkorDB configs
 COPY src/skills/server/config-neo4j.yaml /tmp/config-neo4j.yaml
 COPY src/skills/server/config-falkordb.yaml /tmp/config-falkordb.yaml
