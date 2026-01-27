@@ -14,6 +14,7 @@ import time
 import logging
 from typing import Any
 from functools import wraps
+from urllib.parse import urlparse
 
 logger = logging.getLogger(__name__)
 
@@ -60,10 +61,13 @@ def wrap_openai_client_for_caching(client: Any, model: str) -> Any:
         is_openrouter = False
         if hasattr(underlying_client, 'base_url'):
             base_url = str(underlying_client.base_url)
-            if 'openrouter.ai' in base_url.lower():
+            # Use urlparse for proper hostname validation (satisfies CodeQL)
+            parsed = urlparse(base_url)
+            hostname = (parsed.hostname or "").lower()
+            if hostname.endswith('openrouter.ai') or hostname == 'openrouter.ai':
                 provider_name = "OpenRouter"
                 is_openrouter = True
-            elif 'api.openai.com' in base_url.lower():
+            elif hostname.endswith('api.openai.com') or hostname == 'api.openai.com':
                 provider_name = "OpenAI"
             logger.info(f"Detected provider: {provider_name} (base_url: {base_url})")
 
