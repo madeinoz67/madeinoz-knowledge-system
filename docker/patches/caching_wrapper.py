@@ -79,14 +79,14 @@ def wrap_openai_client_for_caching(client: Any, model: str) -> Any:
         # Helper function to extract and record cache metrics (shared by both wrappers)
         def extract_and_record_metrics(response: Any) -> None:
             """Extract cache metrics from response and record to Prometheus."""
-            metrics_enabled = os.getenv("MADEINOZ_KNOWLEDGE_PROMPT_CACHE_METRICS_ENABLED", "true").lower() == "true"
+            metrics_enabled = os.getenv("PROMPT_CACHE_METRICS_ENABLED", "true").lower() == "true"
 
             if not metrics_enabled:
                 return
 
             try:
                 # DEBUG: Log response structure
-                if os.getenv("MADEINOZ_KNOWLEDGE_PROMPT_CACHE_LOG_REQUESTS", "false").lower() == "true":
+                if os.getenv("PROMPT_CACHE_LOG_REQUESTS", "false").lower() == "true":
                     logger.info(f"📦 Response type: {type(response).__name__}")
                     logger.info(f"📦 Response dir: {[attr for attr in dir(response) if not attr.startswith('_')]}")
 
@@ -144,7 +144,7 @@ def wrap_openai_client_for_caching(client: Any, model: str) -> Any:
                     return
 
                 # DEBUG: Log pricing/token fields from response
-                if os.getenv("MADEINOZ_KNOWLEDGE_PROMPT_CACHE_LOG_REQUESTS", "false").lower() == "true":
+                if os.getenv("PROMPT_CACHE_LOG_REQUESTS", "false").lower() == "true":
                     logger.info("=" * 70)
                     logger.info("📊 RESPONSE PRICE MARKERS:")
 
@@ -249,7 +249,7 @@ def wrap_openai_client_for_caching(client: Any, model: str) -> Any:
                 if hasattr(response, '__dict__'):
                     response._cache_metrics = cache_metrics
 
-                if os.getenv("MADEINOZ_KNOWLEDGE_PROMPT_CACHE_LOG_REQUESTS", "false").lower() == "true":
+                if os.getenv("PROMPT_CACHE_LOG_REQUESTS", "false").lower() == "true":
                     logger.info(
                         f"Cache metrics: hit={cache_metrics.cache_hit}, "
                         f"cached_tokens={cache_metrics.cached_tokens}, "
@@ -278,7 +278,7 @@ def wrap_openai_client_for_caching(client: Any, model: str) -> Any:
                     original_messages = kwargs['messages']
                     kwargs['messages'] = format_messages_for_caching(original_messages, model)
 
-                    if os.getenv("MADEINOZ_KNOWLEDGE_PROMPT_CACHE_LOG_REQUESTS", "false").lower() == "true":
+                    if os.getenv("PROMPT_CACHE_LOG_REQUESTS", "false").lower() == "true":
                         logger.info(f"Formatted {len(kwargs['messages'])} messages for caching")
 
                 # Call original method with timing and error tracking
@@ -342,7 +342,7 @@ def wrap_openai_client_for_caching(client: Any, model: str) -> Any:
                 # Future: Research if cache_control can be added without multipart format
                 # For now: responses.parse always bypasses caching
 
-                if os.getenv("MADEINOZ_KNOWLEDGE_PROMPT_CACHE_LOG_REQUESTS", "false").lower() == "true":
+                if os.getenv("PROMPT_CACHE_LOG_REQUESTS", "false").lower() == "true":
                     logger.info("⚠️ Skipping cache formatting for responses.parse (multipart not supported)")
 
                 # Call original method with timing and error tracking

@@ -59,6 +59,8 @@ export interface KnowledgeConfig {
   PROMPT_CACHE_ENABLED?: string;
   PROMPT_CACHE_METRICS_ENABLED?: string;
   PROMPT_CACHE_LOG_REQUESTS?: string;
+  PROMPT_CACHE_TTL?: string;
+  METRICS_PORT?: string;
 
   // Container Configuration
   NETWORK_NAME: string;
@@ -249,6 +251,8 @@ export class ConfigLoader {
       MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED: 'PROMPT_CACHE_ENABLED',
       MADEINOZ_KNOWLEDGE_PROMPT_CACHE_METRICS_ENABLED: 'PROMPT_CACHE_METRICS_ENABLED',
       MADEINOZ_KNOWLEDGE_PROMPT_CACHE_LOG_REQUESTS: 'PROMPT_CACHE_LOG_REQUESTS',
+      MADEINOZ_KNOWLEDGE_PROMPT_CACHE_TTL: 'PROMPT_CACHE_TTL',
+      MADEINOZ_KNOWLEDGE_METRICS_PORT: 'METRICS_PORT',
     };
 
     // Apply mappings - MADEINOZ_KNOWLEDGE_* takes PRECEDENCE over unprefixed variables
@@ -340,6 +344,8 @@ export class ConfigLoader {
       PROMPT_CACHE_ENABLED: this.getEnvValue(mapped, 'PROMPT_CACHE_ENABLED', ''),
       PROMPT_CACHE_METRICS_ENABLED: this.getEnvValue(mapped, 'PROMPT_CACHE_METRICS_ENABLED', ''),
       PROMPT_CACHE_LOG_REQUESTS: this.getEnvValue(mapped, 'PROMPT_CACHE_LOG_REQUESTS', ''),
+      PROMPT_CACHE_TTL: this.getEnvValue(mapped, 'PROMPT_CACHE_TTL', ''),
+      METRICS_PORT: this.getEnvValue(mapped, 'METRICS_PORT', ''),
 
       // Container Configuration
       NETWORK_NAME: this.getEnvValue(mapped, 'NETWORK_NAME', DEFAULTS.NETWORK_NAME),
@@ -474,6 +480,12 @@ export class ConfigLoader {
     }
     if (config.PROMPT_CACHE_LOG_REQUESTS) {
       env.PROMPT_CACHE_LOG_REQUESTS = config.PROMPT_CACHE_LOG_REQUESTS;
+    }
+    if (config.PROMPT_CACHE_TTL) {
+      env.PROMPT_CACHE_TTL = config.PROMPT_CACHE_TTL;
+    }
+    if (config.METRICS_PORT) {
+      env.METRICS_PORT = config.METRICS_PORT;
     }
 
     return env;

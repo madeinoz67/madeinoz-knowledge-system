@@ -1412,8 +1412,8 @@ def main():
     # Feature 006: Initialize Gemini Prompt Caching metrics exporter
     if _metrics_exporter_available:
         try:
-            metrics_port = int(os.getenv("MADEINOZ_KNOWLEDGE_METRICS_PORT", "9090"))
-            metrics_enabled = os.getenv("MADEINOZ_KNOWLEDGE_PROMPT_CACHE_METRICS_ENABLED", "true").lower() == "true"
+            metrics_port = int(os.getenv("METRICS_PORT", "9090"))
+            metrics_enabled = os.getenv("PROMPT_CACHE_METRICS_ENABLED", "true").lower() == "true"
             initialize_metrics_exporter(enabled=metrics_enabled, port=metrics_port)
             logger.info("Madeinoz Patch: Feature 006 - Gemini prompt caching with cost tracking and Prometheus metrics (active)")
             logger.info(f"Prompt caching metrics exporter initialized (enabled={metrics_enabled}, port={metrics_port})")

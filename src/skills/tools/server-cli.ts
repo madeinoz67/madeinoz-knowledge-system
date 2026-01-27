@@ -128,6 +128,10 @@ async function generateEnvFiles(
       mcpLines.push(`PROMPT_CACHE_METRICS_ENABLED=${containerEnv.PROMPT_CACHE_METRICS_ENABLED}`);
     if (containerEnv.PROMPT_CACHE_LOG_REQUESTS)
       mcpLines.push(`PROMPT_CACHE_LOG_REQUESTS=${containerEnv.PROMPT_CACHE_LOG_REQUESTS}`);
+    if (containerEnv.PROMPT_CACHE_TTL)
+      mcpLines.push(`PROMPT_CACHE_TTL=${containerEnv.PROMPT_CACHE_TTL}`);
+    if (containerEnv.METRICS_PORT)
+      mcpLines.push(`METRICS_PORT=${containerEnv.METRICS_PORT}`);
     mcpLines.push('');
   }
 

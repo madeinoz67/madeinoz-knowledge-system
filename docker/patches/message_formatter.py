@@ -21,9 +21,9 @@ def is_caching_enabled() -> bool:
     which supports multipart format with cache_control markers.
 
     Returns:
-        True if MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED is true, False otherwise
+        True if PROMPT_CACHE_ENABLED is true, False otherwise
     """
-    return os.getenv("MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED", "false").lower() == "true"
+    return os.getenv("PROMPT_CACHE_ENABLED", "false").lower() == "true"
 
 
 def is_gemini_model(model: str) -> bool:
@@ -132,7 +132,7 @@ def add_cache_control_marker(content_parts: List[Dict[str, Any]]) -> List[Dict[s
 
     # Get TTL from environment (default: 1h for better cache hit rates)
     # Options: "5m" (5 minutes), "1h" (1 hour)
-    cache_ttl = os.getenv("MADEINOZ_KNOWLEDGE_PROMPT_CACHE_TTL", "1h")
+    cache_ttl = os.getenv("PROMPT_CACHE_TTL", "1h")
 
     # Find the last text part and add cache_control
     for i in range(len(content_parts) - 1, -1, -1):

@@ -43,8 +43,8 @@ class CachingLLMClient:
         self.session_metrics = SessionMetrics()
 
         # Check if metrics and caching are enabled
-        self.metrics_enabled = os.getenv("MADEINOZ_KNOWLEDGE_PROMPT_CACHE_METRICS_ENABLED", "true").lower() == "true"
-        self.log_requests = os.getenv("MADEINOZ_KNOWLEDGE_PROMPT_CACHE_LOG_REQUESTS", "false").lower() == "true"
+        self.metrics_enabled = os.getenv("PROMPT_CACHE_METRICS_ENABLED", "true").lower() == "true"
+        self.log_requests = os.getenv("PROMPT_CACHE_LOG_REQUESTS", "false").lower() == "true"
 
     def _preprocess_request(self, messages: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], bool]:
         """
