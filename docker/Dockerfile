@@ -5,7 +5,7 @@
 FROM zepai/knowledge-graph-mcp:standalone
 
 LABEL description="Madeinoz Knowledge System - Graphiti MCP with Ollama/OpenRouter support, Neo4j + FalkorDB, Lucene sanitization, Prompt Caching"
-LABEL version="1.4.0-dev"
+LABEL version="1.4.1"
 
 # Apply patches by replacing original files
 # factories.py - Adds Ollama/OpenRouter support (fixes GitHub #1116)
