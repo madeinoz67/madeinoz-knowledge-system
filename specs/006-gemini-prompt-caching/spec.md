@@ -2,8 +2,15 @@
 
 **Feature Branch**: `006-gemini-prompt-caching`
 **Created**: 2026-01-27
-**Status**: Draft
+**Status**: Blocked Indefinitely (Research Complete - No Viable Resolution)
 **Input**: User description: "I want to use the recent research on prompt caching to implement in the Docker image for gemini, as well as reporting, OpenAI includes costs and cache savings in their response"
+
+**CRITICAL NOTE (2026-01-27)**: Feature infrastructure complete but caching disabled due to OpenRouter `/responses` endpoint incompatibility with multipart format. Research (T059) completed - all three paths non-viable. See `resolution-research.md` for full analysis.
+
+**Resolution Options**:
+- Short-term: Keep disabled (current state)
+- Medium-term: Monitor OpenRouter quarterly for API updates
+- Long-term: Consider native Gemini API migration (40-80 hours, 75-90% savings)
 
 ## User Scenarios & Testing *(mandatory)*
 

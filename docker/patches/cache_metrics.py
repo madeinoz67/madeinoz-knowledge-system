@@ -86,21 +86,38 @@ class CacheMetrics:
         Returns:
             CacheMetrics instance with calculated savings
 
-        Example OpenRouter response usage field:
+        Example OpenRouter response formats:
+
+        Format 1 - Standard OpenAI (usage object):
             {
                 "usage": {
                     "prompt_tokens": 2048,
                     "completion_tokens": 342,
                     "cached_tokens": 1523
-                },
-                "cache_discount": 0.2769  // Optional: percentage as decimal
+                }
+            }
+
+        Format 2 - OpenRouter metadata (root level):
+            {
+                "tokens_prompt": 685,
+                "tokens_completion": 26,
+                "native_tokens_cached": 523,
+                "native_tokens_prompt": 704,
+                "native_tokens_completion": 30
             }
         """
-        usage = response.get("usage", {})
+        # Try OpenRouter format first (root-level fields)
+        if "native_tokens_cached" in response:
+            prompt_tokens = response.get("tokens_prompt", 0)
+            completion_tokens = response.get("tokens_completion", 0)
+            cached_tokens = response.get("native_tokens_cached", 0)
+        else:
+            # Fall back to standard OpenAI format (usage object)
+            usage = response.get("usage", {})
+            prompt_tokens = usage.get("prompt_tokens", 0)
+            completion_tokens = usage.get("completion_tokens", 0)
+            cached_tokens = usage.get("cached_tokens", 0)
 
-        prompt_tokens = usage.get("prompt_tokens", 0)
-        completion_tokens = usage.get("completion_tokens", 0)
-        cached_tokens = usage.get("cached_tokens", 0)
         cache_discount = response.get("cache_discount")  # Optional from OpenRouter
 
         # Calculate token costs

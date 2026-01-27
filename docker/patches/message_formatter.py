@@ -121,52 +121,58 @@ def add_cache_control_marker(content_parts: List[Dict[str, Any]]) -> List[Dict[s
 
     Example:
         Input: [{"type": "text", "text": "System prompt"}]
-        Output: [{"type": "text", "text": "System prompt", "cache_control": {"type": "ephemeral"}}]
+        Output: [{"type": "text", "text": "System prompt", "cache_control": {"type": "ephemeral", "ttl": "1h"}}]
     """
     if not content_parts:
         return content_parts
+
+    # Get TTL from environment (default: 1h for better cache hit rates)
+    # Options: "5m" (5 minutes), "1h" (1 hour)
+    cache_ttl = os.getenv("MADEINOZ_KNOWLEDGE_PROMPT_CACHE_TTL", "1h")
 
     # Find the last text part and add cache_control
     for i in range(len(content_parts) - 1, -1, -1):
         part = content_parts[i]
         if part.get("type") == "text":
-            part["cache_control"] = {"type": "ephemeral"}
+            part["cache_control"] = {"type": "ephemeral", "ttl": cache_ttl}
             break
 
     return content_parts
 
 
-def format_message_for_caching(message: Dict[str, Any]) -> Dict[str, Any]:
+def format_message_for_caching(message: Dict[str, Any], is_last: bool = False) -> Dict[str, Any]:
     """
     Transform a message to include cache_control markers for OpenRouter caching.
 
-    Only applies to system messages. User and assistant messages are passed through
-    unchanged to avoid interfering with conversation flow.
+    Applies cache_control marker to the last message in the conversation to mark
+    the final repeating context for caching. This works for both system-first and
+    user-first prompt patterns.
 
     Args:
         message: Message dictionary with 'role' and 'content'
+        is_last: Whether this is the last message in the conversation
 
     Returns:
-        Modified message with multipart content and cache_control marker
+        Modified message with multipart content and cache_control marker (if is_last=True)
 
     Example:
-        Input:
-            {"role": "system", "content": "You are a helpful assistant..."}
+        Input (is_last=True):
+            {"role": "user", "content": "Extract entities from this text..."}
 
         Output:
             {
-                "role": "system",
+                "role": "user",
                 "content": [
                     {
                         "type": "text",
-                        "text": "You are a helpful assistant...",
+                        "text": "Extract entities from this text...",
                         "cache_control": {"type": "ephemeral"}
                     }
                 ]
             }
     """
-    # Only transform system messages
-    if message.get("role") != "system":
+    # Only mark the last message for caching
+    if not is_last:
         return message
 
     content = message.get("content", "")
@@ -219,10 +225,11 @@ def format_messages_for_caching(
         logger.debug("Request below minimum token threshold, skipping cache formatting")
         return messages
 
-    # Transform messages
+    # Transform messages - mark only the LAST message for caching
     formatted_messages = []
-    for message in messages:
-        formatted_messages.append(format_message_for_caching(message))
+    for i, message in enumerate(messages):
+        is_last = (i == len(messages) - 1)
+        formatted_messages.append(format_message_for_caching(message, is_last=is_last))
 
-    logger.debug(f"Formatted {len(messages)} messages for caching")
+    logger.debug(f"Formatted {len(messages)} messages for caching (marked last message)")
     return formatted_messages

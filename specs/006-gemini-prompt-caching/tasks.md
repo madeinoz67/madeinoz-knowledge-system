@@ -23,6 +23,15 @@
    - 7 metrics defined (5 counters, 4 gauges)
    - **No health endpoint modification**
 
+3. **CRITICAL: Architectural Limitation Discovered (2026-01-27)**:
+   - **OpenRouter `/responses` endpoint does NOT support multipart format**
+   - Graphiti uses `responses.parse()` for ALL entity extraction (100% of operations)
+   - Multipart format with cache_control causes BadRequestError: "expected string, received array"
+   - **Caching DISABLED until resolution**: `MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED=false`
+   - **Fix implemented**: `caching_wrapper.py` skips formatting for responses.parse to prevent future breakage
+   - **Research needed**: Determine if cache_control works without multipart format, OR restrict caching to chat.completions.create only
+   - **Status**: Feature 006 infrastructure complete but non-functional due to endpoint incompatibility
+
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies)
@@ -102,20 +111,20 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T024 [P] [US2] Unit test for CacheMetrics dataclass validation in tests/unit/test_cache_metrics.py
-- [ ] T025 [P] [US2] Unit test for cost_saved calculation formula in tests/unit/test_cache_metrics.py
-- [ ] T026 [P] [US2] Unit test for savings_percent calculation in tests/unit/test_cache_metrics.py
-- [ ] T027 [P] [US2] Unit test for SessionMetrics accumulation in tests/unit/test_session_metrics.py
+- [x] T024 [P] [US2] Unit test for CacheMetrics dataclass validation in docker/tests/unit/test_cache_metrics.py
+- [x] T025 [P] [US2] Unit test for cost_saved calculation formula in docker/tests/unit/test_cache_metrics.py
+- [x] T026 [P] [US2] Unit test for savings_percent calculation in docker/tests/unit/test_cache_metrics.py
+- [x] T027 [P] [US2] Unit test for SessionMetrics accumulation in docker/tests/unit/test_session_metrics.py
 
 ### Implementation for User Story 2
 
-- [ ] T028 [US2] Implement CacheMetrics.to_dict() method in docker/patches/cache_metrics.py for JSON serialization
-- [ ] T029 [US2] Implement CacheMetrics.from_openrouter_response() factory in docker/patches/cache_metrics.py (extract from OpenRouter format)
-- [ ] T030 [US2] Implement SessionMetrics.record_request() method in docker/patches/session_metrics.py (accumulate per-request metrics)
-- [ ] T031 [US2] Add response metadata enhancement in factories.py to embed cache_metrics in MCP response
-- [ ] T032 [US2] Implement SessionMetrics.get_summary() method for session-level statistics
-- [ ] T033 [P] [US2] Integration test for cache_metrics present in response on cache hit in tests/integration/test_caching_e2e.py
-- [ ] T034 [P] [US2] Integration test for all 10 cache_metrics fields present in tests/integration/test_caching_e2e.py
+- [x] T028 [US2] Implement CacheMetrics.to_dict() method in docker/patches/cache_metrics.py for JSON serialization
+- [x] T029 [US2] Implement CacheMetrics.from_openrouter_response() factory in docker/patches/cache_metrics.py (extract from OpenRouter format)
+- [x] T030 [US2] Implement SessionMetrics.record_request() method in docker/patches/session_metrics.py (accumulate per-request metrics)
+- [~] T031 [US2] DEFERRED: MCP response integration not required - response._cache_metrics attachment + Prometheus metrics sufficient for observability (see investigation notes)
+- [x] T032 [US2] Implement SessionMetrics.get_summary() method for session-level statistics
+- [x] T033 [P] [US2] Integration test for cache_metrics present in response on cache hit in docker/tests/integration/test_caching_e2e.py
+- [x] T034 [P] [US2] Integration test for all 10 cache_metrics fields present in docker/tests/integration/test_caching_e2e.py
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently - responses include cost transparency
 
@@ -131,22 +140,32 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T035 [P] [US3] Integration test for /metrics endpoint returns Prometheus format in tests/integration/test_metrics_endpoint.py
-- [ ] T036 [P] [US3] Integration test for graphiti_cache_hits_total counter in tests/integration/test_metrics_endpoint.py
-- [ ] T037 [P] [US3] Integration test for graphiti_cache_hit_rate gauge in tests/integration/test_metrics_endpoint.py
+- [x] T035 [P] [US3] Integration test for /metrics endpoint returns Prometheus format in tests/integration/test_metrics_endpoint.py
+- [x] T036 [P] [US3] Integration test for graphiti_cache_hits_total counter in tests/integration/test_metrics_endpoint.py
+- [x] T037 [P] [US3] Integration test for graphiti_cache_hit_rate gauge in tests/integration/test_metrics_endpoint.py
 
 ### Implementation for User Story 3
 
-- [ ] T038 [US3] Implement create_cache_counters() in docker/patches/metrics_exporter.py (graphiti_cache_hits_total, graphiti_cache_misses_total, graphiti_cache_tokens_saved_total, graphiti_cache_cost_saved_total, graphiti_cache_requests_total)
-- [ ] T039 [US3] Implement create_cache_gauges() in docker/patches/metrics_exporter.py (graphiti_cache_hit_rate, graphiti_cache_size_bytes, graphiti_cache_entries, graphiti_cache_enabled)
-- [ ] T040 [US3] Implement record_cache_hit() in docker/patches/metrics_exporter.py (increment counters with model label)
-- [ ] T041 [US3] Implement record_cache_miss() in docker/patches/metrics_exporter.py (increment miss counter)
-- [ ] T042 [US3] Implement start_metrics_server() in docker/patches/metrics_exporter.py (start prometheus_client HTTP server on port 9090)
-- [ ] T043 [US3] Integrate metrics recording calls into factories.py response processing
-- [ ] T044 [P] [US3] Integration test for metrics server responds on port 9090 in tests/integration/test_metrics_endpoint.py
-- [ ] T045 [P] [US3] Integration test for Prometheus scrape format compliance in tests/integration/test_metrics_endpoint.py
+- [x] T038 [US3] Implement _create_counters() in docker/patches/metrics_exporter.py (graphiti_cache_hits_total, graphiti_cache_misses_total, graphiti_cache_tokens_saved_total, graphiti_cache_cost_saved_total, graphiti_cache_requests_total)
+- [x] T039 [US3] Implement _create_gauges() in docker/patches/metrics_exporter.py (cache_hit_rate ✓, cache_enabled ✓; cache_size_bytes and cache_entries not applicable for server-side OpenRouter caching - no client-side cache to measure)
+- [x] T040 [US3] Implement record_cache_hit() in docker/patches/metrics_exporter.py (increment counters with model label)
+- [x] T041 [US3] Implement record_cache_miss() in docker/patches/metrics_exporter.py (increment miss counter)
+- [x] T042 [US3] Implement start_metrics_server() in docker/patches/metrics_exporter.py (start prometheus_client HTTP server on port 9090)
+- [x] T043 [US3] Integrate metrics recording calls into caching_wrapper.py response processing
+- [x] T044 [P] [US3] Integration test for metrics server responds on port 9090 in tests/integration/test_metrics_endpoint.py
+- [x] T045 [P] [US3] Integration test for Prometheus scrape format compliance in tests/integration/test_metrics_endpoint.py
 
-**Checkpoint**: All user stories should now be independently functional - Prometheus monitoring enabled
+### Metrics Enhancement (Post-MVP)
+
+**Purpose**: Expand metrics capabilities with distribution analysis, efficiency tracking, and throughput monitoring
+
+- [ ] T054 [P] [US3] Add histogram metrics for cache savings distribution in docker/patches/metrics_exporter.py (tokens_saved_distribution, cost_saved_distribution, efficiency_distribution with buckets [0, 10, 25, 50, 75, 90, 100] for percentiles)
+- [ ] T055 [P] [US3] Add aggregate total counter metrics without model labels in docker/patches/metrics_exporter.py (cache_hits_all_models_total, cache_tokens_saved_all_models_total, cache_cost_saved_all_models_total for cross-model totals)
+- [ ] T056 [P] [US3] Add efficiency ratio and rate gauges in docker/patches/metrics_exporter.py (cache_efficiency_ratio [0-1], average_tokens_per_hit, cache_requests_per_minute for operational insights)
+- [ ] T057 [P] [US3] Add recommended insights metrics in docker/patches/metrics_exporter.py (cache_hit_streak counter, cache_warmup_time_seconds gauge, unique_prompts_cached counter, cache_hit_rate_sliding_window gauge with 5-minute window for trend analysis)
+- [ ] T058 [P] [US3] Add throughput metrics in docker/patches/metrics_exporter.py (tokens_per_second gauges for input_tps, output_tps, total_tps, cached_tps to measure processing speed)
+
+**Checkpoint**: All user stories should now be independently functional - Prometheus monitoring enabled with comprehensive metrics
 
 ---
 
@@ -297,19 +316,63 @@ The following tasks from the previous (incorrect) task list have been REMOVED:
 
 ---
 
+## Phase 7: Architectural Research (BLOCKING)
+
+**Purpose**: Investigate resolution paths for OpenRouter /responses endpoint incompatibility discovered 2026-01-27
+
+**Status**: CRITICAL - Feature 006 infrastructure complete but caching non-functional due to architectural limitation
+
+**Background**: During testing, discovered that OpenRouter's `/responses` endpoint (used by Graphiti's `responses.parse()` for ALL entity extraction) does NOT support multipart message format required for cache_control markers. This causes 82% request failure rate when caching enabled.
+
+**Current State**: Caching DISABLED (`MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED=false`). Architectural fix implemented in `caching_wrapper.py` to skip formatting for responses.parse endpoint, preventing future breakage.
+
+### Research Task
+
+- [x] T059 [BLOCKING] Investigate three resolution paths for cache_control compatibility:
+
+  **Path 1: String-based cache_control**
+  - Research if OpenRouter supports cache_control markers WITHOUT multipart format
+  - Test if simple string content with cache_control header/parameter works
+  - Document API requirements and examples if supported
+  - **Decision criteria**: If YES, modify message_formatter.py to use string format
+
+  **Path 2: Endpoint-specific caching**
+  - Restrict caching to `chat.completions.create` endpoint only (skip responses.parse)
+  - Analyze Graphiti usage: What % of requests use chat.completions vs responses.parse?
+  - Estimate cost savings potential if only non-entity-extraction calls cached
+  - **Decision criteria**: If >20% requests use chat.completions, partial caching valuable
+
+  **Path 3: Wait for OpenRouter**
+  - Contact OpenRouter support about multipart format support roadmap for /responses
+  - Check if other providers (direct Google AI, Anthropic) support both multipart + responses.parse
+  - Document timeline and alternative provider options
+  - **Decision criteria**: If <3 months ETA or alternative provider found, wait for fix
+
+  **Deliverables**:
+  - Research findings document in specs/006-gemini-prompt-caching/resolution-research.md
+  - Recommendation with cost/benefit analysis for each path
+  - Updated architecture decision in plan.md
+  - Either: (a) re-enable caching with working approach, OR (b) document feature as blocked indefinitely
+
+**Checkpoint**: Resolution path selected, Feature 006 either unblocked or formally deferred
+
+---
+
 ## Summary
 
 | Metric | Count |
 |--------|-------|
-| **Total Tasks** | 53 |
+| **Total Tasks** | 59 |
 | **Phase 1 (Setup)** | 6 tasks |
 | **Phase 2 (Foundational)** | 4 tasks |
 | **Phase 3 (US1 - P1)** | 13 tasks |
 | **Phase 4 (US2 - P2)** | 11 tasks |
-| **Phase 5 (US3 - P3)** | 11 tasks |
+| **Phase 5 (US3 - P3)** | 16 tasks (11 MVP + 5 enhancement) |
 | **Phase 6 (Polish)** | 8 tasks |
-| **Parallel Opportunities** | 31 tasks (58%) |
+| **Phase 7 (Research)** | 1 task (BLOCKING) |
+| **Parallel Opportunities** | 36 tasks (62%) |
 | **MVP Scope** | 23 tasks (Setup + Foundational + US1) |
+| **Current Status** | Infrastructure complete, caching disabled pending resolution research (T059) |
 
 ---
 

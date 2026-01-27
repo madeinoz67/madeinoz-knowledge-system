@@ -34,10 +34,17 @@ from graphiti_core.llm_client.config import LLMConfig as GraphitiLLMConfig
 
 # Feature 006: Gemini Prompt Caching - Import caching wrapper
 try:
-    from patches.caching_wrapper import wrap_openai_client_for_caching
+    from utils.caching_wrapper import wrap_openai_client_for_caching
     _caching_wrapper_available = True
 except ImportError:
     _caching_wrapper_available = False
+
+# Diagnostic instrumentation for debugging wrapper issues
+try:
+    from utils.diagnostic_wrapper import add_comprehensive_instrumentation
+    _diagnostic_wrapper_available = True
+except ImportError:
+    _diagnostic_wrapper_available = False
 
 # Madeinoz Patch: Import OpenAIGenericClient for Ollama/custom endpoint support
 try:
@@ -289,6 +296,8 @@ class LLMClientFactory:
                         client = OpenAIGenericClient(config=llm_config)
                         if _caching_wrapper_available:
                             client = wrap_openai_client_for_caching(client, config.model)
+                        if _diagnostic_wrapper_available:
+                            client = add_comprehensive_instrumentation(client, config.model)
                         return client
                     else:
                         # Cloud providers (OpenRouter, Together, etc.) - use standard OpenAI client
@@ -297,6 +306,8 @@ class LLMClientFactory:
                         client = OpenAIClient(config=llm_config)
                         if _caching_wrapper_available:
                             client = wrap_openai_client_for_caching(client, config.model)
+                        if _diagnostic_wrapper_available:
+                            client = add_comprehensive_instrumentation(client, config.model)
                         return client
 
                 # Standard OpenAI endpoint - use regular client
@@ -307,6 +318,8 @@ class LLMClientFactory:
 
                 if _caching_wrapper_available:
                     client = wrap_openai_client_for_caching(client, config.model)
+                if _diagnostic_wrapper_available:
+                    client = add_comprehensive_instrumentation(client, config.model)
                 return client
 
             case 'azure_openai':
@@ -358,6 +371,8 @@ class LLMClientFactory:
                 )
                 if _caching_wrapper_available:
                     client = wrap_openai_client_for_caching(client, config.model)
+                if _diagnostic_wrapper_available:
+                    client = add_comprehensive_instrumentation(client, config.model)
                 return client
 
             case 'anthropic':
@@ -415,6 +430,8 @@ class LLMClientFactory:
                 client = GroqClient(config=llm_config)
                 if _caching_wrapper_available:
                     client = wrap_openai_client_for_caching(client, config.model)
+                if _diagnostic_wrapper_available:
+                    client = add_comprehensive_instrumentation(client, config.model)
                 return client
 
             case _:

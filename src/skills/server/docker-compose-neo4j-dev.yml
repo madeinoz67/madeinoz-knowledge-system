@@ -1,15 +1,24 @@
 # Docker Compose configuration for Madeinoz Knowledge System - DEVELOPMENT
 # Isolated from production with different ports, volumes, and container names
 #
+# Build local image FIRST (includes Feature 006 prompt caching):
+#   docker build -t madeinoz-knowledge-system:dev -f docker/Dockerfile .
+#
 # Usage:
-#   ./start.sh --dev     # Start dev environment
-#   ./start.sh           # Start production environment
+#   docker compose -f src/skills/server/docker-compose-neo4j-dev.yml up -d
+#   docker compose -f src/skills/server/docker-compose-neo4j-dev.yml down
+#
+# Access points:
+#   - Neo4j Browser: http://localhost:7475
+#   - MCP Server: http://localhost:8001
+#   - Prometheus Metrics: http://localhost:9091/metrics
 #
 # Port Mapping (Dev vs Prod):
 #   Dev  -> Prod
 #   7475 -> 7474  (Neo4j Browser)
 #   7688 -> 7687  (Neo4j Bolt)
 #   8001 -> 8000  (MCP Server)
+#   9091 -> 9090  (Prometheus Metrics)
 #
 # Volumes are prefixed with 'dev-' to isolate from production data
 
@@ -54,16 +63,23 @@ services:
       start_period: 60s
 
   # Graphiti MCP Server (Development)
+  # Uses locally built image with Feature 006 prompt caching
   graphiti-mcp:
-    image: ghcr.io/madeinoz67/madeinoz-knowledge-system:latest
+    image: madeinoz-knowledge-system:dev
     container_name: madeinoz-knowledge-graph-mcp-dev
     restart: unless-stopped
     networks:
       - madeinoz-knowledge-dev-net
     ports:
       - "8001:8000"  # MCP HTTP endpoint (dev port)
+      - "9091:9090"  # Prometheus metrics endpoint (dev port)
     env_file:
-      - /tmp/madeinoz-knowledge-mcp-dev.env
+      - /tmp/madeinoz-knowledge-mcp.env
+    environment:
+      # Override production env_file with dev-specific Neo4j connection
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-devpassword}
+      - DATABASE_TYPE=neo4j
     depends_on:
       neo4j:
         condition: service_healthy
