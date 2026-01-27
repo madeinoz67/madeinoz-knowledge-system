@@ -10,6 +10,7 @@ Wraps BOTH OpenAI API endpoints used by Graphiti:
 """
 
 import os
+import time
 import logging
 from typing import Any
 from functools import wraps
@@ -223,6 +224,22 @@ def wrap_openai_client_for_caching(client: Any, model: str) -> Any:
                         output_cost=output_cost
                     )
 
+                    # Record cache writes (tokens written to cache on cache miss)
+                    # Gemini returns cache_creation_input_tokens when new cache is created
+                    cache_write_tokens = 0
+                    # Check in usage dict
+                    if 'cache_creation_input_tokens' in usage:
+                        cache_write_tokens = usage.get('cache_creation_input_tokens', 0)
+                    # Check in prompt_tokens_details
+                    elif 'prompt_tokens_details' in usage:
+                        details = usage.get('prompt_tokens_details', {})
+                        if isinstance(details, dict):
+                            cache_write_tokens = details.get('cache_creation_input_tokens', 0) or 0
+
+                    if cache_write_tokens > 0:
+                        metrics_exporter.record_cache_write(model, cache_write_tokens)
+                        logger.debug(f"📝 Cache write: {cache_write_tokens} tokens written to cache")
+
                 # Attach metrics to response object for MCP layer to access
                 if hasattr(response, '__dict__'):
                     response._cache_metrics = cache_metrics
@@ -259,8 +276,30 @@ def wrap_openai_client_for_caching(client: Any, model: str) -> Any:
                     if os.getenv("MADEINOZ_KNOWLEDGE_PROMPT_CACHE_LOG_REQUESTS", "false").lower() == "true":
                         logger.info(f"Formatted {len(kwargs['messages'])} messages for caching")
 
-                # Call original method
-                response = await original_create(*args, **kwargs)
+                # Call original method with timing and error tracking
+                start_time = time.monotonic()
+                try:
+                    response = await original_create(*args, **kwargs)
+                except Exception as e:
+                    # Record error and duration on failure
+                    duration = time.monotonic() - start_time
+                    metrics_exporter = get_metrics_exporter()
+                    if metrics_exporter:
+                        # Categorize error type
+                        error_type = type(e).__name__
+                        if 'rate' in str(e).lower() or 'limit' in str(e).lower():
+                            error_type = 'rate_limit'
+                        elif 'timeout' in str(e).lower():
+                            error_type = 'timeout'
+                        metrics_exporter.record_error(model, error_type)
+                        metrics_exporter.record_request_duration(model, duration)
+                    raise
+
+                # Record successful request duration
+                duration = time.monotonic() - start_time
+                metrics_exporter = get_metrics_exporter()
+                if metrics_exporter:
+                    metrics_exporter.record_request_duration(model, duration)
 
                 # PHASE 2: RESPONSE POST-PROCESSING
                 extract_and_record_metrics(response)
@@ -301,8 +340,30 @@ def wrap_openai_client_for_caching(client: Any, model: str) -> Any:
                 if os.getenv("MADEINOZ_KNOWLEDGE_PROMPT_CACHE_LOG_REQUESTS", "false").lower() == "true":
                     logger.info("⚠️ Skipping cache formatting for responses.parse (multipart not supported)")
 
-                # Call original method
-                response = await original_parse(*args, **kwargs)
+                # Call original method with timing and error tracking
+                start_time = time.monotonic()
+                try:
+                    response = await original_parse(*args, **kwargs)
+                except Exception as e:
+                    # Record error and duration on failure
+                    duration = time.monotonic() - start_time
+                    metrics_exporter = get_metrics_exporter()
+                    if metrics_exporter:
+                        # Categorize error type
+                        error_type = type(e).__name__
+                        if 'rate' in str(e).lower() or 'limit' in str(e).lower():
+                            error_type = 'rate_limit'
+                        elif 'timeout' in str(e).lower():
+                            error_type = 'timeout'
+                        metrics_exporter.record_error(model, error_type)
+                        metrics_exporter.record_request_duration(model, duration)
+                    raise
+
+                # Record successful request duration
+                duration = time.monotonic() - start_time
+                metrics_exporter = get_metrics_exporter()
+                if metrics_exporter:
+                    metrics_exporter.record_request_duration(model, duration)
 
                 # PHASE 2: RESPONSE POST-PROCESSING
                 extract_and_record_metrics(response)

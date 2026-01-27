@@ -92,6 +92,15 @@ class CacheMetricsExporter:
                 10, 25, 50, 100, 250, 500, 1000, 2000, 3000, 5000,
                 10000, 25000, 50000, 100000, 200000
             ]
+            # Duration buckets: LLM request latency in seconds
+            # - Fast (0.1-1s): cached/simple requests
+            # - Normal (1-10s): typical LLM calls
+            # - Slow (10-60s): complex reasoning, large context
+            # - Very slow (60-300s): timeout territory
+            duration_buckets = [
+                0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0,
+                15.0, 30.0, 60.0, 120.0, 300.0
+            ]
 
             # Create views with custom bucket boundaries
             views = [
@@ -108,6 +117,15 @@ class CacheMetricsExporter:
                     instrument_name="graphiti_api_output_cost_per_request",
                     aggregation=ExplicitBucketHistogramAggregation(boundaries=cost_buckets)
                 ),
+                # Cache savings histogram views
+                View(
+                    instrument_name="graphiti_cache_cost_saved_per_request",
+                    aggregation=ExplicitBucketHistogramAggregation(boundaries=cost_buckets)
+                ),
+                View(
+                    instrument_name="graphiti_cache_tokens_saved_per_request",
+                    aggregation=ExplicitBucketHistogramAggregation(boundaries=token_buckets)
+                ),
                 # Token histogram views
                 View(
                     instrument_name="graphiti_prompt_tokens_per_request",
@@ -120,6 +138,11 @@ class CacheMetricsExporter:
                 View(
                     instrument_name="graphiti_total_tokens_per_request",
                     aggregation=ExplicitBucketHistogramAggregation(boundaries=token_buckets)
+                ),
+                # Duration histogram view
+                View(
+                    instrument_name="graphiti_llm_request_duration_seconds",
+                    aggregation=ExplicitBucketHistogramAggregation(boundaries=duration_buckets)
                 ),
             ]
 
@@ -268,6 +291,39 @@ class CacheMetricsExporter:
                 name="graphiti_api_output_cost_all_models_total",
                 description="Total output cost across all models combined",
                 unit="USD"
+            ),
+            # === Error Metrics ===
+            "llm_errors_total": self._meter.create_counter(
+                name="graphiti_llm_errors_total",
+                description="Total LLM API errors by type (per model)",
+                unit="1"
+            ),
+            "llm_errors_all_models": self._meter.create_counter(
+                name="graphiti_llm_errors_all_models_total",
+                description="Total LLM API errors across all models",
+                unit="1"
+            ),
+            # === Throughput Metrics ===
+            "episodes_processed_total": self._meter.create_counter(
+                name="graphiti_episodes_processed_total",
+                description="Total episodes processed (per group_id)",
+                unit="1"
+            ),
+            "episodes_processed_all_groups": self._meter.create_counter(
+                name="graphiti_episodes_processed_all_groups_total",
+                description="Total episodes processed across all groups",
+                unit="1"
+            ),
+            # === Cache Write Metrics ===
+            "cache_write_tokens_total": self._meter.create_counter(
+                name="graphiti_cache_write_tokens_total",
+                description="Total tokens written to cache (per model)",
+                unit="1"
+            ),
+            "cache_write_tokens_all_models": self._meter.create_counter(
+                name="graphiti_cache_write_tokens_all_models_total",
+                description="Total tokens written to cache across all models",
+                unit="1"
             )
         }
 
@@ -354,6 +410,23 @@ class CacheMetricsExporter:
                 name="graphiti_api_output_cost_per_request",
                 description="Distribution of output/completion cost per request in USD",
                 unit="USD"
+            ),
+            # === Cache Savings Histograms (per request, on cache hit) ===
+            "cache_tokens_saved_per_request": self._meter.create_histogram(
+                name="graphiti_cache_tokens_saved_per_request",
+                description="Distribution of tokens saved per cache hit request",
+                unit="1"
+            ),
+            "cache_cost_saved_per_request": self._meter.create_histogram(
+                name="graphiti_cache_cost_saved_per_request",
+                description="Distribution of cost saved per cache hit request in USD",
+                unit="USD"
+            ),
+            # === Duration Histogram (per request) ===
+            "llm_request_duration": self._meter.create_histogram(
+                name="graphiti_llm_request_duration_seconds",
+                description="Distribution of LLM request latency in seconds",
+                unit="s"
             )
         }
 
@@ -364,6 +437,8 @@ class CacheMetricsExporter:
         Metrics are recorded twice:
         1. With model label for per-model distribution
         2. Without label for total across all models
+
+        Also records histogram data for per-request distribution analysis.
 
         Args:
             model: Gemini model identifier
@@ -386,6 +461,11 @@ class CacheMetricsExporter:
             self._counters["cache_tokens_saved_all_models"].add(tokens_saved)
             self._counters["cache_cost_saved_all_models"].add(cost_saved)
             self._counters["cache_requests_all_models"].add(1)
+
+            # Record histogram metrics (per-request distributions with model label)
+            if self._histograms:
+                self._histograms["cache_tokens_saved_per_request"].record(tokens_saved, attributes)
+                self._histograms["cache_cost_saved_per_request"].record(cost_saved, attributes)
 
             # Update session metrics for hit rate calculation
             self._session_metrics["hits"] += 1
@@ -496,6 +576,92 @@ class CacheMetricsExporter:
 
         except Exception as e:
             logger.error(f"Failed to record request metrics: {e}")
+
+    def record_request_duration(self, model: str, duration_seconds: float) -> None:
+        """
+        Record the duration of an LLM API request.
+
+        Args:
+            model: Model identifier (e.g., 'google/gemini-2.5-flash')
+            duration_seconds: Request duration in seconds
+        """
+        if not self.enabled or not self._histograms:
+            return
+
+        try:
+            attributes = {"model": model}
+            self._histograms["llm_request_duration"].record(duration_seconds, attributes)
+            logger.debug(f"Recorded request duration: model={model}, duration={duration_seconds:.3f}s")
+        except Exception as e:
+            logger.error(f"Failed to record request duration: {e}")
+
+    def record_error(self, model: str, error_type: str) -> None:
+        """
+        Record an LLM API error.
+
+        Args:
+            model: Model identifier (e.g., 'google/gemini-2.5-flash')
+            error_type: Error type/category (e.g., 'rate_limit', 'timeout', 'invalid_response')
+        """
+        if not self.enabled or not self._counters:
+            return
+
+        try:
+            # Record per-model with error type
+            attributes = {"model": model, "error_type": error_type}
+            self._counters["llm_errors_total"].add(1, attributes)
+
+            # Record aggregate
+            self._counters["llm_errors_all_models"].add(1)
+
+            logger.debug(f"Recorded LLM error: model={model}, type={error_type}")
+        except Exception as e:
+            logger.error(f"Failed to record error metric: {e}")
+
+    def record_episode_processed(self, group_id: str) -> None:
+        """
+        Record an episode being processed by Graphiti.
+
+        Args:
+            group_id: The group/namespace for the episode
+        """
+        if not self.enabled or not self._counters:
+            return
+
+        try:
+            # Record per-group
+            attributes = {"group_id": group_id}
+            self._counters["episodes_processed_total"].add(1, attributes)
+
+            # Record aggregate
+            self._counters["episodes_processed_all_groups"].add(1)
+
+            logger.debug(f"Recorded episode processed: group_id={group_id}")
+        except Exception as e:
+            logger.error(f"Failed to record episode metric: {e}")
+
+    def record_cache_write(self, model: str, tokens_written: int) -> None:
+        """
+        Record tokens written to cache (cache creation).
+
+        Args:
+            model: Model identifier (e.g., 'google/gemini-2.5-flash')
+            tokens_written: Number of tokens written to cache
+        """
+        if not self.enabled or not self._counters:
+            return
+
+        try:
+            # Record per-model
+            attributes = {"model": model}
+            self._counters["cache_write_tokens_total"].add(tokens_written, attributes)
+
+            # Record aggregate
+            self._counters["cache_write_tokens_all_models"].add(tokens_written)
+
+            logger.debug(f"Recorded cache write: model={model}, tokens={tokens_written}")
+        except Exception as e:
+            logger.error(f"Failed to record cache write metric: {e}")
 
 
 # Global metrics exporter instance

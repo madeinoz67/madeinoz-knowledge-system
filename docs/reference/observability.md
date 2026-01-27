@@ -151,9 +151,70 @@ These metrics populate when `MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED=true`:
 | `graphiti_cache_misses_total` | `model` | Cache misses per model |
 | `graphiti_cache_tokens_saved_total` | `model` | Tokens saved via caching |
 | `graphiti_cache_cost_saved_total` | `model` | Cost savings from caching (USD) |
+| `graphiti_cache_write_tokens_total` | `model` | Tokens written to cache (cache creation) |
 
-!!! success "Caching Now Available for Gemini"
-    **Prompt caching is now functional for Gemini models on OpenRouter.** The system routes Gemini models through the `/chat/completions` endpoint which supports multipart format with cache control markers. To enable caching, set `MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED=true`. Other models continue using the `/responses` endpoint where caching is not yet supported.
+**Cache Savings Histograms:**
+
+| Metric | Labels | Description |
+|--------|--------|-------------|
+| `graphiti_cache_tokens_saved_per_request` | `model` | Distribution of tokens saved per cache hit |
+| `graphiti_cache_cost_saved_per_request` | `model` | Distribution of cost saved per cache hit (USD) |
+
+!!! success "Caching Now Available for Gemini 2.5"
+    **Prompt caching is functional for Gemini 2.5 models on OpenRouter.** Gemini 2.5 Flash uses **implicit caching** (automatic, no markers needed) with a minimum of 1,028 tokens. The system routes Gemini models through the `/chat/completions` endpoint. To enable caching, set `MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED=true`. See [Prompt Caching](#prompt-caching-gemini) for details.
+
+### Duration Metrics
+
+Track LLM request latency for performance monitoring.
+
+| Metric | Labels | Description |
+|--------|--------|-------------|
+| `graphiti_llm_request_duration_seconds` | `model` | Distribution of LLM request latency |
+
+**Duration bucket boundaries (seconds):**
+
+```
+0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0, 15.0, 30.0, 60.0, 120.0, 300.0
+```
+
+**Bucket coverage:**
+
+| Range | Request Type |
+|-------|--------------|
+| 0.05s - 1s | Cached/simple requests |
+| 1s - 10s | Typical LLM calls |
+| 10s - 60s | Complex reasoning, large context |
+| 60s - 300s | Timeout territory |
+
+### Error Metrics
+
+Track LLM API errors for reliability monitoring.
+
+| Metric | Labels | Description |
+|--------|--------|-------------|
+| `graphiti_llm_errors_total` | `model`, `error_type` | Error count by model and type |
+| `graphiti_llm_errors_all_models_total` | - | Total errors across all models |
+
+**Error types:**
+
+- `rate_limit` - API rate limit exceeded
+- `timeout` - Request timeout
+- `BadRequestError`, `APIError`, etc. - Exception class names
+
+!!! note "Error Metrics Visibility"
+    Error counters only appear in Prometheus after at least one error has been recorded. If you don't see these metrics, it means no LLM errors have occurred.
+
+### Throughput Metrics
+
+Track episode processing volume.
+
+| Metric | Labels | Description |
+|--------|--------|-------------|
+| `graphiti_episodes_processed_total` | `group_id` | Episodes processed per group |
+| `graphiti_episodes_processed_all_groups_total` | - | Total episodes across all groups |
+
+!!! note "Throughput Metrics Integration"
+    Episode metrics require integration into the MCP tool handler and may not be active in all deployments.
 
 ## Prometheus Integration
 
@@ -213,6 +274,24 @@ histogram_quantile(0.99, rate(graphiti_total_tokens_per_request_bucket[5m]))
 histogram_quantile(0.50, rate(graphiti_api_cost_per_request_bucket[5m]))
 ```
 
+**P95 request duration:**
+
+```promql
+histogram_quantile(0.95, rate(graphiti_llm_request_duration_seconds_bucket[5m]))
+```
+
+**Average request duration:**
+
+```promql
+rate(graphiti_llm_request_duration_seconds_sum[5m]) / rate(graphiti_llm_request_duration_seconds_count[5m])
+```
+
+**Error rate by model:**
+
+```promql
+sum by (model) (rate(graphiti_llm_errors_total[5m]))
+```
+
 ## Understanding Histogram Buckets
 
 Prometheus histograms are **cumulative**. Each bucket shows the count of observations **less than or equal to** that boundary.
@@ -235,10 +314,24 @@ graphiti_api_cost_per_request_USD_bucket{le="0.0005"} 5.0
 
 A basic Grafana dashboard can be created with these panels:
 
+**Usage & Cost:**
+
 1. **Token Usage Rate** - `rate(graphiti_total_tokens_all_models_total[5m])`
 2. **Cost Rate ($/hour)** - `rate(graphiti_api_cost_all_models_total[1h]) * 3600`
 3. **Request Cost Distribution** - Histogram panel with `graphiti_api_cost_per_request_bucket`
 4. **Token Usage by Model** - `sum by (model) (rate(graphiti_total_tokens_total[5m]))`
+
+**Performance:**
+
+5. **Request Duration P95** - `histogram_quantile(0.95, rate(graphiti_llm_request_duration_seconds_bucket[5m]))`
+6. **Request Duration Heatmap** - Heatmap panel with `graphiti_llm_request_duration_seconds_bucket`
+7. **Error Rate** - `sum(rate(graphiti_llm_errors_total[5m]))`
+
+**Caching (when enabled):**
+
+8. **Cache Hit Rate** - `graphiti_cache_hit_rate`
+9. **Cost Savings Rate** - `rate(graphiti_cache_cost_saved_all_models_total[1h]) * 3600`
+10. **Tokens Saved** - `increase(graphiti_cache_tokens_saved_all_models_total[1h])`
 
 ## Troubleshooting
 
@@ -284,20 +377,206 @@ This shows per-request metrics in container logs:
 📊 Metrics: prompt=1234, completion=567, cost=$0.000089, input_cost=$0.000062, output_cost=$0.000027
 ```
 
+## Prompt Caching (Gemini)
+
+Prompt caching reduces API costs by reusing previously processed prompt content. The system automatically caches system prompts and repeated content, serving subsequent requests from cache at reduced cost.
+
+### How It Works
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    First Request (Cache Miss)                    │
+├─────────────────────────────────────────────────────────────────┤
+│  System Prompt (800 tokens) ──► LLM processes ──► Cache stored  │
+│  User Message (200 tokens)  ──► LLM processes ──► Response      │
+│                                                                  │
+│  Cost: Full price for 1000 tokens                               │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                   Second Request (Cache Hit)                     │
+├─────────────────────────────────────────────────────────────────┤
+│  System Prompt (800 tokens) ──► Retrieved from cache (0.25x)    │
+│  User Message (200 tokens)  ──► LLM processes ──► Response      │
+│                                                                  │
+│  Cost: 0.25x for cached 800 + full for 200 = 75% savings        │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Gemini Caching Modes
+
+| Model Family | Caching Mode | Minimum Tokens | How It Works |
+|--------------|--------------|----------------|--------------|
+| Gemini 2.5 | **Implicit** | 1,028 | Automatic - no markers needed |
+| Gemini 2.0 | **Explicit** | 4,096 | Requires `cache_control` markers |
+
+**Recommendation:** Use **Gemini 2.5 Flash** (`google/gemini-2.5-flash`) for best caching results. It has a lower token threshold (1,028 vs 4,096) and caching is automatic.
+
+### Implicit vs Explicit Caching
+
+**Implicit Caching (Gemini 2.5):**
+
+- Automatic - Gemini decides what to cache
+- No special formatting required
+- Works with standard message format
+- Cache keys based on content hash
+
+**Explicit Caching (Gemini 2.0):**
+
+- Requires `cache_control: {"type": "ephemeral"}` markers
+- Messages must use multipart format
+- Minimum 4,096 tokens required
+- Most Graphiti prompts (~800 tokens) are below this threshold
+
+### Configuration
+
+```bash
+# Enable prompt caching (required)
+MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED=true
+
+# Enable metrics collection for cache statistics (recommended)
+MADEINOZ_KNOWLEDGE_PROMPT_CACHE_METRICS_ENABLED=true
+
+# Enable verbose caching logs for debugging (optional)
+MADEINOZ_KNOWLEDGE_PROMPT_CACHE_LOG_REQUESTS=true
+
+# Recommended model for caching
+MADEINOZ_KNOWLEDGE_MODEL_NAME=google/gemini-2.5-flash
+```
+
+### Cache Pricing
+
+Cached tokens are billed at **0.25x** the normal input token price:
+
+| Model | Input Price | Cached Price | Savings |
+|-------|-------------|--------------|---------|
+| Gemini 2.5 Flash | $0.15/1M | $0.0375/1M | 75% |
+| Gemini 2.5 Pro | $1.25/1M | $0.3125/1M | 75% |
+| Gemini 2.0 Flash | $0.10/1M | $0.025/1M | 75% |
+
+### Cache Metrics to Monitor
+
+| Metric | Purpose |
+|--------|---------|
+| `graphiti_cache_hit_rate` | Current session hit rate (%) |
+| `graphiti_cache_tokens_saved_total` | Cumulative tokens served from cache |
+| `graphiti_cache_cost_saved_total` | Cumulative USD saved |
+| `graphiti_cache_hits_total` / `graphiti_cache_misses_total` | Hit/miss ratio |
+
+### Example PromQL Queries
+
+**Cache hit rate over time:**
+
+```promql
+graphiti_cache_hit_rate
+```
+
+**Cost savings rate ($/hour):**
+
+```promql
+rate(graphiti_cache_cost_saved_all_models_total[1h]) * 3600
+```
+
+**Tokens saved in last hour:**
+
+```promql
+increase(graphiti_cache_tokens_saved_all_models_total[1h])
+```
+
+**Cache effectiveness by model:**
+
+```promql
+sum by (model) (graphiti_cache_hits_total) / sum by (model) (graphiti_cache_requests_total) * 100
+```
+
+### Troubleshooting Caching
+
+#### Cache Hits Are Zero
+
+**Possible causes:**
+
+1. **Model doesn't support caching** - Only Gemini models support caching
+2. **Token count below threshold** - Gemini 2.0 requires 4,096+ tokens (use Gemini 2.5 instead)
+3. **Caching not enabled** - Set `MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED=true`
+4. **Different prompts** - Cache keys are content-based; slight variations = cache miss
+
+**Debug steps:**
+
+```bash
+# Check caching is enabled
+curl -s http://localhost:9091/metrics | grep graphiti_cache_enabled
+
+# Check for any cache activity
+curl -s http://localhost:9091/metrics | grep graphiti_cache
+
+# Enable verbose logging
+MADEINOZ_KNOWLEDGE_PROMPT_CACHE_LOG_REQUESTS=true
+```
+
+#### Low Cache Hit Rate
+
+**Expected behavior:**
+
+- First request for any unique prompt = cache miss
+- Subsequent identical prompts = cache hit
+- Entity extraction uses similar system prompts = good cache reuse
+
+**Typical hit rates:**
+
+| Scenario | Expected Hit Rate |
+|----------|-------------------|
+| Single `add_memory` call | 0% (first request) |
+| Bulk import (10+ episodes) | 30-50% |
+| Steady-state operation | 40-60% |
+
+### Implementation Details
+
+The caching system consists of three components:
+
+1. **`caching_wrapper.py`** - Wraps OpenAI client methods
+   - Adds timing for duration metrics
+   - Catches errors for error metrics
+   - Extracts cache statistics from responses
+
+2. **`message_formatter.py`** - Formats messages for caching
+   - Adds `cache_control` markers for explicit caching
+   - Detects Gemini model families
+
+3. **`metrics_exporter.py`** - Exports to Prometheus
+   - Counters for totals
+   - Histograms for distributions
+   - Gauges for current state
+
+**Files modified (in `docker/patches/`):**
+
+```
+docker/patches/
+├── caching_wrapper.py      # Client wrapper with timing/error tracking
+├── caching_llm_client.py   # LLM client routing
+├── message_formatter.py    # Cache marker formatting
+├── cache_metrics.py        # Metrics calculation
+├── session_metrics.py      # Session-level aggregation
+└── metrics_exporter.py     # Prometheus export
+```
+
 ## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                     OpenRouter API                               │
 │  (returns: usage, cost, cost_details, prompt_tokens_details)    │
+│  (Gemini: cached_tokens in prompt_tokens_details)               │
 └─────────────────────────────────────────────────────────────────┘
+                              ▲
                               │
-                              ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                   caching_wrapper.py                             │
 │  - Wraps responses.parse() and chat.completions.create()        │
-│  - Extracts metrics from response                                │
-│  - Calls metrics_exporter.record_request_metrics()              │
+│  - Adds timing (record_request_duration)                         │
+│  - Catches errors (record_error)                                 │
+│  - Extracts cache metrics from response                          │
+│  - Records cache hits/misses and savings                         │
 └─────────────────────────────────────────────────────────────────┘
                               │
                               ▼
@@ -305,7 +584,9 @@ This shows per-request metrics in container logs:
 │                   metrics_exporter.py                            │
 │  - OpenTelemetry MeterProvider with custom Views                │
 │  - Prometheus exporter on port 9090/9091                        │
-│  - Counters, Histograms, Gauges                                 │
+│  - Counters: tokens, cost, cache hits/misses, errors            │
+│  - Histograms: tokens/request, cost/request, duration           │
+│  - Gauges: cache_enabled, cache_hit_rate                        │
 └─────────────────────────────────────────────────────────────────┘
                               │
                               ▼
@@ -313,7 +594,7 @@ This shows per-request metrics in container logs:
 │              Prometheus / Grafana                                │
 │  - Scrape /metrics endpoint                                      │
 │  - Visualize with dashboards                                     │
-│  - Alert on thresholds                                           │
+│  - Alert on thresholds (cost, errors, latency)                  │
 └─────────────────────────────────────────────────────────────────┘
 ```
 

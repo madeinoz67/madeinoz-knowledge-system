@@ -331,6 +331,24 @@ Multiple groups can be searched together using the search workflows.
 
 ## Performance Configuration
 
+### Rate Limiting
+
+```bash
+RATE_LIMIT_MAX_REQUESTS=60
+RATE_LIMIT_WINDOW_SECONDS=60
+RATE_LIMIT_ENABLED=true
+```
+
+Controls request rate limiting per IP address. Protects against abuse and DoS attacks.
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `RATE_LIMIT_MAX_REQUESTS` | 60 | Maximum requests per time window per IP |
+| `RATE_LIMIT_WINDOW_SECONDS` | 60 | Time window in seconds |
+| `RATE_LIMIT_ENABLED` | true | Set to `false` to disable (not recommended for production) |
+
+**Note:** Rate limiting only applies to HTTP transport mode. SSE/stdio modes do not use rate limiting.
+
 ### Concurrency/Semaphore Limit
 
 ```bash
@@ -596,6 +614,33 @@ To update configuration after installation:
 - Verify `MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS` matches your embedding model
 - Cannot change embedding models without clearing the graph
 - See "Database Backend Configuration" section for model-to-dimension mapping
+
+## System Limits Summary
+
+All configurable limits in one place:
+
+| Limit | Default | Variable | Notes |
+|-------|---------|----------|-------|
+| **Rate limit** | 60 req/60s per IP | `RATE_LIMIT_MAX_REQUESTS`, `RATE_LIMIT_WINDOW_SECONDS` | HTTP mode only |
+| **Concurrent LLM requests** | 10 | `SEMAPHORE_LIMIT` | Tune based on API tier |
+| **Search results (nodes)** | 10 | MCP `max_nodes` param | Per-request |
+| **Search results (facts)** | 10 | MCP `max_facts` param | Per-request |
+| **Search results (episodes)** | 10 | MCP `max_episodes` param | Per-request |
+| **Cache minimum tokens** | 1024 | N/A | Requests < 1024 tokens skip caching |
+| **Episode body size** | No limit | N/A | Bounded by LLM context window |
+
+### Content Size Guidelines
+
+While there's no hard limit on episode body size, consider these guidelines:
+
+| Content Size | Behavior |
+|--------------|----------|
+| < 10 KB | Optimal - fast processing, reliable extraction |
+| 10-50 KB | Good - may take longer to process |
+| 50-100 KB | Acceptable - consider chunking for bulk import |
+| > 100 KB | Not recommended - may hit LLM context limits or timeout |
+
+**For large documents:** Use the bulk import workflow which automatically handles chunking. See [Advanced Usage](../usage/advanced.md).
 
 ## Environment Variable Precedence
 
