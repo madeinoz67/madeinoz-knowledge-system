@@ -120,6 +120,17 @@ async function generateEnvFiles(
   mcpLines.push(`GRAPHITI_TELEMETRY_ENABLED=${containerEnv.GRAPHITI_TELEMETRY_ENABLED}`);
   mcpLines.push('');
 
+  // Prompt Caching Configuration (Gemini)
+  if (containerEnv.PROMPT_CACHE_ENABLED) {
+    mcpLines.push('# Prompt Caching Configuration');
+    mcpLines.push(`PROMPT_CACHE_ENABLED=${containerEnv.PROMPT_CACHE_ENABLED}`);
+    if (containerEnv.PROMPT_CACHE_METRICS_ENABLED)
+      mcpLines.push(`PROMPT_CACHE_METRICS_ENABLED=${containerEnv.PROMPT_CACHE_METRICS_ENABLED}`);
+    if (containerEnv.PROMPT_CACHE_LOG_REQUESTS)
+      mcpLines.push(`PROMPT_CACHE_LOG_REQUESTS=${containerEnv.PROMPT_CACHE_LOG_REQUESTS}`);
+    mcpLines.push('');
+  }
+
   await Bun.write(envFiles.mcp, mcpLines.join('\n'));
   cli.dim(`  Generated: ${envFiles.mcp}`);
 }

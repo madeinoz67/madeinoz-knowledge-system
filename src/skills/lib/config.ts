@@ -55,6 +55,11 @@ export interface KnowledgeConfig {
   // Telemetry
   GRAPHITI_TELEMETRY_ENABLED: string;
 
+  // Prompt Caching (Gemini)
+  PROMPT_CACHE_ENABLED?: string;
+  PROMPT_CACHE_METRICS_ENABLED?: string;
+  PROMPT_CACHE_LOG_REQUESTS?: string;
+
   // Container Configuration
   NETWORK_NAME: string;
   FALKORDB_CONTAINER: string;
@@ -240,6 +245,10 @@ export class ConfigLoader {
       MADEINOZ_KNOWLEDGE_NEO4J_USER: 'NEO4J_USER',
       MADEINOZ_KNOWLEDGE_NEO4J_PASSWORD: 'NEO4J_PASSWORD',
       MADEINOZ_KNOWLEDGE_NEO4J_DATABASE: 'NEO4J_DATABASE',
+      // Prompt Caching
+      MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED: 'PROMPT_CACHE_ENABLED',
+      MADEINOZ_KNOWLEDGE_PROMPT_CACHE_METRICS_ENABLED: 'PROMPT_CACHE_METRICS_ENABLED',
+      MADEINOZ_KNOWLEDGE_PROMPT_CACHE_LOG_REQUESTS: 'PROMPT_CACHE_LOG_REQUESTS',
     };
 
     // Apply mappings - MADEINOZ_KNOWLEDGE_* takes PRECEDENCE over unprefixed variables
@@ -326,6 +335,11 @@ export class ConfigLoader {
         'GRAPHITI_TELEMETRY_ENABLED',
         DEFAULTS.GRAPHITI_TELEMETRY_ENABLED
       ),
+
+      // Prompt Caching (Gemini)
+      PROMPT_CACHE_ENABLED: this.getEnvValue(mapped, 'PROMPT_CACHE_ENABLED', ''),
+      PROMPT_CACHE_METRICS_ENABLED: this.getEnvValue(mapped, 'PROMPT_CACHE_METRICS_ENABLED', ''),
+      PROMPT_CACHE_LOG_REQUESTS: this.getEnvValue(mapped, 'PROMPT_CACHE_LOG_REQUESTS', ''),
 
       // Container Configuration
       NETWORK_NAME: this.getEnvValue(mapped, 'NETWORK_NAME', DEFAULTS.NETWORK_NAME),
@@ -449,6 +463,17 @@ export class ConfigLoader {
       env.EMBEDDER_DIMENSIONS = config.EMBEDDER_DIMENSIONS || DEFAULTS.EMBEDDER_DIMENSIONS;
     } else if (config.EMBEDDER_MODEL) {
       env.EMBEDDER_MODEL = config.EMBEDDER_MODEL;
+    }
+
+    // Prompt Caching (Gemini)
+    if (config.PROMPT_CACHE_ENABLED) {
+      env.PROMPT_CACHE_ENABLED = config.PROMPT_CACHE_ENABLED;
+    }
+    if (config.PROMPT_CACHE_METRICS_ENABLED) {
+      env.PROMPT_CACHE_METRICS_ENABLED = config.PROMPT_CACHE_METRICS_ENABLED;
+    }
+    if (config.PROMPT_CACHE_LOG_REQUESTS) {
+      env.PROMPT_CACHE_LOG_REQUESTS = config.PROMPT_CACHE_LOG_REQUESTS;
     }
 
     return env;

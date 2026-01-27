@@ -347,10 +347,10 @@ class CacheMetricsExporter:
         def get_cache_enabled(_options):
             """Return cache enabled status (1=enabled, 0=disabled).
 
-            Checks the MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED env var,
+            Checks the PROMPT_CACHE_ENABLED env var (prefix stripped in container),
             NOT the metrics exporter enabled status.
             """
-            cache_enabled = os.getenv("MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED", "false").lower() == "true"
+            cache_enabled = os.getenv("PROMPT_CACHE_ENABLED", "false").lower() == "true"
             return [metrics.Observation(1 if cache_enabled else 0)]
 
         self._gauges = {
