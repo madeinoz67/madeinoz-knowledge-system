@@ -13,6 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Gemini prompt caching with monitoring stack [006] ([#12](https://github.com/madeinoz67/madeinoz-knowledge-system/issues/12))
 
+
+### Fixed
+
+
+- Release workflow checkout main before pushing CHANGELOG
+
 ## [1.3.0] - 2026-01-26
 
 
