@@ -15,7 +15,7 @@ Purpose: Personal knowledge management with automatic entity extraction
 Backend: Neo4j (default) or FalkorDB graph database
 LLM: Requires cloud LLM (Gemini, GPT-4o recommended) for entity extraction
 Embeddings: Local Ollama (mxbai-embed-large) or cloud embeddings
-Caching: Gemini 2.5 Flash supports prompt caching (75% cost reduction)
+Caching: Gemini 2.5 Flash supports prompt caching (est 15-20% cost reduction)
 Metrics: Prometheus endpoint on port 9090/9091
 
 Key MCP Tools:
@@ -133,7 +133,7 @@ Two graph database options:
 
 ### Prompt Caching (Gemini)
 
-Reduce LLM costs by up to 75% with Gemini prompt caching:
+Reduce LLM costs by up to 15-20% (est) with Gemini prompt caching:
 
 ```bash
 # Enable in ~/.claude/.env

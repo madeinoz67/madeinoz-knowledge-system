@@ -45,6 +45,7 @@ nav:
   - Usage:
     - Basic Usage: usage/basic-usage.md
     - Advanced: usage/advanced.md
+    - Monitoring: usage/monitoring.md
     - Backup & Restore: usage/backup-restore.md
   - Concepts:
     - Architecture: concepts/architecture.md
@@ -57,6 +58,7 @@ nav:
     - CLI: reference/cli.md
     - Configuration: reference/configuration.md
     - Observability & Metrics: reference/observability.md
+    - Cache Implementation: reference/cache-implementation.md
     - Model Guide: reference/model-guide.md
     - Benchmarks: reference/benchmarks.md
     - Developer Notes: reference/developer-notes.md

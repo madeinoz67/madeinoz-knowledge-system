@@ -486,6 +486,9 @@ This shows per-request metrics in container logs:
 
 Prompt caching reduces API costs by reusing previously processed prompt content. The system automatically caches system prompts and repeated content, serving subsequent requests from cache at reduced cost.
 
+!!! info "Developer Documentation"
+    For implementation details including architecture, code flow, and metrics internals, see the [Cache Implementation Guide](cache-implementation.md).
+
 ### How It Works
 
 ```

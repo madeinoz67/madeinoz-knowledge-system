@@ -32,7 +32,7 @@ Metrics Categories:
 
 The Madeinoz Knowledge System includes a built-in monitoring stack to help you track token usage, costs, cache performance, and errors in real-time.
 
-![Grafana Dashboard Overview](../images/grafana-dashboard-overview.png)
+![Grafana Dashboard Overview](../assets/images/grafana-dashboard-overview.png)
 
 ## What You'll See
 
@@ -80,7 +80,7 @@ Access points:
 
 When you first access Grafana, you'll see the login screen:
 
-![Grafana Login](../images/grafana-login.png)
+![Grafana Login](../assets/images/grafana-login.png)
 
 **Default credentials:**
 
@@ -151,7 +151,7 @@ Error tracking:
 
 You can check that Prometheus is scraping metrics correctly:
 
-![Prometheus Targets](../images/prometheus-targets.png)
+![Prometheus Targets](../assets/images/prometheus-targets.png)
 
 Navigate to http://localhost:9092/targets and verify:
 
@@ -241,5 +241,5 @@ GRAFANA_ADMIN_PASSWORD=your-secure-password
 ## Next Steps
 
 - Explore the [observability reference](../reference/observability.md) for detailed metric descriptions
-- Learn about [cache optimization](advanced.md#cache-optimization) to improve efficiency
-- Set up [alerting rules](../reference/observability.md#alerting) for proactive monitoring
+- Learn about [advanced usage patterns](advanced.md) for optimization tips
+- Explore [detailed metrics reference](../reference/observability.md) for all available metrics
