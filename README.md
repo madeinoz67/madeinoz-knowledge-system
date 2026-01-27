@@ -37,7 +37,7 @@ keywords: [knowledge, graph, memory, semantic search, entity extraction, relatio
 > Persistent personal knowledge management system powered by Graphiti knowledge graph - automatically extracts entities, relationships, and temporal context from conversations and documents.
 
 [![CI](https://github.com/madeinoz67/madeinoz-knowledge-system/actions/workflows/ci.yml/badge.svg)](https://github.com/madeinoz67/madeinoz-knowledge-system/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/madeinoz67/madeinoz-knowledge-system/actions/workflows/codeql.yml/badge.svg)](https://github.com/madeinoz67/madeinoz-knowledge-system/actions/workflows/codeql.yml)
+[![CodeQL](https://github.com/madeinoz67/madeinoz-knowledge-system/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/madeinoz67/madeinoz-knowledge-system/security/code-scanning)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/madeinoz67/madeinoz-knowledge-system)](https://github.com/madeinoz67/madeinoz-knowledge-system/releases/latest)
 [![GitHub Container Registry](https://img.shields.io/badge/ghcr.io-madeinoz--knowledge--system-blue?logo=docker)](https://ghcr.io/madeinoz67/madeinoz-knowledge-system)
 
