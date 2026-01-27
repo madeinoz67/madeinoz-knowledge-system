@@ -20,6 +20,12 @@ description: "Task list template for feature implementation"
 
 ## Path Conventions
 
+**For this project (Madeinoz Knowledge System):**
+- **Python code**: `docker/patches/` for implementation, `docker/tests/` for tests
+- **TypeScript code**: `src/` for implementation, `tests/` for tests (if needed)
+- See Constitution Principle VII (Language Separation) for strict directory boundaries
+
+**Generic conventions for other projects:**
 - **Single project**: `src/`, `tests/` at repository root
 - **Web app**: `backend/src/`, `frontend/src/`
 - **Mobile**: `api/src/`, `ios/src/` or `android/src/`

@@ -1,7 +1,7 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version Change: 1.1.0 → 1.1.1 (PATCH - Clarification of CLI invocation method)
+Version Change: 1.1.1 → 1.2.0 (MINOR - New principle added)
 
 Modified Principles:
 - [UNCHANGED] I. Container-First Architecture
@@ -9,10 +9,10 @@ Modified Principles:
 - [UNCHANGED] III. Zero-Friction Knowledge Capture
 - [UNCHANGED] IV. Query Resilience
 - [UNCHANGED] V. Graceful Degradation
-- [CLARIFIED] VI. Codanna-First Development - Now specifies CLI invocation via Bash
+- [UNCHANGED] VI. Codanna-First Development
 
 Added Sections:
-- None
+- [NEW] VII. Language Separation - Establishes strict directory boundaries between Python (docker/) and TypeScript (src/) code
 
 Removed Sections:
 - None
@@ -20,12 +20,12 @@ Removed Sections:
 Templates Requiring Updates:
 - .specify/templates/plan-template.md ✅ (no changes needed - Constitution Check is generic)
 - .specify/templates/spec-template.md ✅ (no changes needed - requirements structure compatible)
-- .specify/templates/tasks-template.md ✅ (no changes needed - phase structure aligns)
+- .specify/templates/tasks-template.md ⚠ (UPDATED - Path Conventions section amended to reference project-specific language separation)
 - .specify/templates/checklist-template.md ✅ (no changes needed - generic structure)
 - .specify/templates/agent-file-template.md ✅ (no changes needed - generic structure)
 
 Follow-up TODOs:
-- None - clarification only, no structural changes
+- None - new principle codifies existing practice from feature 006 integration test placement
 -->
 
 # Madeinoz Knowledge System Constitution
@@ -137,6 +137,46 @@ codanna mcp analyze_impact symbol_name:<name>
 
 **Rationale:** The Codanna CLI provides concise text output that conserves context window tokens (3-5x more efficient than JSON). Native MCP tools return verbose JSON by default, consuming excessive context. Using CLI-first via Bash ensures consistent, token-efficient code intelligence operations.
 
+### VII. Language Separation
+
+Python and TypeScript code MUST be kept in separate directory trees and MUST NOT be mixed.
+
+**Non-Negotiable Rules:**
+- Python code (server, patches, utilities) MUST live in `docker/` directory
+- TypeScript code (CLI, tools, client libraries) MUST live in `src/` directory
+- Python tests MUST live in `docker/tests/` (unit and integration subdirectories)
+- TypeScript tests MUST live in `tests/` at repository root
+- NEVER create Python files in `src/` or TypeScript files in `docker/patches/`
+- Build artifacts MUST respect language boundaries (Python: `docker/.venv`, `docker/__pycache__`; TypeScript: `dist/`, `node_modules/`)
+
+**Directory Structure:**
+
+```text
+docker/                      # Python ecosystem
+├── patches/                 # Python implementation code
+│   ├── graphiti_mcp_server.py
+│   ├── factories.py
+│   ├── cache_metrics.py
+│   └── ...
+├── tests/                   # Python tests
+│   ├── unit/               # Python unit tests
+│   └── integration/        # Python integration tests
+└── Dockerfile              # Python container definition
+
+src/                         # TypeScript ecosystem
+├── server/                 # TypeScript server code
+│   ├── server-cli.ts
+│   ├── install.ts
+│   └── lib/
+├── skills/                 # PAI skill definitions
+└── hooks/                  # Session lifecycle hooks
+
+tests/                       # TypeScript tests (if needed)
+└── ...
+```
+
+**Rationale:** Mixing languages in the same directory tree creates confusion about runtime requirements, complicates build processes, and makes dependency management ambiguous. Clear separation enables language-specific tooling (Python virtual environments, TypeScript path aliases, linters) to operate independently without conflicts. This principle emerged from feature 006 where integration tests were initially placed in root `tests/` before being correctly relocated to `docker/tests/integration/`.
+
 ## Technical Constraints
 
 **Runtime Environment:**
@@ -154,7 +194,7 @@ codanna mcp analyze_impact symbol_name:<name>
 - Per-installation config via `.env` files (never committed)
 
 **Testing Requirements:**
-- Unit tests via `bun test`
+- Unit tests via `bun test` (TypeScript) or `pytest` (Python)
 - Integration tests require running containers
 - All tests MUST pass before merge to master
 
@@ -163,9 +203,9 @@ codanna mcp analyze_impact symbol_name:<name>
 **Code Changes:**
 1. Create feature branch from master
 2. Use Codanna CLI to explore existing codebase and understand context (Principle VI)
-3. Implement changes following Constitution principles
+3. Implement changes following Constitution principles, respecting language separation (Principle VII)
 4. Run `bun run typecheck` - MUST pass with no errors
-5. Run `bun test` - all tests MUST pass
+5. Run `bun test` (TypeScript) and/or `pytest docker/tests` (Python) - all tests MUST pass
 6. Update documentation if user-facing behavior changes
 7. Create PR with clear description of changes
 
@@ -201,4 +241,4 @@ This Constitution supersedes all other practices in the Madeinoz Knowledge Syste
 - Constitution Check in plan-template.md MUST be evaluated for each feature
 - Complexity additions MUST be justified in Complexity Tracking table
 
-**Version**: 1.1.1 | **Ratified**: 2026-01-18 | **Last Amended**: 2026-01-19
+**Version**: 1.2.0 | **Ratified**: 2026-01-18 | **Last Amended**: 2026-01-27
