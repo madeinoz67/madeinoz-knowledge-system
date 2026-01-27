@@ -184,9 +184,18 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Save generated CHANGELOG.md before switching branches
+          cp CHANGELOG.md /tmp/CHANGELOG.md
+          # Checkout main to apply changelog update (tag checkout is detached HEAD)
+          git fetch origin main
+          git checkout main
+          # Restore the generated CHANGELOG.md
+          cp /tmp/CHANGELOG.md CHANGELOG.md
           git add CHANGELOG.md
           git diff --staged --quiet || git commit -m "docs: update CHANGELOG.md for ${{ github.ref_name }} [skip ci]"
-          git push origin HEAD:main
+          git push origin main
+          # Return to tag for subsequent build steps
+          git checkout ${{ github.ref_name }}
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
