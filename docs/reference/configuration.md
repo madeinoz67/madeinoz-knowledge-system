@@ -385,6 +385,45 @@ MADEINOZ_KNOWLEDGE_GRAPHITI_TELEMETRY_ENABLED=false
 
 Controls whether Graphiti sends anonymous telemetry. Default is `false` (disabled).
 
+## Metrics & Observability Configuration
+
+### Metrics Collection
+
+```bash
+MADEINOZ_KNOWLEDGE_PROMPT_CACHE_METRICS_ENABLED=true
+```
+
+Controls whether Prometheus metrics are collected and exported. Default is `true` (enabled).
+
+**Metrics endpoint:** `http://localhost:9091/metrics` (dev) or `http://localhost:9090/metrics` (prod)
+
+### Debug Logging
+
+```bash
+MADEINOZ_KNOWLEDGE_PROMPT_CACHE_LOG_REQUESTS=false
+```
+
+Enables detailed per-request metrics logging. When `true` and `LOG_LEVEL=DEBUG`, logs show:
+
+```
+📊 Metrics: prompt=1234, completion=567, cost=$0.000089
+```
+
+Default is `false` (disabled).
+
+### Prompt Caching (Experimental)
+
+```bash
+MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED=false
+```
+
+Controls prompt caching for Gemini models via OpenRouter. Default is `false` (disabled).
+
+!!! warning "Currently Blocked"
+    Prompt caching is blocked due to an OpenRouter API limitation. The `/responses` endpoint does not support the multipart format required for cache control markers. Metrics collection works regardless of this setting.
+
+For detailed metrics documentation, see the [Observability & Metrics](observability.md) reference.
+
 ## Query Sanitization (FalkorDB Only)
 
 For FalkorDB backend, special characters in group_ids and search queries are automatically sanitized to prevent Lucene query syntax errors.
