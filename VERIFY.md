@@ -789,7 +789,10 @@ lsof -i :7687
 > ALL tests MUST pass for the installation to be considered complete.
 > If any test fails, the knowledge system is NOT functional - troubleshoot before proceeding.
 
-Verify the complete system works end-to-end using the actual MCP tools.
+Verify the complete system works end-to-end using the knowledge CLI.
+
+> **Note:** The MCP server uses Streamable HTTP transport which requires session management.
+> The `knowledge-cli.ts` handles this internally. Raw curl commands require session initialization.
 
 ### 5.1 Knowledge Capture (add_memory)
 
@@ -797,77 +800,42 @@ Verify the complete system works end-to-end using the actual MCP tools.
 
 **Verification commands:**
 ```bash
-curl -s -X POST http://localhost:8000/mcp/ \
-    -H "Content-Type: application/json" \
-    -d '{
-        "jsonrpc":"2.0",
-        "id":1,
-        "method":"tools/call",
-        "params":{
-            "name":"add_memory",
-            "arguments":{
-                "name":"PAI Verification Test",
-                "episode_body":"Madeinoz Knowledge System verification test completed successfully.",
-                "source":"text",
-                "source_description":"verification test"
-            }
-        }
-    }' | head -20
+PAI_SKILLS="${PAI_DIR:-$HOME/.claude}/skills/Knowledge"
+bun run "$PAI_SKILLS/tools/knowledge-cli.ts" add_episode \
+    "PAI Verification Test" \
+    "Madeinoz Knowledge System verification test completed successfully." \
+    "verification test"
 ```
 
-**Expected result:** JSON response with success indication, no errors
+**Expected result:** `✓ Episode 'PAI Verification Test' queued for processing in group 'main'`
 
 ---
 
-### 5.2 Knowledge Search (search_memory_nodes)
+### 5.2 Knowledge Search (search_nodes)
 
 - [ ] **Can search knowledge graph nodes**
 
 **Verification commands:**
 ```bash
-curl -s -X POST http://localhost:8000/mcp/ \
-    -H "Content-Type: application/json" \
-    -d '{
-        "jsonrpc":"2.0",
-        "id":2,
-        "method":"tools/call",
-        "params":{
-            "name":"search_memory_nodes",
-            "arguments":{
-                "query":"Madeinoz Knowledge System",
-                "max_nodes":5
-            }
-        }
-    }' | head -20
+PAI_SKILLS="${PAI_DIR:-$HOME/.claude}/skills/Knowledge"
+bun run "$PAI_SKILLS/tools/knowledge-cli.ts" search_nodes "verification" 5
 ```
 
-**Expected result:** JSON response with search results (may be empty if graph is new)
+**Expected result:** `Found N entities for "verification":` followed by entity list
 
 ---
 
-### 5.3 Relationship Search (search_memory_facts)
+### 5.3 Relationship Search (search_facts)
 
 - [ ] **Can search relationships/facts**
 
 **Verification commands:**
 ```bash
-curl -s -X POST http://localhost:8000/mcp/ \
-    -H "Content-Type: application/json" \
-    -d '{
-        "jsonrpc":"2.0",
-        "id":3,
-        "method":"tools/call",
-        "params":{
-            "name":"search_memory_facts",
-            "arguments":{
-                "query":"PAI",
-                "max_facts":5
-            }
-        }
-    }' | head -20
+PAI_SKILLS="${PAI_DIR:-$HOME/.claude}/skills/Knowledge"
+bun run "$PAI_SKILLS/tools/knowledge-cli.ts" search_facts "PAI" 5
 ```
 
-**Expected result:** JSON response with facts/relationships (may be empty if graph is new)
+**Expected result:** `Found N facts for "PAI":` followed by relationship list
 
 ---
 
@@ -877,22 +845,11 @@ curl -s -X POST http://localhost:8000/mcp/ \
 
 **Verification commands:**
 ```bash
-curl -s -X POST http://localhost:8000/mcp/ \
-    -H "Content-Type: application/json" \
-    -d '{
-        "jsonrpc":"2.0",
-        "id":4,
-        "method":"tools/call",
-        "params":{
-            "name":"get_episodes",
-            "arguments":{
-                "last_n":5
-            }
-        }
-    }' | head -20
+PAI_SKILLS="${PAI_DIR:-$HOME/.claude}/skills/Knowledge"
+bun run "$PAI_SKILLS/tools/knowledge-cli.ts" get_episodes 5
 ```
 
-**Expected result:** JSON array with episodes (includes test episode from 5.1)
+**Expected result:** `Recent episodes (5):` followed by episode list (includes test episode from 5.1)
 
 ---
 
