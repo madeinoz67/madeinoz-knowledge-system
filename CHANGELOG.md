@@ -5,14 +5,6 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-
-
-### Fixed
-
-
-- Correct icon path in README
-
 ## [1.5.0] - 2026-01-28
 
 
@@ -21,6 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fix metric names and add heatmap visualizations
 - Configurable memory sync with external config (v1.5.0) ([#13](https://github.com/madeinoz67/madeinoz-knowledge-system/issues/13))
+
+
+### Fixed
+
+
+- Correct icon path in README
+- Discard local CHANGELOG.md changes before branch switch
 
 ## [1.4.1] - 2026-01-27
 
