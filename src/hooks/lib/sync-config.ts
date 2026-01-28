@@ -311,7 +311,7 @@ function parseEnvNumber(value: string | undefined, min: number, max: number): nu
 /**
  * Parse comma-separated patterns from environment variable.
  */
-function parseEnvPatterns(value: string | undefined): string[] {
+function _parseEnvPatterns(value: string | undefined): string[] {
   if (value === undefined || value === '') {
     return [];
   }

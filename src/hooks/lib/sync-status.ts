@@ -10,15 +10,11 @@
 import {
   loadSyncConfig,
   getAllSourcesWithStatus,
-  formatConfig,
-  type SyncConfiguration,
-  type SyncSource,
 } from './sync-config';
 import {
   loadSyncState,
   getSyncStats,
   getRecentlySynced,
-  type SyncState,
   type SyncedFile,
 } from './sync-state';
 

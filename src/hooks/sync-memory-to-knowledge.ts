@@ -41,8 +41,6 @@ import { checkHealth, addEpisode, type AddEpisodeParams } from './lib/knowledge-
 import {
   loadSyncConfig,
   getEnabledSources,
-  type SyncConfiguration,
-  type SyncSource,
 } from './lib/sync-config';
 import { checkAntiLoop } from './lib/anti-loop-patterns';
 import { getSyncStatus, formatSyncStatus } from './lib/sync-status';
