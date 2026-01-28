@@ -186,6 +186,8 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           # Save generated CHANGELOG.md before switching branches
           cp CHANGELOG.md /tmp/CHANGELOG.md
+          # Discard local changes so we can switch branches
+          git checkout -- CHANGELOG.md
           # Checkout main to apply changelog update (tag checkout is detached HEAD)
           git fetch origin main
           git checkout main
