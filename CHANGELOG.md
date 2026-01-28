@@ -11,37 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 
-- Configurable memory sync with environment variable controls [007]
-  - Enable/disable sync per source (LEARNING_ALGORITHM, LEARNING_SYSTEM, RESEARCH)
-  - Custom exclude patterns via MADEINOZ_KNOWLEDGE_SYNC_EXCLUDE_PATTERNS
-  - Max files per sync and verbose logging options
-  - External path configuration via config/sync-sources.json
-- Anti-loop detection to prevent knowledge query results from being re-synced [007]
-  - 16 built-in patterns for MCP tools, query phrases, and formatted output
-  - Prevents knowledge graph pollution from recursive syncing
-- Sync status CLI command (`--status`) showing configuration and recent activity [007]
-- Production Docker Compose for remote Neo4j deployment [007]
-  - Native service names (neo4j, knowledge-mcp)
-  - Self-contained deployment without PAI infrastructure
-- Remote deployment documentation at docs/installation/remote-deployment.md [007]
-
-
-### Changed
-
-
-- Consolidated memory sync into single SessionStart hook (deprecated realtime sync) [007]
-
-
-### Removed
-
-
-- Deprecated sync-learning-realtime.ts hook (functionality moved to main sync hook) [007]
-
-
-### Fixed
-
-
 - Fix metric names and add heatmap visualizations
+- Configurable memory sync with external config (v1.5.0) ([#13](https://github.com/madeinoz67/madeinoz-knowledge-system/issues/13))
 
 ## [1.4.1] - 2026-01-27
 
