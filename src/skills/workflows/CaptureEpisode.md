@@ -65,7 +65,7 @@ source_description: "Technical learning about Podman"
 **ALWAYS try CLI first - it's more reliable and token-efficient:**
 
 ```bash
-bun run tools/knowledge-cli.ts add_episode "Episode Title" "Content to store" "Source description"
+bun run ~/.claude/skills/Knowledge/tools/knowledge-cli.ts add_episode "Episode Title" "Content to store" "Source description"
 ```
 
 **CRITICAL: This command requires TWO separate quoted arguments (title AND body).**

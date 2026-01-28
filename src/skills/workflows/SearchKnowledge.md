@@ -72,7 +72,7 @@ Running the **SearchKnowledge** workflow from the **MadeinozKnowledgeSystem** sk
 **ALWAYS try CLI first - it's more reliable and token-efficient (30%+ savings):**
 
 ```bash
-bun run tools/knowledge-cli.ts search_nodes "search query" 10
+bun run ~/.claude/skills/Knowledge/tools/knowledge-cli.ts search_nodes "search query" 10
 ```
 
 **Parameters:**
@@ -285,16 +285,16 @@ query: "Podman container networking troubleshooting"
 **Temporal Searches (with date filters):**
 ```bash
 # Search from today
-bun run tools/knowledge-cli.ts search_nodes "PAI skills" --since today
+bun run ~/.claude/skills/Knowledge/tools/knowledge-cli.ts search_nodes "PAI skills" --since today
 
 # Search from last 7 days
-bun run tools/knowledge-cli.ts search_nodes "PAI skills" --since 7d
+bun run ~/.claude/skills/Knowledge/tools/knowledge-cli.ts search_nodes "PAI skills" --since 7d
 
 # Search within date range
-bun run tools/knowledge-cli.ts search_nodes "PAI skills" --since 2026-01-01 --until 2026-01-15
+bun run ~/.claude/skills/Knowledge/tools/knowledge-cli.ts search_nodes "PAI skills" --since 2026-01-01 --until 2026-01-15
 
 # Yesterday only
-bun run tools/knowledge-cli.ts search_nodes "PAI skills" --since yesterday --until today
+bun run ~/.claude/skills/Knowledge/tools/knowledge-cli.ts search_nodes "PAI skills" --since yesterday --until today
 ```
 
 **Temporal filter options:**

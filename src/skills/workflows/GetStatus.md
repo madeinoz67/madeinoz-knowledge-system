@@ -22,7 +22,7 @@ Running the **GetStatus** workflow from the **MadeinozKnowledgeSystem** skill...
 **Use the Knowledge CLI (preferred):**
 
 ```bash
-bun run tools/knowledge-cli.ts health
+bun run ~/.claude/skills/Knowledge/tools/knowledge-cli.ts health
 ```
 
 **Alternative: Direct curl check:**
@@ -55,7 +55,7 @@ bun run tools/logs.ts | head -50
 **ALWAYS try CLI first - it's more reliable and token-efficient (25%+ savings):**
 
 ```bash
-bun run tools/knowledge-cli.ts get_status
+bun run ~/.claude/skills/Knowledge/tools/knowledge-cli.ts get_status
 ```
 
 **Options:**
