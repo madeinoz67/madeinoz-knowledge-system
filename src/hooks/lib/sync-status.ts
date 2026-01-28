@@ -10,6 +10,8 @@
 import {
   loadSyncConfig,
   getAllSourcesWithStatus,
+  type SyncConfiguration,
+  type SyncSource,
 } from './sync-config';
 import {
   loadSyncState,
