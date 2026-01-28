@@ -6,8 +6,8 @@ global:
   evaluation_interval: 15s
 
 scrape_configs:
-  - job_name: 'graphiti-mcp'
+  - job_name: "knowledge-mcp"
     static_configs:
-      - targets: ['graphiti-mcp:9090']
-    metrics_path: '/metrics'
+      - targets: ["knowledge-mcp:9090"]
+    metrics_path: "/metrics"
     scrape_timeout: 10s

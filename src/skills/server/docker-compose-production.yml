@@ -18,10 +18,54 @@
 #   3. Run: docker compose -f docker-compose-production.yml up -d
 #
 # Environment Variables (configure in .env file or export):
-#   NEO4J_PASSWORD=your-secure-password     (required)
+#
+# REQUIRED:
+#   NEO4J_PASSWORD=your-secure-password     (required - change from default)
 #   OPENAI_API_KEY=sk-...                   (required for LLM operations)
-#   MODEL_NAME=gpt-4o-mini                  (optional, default: gpt-4o-mini)
-#   EMBEDDING_MODEL_NAME=text-embedding-3-small  (optional)
+#
+# DATABASE:
+#   DATABASE_TYPE=neo4j                     (neo4j or falkordb, default: neo4j)
+#   NEO4J_DATABASE=neo4j                    (default: neo4j)
+#
+# API KEYS (optional - depends on LLM_PROVIDER):
+#   ANTHROPIC_API_KEY=sk-...                (for Anthropic Claude models)
+#   GOOGLE_API_KEY=AIza...                  (for Google Gemini models)
+#   GROQ_API_KEY=gsk_...                    (for Groq models)
+#   VOYAGE_API_KEY=...                      (for Voyage AI embeddings)
+#
+# LLM CONFIGURATION:
+#   LLM_PROVIDER=openai                     (openai, ollama, anthropic, gemini, groq)
+#   MODEL_NAME=gpt-4o-mini                  (default: gpt-4o-mini)
+#   OPENAI_BASE_URL=https://openrouter.ai/api/v1  (for OpenRouter)
+#
+# EMBEDDER CONFIGURATION:
+#   EMBEDDER_PROVIDER=ollama                (ollama or openai, default: ollama)
+#   EMBEDDER_PROVIDER_URL=http://host.containers.internal:11434
+#   EMBEDDER_MODEL=mxbai-embed-large        (Ollama model name)
+#   EMBEDDER_DIMENSIONS=1024                (must match model, default: 1024)
+#
+# PERFORMANCE:
+#   SEMAPHORE_LIMIT=10                      (concurrent LLM requests, default: 10)
+#
+# KNOWLEDGE GRAPH:
+#   GROUP_ID=main                           (isolates knowledge graphs, default: main)
+#
+# TELEMETRY:
+#   GRAPHITI_TELEMETRY_ENABLED=false       (default: false)
+#   NEO4J_TELEMETRY_ENABLED=false          (default: false)
+#
+# PROMPT CACHING:
+#   PROMPT_CACHE_ENABLED=true              (default: true)
+#   PROMPT_CACHE_METRICS_ENABLED=true      (default: true)
+#   PROMPT_CACHE_TTL=1h                    (5m or 1h, default: 1h)
+#   METRICS_PORT=9090                      (Prometheus metrics port, default: 9090)
+#   PROMPT_CACHE_LOG_REQUESTS=false        (default: false)
+#
+# SEARCH BEHAVIOR:
+#   GRAPHITI_SEARCH_ALL_GROUPS=false       (search all groups when no group_ids specified)
+#
+# SERVER:
+#   LOG_LEVEL=INFO                         (default: INFO)
 #
 # Access:
 #   - Neo4j Browser: http://localhost:7474 (user: neo4j)
@@ -88,13 +132,45 @@ services:
       - "9090:9090"  # Prometheus metrics
     environment:
       # Database connection (connects to neo4j service)
+      - DATABASE_TYPE=neo4j
       - NEO4J_URI=bolt://neo4j:7687
       - NEO4J_USER=neo4j
       - NEO4J_PASSWORD=${NEO4J_PASSWORD:-changeme}
-      # LLM Configuration (OpenAI by default)
+      - NEO4J_DATABASE=${NEO4J_DATABASE:-neo4j}
+      # FalkorDB connection (only used when DATABASE_TYPE=falkordb)
+      - FALKORDB_HOST=${FALKORDB_HOST:-neo4j}
+      - FALKORDB_PORT=${FALKORDB_PORT:-6379}
+      - FALKORDB_PASSWORD=${FALKORDB_PASSWORD:-}
+      # API Keys
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - VOYAGE_API_KEY=${VOYAGE_API_KEY:-}
+      # LLM Configuration
+      - LLM_PROVIDER=${LLM_PROVIDER:-openai}
       - MODEL_NAME=${MODEL_NAME:-gpt-4o-mini}
-      - EMBEDDING_MODEL_NAME=${EMBEDDING_MODEL_NAME:-text-embedding-3-small}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-}
+      # Embedder Configuration
+      - EMBEDDER_PROVIDER=${EMBEDDER_PROVIDER:-ollama}
+      - EMBEDDER_PROVIDER_URL=${EMBEDDER_PROVIDER_URL:-http://host.containers.internal:11434}
+      - EMBEDDER_MODEL=${EMBEDDER_MODEL:-mxbai-embed-large}
+      - EMBEDDER_DIMENSIONS=${EMBEDDER_DIMENSIONS:-1024}
+      # Performance Configuration
+      - SEMAPHORE_LIMIT=${SEMAPHORE_LIMIT:-10}
+      # Knowledge Graph Configuration
+      - GROUP_ID=${GROUP_ID:-main}
+      # Telemetry
+      - GRAPHITI_TELEMETRY_ENABLED=${GRAPHITI_TELEMETRY_ENABLED:-false}
+      - NEO4J_TELEMETRY_ENABLED=${NEO4J_TELEMETRY_ENABLED:-false}
+      # Prompt Caching Configuration
+      - PROMPT_CACHE_ENABLED=${PROMPT_CACHE_ENABLED:-true}
+      - PROMPT_CACHE_METRICS_ENABLED=${PROMPT_CACHE_METRICS_ENABLED:-true}
+      - PROMPT_CACHE_TTL=${PROMPT_CACHE_TTL:-1h}
+      - METRICS_PORT=${METRICS_PORT:-9090}
+      - PROMPT_CACHE_LOG_REQUESTS=${PROMPT_CACHE_LOG_REQUESTS:-false}
+      # Search All Groups (Neo4j only)
+      - GRAPHITI_SEARCH_ALL_GROUPS=${GRAPHITI_SEARCH_ALL_GROUPS:-false}
       # Server settings
       - PORT=8000
       - HOST=0.0.0.0

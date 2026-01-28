@@ -13,6 +13,8 @@ Auto-generated from all feature plans. Last updated: 2026-01-18
 - N/A (documentation and configuration files only) (001-docs-compose-updates)
 - TypeScript (ES modules, strict mode) with Bun runtime + @modelcontextprotocol/sdk, node:fs, node:crypto (001-configurable-memory-sync)
 - Neo4j graph database via Graphiti MCP server (001-configurable-memory-sync)
+- TypeScript (ES modules, strict mode) with Bun runtime + @modelcontextprotocol/sdk (existing), mcp-client.ts library (existing) (008-remote-host)
+- N/A (configuration only - connects to remote Neo4j/FalkorDB) (008-remote-host)
 
 - TypeScript (ES modules, strict mode), Bun runtime + @modelcontextprotocol/sdk (existing), mcp-client.ts library (existing) (001-mcp-wrapper)
 
@@ -32,9 +34,9 @@ npm test && npm run lint
 TypeScript (ES modules, strict mode), Bun runtime: Follow standard conventions
 
 ## Recent Changes
+- 008-remote-host: Added TypeScript (ES modules, strict mode) with Bun runtime + @modelcontextprotocol/sdk (existing), mcp-client.ts library (existing)
+- 008-remote-host: Added [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
 - 001-configurable-memory-sync: Added TypeScript (ES modules, strict mode) with Bun runtime + @modelcontextprotocol/sdk, node:fs, node:crypto
-- 001-docs-compose-updates: Added Markdown (documentation), YAML (Docker/Podman Compose v2.x) + Docker Compose v2.x or Podman Compose
-- 004-fix-env-file-loading: Added YAML (Docker/Podman Compose v2.x) + Docker Compose v2.x or Podman Compose
 
 
 <!-- MANUAL ADDITIONS START -->
