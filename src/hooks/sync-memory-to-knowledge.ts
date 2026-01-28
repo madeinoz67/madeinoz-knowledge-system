@@ -38,6 +38,14 @@ import {
   getSyncStats,
 } from './lib/sync-state';
 import { checkHealth, addEpisode, type AddEpisodeParams } from './lib/knowledge-client';
+import {
+  loadSyncConfig,
+  getEnabledSources,
+  type SyncConfiguration,
+  type SyncSource,
+} from './lib/sync-config';
+import { checkAntiLoop } from './lib/anti-loop-patterns';
+import { getSyncStatus, formatSyncStatus } from './lib/sync-status';
 
 /**
  * Generate SHA-256 hash of content for deduplication
@@ -48,13 +56,9 @@ function hashContent(content: string): string {
 
 /**
  * Memory System source directories to sync
- * Each has a path relative to MEMORY/ and a default capture type
+ * Now loaded dynamically from configuration via getEnabledSources()
+ * See sync-config.ts for available sources and environment variable controls
  */
-const SYNC_SOURCES = [
-  { path: 'LEARNING/ALGORITHM', type: 'LEARNING', description: 'Task execution learnings' },
-  { path: 'LEARNING/SYSTEM', type: 'LEARNING', description: 'PAI/tooling learnings' },
-  { path: 'RESEARCH', type: 'RESEARCH', description: 'Agent research outputs' },
-];
 
 // Skip these directories (low entity value or specialized formats)
 const _SKIP_PATTERNS = [
@@ -70,6 +74,7 @@ interface SyncOptions {
   syncAll: boolean;
   maxFiles: number;
   verbose: boolean;
+  showStatus: boolean;
 }
 
 const DEFAULT_OPTIONS: SyncOptions = {
@@ -77,6 +82,7 @@ const DEFAULT_OPTIONS: SyncOptions = {
   syncAll: false,
   maxFiles: 50, // Limit per run to avoid overwhelming the API
   verbose: false,
+  showStatus: false,
 };
 
 /**
@@ -315,15 +321,42 @@ async function syncMemoryToKnowledge(options: SyncOptions = DEFAULT_OPTIONS): Pr
 
   const stats = { synced: 0, failed: 0, skipped: 0 };
 
+  // Load sync configuration from environment variables
+  const syncConfig = loadSyncConfig();
+
+  // Merge config into options (config takes precedence for env-controlled settings)
+  const effectiveOptions: SyncOptions = {
+    ...options,
+    verbose: options.verbose || syncConfig.verbose,
+    maxFiles: syncConfig.maxFilesPerSync,
+  };
+
   // Check if memory directory exists
   if (!existsSync(memoryDir)) {
     console.error(`[Sync] Memory directory not found: ${memoryDir}`);
     return stats;
   }
 
+  // Get enabled sources based on configuration
+  const enabledSources = getEnabledSources(syncConfig);
+
+  if (enabledSources.length === 0) {
+    if (effectiveOptions.verbose) {
+      console.error('[Sync] No sync sources enabled in configuration');
+    }
+    return stats;
+  }
+
+  if (effectiveOptions.verbose) {
+    console.error(`[Sync] Enabled sources: ${enabledSources.map((s) => s.path).join(', ')}`);
+    if (syncConfig.customExcludePatterns.length > 0) {
+      console.error(`[Sync] Custom exclude patterns: ${syncConfig.customExcludePatterns.join(', ')}`);
+    }
+  }
+
   // Check if MCP is healthy with retry logic
-  if (!options.dryRun) {
-    const healthy = await waitForMcpServer(options.verbose);
+  if (!effectiveOptions.dryRun) {
+    const healthy = await waitForMcpServer(effectiveOptions.verbose);
     if (!healthy) {
       console.error('[Sync] MCP server offline after retries - skipping sync');
       return stats;
@@ -335,43 +368,43 @@ async function syncMemoryToKnowledge(options: SyncOptions = DEFAULT_OPTIONS): Pr
   const syncedPaths = getSyncedPaths(syncState);
   const syncedHashes = getContentHashes(syncState);
 
-  if (options.verbose) {
+  if (effectiveOptions.verbose) {
     const stateStats = getSyncStats(syncState);
     console.error(
       `[Sync] Previously synced: ${stateStats.totalSynced} files, ${syncedHashes.size} unique hashes`
     );
   }
 
-  // Collect files to sync from all sources
+  // Collect files to sync from enabled sources
   const filesToSync: { filepath: string; sourceType: string }[] = [];
 
-  for (const source of SYNC_SOURCES) {
+  for (const source of enabledSources) {
     const sourceDir = join(memoryDir, source.path);
     const files = findMarkdownFiles(sourceDir);
 
-    if (options.verbose && files.length > 0) {
+    if (effectiveOptions.verbose && files.length > 0) {
       console.error(`[Sync] Found ${files.length} files in ${source.path}`);
     }
 
     for (const file of files) {
-      if (!options.syncAll && syncedPaths.has(file)) {
+      if (!effectiveOptions.syncAll && syncedPaths.has(file)) {
         stats.skipped++;
         continue;
       }
 
       filesToSync.push({ filepath: file, sourceType: source.type });
 
-      if (filesToSync.length >= options.maxFiles) {
+      if (filesToSync.length >= effectiveOptions.maxFiles) {
         break;
       }
     }
 
-    if (filesToSync.length >= options.maxFiles) {
+    if (filesToSync.length >= effectiveOptions.maxFiles) {
       break;
     }
   }
 
-  if (options.verbose) {
+  if (effectiveOptions.verbose) {
     console.error(`[Sync] Found ${filesToSync.length} files to sync`);
   }
 
@@ -382,9 +415,11 @@ async function syncMemoryToKnowledge(options: SyncOptions = DEFAULT_OPTIONS): Pr
 
   // Sync files
   for (const { filepath, sourceType } of filesToSync) {
-    // Pre-check content hash for deduplication
+    // Pre-check content hash for deduplication and anti-loop detection
     let contentHash: string | undefined;
     let captureType = sourceType;
+    let fileTitle = '';
+    let fileBody = '';
 
     try {
       const content = readFileSync(filepath, 'utf-8');
@@ -393,15 +428,33 @@ async function syncMemoryToKnowledge(options: SyncOptions = DEFAULT_OPTIONS): Pr
       const cleanedBody = cleanBody(parsed.body);
       contentHash = hashContent(cleanedBody);
       captureType = parsed.frontmatter.capture_type || sourceType;
+      fileTitle = parsed.title;
+      fileBody = cleanedBody;
+
+      // Anti-loop detection: Skip files containing knowledge operations
+      const antiLoopResult = checkAntiLoop(fileTitle, fileBody, syncConfig.customExcludePatterns);
+      if (antiLoopResult.matches) {
+        if (effectiveOptions.verbose) {
+          console.error(
+            `[Sync] Skipping (anti-loop: ${antiLoopResult.matchedPattern}): ${filepath}`
+          );
+        }
+        stats.skipped++;
+        // Mark as synced to avoid re-checking
+        if (!effectiveOptions.dryRun) {
+          markAsSynced(syncState, filepath, captureType, undefined, contentHash);
+        }
+        continue;
+      }
 
       // Skip if content already synced (even from a different file)
       if (syncedHashes.has(contentHash)) {
-        if (options.verbose) {
+        if (effectiveOptions.verbose) {
           console.error(`[Sync] Skipping duplicate content: ${filepath}`);
         }
         stats.skipped++;
         // Mark filepath as synced to avoid re-checking (only if not dry run)
-        if (!options.dryRun) {
+        if (!effectiveOptions.dryRun) {
           markAsSynced(syncState, filepath, captureType, undefined, contentHash);
         }
         continue;
@@ -410,12 +463,12 @@ async function syncMemoryToKnowledge(options: SyncOptions = DEFAULT_OPTIONS): Pr
       // Continue with sync attempt if pre-check fails
     }
 
-    const result = await syncFile(filepath, sourceType, options);
+    const result = await syncFile(filepath, sourceType, effectiveOptions);
 
     if (result.success) {
       stats.synced++;
 
-      if (!options.dryRun) {
+      if (!effectiveOptions.dryRun) {
         try {
           const content = readFileSync(filepath, 'utf-8');
           const filename = basename(filepath);
@@ -438,13 +491,13 @@ async function syncMemoryToKnowledge(options: SyncOptions = DEFAULT_OPTIONS): Pr
     }
 
     // Brief pause between API calls
-    if (!options.dryRun && stats.synced % 5 === 0) {
+    if (!effectiveOptions.dryRun && stats.synced % 5 === 0) {
       await new Promise((r) => setTimeout(r, 100));
     }
   }
 
   // Save sync state (also save if we skipped duplicates, as we marked them)
-  if (!options.dryRun && (stats.synced > 0 || stats.skipped > 0)) {
+  if (!effectiveOptions.dryRun && (stats.synced > 0 || stats.skipped > 0)) {
     saveSyncState(syncState);
   }
 
@@ -474,6 +527,10 @@ function parseArgs(args: string[]): SyncOptions {
       case '--verbose':
       case '-v':
         options.verbose = true;
+        break;
+      case '--status':
+      case '-s':
+        options.showStatus = true;
         break;
       default:
         if (arg.startsWith('--max=')) {
@@ -510,6 +567,13 @@ async function main() {
     // Running as CLI - parse args
     const args = process.argv.slice(2);
     const options = parseArgs(args);
+
+    // Handle --status option
+    if (options.showStatus) {
+      const status = getSyncStatus();
+      console.log(formatSyncStatus(status));
+      process.exit(0);
+    }
 
     if (options.verbose) {
       console.error('[Sync] Running in CLI mode');

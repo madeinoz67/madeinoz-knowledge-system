@@ -1,0 +1,27 @@
+{
+  "version": "1.0",
+  "sources": [
+    {
+      "id": "LEARNING_ALGORITHM",
+      "path": "LEARNING/ALGORITHM",
+      "type": "LEARNING",
+      "description": "Task execution learnings",
+      "defaultEnabled": true
+    },
+    {
+      "id": "LEARNING_SYSTEM",
+      "path": "LEARNING/SYSTEM",
+      "type": "LEARNING",
+      "description": "PAI/tooling learnings",
+      "defaultEnabled": true
+    },
+    {
+      "id": "RESEARCH",
+      "path": "RESEARCH",
+      "type": "RESEARCH",
+      "description": "Agent research outputs",
+      "defaultEnabled": true
+    }
+  ],
+  "customExcludePatterns": []
+}

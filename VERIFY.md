@@ -1,3 +1,58 @@
+<!-- AI-FRIENDLY SUMMARY
+Document: Verification Checklist
+Purpose: Post-installation verification for Madeinoz Knowledge System
+Target Audience: AI agents verifying installation completeness
+
+Verification Sections (run in order):
+0. Database Backend Detection (Neo4j or FalkorDB)
+1. Directory Structure (pack files, skills, hooks, config)
+2. MCP Server (containers running, health endpoint, database connection)
+3. PAI Skill (installed to ~/.claude/skills/Knowledge/)
+4. Configuration (env vars, MCP config, port availability)
+5. End-to-End Functionality (add_memory, search_nodes, search_facts, get_episodes)
+6. Neo4j Cypher Verification (Neo4j backend only)
+7. Integration (Claude Code recognition, workflow invocation)
+8. Memory Sync Hook (hook files, registration, config file)
+9. Documentation (README, INSTALL, VERIFY completeness)
+10. End-to-End Completeness (no "beyond scope" gaps)
+11. Optional (performance, persistence, error handling)
+
+Critical Pass Criteria:
+- ALL sections 0-6 MUST pass
+- Section 8 (hooks) MUST pass for automatic sync
+- Any critical failure = installation NOT complete
+
+Installed File Locations:
+- Skill: ~/.claude/skills/Knowledge/
+- Hook: ~/.claude/hooks/sync-memory-to-knowledge.ts
+- Hook lib: ~/.claude/hooks/lib/
+- Config: ~/.claude/config/sync-sources.json
+- MCP: ~/.claude.json (madeinoz-knowledge server entry)
+
+Verification Commands:
+- bun run server-cli status (container status)
+- curl http://localhost:8000/health (MCP health)
+- bun run src/hooks/sync-memory-to-knowledge.ts --dry-run (hook test)
+
+AI AGENT INSTRUCTIONS - Issue Tracking:
+During verification, track ALL issues encountered for post-verification RCA:
+- Verification steps that fail unexpectedly
+- Commands that don't match documented behavior
+- Missing files or incorrect paths in checklist
+- Checks that pass but with warnings or anomalies
+- Documentation inconsistencies (VERIFY vs INSTALL vs README)
+- False positives/negatives in verification logic
+- Unclear or ambiguous verification criteria
+
+At verification completion, perform Root Cause Analysis:
+1. List all issues encountered with severity (critical/warning/minor)
+2. Note the section and check where each issue occurred
+3. Distinguish between installation problems vs verification doc problems
+4. Document any manual interventions required
+5. Recommend fixes for future releases (installation OR verification)
+6. Report findings to user for GitHub issue creation if warranted
+-->
+
 # Madeinoz Knowledge System - Verification Checklist
 
 Mandatory verification checklist for the Knowledge pack installation.
@@ -231,14 +286,15 @@ grep "MADEINOZ_KNOWLEDGE_" config/.env.example | head -5
 
 ### 1.8 Hook Files
 
-- [ ] `src/hooks/sync-memory-to-knowledge.ts` exists
-- [ ] `src/hooks/sync-learning-realtime.ts` exists
+- [ ] `src/hooks/sync-memory-to-knowledge.ts` exists (consolidated sync hook)
 - [ ] `src/hooks/lib/` directory exists with support files
+- [ ] `config/sync-sources.json` exists (sync configuration)
 
 **Verification commands:**
 ```bash
 ls -la src/hooks/
 ls -la src/hooks/lib/
+ls -la config/sync-sources.json
 ```
 
 
@@ -998,28 +1054,29 @@ Verify the memory sync hook is properly installed for syncing learnings and rese
 
 ### 8.1 Hook Files Installed
 
-- [ ] **Hook scripts exist in PAI hooks directory**
+- [ ] **Hook script exists in PAI hooks directory**
 - [ ] **Hook lib files exist**
+- [ ] **Config file exists in PAI config directory**
 
 **Verification commands:**
 ```bash
 PAI_HOOKS="$HOME/.claude/hooks"
+PAI_CONFIG="$HOME/.claude/config"
 ls -la "$PAI_HOOKS/"
 ls -la "$PAI_HOOKS/lib/"
+ls -la "$PAI_CONFIG/sync-sources.json"
 ```
 
-**Expected result:** sync-memory-to-knowledge.ts, sync-learning-realtime.ts, and lib/ directory with:
-- frontmatter-parser.ts
-- knowledge-client.ts
-- sync-state.ts
+**Expected result:**
+- sync-memory-to-knowledge.ts (consolidated sync hook)
+- lib/ directory with: frontmatter-parser.ts, knowledge-client.ts, sync-state.ts, sync-config.ts, anti-loop-patterns.ts
+- config/sync-sources.json (sync source paths and custom exclude patterns)
 
 ---
 
-### 8.2 Hooks Registered in settings.json
+### 8.2 Hook Registered in settings.json
 
 - [ ] **SessionStart hook registered** (sync-memory-to-knowledge.ts)
-- [ ] **Stop hook registered** (sync-learning-realtime.ts)
-- [ ] **SubagentStop hook registered** (sync-learning-realtime.ts)
 
 **Verification commands:**
 ```bash
@@ -1034,29 +1091,12 @@ if [ -f "$SETTINGS" ]; then
     else
         echo "✗ SessionStart: sync-memory-to-knowledge.ts NOT registered"
     fi
-
-    # Check Stop hook
-    if grep -q '"Stop"' "$SETTINGS" && grep -q "sync-learning-realtime" "$SETTINGS"; then
-        echo "✓ Stop: sync-learning-realtime.ts registered"
-    else
-        echo "✗ Stop: sync-learning-realtime.ts NOT registered"
-    fi
-
-    # Check SubagentStop hook
-    if grep -q '"SubagentStop"' "$SETTINGS" && grep -q "sync-learning-realtime" "$SETTINGS"; then
-        echo "✓ SubagentStop: sync-learning-realtime.ts registered"
-    else
-        echo "✗ SubagentStop: sync-learning-realtime.ts NOT registered"
-    fi
 else
     echo "✗ settings.json not found at: $SETTINGS"
 fi
 ```
 
-**Expected result:** All three hooks registered:
-- SessionStart: syncs memory at session start
-- Stop: syncs learnings when execution stops
-- SubagentStop: syncs when subagent completes
+**Expected result:** SessionStart hook registered - syncs memory to knowledge graph at session start
 
 ---
 
@@ -1196,9 +1236,9 @@ grep -i "beyond.*scope\|implement.*your.*own\|left as.*exercise" \
 - [ ] **Workflows included** (7 complete workflows in `src/skills/workflows/`)
 - [ ] **Skill tools included** (start.ts, stop.ts, status.ts, logs.ts in `src/skills/tools/`)
 - [ ] **Pack tools included** (install.ts, diagnose.ts in `src/server/`)
-- [ ] **Hooks included** (sync-memory-to-knowledge.ts, sync-learning-realtime.ts in `src/hooks/`)
+- [ ] **Hooks included** (sync-memory-to-knowledge.ts in `src/hooks/`, consolidated sync hook)
 - [ ] **Installation included** (`INSTALL.md` with all steps and database backend selection)
-- [ ] **Configuration included** (`config/.env.example` with all variables for both backends)
+- [ ] **Configuration included** (`config/.env.example` with all variables for both backends, `config/sync-sources.json` for sync configuration)
 - [ ] **Documentation included** (README, INSTALL, VERIFY)
 - [ ] **Tests included** (`tests/` directory with unit and integration tests)
 - [ ] **No external dependencies** beyond documented prerequisites

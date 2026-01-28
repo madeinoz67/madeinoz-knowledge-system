@@ -1,6 +1,6 @@
 ---
 name: Knowledge
-version: 1.4.1
+version: 1.5.0
 description: Personal knowledge management using Graphiti knowledge graph with Neo4j/FalkorDB. USE WHEN 'store this', 'remember this', 'add to knowledge', 'search my knowledge', 'what do I know about', 'find in knowledge base', 'save to memory', 'graphiti', 'knowledge graph', 'entity extraction', 'relationship mapping', 'semantic search', 'episode', 'install knowledge', 'setup knowledge system', 'configure knowledge graph', knowledge capture, retrieval, synthesis.
 tools:
   # MCP Wrapper CLI (76%+ token savings vs direct MCP calls)
@@ -315,4 +315,4 @@ MADEINOZ_KNOWLEDGE_GRAPHITI_TELEMETRY_ENABLED=false
 - [Graphiti Documentation](https://help.getzep.com/graphiti)
 - [Podman Configuration](../README.md)
 
-**Last Updated:** 2026-01-26
+**Last Updated:** 2026-01-28

@@ -11,6 +11,8 @@ Auto-generated from all feature plans. Last updated: 2026-01-18
 - N/A (configuration files only) (004-fix-env-file-loading)
 - Markdown (documentation), YAML (Docker/Podman Compose v2.x) + Docker Compose v2.x or Podman Compose (001-docs-compose-updates)
 - N/A (documentation and configuration files only) (001-docs-compose-updates)
+- TypeScript (ES modules, strict mode) with Bun runtime + @modelcontextprotocol/sdk, node:fs, node:crypto (001-configurable-memory-sync)
+- Neo4j graph database via Graphiti MCP server (001-configurable-memory-sync)
 
 - TypeScript (ES modules, strict mode), Bun runtime + @modelcontextprotocol/sdk (existing), mcp-client.ts library (existing) (001-mcp-wrapper)
 
@@ -30,12 +32,77 @@ npm test && npm run lint
 TypeScript (ES modules, strict mode), Bun runtime: Follow standard conventions
 
 ## Recent Changes
+- 001-configurable-memory-sync: Added TypeScript (ES modules, strict mode) with Bun runtime + @modelcontextprotocol/sdk, node:fs, node:crypto
 - 001-docs-compose-updates: Added Markdown (documentation), YAML (Docker/Podman Compose v2.x) + Docker Compose v2.x or Podman Compose
 - 004-fix-env-file-loading: Added YAML (Docker/Podman Compose v2.x) + Docker Compose v2.x or Podman Compose
-- 003-fix-issue-2: Added TypeScript (ES modules, strict mode), Bun runtime + @modelcontextprotocol/sdk (existing), existing mcp-client.ts library
 
 
 <!-- MANUAL ADDITIONS START -->
+
+## Memory-to-Knowledge Sync Configuration
+
+The system syncs LEARNING and RESEARCH files from `~/.claude/MEMORY/` to the knowledge graph.
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `MADEINOZ_KNOWLEDGE_SYNC_LEARNING_ALGORITHM` | `true` | Enable sync for LEARNING/ALGORITHM files |
+| `MADEINOZ_KNOWLEDGE_SYNC_LEARNING_SYSTEM` | `true` | Enable sync for LEARNING/SYSTEM files |
+| `MADEINOZ_KNOWLEDGE_SYNC_RESEARCH` | `true` | Enable sync for RESEARCH files |
+| `MADEINOZ_KNOWLEDGE_SYNC_EXCLUDE_PATTERNS` | - | Comma-separated custom exclude patterns (overrides config file) |
+| `MADEINOZ_KNOWLEDGE_SYNC_MAX_FILES` | `50` | Max files per sync run (1-1000) |
+| `MADEINOZ_KNOWLEDGE_SYNC_VERBOSE` | `false` | Enable verbose logging |
+
+### CLI Usage
+
+```bash
+# Run sync manually
+bun run src/hooks/sync-memory-to-knowledge.ts
+
+# Show sync status
+bun run src/hooks/sync-memory-to-knowledge.ts --status
+
+# Sync all files (not just recent)
+bun run src/hooks/sync-memory-to-knowledge.ts --all
+
+# Dry run with verbose output
+bun run src/hooks/sync-memory-to-knowledge.ts --dry-run --verbose
+```
+
+### External Configuration
+
+Sync configuration can be customized via `config/sync-sources.json`:
+
+```json
+{
+  "version": "1.0",
+  "sources": [
+    {
+      "id": "LEARNING_ALGORITHM",
+      "path": "LEARNING/ALGORITHM",
+      "type": "LEARNING",
+      "description": "Task execution learnings",
+      "defaultEnabled": true
+    }
+  ],
+  "customExcludePatterns": [
+    "meeting notes",
+    "/^draft-/i"
+  ]
+}
+```
+
+**Pattern types:**
+- Substring match: `"meeting notes"` (case-insensitive)
+- Regex: `"/^draft-/i"` (surrounded by `/`, optional flags)
+
+### Anti-Loop Detection
+
+The system automatically excludes knowledge-derived content from being re-synced to prevent feedback loops. Built-in patterns detect:
+- MCP tool invocations (`mcp__madeinoz-knowledge__`)
+- Query phrases ("what do I know about")
+- Formatted search output ("Knowledge Found:", "Key Entities:")
 
 ## Codanna Code Intelligence
 
