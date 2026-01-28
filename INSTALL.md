@@ -1,3 +1,56 @@
+<!-- AI-FRIENDLY SUMMARY
+Document: Installation Guide
+Purpose: Step-by-step installation for Madeinoz Knowledge System PAI pack
+Target Audience: AI agents installing into user infrastructure
+
+Key Installation Steps:
+1. Pre-installation analysis (existing packs, dependencies)
+2. Configure environment variables in ~/.claude/.env
+3. Start containers (Neo4j or FalkorDB backend)
+4. Install PAI skill to ~/.claude/skills/Knowledge/
+5. Configure MCP server in ~/.claude.json
+6. Install memory sync hook to ~/.claude/hooks/
+7. Copy config file to ~/.claude/config/
+8. Verify installation via VERIFY.md
+
+Configuration Prefix: MADEINOZ_KNOWLEDGE_*
+Config Locations:
+- Environment: ~/.claude/.env
+- MCP Server: ~/.claude.json
+- Skill: ~/.claude/skills/Knowledge/
+- Hooks: ~/.claude/hooks/
+- Config: ~/.claude/config/sync-sources.json
+
+Default Ports:
+- 8000 (MCP Server)
+- 7474/7687 (Neo4j Browser/Bolt)
+- 3000/6379 (FalkorDB UI/Redis)
+
+Hook: SessionStart → sync-memory-to-knowledge.ts (syncs MEMORY to knowledge graph)
+
+Critical Commands:
+- bun run server-cli start (start containers)
+- bun run server-cli status (verify running)
+- bun run install:system (interactive installer)
+
+AI AGENT INSTRUCTIONS - Issue Tracking:
+During installation, track ALL issues encountered for post-installation RCA:
+- Scripts not found or returning errors
+- Incorrect file paths or missing directories
+- Commands that fail or produce unexpected output
+- Documentation that doesn't match actual behavior
+- Missing dependencies or prerequisites
+- Configuration issues or unclear instructions
+- Any workarounds required to complete installation
+
+At installation completion, perform Root Cause Analysis:
+1. List all issues encountered with severity (critical/warning/minor)
+2. Note the step where each issue occurred
+3. Document any workarounds applied
+4. Recommend fixes for future releases
+5. Report findings to user for GitHub issue creation if warranted
+-->
+
 # Madeinoz Knowledge System - Installation
 
 **This guide is designed for AI agents installing this pack into a user's infrastructure.**
@@ -1943,10 +1996,28 @@ echo "Installing hook files to: $PAI_HOOKS_DIR"
 
 # Copy hook implementation files FROM SOURCE
 cp "$HOOK_SOURCE_DIR/sync-memory-to-knowledge.ts" "$PAI_HOOKS_DIR/"
-cp "$HOOK_SOURCE_DIR/sync-learning-realtime.ts" "$PAI_HOOKS_DIR/"
 cp -r "$HOOK_SOURCE_DIR/lib/"* "$PAI_HOOKS_DIR/lib/"
 
 echo "✓ Hook files installed"
+
+# Copy config file to ~/.claude/config/ (preserves user customizations)
+PAI_CONFIG_DIR="$PAI_DIR/config"
+mkdir -p "$PAI_CONFIG_DIR"
+
+if [[ -d "$PACK_INSTALL_DIR/config" ]]; then
+    CONFIG_SOURCE_DIR="$PACK_INSTALL_DIR/config"
+elif [[ -d "$PACK_SOURCE_DIR/config" ]]; then
+    CONFIG_SOURCE_DIR="$PACK_SOURCE_DIR/config"
+fi
+
+if [[ -f "$CONFIG_SOURCE_DIR/sync-sources.json" ]]; then
+    if [[ ! -f "$PAI_CONFIG_DIR/sync-sources.json" ]]; then
+        cp "$CONFIG_SOURCE_DIR/sync-sources.json" "$PAI_CONFIG_DIR/"
+        echo "✓ Config file installed: sync-sources.json"
+    else
+        echo "✓ Config file exists, preserving user customizations"
+    fi
+fi
 
 # Create sync state directory
 SYNC_STATE_DIR="$MEMORY_DIR/STATE/knowledge-sync"
@@ -1976,13 +2047,11 @@ try {
 // Ensure hooks structure exists
 if (!settings.hooks) settings.hooks = {};
 if (!settings.hooks.SessionStart) settings.hooks.SessionStart = [];
-if (!settings.hooks.Stop) settings.hooks.Stop = [];
-if (!settings.hooks.SubagentStop) settings.hooks.SubagentStop = [];
 
 const homeDir = process.env.HOME;
 let changed = false;
 
-// 1. SessionStart: sync-memory-to-knowledge.ts (syncs memory at session start)
+// SessionStart: sync-memory-to-knowledge.ts (syncs memory at session start)
 const sessionStartExists = settings.hooks.SessionStart.some(h =>
     h.hooks?.some(hook => hook.command?.includes('sync-memory-to-knowledge'))
 );
@@ -2001,42 +2070,6 @@ if (!sessionStartExists) {
     console.log("✓ SessionStart hook already registered (skipping)");
 }
 
-// 2. Stop: sync-learning-realtime.ts (syncs learning when execution stops)
-const stopExists = settings.hooks.Stop.some(h =>
-    h.hooks?.some(hook => hook.command?.includes('sync-learning-realtime'))
-);
-if (!stopExists) {
-    settings.hooks.Stop.push({
-        hooks: [{
-            type: "command",
-            command: `bun run ${homeDir}/.claude/hooks/sync-learning-realtime.ts`,
-            timeout: 15000
-        }]
-    });
-    console.log("✓ Stop hook registered (sync-learning-realtime.ts)");
-    changed = true;
-} else {
-    console.log("✓ Stop hook already registered (skipping)");
-}
-
-// 3. SubagentStop: sync-learning-realtime.ts (syncs when subagent completes)
-const subagentStopExists = settings.hooks.SubagentStop.some(h =>
-    h.hooks?.some(hook => hook.command?.includes('sync-learning-realtime'))
-);
-if (!subagentStopExists) {
-    settings.hooks.SubagentStop.push({
-        hooks: [{
-            type: "command",
-            command: `bun run ${homeDir}/.claude/hooks/sync-learning-realtime.ts`,
-            timeout: 15000
-        }]
-    });
-    console.log("✓ SubagentStop hook registered (sync-learning-realtime.ts)");
-    changed = true;
-} else {
-    console.log("✓ SubagentStop hook already registered (skipping)");
-}
-
 if (changed) {
     fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
     console.log("\n✓ settings.json updated with knowledge hooks");
@@ -2050,12 +2083,12 @@ echo "Hooks installed:"
 echo "  📍 SessionStart: sync-memory-to-knowledge.ts"
 echo "     - Syncs memory to knowledge graph at session start"
 echo "     - Scans: LEARNING/ALGORITHM/, LEARNING/SYSTEM/, RESEARCH/"
+echo "     - Configurable via ~/.claude/config/sync-sources.json"
 echo ""
-echo "  📍 Stop: sync-learning-realtime.ts"
-echo "     - Syncs new learnings when execution stops"
-echo ""
-echo "  📍 SubagentStop: sync-learning-realtime.ts"
-echo "     - Syncs learnings when subagent completes"
+echo "Config files installed:"
+echo "  📍 ~/.claude/config/sync-sources.json"
+echo "     - Sync source paths and custom exclude patterns"
+echo "     - User customizations preserved on upgrade"
 echo ""
 echo "Manual sync commands:"
 echo "  - Sync all:    bun run src/hooks/sync-memory-to-knowledge.ts --all"

@@ -65,19 +65,19 @@ Running the **SearchByDate** workflow from the **MadeinozKnowledgeSystem** skill
 
 ```bash
 # Search nodes from today
-bun run tools/knowledge-cli.ts search_nodes "query" --since today
+bun run ~/.claude/skills/Knowledge/tools/knowledge-cli.ts search_nodes "query" --since today
 
 # Search facts from last 7 days
-bun run tools/knowledge-cli.ts search_facts "query" --since 7d
+bun run ~/.claude/skills/Knowledge/tools/knowledge-cli.ts search_facts "query" --since 7d
 
 # Search within a date range
-bun run tools/knowledge-cli.ts search_nodes "query" --since 2026-01-01 --until 2026-01-15
+bun run ~/.claude/skills/Knowledge/tools/knowledge-cli.ts search_nodes "query" --since 2026-01-01 --until 2026-01-15
 
 # Yesterday's knowledge
-bun run tools/knowledge-cli.ts search_nodes "query" --since yesterday --until today
+bun run ~/.claude/skills/Knowledge/tools/knowledge-cli.ts search_nodes "query" --since yesterday --until today
 
 # Last month
-bun run tools/knowledge-cli.ts search_facts "query" --since 1m
+bun run ~/.claude/skills/Knowledge/tools/knowledge-cli.ts search_facts "query" --since 1m
 ```
 
 **Parameters:**
@@ -159,7 +159,7 @@ Suggestions:
 **User:** "What did I learn today?"
 
 ```bash
-bun run tools/knowledge-cli.ts search_nodes "*" 10 --since today
+bun run ~/.claude/skills/Knowledge/tools/knowledge-cli.ts search_nodes "*" 10 --since today
 ```
 
 ### Example 2: Last Week's Decisions
@@ -167,7 +167,7 @@ bun run tools/knowledge-cli.ts search_nodes "*" 10 --since today
 **User:** "Show me decisions from last week"
 
 ```bash
-bun run tools/knowledge-cli.ts search_facts "decision" 10 --since 7d
+bun run ~/.claude/skills/Knowledge/tools/knowledge-cli.ts search_facts "decision" 10 --since 7d
 ```
 
 ### Example 3: Specific Date Range
@@ -175,7 +175,7 @@ bun run tools/knowledge-cli.ts search_facts "decision" 10 --since 7d
 **User:** "Knowledge from January 15-20"
 
 ```bash
-bun run tools/knowledge-cli.ts search_nodes "*" 20 --since 2026-01-15 --until 2026-01-20
+bun run ~/.claude/skills/Knowledge/tools/knowledge-cli.ts search_nodes "*" 20 --since 2026-01-15 --until 2026-01-20
 ```
 
 ### Example 4: Yesterday's Research
@@ -183,7 +183,7 @@ bun run tools/knowledge-cli.ts search_nodes "*" 20 --since 2026-01-15 --until 20
 **User:** "What did we research yesterday?"
 
 ```bash
-bun run tools/knowledge-cli.ts search_nodes "research" --since yesterday --until today
+bun run ~/.claude/skills/Knowledge/tools/knowledge-cli.ts search_nodes "research" --since yesterday --until today
 ```
 
 ### Example 5: Last Month Overview
@@ -191,8 +191,8 @@ bun run tools/knowledge-cli.ts search_nodes "research" --since yesterday --until
 **User:** "Give me an overview of last month's knowledge"
 
 ```bash
-bun run tools/knowledge-cli.ts search_nodes "*" 20 --since 1m
-bun run tools/knowledge-cli.ts search_facts "*" 20 --since 1m
+bun run ~/.claude/skills/Knowledge/tools/knowledge-cli.ts search_nodes "*" 20 --since 1m
+bun run ~/.claude/skills/Knowledge/tools/knowledge-cli.ts search_facts "*" 20 --since 1m
 ```
 
 ---

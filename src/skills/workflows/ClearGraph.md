@@ -150,7 +150,7 @@ Do you want to create a backup before clearing?
 **ALWAYS try CLI first - it's more reliable:**
 
 ```bash
-bun run tools/knowledge-cli.ts clear_graph --force
+bun run ~/.claude/skills/Knowledge/tools/knowledge-cli.ts clear_graph --force
 ```
 
 **Note:** The `--force` flag is required as a safety measure. Without it, the command will fail with a warning.

@@ -122,7 +122,7 @@ const importManifest = [
 
 ```bash
 # For each file in the batch
-bun run tools/knowledge-cli.ts add_episode "Episode Title" "$(cat /path/to/file.md)" "Imported from /path/to/file.md"
+bun run ~/.claude/skills/Knowledge/tools/knowledge-cli.ts add_episode "Episode Title" "$(cat /path/to/file.md)" "Imported from /path/to/file.md"
 ```
 
 **For scripted batch imports:**
@@ -132,7 +132,7 @@ bun run tools/knowledge-cli.ts add_episode "Episode Title" "$(cat /path/to/file.
 for file in /path/to/docs/*.md; do
   title=$(basename "$file" .md)
   content=$(cat "$file")
-  bun run tools/knowledge-cli.ts add_episode "$title" "$content" "Imported from $file"
+  bun run ~/.claude/skills/Knowledge/tools/knowledge-cli.ts add_episode "$title" "$content" "Imported from $file"
   sleep 2  # Rate limiting
 done
 ```

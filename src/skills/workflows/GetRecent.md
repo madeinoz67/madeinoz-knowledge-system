@@ -78,7 +78,7 @@ Running the **GetRecent** workflow from the **MadeinozKnowledgeSystem** skill...
 **ALWAYS try CLI first - it's more reliable and token-efficient (25%+ savings):**
 
 ```bash
-bun run tools/knowledge-cli.ts get_episodes 20
+bun run ~/.claude/skills/Knowledge/tools/knowledge-cli.ts get_episodes 20
 ```
 
 **Arguments:**

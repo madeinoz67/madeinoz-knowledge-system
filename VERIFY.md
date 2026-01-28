@@ -1,3 +1,62 @@
+<!-- AI-FRIENDLY SUMMARY
+Document: Verification Checklist
+Purpose: Post-installation verification for Madeinoz Knowledge System
+Target Audience: AI agents verifying installation completeness
+
+Verification Sections (run in order):
+0. Database Backend Detection (Neo4j or FalkorDB)
+1. Directory Structure (pack files, skills, hooks, config)
+2. MCP Server (containers running, health endpoint, database connection)
+3. PAI Skill (installed to ~/.claude/skills/Knowledge/)
+4. Configuration (env vars, MCP config, port availability)
+5. End-to-End Functionality (add_memory, search_nodes, search_facts, get_episodes)
+6. Neo4j Cypher Verification (Neo4j backend only)
+7. Integration (Claude Code recognition, workflow invocation)
+8. Memory Sync Hook (hook files, registration, config file)
+9. Documentation (README, INSTALL, VERIFY completeness)
+10. End-to-End Completeness (no "beyond scope" gaps)
+11. Optional (performance, persistence, error handling)
+
+Critical Pass Criteria:
+- ALL sections 0-6 MUST pass
+- Section 8 (hooks) MUST pass for automatic sync
+- Any critical failure = installation NOT complete
+
+Installed File Locations:
+- Skill: ~/.claude/skills/Knowledge/
+  - workflows/: 8 workflow files
+  - tools/: CLI tools (server-cli.ts, knowledge-cli.ts)
+  - lib/: shared utilities
+  - server/: compose files, install.ts, diagnose.ts
+- Hook: ~/.claude/hooks/sync-memory-to-knowledge.ts
+- Hook lib: ~/.claude/hooks/lib/
+- Config: ~/.claude/config/sync-sources.json
+- MCP: ~/.claude.json (madeinoz-knowledge server entry)
+
+Verification Commands:
+- bun run server-cli status (container status)
+- curl http://localhost:8000/health (MCP health)
+- bun run ~/.claude/hooks/sync-memory-to-knowledge.ts --dry-run (hook test)
+
+AI AGENT INSTRUCTIONS - Issue Tracking:
+During verification, track ALL issues encountered for post-verification RCA:
+- Verification steps that fail unexpectedly
+- Commands that don't match documented behavior
+- Missing files or incorrect paths in checklist
+- Checks that pass but with warnings or anomalies
+- Documentation inconsistencies (VERIFY vs INSTALL vs README)
+- False positives/negatives in verification logic
+- Unclear or ambiguous verification criteria
+
+At verification completion, perform Root Cause Analysis:
+1. List all issues encountered with severity (critical/warning/minor)
+2. Note the section and check where each issue occurred
+3. Distinguish between installation problems vs verification doc problems
+4. Document any manual interventions required
+5. Recommend fixes for future releases (installation OR verification)
+6. Report findings to user for GitHub issue creation if warranted
+-->
+
 # Madeinoz Knowledge System - Verification Checklist
 
 Mandatory verification checklist for the Knowledge pack installation.
@@ -96,48 +155,49 @@ ls -la README.md INSTALL.md VERIFY.md package.json
 
 ---
 
-### 1.1b Skill Root Files (src/skills/)
+### 1.1b Installed Skill Root Files
 
-- [ ] **SKILL.md** exists in src/skills/
-- [ ] **STANDARDS.md** exists in src/skills/ (usage standards)
+- [ ] **SKILL.md** exists in installed skill directory
+- [ ] **STANDARDS.md** exists in installed skill directory
 
 **Verification commands:**
 ```bash
-ls -la src/skills/SKILL.md src/skills/STANDARDS.md
+PAI_SKILLS="${PAI_DIR:-$HOME/.claude}/skills/Knowledge"
+ls -la "$PAI_SKILLS/SKILL.md" "$PAI_SKILLS/STANDARDS.md"
 ```
 
 **Expected result:** Both skill definition files listed
 
 ---
 
-### 1.2 Source Directory Structure
+### 1.2 Installed Skill Directory Structure
 
-- [ ] **src/skills/workflows/** directory exists
-- [ ] **src/skills/tools/** directory exists
-- [ ] **src/server/** directory exists
-- [ ] **src/hooks/** directory exists
-- [ ] **config/** directory exists
+- [ ] **workflows/** directory exists with workflow files
+- [ ] **tools/** directory exists with CLI tools
+- [ ] **server/** directory exists with compose files
+- [ ] **lib/** directory exists with shared utilities
 
 **Verification commands:**
 ```bash
-ls -la src/skills/workflows/
-ls -la src/skills/tools/
-ls -la src/server/
-ls -la src/hooks/
-ls -la config/
+PAI_SKILLS="${PAI_DIR:-$HOME/.claude}/skills/Knowledge"
+ls -la "$PAI_SKILLS/workflows/"
+ls -la "$PAI_SKILLS/tools/"
+ls -la "$PAI_SKILLS/server/"
+ls -la "$PAI_SKILLS/lib/"
 ```
 
-**Expected result:** Directories exist with workflow, tool, server, and hook files
+**Expected result:** All directories exist with their respective files
 
 ---
 
-### 1.3 Workflow Files
+### 1.3 Installed Workflow Files
 
-All required workflows must be present:
+All required workflows must be present in installed skill:
 
 - [ ] `CaptureEpisode.md` - Add knowledge to graph
 - [ ] `SearchKnowledge.md` - Search entities and summaries
 - [ ] `SearchFacts.md` - Find relationships
+- [ ] `SearchByDate.md` - Search with temporal filtering
 - [ ] `GetRecent.md` - Retrieve recent knowledge
 - [ ] `GetStatus.md` - Check system health
 - [ ] `ClearGraph.md` - Delete all knowledge
@@ -145,71 +205,72 @@ All required workflows must be present:
 
 **Verification commands:**
 ```bash
-ls -1 src/skills/workflows/
+PAI_SKILLS="${PAI_DIR:-$HOME/.claude}/skills/Knowledge"
+ls -1 "$PAI_SKILLS/workflows/"
 ```
 
-**Expected result:** All 7 workflow files listed
+**Expected result:** All 8 workflow files listed
 
 ---
 
-### 1.4 Skill Tool Files
+### 1.4 Installed Tool Files
 
-Required tool files in `src/skills/tools/` (installed with skill):
+Required tool files in installed skill:
 
 - [ ] `Install.md` - Installation workflow (triggered by skill)
 - [ ] `README.md` - Tools documentation
-- [ ] `start.ts` - Start containers
-- [ ] `stop.ts` - Stop containers
-- [ ] `status.ts` - Show container status
-- [ ] `logs.ts` - View container logs
+- [ ] `server-cli.ts` - Unified server CLI (start, stop, restart, status, logs)
+- [ ] `knowledge-cli.ts` - Knowledge operations CLI (add, search, get)
 
 **Verification commands:**
 ```bash
-ls -1 src/skills/tools/
+PAI_SKILLS="${PAI_DIR:-$HOME/.claude}/skills/Knowledge"
+ls -1 "$PAI_SKILLS/tools/"
 ```
 
-**Expected result:** Install.md, README.md, logs.ts, start.ts, status.ts, stop.ts
+**Expected result:** Install.md, README.md, knowledge-cli.ts, server-cli.ts
 
 ---
 
-### 1.5 Skill Library Files
+### 1.5 Installed Library Files
 
-Required shared library in `src/skills/lib/` (installed with skill):
+Required shared library files in installed skill:
 
 - [ ] `cli.ts` - CLI output utilities
 - [ ] `container.ts` - Container management
+- [ ] `config.ts` - Configuration loader
+- [ ] `mcp-client.ts` - MCP client library
 
 **Verification commands:**
 ```bash
-ls -1 src/skills/lib/
+PAI_SKILLS="${PAI_DIR:-$HOME/.claude}/skills/Knowledge"
+ls -1 "$PAI_SKILLS/lib/"
 ```
 
-**Expected result:** cli.ts, container.ts
+**Expected result:** cli.ts, config.ts, container.ts, mcp-client.ts, and other utility files
 
 ---
 
-### 1.6 Server Infrastructure Files
+### 1.6 Installed Server Infrastructure Files
 
-Pack-level files in `src/server/` (not installed with skill):
+Server infrastructure files in installed skill:
 
-- [ ] `server-cli.ts` - Unified server CLI (start, stop, restart, status, logs)
 - [ ] `install.ts` - Interactive installation wizard
 - [ ] `diagnose.ts` - Diagnostic and troubleshooting tool
-- [ ] `mcp-wrapper.ts` - MCP protocol wrapper
 - [ ] `podman-compose-falkordb.yml` - Podman compose file (FalkorDB)
 - [ ] `docker-compose-falkordb.yml` - Docker compose file (FalkorDB)
 - [ ] `podman-compose-neo4j.yml` - Podman compose file (Neo4j)
 - [ ] `docker-compose-neo4j.yml` - Docker compose file (Neo4j)
 - [ ] `config-neo4j.yaml` - Neo4j backend configuration
-- [ ] `lib/` - Full library (cli, config, container, mcp-client)
+- [ ] `config-falkordb.yaml` - FalkorDB backend configuration
 
 **Verification commands:**
 ```bash
-ls -la src/server/
-ls -la src/server/lib/
+PAI_SKILLS="${PAI_DIR:-$HOME/.claude}/skills/Knowledge"
+ls -la "$PAI_SKILLS/server/"
 ```
 
-**Expected result:** server-cli.ts, install.ts, diagnose.ts, mcp-wrapper.ts, compose files for both backends, config-neo4j.yaml, and lib/ directory
+**Expected result:** install.ts, diagnose.ts, compose files for both backends, config YAML files
 
 ---
 
@@ -229,16 +290,18 @@ grep "MADEINOZ_KNOWLEDGE_" config/.env.example | head -5
 
 ---
 
-### 1.8 Hook Files
+### 1.8 Installed Hook Files
 
-- [ ] `src/hooks/sync-memory-to-knowledge.ts` exists
-- [ ] `src/hooks/sync-learning-realtime.ts` exists
-- [ ] `src/hooks/lib/` directory exists with support files
+- [ ] `~/.claude/hooks/sync-memory-to-knowledge.ts` exists (consolidated sync hook)
+- [ ] `~/.claude/hooks/lib/` directory exists with support files
+- [ ] `~/.claude/config/sync-sources.json` exists (sync configuration)
 
 **Verification commands:**
 ```bash
-ls -la src/hooks/
-ls -la src/hooks/lib/
+PAI_DIR="${PAI_DIR:-$HOME/.claude}"
+ls -la "$PAI_DIR/hooks/sync-memory-to-knowledge.ts"
+ls -la "$PAI_DIR/hooks/lib/"
+ls -la "$PAI_DIR/config/sync-sources.json"
 ```
 
 
@@ -265,7 +328,8 @@ podman ps | grep madeinoz-knowledge
 docker ps | grep madeinoz-knowledge
 
 # Or use the status script
-bun run src/skills/tools/status.ts
+PAI_SKILLS="${PAI_DIR:-$HOME/.claude}/skills/Knowledge"
+bun run "$PAI_SKILLS/tools/server-cli.ts" status
 ```
 
 **Expected result (FalkorDB backend):**
@@ -273,6 +337,58 @@ bun run src/skills/tools/status.ts
 
 **Expected result (Neo4j backend):**
 - Containers `madeinoz-knowledge-graph-mcp` and `madeinoz-knowledge-neo4j` listed with status "Up"
+
+---
+
+### 2.1b Image Version Match (CRITICAL)
+
+- [ ] **Running container image version matches installed pack version**
+
+> **FOR AI AGENTS:** This check is CRITICAL. A version mismatch means the container is running
+> outdated code. If versions don't match, the user must pull the new image and restart containers.
+
+**Verification commands:**
+```bash
+PAI_SKILLS="${PAI_DIR:-$HOME/.claude}/skills/Knowledge"
+
+# Get installed pack version from SKILL.md
+INSTALLED_VERSION=$(grep "^version:" "$PAI_SKILLS/SKILL.md" | head -1 | sed 's/version:[[:space:]]*//')
+echo "Installed pack version: $INSTALLED_VERSION"
+
+# Get running MCP container image version
+# For Podman:
+IMAGE_VERSION=$(podman ps --format "{{.Image}}" --filter "name=madeinoz-knowledge-graph-mcp" 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+# For Docker (if podman not available):
+[ -z "$IMAGE_VERSION" ] && IMAGE_VERSION=$(docker ps --format "{{.Image}}" --filter "name=madeinoz-knowledge-graph-mcp" 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+
+echo "Running image version: $IMAGE_VERSION"
+
+# Compare versions
+if [ "$INSTALLED_VERSION" = "$IMAGE_VERSION" ]; then
+    echo "✓ Versions match: $INSTALLED_VERSION"
+else
+    echo "✗ VERSION MISMATCH!"
+    echo "  Installed pack: $INSTALLED_VERSION"
+    echo "  Running image:  $IMAGE_VERSION"
+    echo ""
+    echo "  To fix: Pull new image and restart containers:"
+    echo "    podman pull ghcr.io/madeinoz67/madeinoz-knowledge-system:$INSTALLED_VERSION"
+    echo "    bun run server-cli restart"
+    exit 1
+fi
+```
+
+**Expected result:** `✓ Versions match: X.Y.Z`
+
+**If FAIL:**
+1. Pull the correct image version:
+   ```bash
+   podman pull ghcr.io/madeinoz67/madeinoz-knowledge-system:$INSTALLED_VERSION
+   # or for Docker:
+   docker pull ghcr.io/madeinoz67/madeinoz-knowledge-system:$INSTALLED_VERSION
+   ```
+2. Update compose file image tag if needed
+3. Restart containers: `bun run server-cli restart`
 
 ---
 
@@ -387,7 +503,8 @@ curl -s -o /dev/null -w "%{http_code}" http://localhost:7474
 
 **Verification commands:**
 ```bash
-bun run src/skills/tools/logs.ts 2>&1 | grep -i "error\|critical\|fatal" | head -10
+PAI_SKILLS="${PAI_DIR:-$HOME/.claude}/skills/Knowledge"
+bun run "$PAI_SKILLS/tools/server-cli.ts" logs 2>&1 | grep -i "error\|critical\|fatal" | head -10
 ```
 
 **Expected result:** No output (or only warnings, not errors)
@@ -411,19 +528,20 @@ ls -la ~/.claude/skills/Knowledge/
 ls -la ${PAI_DIR:-$HOME/.claude}/skills/Knowledge/
 ```
 
-**Expected result:** Directory exists with SKILL.md, STANDARDS.md, workflows/, tools/
+**Expected result:** Directory exists with SKILL.md, STANDARDS.md, workflows/, tools/, lib/, server/
 
 ---
 
 ### 3.2 Installed Skill Structure
 
-The installed skill is a copy of `src/skills/` directory:
+The installed skill should have the following structure:
 
 - [ ] `Knowledge/SKILL.md` exists
 - [ ] `Knowledge/STANDARDS.md` exists
-- [ ] `Knowledge/workflows/` directory exists with 7 workflow files
+- [ ] `Knowledge/workflows/` directory exists with 8 workflow files
 - [ ] `Knowledge/tools/` directory exists with management scripts
 - [ ] `Knowledge/lib/` directory exists with shared utilities
+- [ ] `Knowledge/server/` directory exists with compose files and install scripts
 
 **Verification commands:**
 ```bash
@@ -432,9 +550,10 @@ ls -la "$PAI_SKILLS/Knowledge/"
 ls -la "$PAI_SKILLS/Knowledge/workflows/"
 ls -la "$PAI_SKILLS/Knowledge/tools/"
 ls -la "$PAI_SKILLS/Knowledge/lib/"
+ls -la "$PAI_SKILLS/Knowledge/server/"
 ```
 
-**Expected result:** Structure matches `src/skills/` with SKILL.md, STANDARDS.md, workflows/, tools/, lib/
+**Expected result:** Structure includes SKILL.md, STANDARDS.md, workflows/, tools/, lib/, server/
 
 ---
 
@@ -722,7 +841,10 @@ lsof -i :7687
 > ALL tests MUST pass for the installation to be considered complete.
 > If any test fails, the knowledge system is NOT functional - troubleshoot before proceeding.
 
-Verify the complete system works end-to-end using the actual MCP tools.
+Verify the complete system works end-to-end using the knowledge CLI.
+
+> **Note:** The MCP server uses Streamable HTTP transport which requires session management.
+> The `knowledge-cli.ts` handles this internally. Raw curl commands require session initialization.
 
 ### 5.1 Knowledge Capture (add_memory)
 
@@ -730,77 +852,42 @@ Verify the complete system works end-to-end using the actual MCP tools.
 
 **Verification commands:**
 ```bash
-curl -s -X POST http://localhost:8000/mcp/ \
-    -H "Content-Type: application/json" \
-    -d '{
-        "jsonrpc":"2.0",
-        "id":1,
-        "method":"tools/call",
-        "params":{
-            "name":"add_memory",
-            "arguments":{
-                "name":"PAI Verification Test",
-                "episode_body":"Madeinoz Knowledge System verification test completed successfully.",
-                "source":"text",
-                "source_description":"verification test"
-            }
-        }
-    }' | head -20
+PAI_SKILLS="${PAI_DIR:-$HOME/.claude}/skills/Knowledge"
+bun run "$PAI_SKILLS/tools/knowledge-cli.ts" add_episode \
+    "PAI Verification Test" \
+    "Madeinoz Knowledge System verification test completed successfully." \
+    "verification test"
 ```
 
-**Expected result:** JSON response with success indication, no errors
+**Expected result:** `✓ Episode 'PAI Verification Test' queued for processing in group 'main'`
 
 ---
 
-### 5.2 Knowledge Search (search_memory_nodes)
+### 5.2 Knowledge Search (search_nodes)
 
 - [ ] **Can search knowledge graph nodes**
 
 **Verification commands:**
 ```bash
-curl -s -X POST http://localhost:8000/mcp/ \
-    -H "Content-Type: application/json" \
-    -d '{
-        "jsonrpc":"2.0",
-        "id":2,
-        "method":"tools/call",
-        "params":{
-            "name":"search_memory_nodes",
-            "arguments":{
-                "query":"Madeinoz Knowledge System",
-                "max_nodes":5
-            }
-        }
-    }' | head -20
+PAI_SKILLS="${PAI_DIR:-$HOME/.claude}/skills/Knowledge"
+bun run "$PAI_SKILLS/tools/knowledge-cli.ts" search_nodes "verification" 5
 ```
 
-**Expected result:** JSON response with search results (may be empty if graph is new)
+**Expected result:** `Found N entities for "verification":` followed by entity list
 
 ---
 
-### 5.3 Relationship Search (search_memory_facts)
+### 5.3 Relationship Search (search_facts)
 
 - [ ] **Can search relationships/facts**
 
 **Verification commands:**
 ```bash
-curl -s -X POST http://localhost:8000/mcp/ \
-    -H "Content-Type: application/json" \
-    -d '{
-        "jsonrpc":"2.0",
-        "id":3,
-        "method":"tools/call",
-        "params":{
-            "name":"search_memory_facts",
-            "arguments":{
-                "query":"PAI",
-                "max_facts":5
-            }
-        }
-    }' | head -20
+PAI_SKILLS="${PAI_DIR:-$HOME/.claude}/skills/Knowledge"
+bun run "$PAI_SKILLS/tools/knowledge-cli.ts" search_facts "PAI" 5
 ```
 
-**Expected result:** JSON response with facts/relationships (may be empty if graph is new)
+**Expected result:** `Found N facts for "PAI":` followed by relationship list
 
 ---
 
@@ -810,22 +897,11 @@ curl -s -X POST http://localhost:8000/mcp/ \
 
 **Verification commands:**
 ```bash
-curl -s -X POST http://localhost:8000/mcp/ \
-    -H "Content-Type: application/json" \
-    -d '{
-        "jsonrpc":"2.0",
-        "id":4,
-        "method":"tools/call",
-        "params":{
-            "name":"get_episodes",
-            "arguments":{
-                "last_n":5
-            }
-        }
-    }' | head -20
+PAI_SKILLS="${PAI_DIR:-$HOME/.claude}/skills/Knowledge"
+bun run "$PAI_SKILLS/tools/knowledge-cli.ts" get_episodes 5
 ```
 
-**Expected result:** JSON array with episodes (includes test episode from 5.1)
+**Expected result:** `Recent episodes (5):` followed by episode list (includes test episode from 5.1)
 
 ---
 
@@ -998,28 +1074,29 @@ Verify the memory sync hook is properly installed for syncing learnings and rese
 
 ### 8.1 Hook Files Installed
 
-- [ ] **Hook scripts exist in PAI hooks directory**
+- [ ] **Hook script exists in PAI hooks directory**
 - [ ] **Hook lib files exist**
+- [ ] **Config file exists in PAI config directory**
 
 **Verification commands:**
 ```bash
 PAI_HOOKS="$HOME/.claude/hooks"
+PAI_CONFIG="$HOME/.claude/config"
 ls -la "$PAI_HOOKS/"
 ls -la "$PAI_HOOKS/lib/"
+ls -la "$PAI_CONFIG/sync-sources.json"
 ```
 
-**Expected result:** sync-memory-to-knowledge.ts, sync-learning-realtime.ts, and lib/ directory with:
-- frontmatter-parser.ts
-- knowledge-client.ts
-- sync-state.ts
+**Expected result:**
+- sync-memory-to-knowledge.ts (consolidated sync hook)
+- lib/ directory with: frontmatter-parser.ts, knowledge-client.ts, sync-state.ts, sync-config.ts, anti-loop-patterns.ts
+- config/sync-sources.json (sync source paths and custom exclude patterns)
 
 ---
 
-### 8.2 Hooks Registered in settings.json
+### 8.2 Hook Registered in settings.json
 
 - [ ] **SessionStart hook registered** (sync-memory-to-knowledge.ts)
-- [ ] **Stop hook registered** (sync-learning-realtime.ts)
-- [ ] **SubagentStop hook registered** (sync-learning-realtime.ts)
 
 **Verification commands:**
 ```bash
@@ -1034,29 +1111,12 @@ if [ -f "$SETTINGS" ]; then
     else
         echo "✗ SessionStart: sync-memory-to-knowledge.ts NOT registered"
     fi
-
-    # Check Stop hook
-    if grep -q '"Stop"' "$SETTINGS" && grep -q "sync-learning-realtime" "$SETTINGS"; then
-        echo "✓ Stop: sync-learning-realtime.ts registered"
-    else
-        echo "✗ Stop: sync-learning-realtime.ts NOT registered"
-    fi
-
-    # Check SubagentStop hook
-    if grep -q '"SubagentStop"' "$SETTINGS" && grep -q "sync-learning-realtime" "$SETTINGS"; then
-        echo "✓ SubagentStop: sync-learning-realtime.ts registered"
-    else
-        echo "✗ SubagentStop: sync-learning-realtime.ts NOT registered"
-    fi
 else
     echo "✗ settings.json not found at: $SETTINGS"
 fi
 ```
 
-**Expected result:** All three hooks registered:
-- SessionStart: syncs memory at session start
-- Stop: syncs learnings when execution stops
-- SubagentStop: syncs when subagent completes
+**Expected result:** SessionStart hook registered - syncs memory to knowledge graph at session start
 
 ---
 
@@ -1080,8 +1140,7 @@ ls -la "$MEMORY_DIR/STATE/knowledge-sync/" 2>/dev/null || echo "Sync state direc
 
 **Verification commands:**
 ```bash
-cd /path/to/madeinoz-knowledge-system
-bun run src/hooks/sync-memory-to-knowledge.ts --dry-run --verbose
+bun run ~/.claude/hooks/sync-memory-to-knowledge.ts --dry-run --verbose
 ```
 
 **Expected result:** Hook completes without errors, shows what would be synced
@@ -1133,7 +1192,7 @@ grep "bun run" INSTALL.md | head -5
 - [ ] **Each workflow has MCP tool references**
 
 **Verification:**
-Open and review each workflow file in `src/skills/workflows/`
+Open and review each workflow file in `~/.claude/skills/Knowledge/workflows/`
 
 **Expected result:** All workflows are well-documented
 
@@ -1189,16 +1248,16 @@ grep -i "beyond.*scope\|implement.*your.*own\|left as.*exercise" \
 
 ### 10.3 Complete Component List
 
-- [ ] **MCP Server included** (`src/server/server-cli.ts` and compose files)
-- [ ] **FalkorDB compose files included** (`docker-compose-falkordb.yml`, `podman-compose-falkordb.yml`)
-- [ ] **Neo4j compose files included** (`docker-compose-neo4j.yml`, `podman-compose-neo4j.yml`, `config-neo4j.yaml`)
-- [ ] **PAI Skill included** (`SKILL.md` with workflows)
-- [ ] **Workflows included** (7 complete workflows in `src/skills/workflows/`)
-- [ ] **Skill tools included** (start.ts, stop.ts, status.ts, logs.ts in `src/skills/tools/`)
-- [ ] **Pack tools included** (install.ts, diagnose.ts in `src/server/`)
-- [ ] **Hooks included** (sync-memory-to-knowledge.ts, sync-learning-realtime.ts in `src/hooks/`)
+- [ ] **MCP Server included** (server-cli.ts and compose files in installed skill)
+- [ ] **FalkorDB compose files included** (`server/docker-compose-falkordb.yml`, `server/podman-compose-falkordb.yml`)
+- [ ] **Neo4j compose files included** (`server/docker-compose-neo4j.yml`, `server/podman-compose-neo4j.yml`)
+- [ ] **PAI Skill included** (`SKILL.md` with workflows at `~/.claude/skills/Knowledge/`)
+- [ ] **Workflows included** (8 workflow files in `~/.claude/skills/Knowledge/workflows/`)
+- [ ] **Skill tools included** (server-cli.ts, knowledge-cli.ts in `~/.claude/skills/Knowledge/tools/`)
+- [ ] **Server tools included** (install.ts, diagnose.ts in `~/.claude/skills/Knowledge/server/`)
+- [ ] **Hooks included** (sync-memory-to-knowledge.ts in `~/.claude/hooks/`, consolidated sync hook)
 - [ ] **Installation included** (`INSTALL.md` with all steps and database backend selection)
-- [ ] **Configuration included** (`config/.env.example` with all variables for both backends)
+- [ ] **Configuration included** (`config/.env.example` with all variables for both backends, `config/sync-sources.json` for sync configuration)
 - [ ] **Documentation included** (README, INSTALL, VERIFY)
 - [ ] **Tests included** (`tests/` directory with unit and integration tests)
 - [ ] **No external dependencies** beyond documented prerequisites
@@ -1230,7 +1289,7 @@ time curl -s http://localhost:8000/health
 
 **Verification:**
 1. Add test knowledge
-2. Restart containers: `bun run src/skills/tools/stop.ts && bun run src/skills/tools/start.ts`
+2. Restart containers: `bun run ~/.claude/skills/Knowledge/tools/server-cli.ts restart`
 3. Search for test knowledge
 4. Verify it's still there
 
@@ -1277,6 +1336,7 @@ For a successful installation, you must have:
 - Database backend detected (Section 0)
 - All files in correct locations (Section 1)
 - MCP server running and accessible (Section 2)
+- **Image version matches installed pack version (Section 2.1b)**
 - Database container running (Section 2.3 for FalkorDB OR 2.3-ALT for Neo4j)
 - PAI skill installed with flat structure (Section 3)
 - Configuration complete with valid API key (Section 4)
@@ -1294,11 +1354,11 @@ For a successful installation, you must have:
 
 If any critical item fails:
 
-1. **Review logs:** `bun run src/skills/tools/logs.ts`
-2. **Check configuration:** Verify `config/.env.example` is properly configured
+1. **Review logs:** `bun run ~/.claude/skills/Knowledge/tools/server-cli.ts logs`
+2. **Check configuration:** Verify PAI .env has required MADEINOZ_KNOWLEDGE_* variables
 3. **Re-run installation:** Follow `INSTALL.md` steps again
 4. **Check troubleshooting:** Review troubleshooting section in `INSTALL.md`
-5. **Run diagnostics:** `bun run src/server/diagnose.ts`
+5. **Run diagnostics:** `bun run ~/.claude/skills/Knowledge/server/diagnose.ts`
 
 ### Final Verification
 

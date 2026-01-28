@@ -1383,10 +1383,11 @@ class Installer {
 
       const filesToCopy = [
         { src: 'sync-memory-to-knowledge.ts', dest: 'sync-memory-to-knowledge.ts' },
-        { src: 'sync-learning-realtime.ts', dest: 'sync-learning-realtime.ts' },
         { src: 'lib/frontmatter-parser.ts', dest: 'lib/frontmatter-parser.ts' },
         { src: 'lib/sync-state.ts', dest: 'lib/sync-state.ts' },
         { src: 'lib/knowledge-client.ts', dest: 'lib/knowledge-client.ts' },
+        { src: 'lib/sync-config.ts', dest: 'lib/sync-config.ts' },
+        { src: 'lib/anti-loop-patterns.ts', dest: 'lib/anti-loop-patterns.ts' },
       ];
 
       for (const file of filesToCopy) {
@@ -1398,6 +1399,25 @@ class Installer {
           cli.success(`Installed: ${file.dest}`);
         } else {
           cli.warning(`Source not found: ${file.src}`);
+        }
+      }
+
+      // Copy config file to ~/.claude/config/
+      const configDir = join(paiDir, 'config');
+      if (!existsSync(configDir)) {
+        mkdirSync(configDir, { recursive: true });
+      }
+
+      const sourceConfigPath = join(packDir, 'config', 'sync-sources.json');
+      const destConfigPath = join(configDir, 'sync-sources.json');
+
+      if (existsSync(sourceConfigPath)) {
+        // Only copy if destination doesn't exist (preserve user customizations)
+        if (!existsSync(destConfigPath)) {
+          copyFileSync(sourceConfigPath, destConfigPath);
+          cli.success(`Installed: config/sync-sources.json`);
+        } else {
+          cli.dim('Config file exists, preserving user customizations');
         }
       }
 

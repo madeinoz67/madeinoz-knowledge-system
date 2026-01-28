@@ -1,0 +1,111 @@
+# Production Docker Compose for Remote Neo4j Knowledge Graph Deployment
+#
+# Standalone deployment for servers WITHOUT PAI infrastructure.
+# Uses native service names and environment variables.
+#
+# Services:
+#   - neo4j: Graph database backend (Cypher queries)
+#   - knowledge-mcp: MCP server for knowledge graph operations
+#
+# Requirements:
+#   - Docker Compose v2.x
+#   - At least 4GB RAM available
+#   - Ports 7474, 7687, 8000 available
+#
+# Quick Start:
+#   1. Copy this file to your server
+#   2. Set environment variables (see below) or create .env file
+#   3. Run: docker compose -f docker-compose-production.yml up -d
+#
+# Environment Variables (configure in .env file or export):
+#   NEO4J_PASSWORD=your-secure-password     (required)
+#   OPENAI_API_KEY=sk-...                   (required for LLM operations)
+#   MODEL_NAME=gpt-4o-mini                  (optional, default: gpt-4o-mini)
+#   EMBEDDING_MODEL_NAME=text-embedding-3-small  (optional)
+#
+# Access:
+#   - Neo4j Browser: http://localhost:7474 (user: neo4j)
+#   - MCP HTTP endpoint: http://localhost:8000/mcp
+#   - Health check: http://localhost:8000/health
+#
+# Data Persistence:
+#   - Neo4j data stored in Docker volume: neo4j-data
+#   - Neo4j logs stored in Docker volume: neo4j-logs
+#
+# Security Notes:
+#   - Change NEO4J_PASSWORD before deployment
+#   - Consider adding TLS for production use
+#   - Restrict port access via firewall if exposed to internet
+
+name: knowledge-graph
+
+networks:
+  knowledge-net:
+    driver: bridge
+
+volumes:
+  neo4j-data:
+    driver: local
+  neo4j-logs:
+    driver: local
+
+services:
+  # Neo4j Graph Database
+  neo4j:
+    image: neo4j:latest
+    container_name: neo4j
+    restart: unless-stopped
+    networks:
+      - knowledge-net
+    ports:
+      - "7474:7474"  # Neo4j Browser HTTP
+      - "7687:7687"  # Bolt protocol
+    volumes:
+      - neo4j-data:/data
+      - neo4j-logs:/logs
+    environment:
+      - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD:-changeme}
+      - NEO4J_server_memory_heap_initial__size=512m
+      - NEO4J_server_memory_heap_max__size=1G
+      - NEO4J_server_memory_pagecache_size=512m
+      - NEO4J_dbms_usage__report_enabled=false
+    healthcheck:
+      test: ["CMD", "wget", "-O", "/dev/null", "http://localhost:7474"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  # Graphiti MCP Server
+  knowledge-mcp:
+    image: ghcr.io/madeinoz67/madeinoz-knowledge-system:1.4.1
+    container_name: knowledge-mcp
+    restart: unless-stopped
+    networks:
+      - knowledge-net
+    ports:
+      - "8000:8000"  # MCP HTTP endpoint
+      - "9090:9090"  # Prometheus metrics
+    environment:
+      # Database connection (connects to neo4j service)
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-changeme}
+      # LLM Configuration (OpenAI by default)
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - MODEL_NAME=${MODEL_NAME:-gpt-4o-mini}
+      - EMBEDDING_MODEL_NAME=${EMBEDDING_MODEL_NAME:-text-embedding-3-small}
+      # Server settings
+      - PORT=8000
+      - HOST=0.0.0.0
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    depends_on:
+      neo4j:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "--max-time", "5", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    command: ["uv", "run", "main.py"]

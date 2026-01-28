@@ -4,7 +4,8 @@
   "_instructions": [
     "Merge these hook configurations into ~/.claude/settings.json",
     "The hooks array should be added/merged under the 'hooks' key",
-    "Copy hook files from src/hooks/ to $PAI_DIR/hooks/ during installation"
+    "Copy hook files from src/hooks/ to $PAI_DIR/hooks/ during installation",
+    "Note: Memory sync runs at SessionStart only (syncs previous session's content)"
   ],
   "hooks": {
     "SessionStart": [
@@ -15,28 +16,6 @@
             "type": "command",
             "command": "bun run $PAI_DIR/hooks/sync-memory-to-knowledge.ts",
             "timeout": 30000
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bun run $PAI_DIR/hooks/sync-learning-realtime.ts",
-            "timeout": 15000
-          }
-        ]
-      }
-    ],
-    "SubagentStop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bun run $PAI_DIR/hooks/sync-learning-realtime.ts",
-            "timeout": 15000
           }
         ]
       }

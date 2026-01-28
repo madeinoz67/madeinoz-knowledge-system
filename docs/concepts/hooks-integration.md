@@ -3,6 +3,38 @@ title: Hooks & PAI Memory Integration
 description: How madeinoz-knowledge-system automatically syncs PAI Memory to your knowledge graph using session lifecycle hooks
 ---
 
+<!-- AI-FRIENDLY SUMMARY
+System: Memory Sync Hook
+Purpose: Automatically syncs PAI Memory files to knowledge graph at session start
+
+Key Features:
+- Configurable sync sources (LEARNING/ALGORITHM, LEARNING/SYSTEM, RESEARCH)
+- Anti-loop detection prevents knowledge query results from being re-synced
+- Custom exclude patterns via config file or environment variable
+- Content-based deduplication using SHA-256 hashes
+
+Configuration File: ~/.claude/config/sync-sources.json (installed) or config/sync-sources.json (development)
+Environment Prefix: MADEINOZ_KNOWLEDGE_SYNC_*
+
+Key Environment Variables:
+- MADEINOZ_KNOWLEDGE_SYNC_LEARNING_ALGORITHM: Enable/disable LEARNING/ALGORITHM sync (default: true)
+- MADEINOZ_KNOWLEDGE_SYNC_LEARNING_SYSTEM: Enable/disable LEARNING/SYSTEM sync (default: true)
+- MADEINOZ_KNOWLEDGE_SYNC_RESEARCH: Enable/disable RESEARCH sync (default: true)
+- MADEINOZ_KNOWLEDGE_SYNC_EXCLUDE_PATTERNS: Comma-separated patterns (overrides config file)
+- MADEINOZ_KNOWLEDGE_SYNC_MAX_FILES: Max files per sync run (default: 50)
+- MADEINOZ_KNOWLEDGE_SYNC_VERBOSE: Enable verbose logging (default: false)
+
+CLI Commands:
+- bun run src/hooks/sync-memory-to-knowledge.ts --status: Show sync status
+- bun run src/hooks/sync-memory-to-knowledge.ts --all: Sync all files
+- bun run src/hooks/sync-memory-to-knowledge.ts --dry-run: Preview without syncing
+
+Anti-Loop Patterns (16 built-in):
+- MCP tool invocations: mcp__madeinoz-knowledge__
+- Query phrases: "what do I know about", "search my knowledge"
+- Formatted output: "Knowledge Found:", "Key Entities:"
+-->
+
 # Hooks & PAI Memory Integration
 
 ## Overview
@@ -26,12 +58,12 @@ graph TB
     subgraph "Claude Code Session"
         CC[Claude Code CLI]
         SS[SessionStart Event]
-        SP[SessionStop Event]
     end
 
     subgraph "Hook Layer"
         H1[sync-memory-to-knowledge.ts]
-        H2[sync-learning-realtime.ts]
+        CFG[sync-sources.json]
+        ALP[Anti-Loop Patterns]
     end
 
     subgraph "PAI Memory System"
@@ -59,21 +91,20 @@ graph TB
     end
 
     CC --> SS
-    CC --> SP
     SS --> H1
-    SP --> H2
+    CFG --> H1
+    ALP --> H1
 
     H1 --> M1
     H1 --> M2
     H1 --> M3
-    H2 --> M1
-    H2 --> M2
 
     M1 --> FP
     M2 --> FP
     M3 --> FP
 
     FP --> CH
+    FP --> ALP
     CH --> ST
     ST --> MCP
     MCP --> API
@@ -86,16 +117,17 @@ graph TB
     style CC fill:#4a90d9,color:#fff
     style MCP fill:#28a745,color:#fff
     style DB fill:#6f42c1,color:#fff
+    style CFG fill:#f0ad4e,color:#000
+    style ALP fill:#d9534f,color:#fff
 ```
 
 ## Available Hooks
 
-The system provides two complementary hooks that work together to ensure comprehensive knowledge capture:
+The system provides a single consolidated hook for memory synchronization:
 
 | Hook | Trigger Point | Purpose | Sync Scope |
 |------|--------------|---------|------------|
-| **sync-memory-to-knowledge** | `SessionStart` | Bulk sync of all PAI Memory files at session start | All three memory directories (LEARNING/ALGORITHM/, LEARNING/SYSTEM/, RESEARCH/) |
-| **sync-learning-realtime** | `Post-Stop` | Immediate capture of the most recent learning after session end | Only LEARNING/ directories (ALGORITHM/ and SYSTEM/) |
+| **sync-memory-to-knowledge** | `SessionStart` | Comprehensive sync of all configured PAI Memory files | Configurable (LEARNING/ALGORITHM/, LEARNING/SYSTEM/, RESEARCH/) |
 
 ### sync-memory-to-knowledge (SessionStart Hook)
 
@@ -103,26 +135,16 @@ This hook performs comprehensive synchronization when you start a new Claude Cod
 
 **Key Features:**
 
-- Full directory scanning across all memory sources
+- **Configurable sync sources** - Enable/disable each directory via environment variables or config file
+- **Anti-loop detection** - Prevents knowledge query results from being re-synced (16 built-in patterns)
+- **Custom exclude patterns** - Add your own patterns to skip specific content
+- Full directory scanning across all enabled memory sources
 - Batched processing for efficiency
 - YAML frontmatter metadata extraction
-- Content-based deduplication
+- Content-based deduplication (SHA-256)
 - Exponential backoff retry logic
 - Dry-run mode for testing
-
-### sync-learning-realtime (Post-Stop Hook)
-
-This hook captures your most recent learning immediately after a session ends, ensuring fresh insights are preserved before you close your terminal.
-
-**Key Features:**
-
-- Single-file focus for speed
-- Prevents feedback loops by detecting knowledge tool operations
-- Only syncs from LEARNING/ directories
-- Immediate execution after session stop
-
-!!! tip "Complementary Design"
-    The SessionStart hook handles bulk synchronization of your entire memory library, while the Post-Stop hook ensures your latest work is captured immediately. Together, they provide comprehensive coverage without duplication.
+- Status command for visibility
 
 ## PAI Memory Integration
 
@@ -224,8 +246,139 @@ The hooks monitor three distinct PAI Memory directories, each serving a specific
 
 **Example File:** `~/.claude/MEMORY/RESEARCH/graphiti-vs-alternatives.md`
 
-!!! note "Directory Configuration"
-    The default memory directories are configured in `src/hooks/sync-memory-to-knowledge.ts`. You can customize these paths by modifying the `MEMORY_DIRS` array in the hook source code.
+## Configurable Sync
+
+The memory sync system is fully configurable through an external JSON configuration file and environment variables.
+
+### Configuration File
+
+Sync sources and custom patterns are defined in `sync-sources.json`:
+
+| Context | Configuration File Location |
+|---------|---------------------------|
+| **Installed** (via `bun run install:system`) | `~/.claude/config/sync-sources.json` |
+| **Development** (running from source) | `{project}/config/sync-sources.json` |
+
+**Example configuration:**
+
+```json
+{
+  "version": "1.0",
+  "sources": [
+    {
+      "id": "LEARNING_ALGORITHM",
+      "path": "LEARNING/ALGORITHM",
+      "type": "LEARNING",
+      "description": "Task execution learnings",
+      "defaultEnabled": true
+    },
+    {
+      "id": "LEARNING_SYSTEM",
+      "path": "LEARNING/SYSTEM",
+      "type": "LEARNING",
+      "description": "PAI/tooling learnings",
+      "defaultEnabled": true
+    },
+    {
+      "id": "RESEARCH",
+      "path": "RESEARCH",
+      "type": "RESEARCH",
+      "description": "Agent research outputs",
+      "defaultEnabled": true
+    }
+  ],
+  "customExcludePatterns": [
+    "meeting notes",
+    "/^draft-/i"
+  ]
+}
+```
+
+### Environment Variables
+
+Environment variables override the config file settings:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `MADEINOZ_KNOWLEDGE_SYNC_LEARNING_ALGORITHM` | `true` | Enable sync for LEARNING/ALGORITHM files |
+| `MADEINOZ_KNOWLEDGE_SYNC_LEARNING_SYSTEM` | `true` | Enable sync for LEARNING/SYSTEM files |
+| `MADEINOZ_KNOWLEDGE_SYNC_RESEARCH` | `true` | Enable sync for RESEARCH files |
+| `MADEINOZ_KNOWLEDGE_SYNC_EXCLUDE_PATTERNS` | - | Comma-separated custom exclude patterns (overrides config file) |
+| `MADEINOZ_KNOWLEDGE_SYNC_MAX_FILES` | `50` | Max files per sync run (1-1000) |
+| `MADEINOZ_KNOWLEDGE_SYNC_VERBOSE` | `false` | Enable verbose logging |
+
+**Example: Disable RESEARCH sync:**
+
+```bash
+export MADEINOZ_KNOWLEDGE_SYNC_RESEARCH=false
+```
+
+### Anti-Loop Detection
+
+The system automatically excludes knowledge-derived content from being re-synced to prevent feedback loops. This is critical for preventing infinite sync cycles where knowledge query results get synced back to the knowledge graph.
+
+**16 Built-in Anti-Loop Patterns:**
+
+| Category | Pattern Examples | What It Detects |
+|----------|-----------------|-----------------|
+| **MCP Tools** | `mcp__madeinoz-knowledge__` | Tool invocation markers |
+| **Query Phrases** | `what do I know about`, `search my knowledge` | Natural language queries |
+| **Formatted Output** | `Knowledge Found:`, `Key Entities:` | Structured search results |
+| **Search Results** | `Related Facts:`, `Source Episodes:` | Query response sections |
+
+When a file matches any anti-loop pattern, it is skipped with a logged reason code.
+
+### Custom Exclude Patterns
+
+You can add your own patterns to exclude specific content from sync. Patterns can be:
+
+**1. Substring patterns** (case-insensitive match anywhere in content):
+
+```json
+"customExcludePatterns": [
+  "meeting notes",
+  "TODO:",
+  "DRAFT"
+]
+```
+
+**2. Regex patterns** (surrounded by `/`, optional flags):
+
+```json
+"customExcludePatterns": [
+  "/^draft-/i",
+  "/\\[WIP\\]/",
+  "/meeting-\\d{4}-\\d{2}-\\d{2}/"
+]
+```
+
+| Pattern Type | Syntax | Example | Matches |
+|--------------|--------|---------|---------|
+| Substring | `"text"` | `"meeting notes"` | Any file containing "meeting notes" |
+| Regex (case-insensitive) | `"/pattern/i"` | `"/^draft-/i"` | Files starting with "draft-" |
+| Regex (case-sensitive) | `"/pattern/"` | `"/TODO:/"` | Files containing exactly "TODO:" |
+
+**Precedence:**
+
+1. Environment variable `MADEINOZ_KNOWLEDGE_SYNC_EXCLUDE_PATTERNS` (if set, overrides config file)
+2. Config file `customExcludePatterns` array
+3. Built-in anti-loop patterns (always active, cannot be disabled)
+
+### CLI Commands
+
+```bash
+# Show current sync status and configuration
+bun run src/hooks/sync-memory-to-knowledge.ts --status
+
+# Run sync manually
+bun run src/hooks/sync-memory-to-knowledge.ts
+
+# Sync all files (not just recent)
+bun run src/hooks/sync-memory-to-knowledge.ts --all
+
+# Dry run with verbose output
+bun run src/hooks/sync-memory-to-knowledge.ts --dry-run --verbose
+```
 
 ## How It Works
 
@@ -255,41 +408,23 @@ graph TD
     P --> Q[Session Ready]
 ```
 
-### Post-Stop Sync Flow
-
-```mermaid
-graph TD
-    A[Session Stops] --> B[Check Transcript]
-    B --> C{Knowledge Tools Used?}
-    C -->|Yes| D[Skip Sync - Prevent Loop]
-    C -->|No| E[Find Most Recent File]
-    E --> F{Recent File Found?}
-    F -->|No| G[Exit]
-    F -->|Yes| H[Load Sync State]
-    H --> I[Calculate Content Hash]
-    I --> J{Hash Changed?}
-    J -->|No| G
-    J -->|Yes| K[Parse Frontmatter]
-    K --> L[Sync to Knowledge Graph]
-    L --> M[Update Sync State]
-    M --> N[Exit]
-```
-
 ### Step-by-Step Process
 
-1. **Trigger Detection** - Hook activates at SessionStart or Post-Stop lifecycle point
-2. **State Loading** - Reads `~/.claude/.madeinoz-knowledge-sync-state.json` for previous sync history
-3. **File Discovery** - Scans configured memory directories for `.md` files
-4. **Content Hashing** - Calculates SHA-256 hash of each file's content
-5. **Change Detection** - Compares current hash against stored state
-6. **Frontmatter Parsing** - Extracts YAML metadata (title, tags, source, etc.)
-7. **Batch Processing** - Groups files into batches (default: 10 files)
-8. **Knowledge Graph Sync** - Calls `add_memory` tool with content and metadata
-9. **Retry Logic** - Retries failed syncs with exponential backoff (1s, 2s, 4s delays)
-10. **State Persistence** - Updates sync state file with new hashes and timestamps
+1. **Trigger Detection** - Hook activates at SessionStart lifecycle point
+2. **Configuration Loading** - Reads `sync-sources.json` for enabled sources and custom patterns
+3. **State Loading** - Reads `~/.claude/.madeinoz-knowledge-sync-state.json` for previous sync history
+4. **File Discovery** - Scans enabled memory directories for `.md` files
+5. **Anti-Loop Check** - Skips files matching built-in or custom exclude patterns
+6. **Content Hashing** - Calculates SHA-256 hash of each file's content
+7. **Change Detection** - Compares current hash against stored state
+8. **Frontmatter Parsing** - Extracts YAML metadata (title, tags, source, etc.)
+9. **Batch Processing** - Groups files into batches (default: 10 files)
+10. **Knowledge Graph Sync** - Calls `add_memory` tool with content and metadata
+11. **Retry Logic** - Retries failed syncs with exponential backoff (1s, 2s, 4s delays)
+12. **State Persistence** - Updates sync state file with new hashes and timestamps
 
-!!! warning "Feedback Loop Prevention"
-    The Post-Stop hook checks the session transcript for knowledge tool usage. If detected, the hook skips execution to prevent infinite sync loops where syncing triggers new sessions that trigger more syncing.
+!!! warning "Anti-Loop Protection"
+    The hook automatically detects and skips files containing knowledge query results. This prevents infinite sync cycles where searching the knowledge graph produces output that gets synced back to the graph.
 
 ## Deduplication
 
@@ -438,36 +573,29 @@ const MAX_RETRIES = 3;
 const RETRY_DELAYS = [1000, 2000, 4000]; // ms
 ```
 
-**sync-learning-realtime.ts:**
-
-```typescript
-// Only sync from LEARNING directories
-const LEARNING_DIRS = [
-  `${process.env.HOME}/.claude/MEMORY/LEARNING/ALGORITHM`,
-  `${process.env.HOME}/.claude/MEMORY/LEARNING/SYSTEM`,
-];
-```
-
 ### Customizing Sync Behavior
 
-To modify sync behavior, edit the hook files directly:
+**Recommended: Use the config file** at `~/.claude/config/sync-sources.json` (installed) or `config/sync-sources.json` (development).
+
+For advanced customization, edit the hook source directly:
 
 ```bash
-# SessionStart hook
-/Users/seaton/Documents/src/madeinoz-knowledge-system/src/hooks/sync-memory-to-knowledge.ts
+# Hook source
+src/hooks/sync-memory-to-knowledge.ts
 
-# Post-Stop hook
-/Users/seaton/Documents/src/madeinoz-knowledge-system/src/hooks/sync-learning-realtime.ts
+# Configuration loader
+src/hooks/lib/sync-config.ts
+
+# Anti-loop patterns
+src/hooks/lib/anti-loop-patterns.ts
 ```
 
-After modifying hooks, rebuild the project:
+After modifying TypeScript sources, rebuild and reinstall:
 
 ```bash
 bun run build
+bun run install:system
 ```
-
-!!! warning "Hook Modifications Require Rebuild"
-    Hooks are compiled TypeScript. Changes to `.ts` source files require running `bun run build` to take effect.
 
 ## Troubleshooting
 
@@ -480,15 +608,20 @@ bun run build
 1. Check if hooks are installed in PAI:
    ```bash
    ls ~/.claude/hooks/
-   # Should show: sync-memory-to-knowledge.js, sync-learning-realtime.js
+   # Should show: sync-memory-to-knowledge.ts and lib/ directory
    ```
 
-2. Verify hook registration in PAI settings:
+2. Check if config file exists:
+   ```bash
+   ls ~/.claude/config/sync-sources.json
+   ```
+
+3. Verify hook registration in PAI settings:
    ```bash
    cat ~/.claude/settings.json | grep -A 5 hooks
    ```
 
-3. Check for hook errors in Claude Code output during session start/stop
+4. Check for hook errors in Claude Code output during session start
 
 **Solutions:**
 
@@ -595,19 +728,23 @@ source: "Session work"
 # Content here...
 ```
 
-### Feedback Loop Detection
+### Files Being Skipped (Anti-Loop)
 
-**Symptom:** Post-Stop hook always skips with "Knowledge tools detected in transcript".
+**Symptom:** Files are being skipped with "anti-loop" reason in verbose output.
 
 **Diagnosis:**
 
-This is expected behavior if you used knowledge tools during the session. The hook prevents infinite loops by not syncing after sessions where knowledge graph operations occurred.
+This is expected behavior. The hook automatically skips files containing knowledge query results to prevent feedback loops. Use `--verbose` to see which patterns matched:
+
+```bash
+bun run src/hooks/sync-memory-to-knowledge.ts --verbose
+```
 
 **Solutions:**
 
-- This is normal and protective behavior
-- If you want to force sync, manually run the SessionStart hook in a new session
-- Recent learnings will be captured in the next normal session
+- This is protective behavior - files containing knowledge search results should not be re-synced
+- If a file is incorrectly matched, review the built-in patterns in `src/hooks/lib/anti-loop-patterns.ts`
+- Use `--status` to see current configuration including custom exclude patterns
 
 !!! info "Need More Help?"
     For additional support:
