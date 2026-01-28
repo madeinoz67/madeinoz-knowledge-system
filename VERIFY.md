@@ -340,6 +340,58 @@ bun run "$PAI_SKILLS/tools/server-cli.ts" status
 
 ---
 
+### 2.1b Image Version Match (CRITICAL)
+
+- [ ] **Running container image version matches installed pack version**
+
+> **FOR AI AGENTS:** This check is CRITICAL. A version mismatch means the container is running
+> outdated code. If versions don't match, the user must pull the new image and restart containers.
+
+**Verification commands:**
+```bash
+PAI_SKILLS="${PAI_DIR:-$HOME/.claude}/skills/Knowledge"
+
+# Get installed pack version from SKILL.md
+INSTALLED_VERSION=$(grep "^version:" "$PAI_SKILLS/SKILL.md" | head -1 | sed 's/version:[[:space:]]*//')
+echo "Installed pack version: $INSTALLED_VERSION"
+
+# Get running MCP container image version
+# For Podman:
+IMAGE_VERSION=$(podman ps --format "{{.Image}}" --filter "name=madeinoz-knowledge-graph-mcp" 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+# For Docker (if podman not available):
+[ -z "$IMAGE_VERSION" ] && IMAGE_VERSION=$(docker ps --format "{{.Image}}" --filter "name=madeinoz-knowledge-graph-mcp" 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+
+echo "Running image version: $IMAGE_VERSION"
+
+# Compare versions
+if [ "$INSTALLED_VERSION" = "$IMAGE_VERSION" ]; then
+    echo "✓ Versions match: $INSTALLED_VERSION"
+else
+    echo "✗ VERSION MISMATCH!"
+    echo "  Installed pack: $INSTALLED_VERSION"
+    echo "  Running image:  $IMAGE_VERSION"
+    echo ""
+    echo "  To fix: Pull new image and restart containers:"
+    echo "    podman pull ghcr.io/madeinoz67/madeinoz-knowledge-system:$INSTALLED_VERSION"
+    echo "    bun run server-cli restart"
+    exit 1
+fi
+```
+
+**Expected result:** `✓ Versions match: X.Y.Z`
+
+**If FAIL:**
+1. Pull the correct image version:
+   ```bash
+   podman pull ghcr.io/madeinoz67/madeinoz-knowledge-system:$INSTALLED_VERSION
+   # or for Docker:
+   docker pull ghcr.io/madeinoz67/madeinoz-knowledge-system:$INSTALLED_VERSION
+   ```
+2. Update compose file image tag if needed
+3. Restart containers: `bun run server-cli restart`
+
+---
+
 ### 2.2 MCP Health Endpoint Access
 
 - [ ] **MCP health endpoint is accessible and returns healthy status**
@@ -1284,6 +1336,7 @@ For a successful installation, you must have:
 - Database backend detected (Section 0)
 - All files in correct locations (Section 1)
 - MCP server running and accessible (Section 2)
+- **Image version matches installed pack version (Section 2.1b)**
 - Database container running (Section 2.3 for FalkorDB OR 2.3-ALT for Neo4j)
 - PAI skill installed with flat structure (Section 3)
 - Configuration complete with valid API key (Section 4)
