@@ -138,6 +138,31 @@ class MCPWrapper {
       description: 'Check server health',
       handler: this.cmdHealth.bind(this),
     });
+
+    // Feature 009: Memory decay commands
+    this.addCommand({
+      name: 'health_metrics',
+      description: 'Get memory lifecycle health metrics',
+      handler: this.cmdHealthMetrics.bind(this),
+    });
+
+    this.addCommand({
+      name: 'run_maintenance',
+      description: 'Run decay maintenance cycle',
+      handler: this.cmdRunMaintenance.bind(this),
+    });
+
+    this.addCommand({
+      name: 'classify_memory',
+      description: 'Classify memory importance and stability',
+      handler: this.cmdClassifyMemory.bind(this),
+    });
+
+    this.addCommand({
+      name: 'recover_memory',
+      description: 'Recover a soft-deleted memory',
+      handler: this.cmdRecoverMemory.bind(this),
+    });
   }
 
   /**
@@ -297,6 +322,84 @@ class MCPWrapper {
   }
 
   /**
+   * Feature 009: Command: health_metrics
+   */
+  private async cmdHealthMetrics(
+    args: string[]
+  ): Promise<{ success: boolean; data?: unknown; error?: string }> {
+    // Parse optional --group-id flag
+    const groupId = args.includes('--group-id')
+      ? args[args.indexOf('--group-id') + 1]
+      : undefined;
+
+    const client = createMCPClient();
+    const result = await client.getKnowledgeHealth({ group_id: groupId });
+
+    return result;
+  }
+
+  /**
+   * Feature 009: Command: run_maintenance
+   */
+  private async cmdRunMaintenance(
+    args: string[]
+  ): Promise<{ success: boolean; data?: unknown; error?: string }> {
+    const dryRun = args.includes('--dry-run');
+
+    const client = createMCPClient();
+    const result = await client.runDecayMaintenance({ dry_run: dryRun });
+
+    return result;
+  }
+
+  /**
+   * Feature 009: Command: classify_memory
+   */
+  private async cmdClassifyMemory(
+    args: string[]
+  ): Promise<{ success: boolean; data?: unknown; error?: string }> {
+    if (args.length < 1) {
+      return {
+        success: false,
+        error: 'Usage: classify_memory <content> [--source <description>]',
+      };
+    }
+
+    const content = args[0];
+    const sourceIdx = args.indexOf('--source');
+    const sourceDescription = sourceIdx >= 0 ? args[sourceIdx + 1] : undefined;
+
+    const client = createMCPClient();
+    const result = await client.classifyMemory({
+      content,
+      source_description: sourceDescription,
+    });
+
+    return result;
+  }
+
+  /**
+   * Feature 009: Command: recover_memory
+   */
+  private async cmdRecoverMemory(
+    args: string[]
+  ): Promise<{ success: boolean; data?: unknown; error?: string }> {
+    if (args.length < 1) {
+      return {
+        success: false,
+        error: 'Usage: recover_memory <uuid>',
+      };
+    }
+
+    const uuid = args[0];
+
+    const client = createMCPClient();
+    const result = await client.recoverSoftDeleted({ uuid });
+
+    return result;
+  }
+
+  /**
    * Print help message
    */
   printHelp(): void {
@@ -375,6 +478,22 @@ class MCPWrapper {
     cli.blank();
     cli.dim('  # Clear graph (destructive - requires --force)');
     cli.dim('  bun run src/skills/tools/knowledge-cli.ts clear_graph --force');
+    cli.blank();
+    cli.dim('  # Feature 009: Memory decay and lifecycle');
+    cli.blank();
+    cli.dim('  # Get memory lifecycle health metrics');
+    cli.dim('  bun run src/skills/tools/knowledge-cli.ts health_metrics');
+    cli.blank();
+    cli.dim('  # Run decay maintenance cycle');
+    cli.dim('  bun run src/skills/tools/knowledge-cli.ts run_maintenance');
+    cli.dim('  bun run src/skills/tools/knowledge-cli.ts run_maintenance --dry-run');
+    cli.blank();
+    cli.dim('  # Classify memory importance and stability');
+    cli.dim('  bun run src/skills/tools/knowledge-cli.ts classify_memory "I prefer dark mode"');
+    cli.dim('  bun run src/skills/tools/knowledge-cli.ts classify_memory "Allergic to peanuts" --source "medical"');
+    cli.blank();
+    cli.dim('  # Recover a soft-deleted memory');
+    cli.dim('  bun run src/skills/tools/knowledge-cli.ts recover_memory abc123-def456-...');
     cli.blank();
     cli.info('Temporal Search Examples:');
     cli.blank();

@@ -627,7 +627,7 @@ bun run install:system
 
 - Re-run installation: `bun run install:system`
 - Check file permissions: `chmod +x ~/.claude/hooks/*.js`
-- Verify MCP server is running: `bun run status`
+- Verify MCP server is running: `bun run server-cli status`
 
 ### Duplicate Entries in Knowledge Graph
 
@@ -680,12 +680,12 @@ cat ~/.claude/.madeinoz-knowledge-sync-state.json
 
 1. Check MCP server status:
    ```bash
-   bun run status
+   bun run server-cli status
    ```
 
 2. Verify server logs for errors:
    ```bash
-   bun run logs
+   bun run server-cli logs
    ```
 
 3. Test connection manually:
@@ -695,7 +695,7 @@ cat ~/.claude/.madeinoz-knowledge-sync-state.json
 
 **Solutions:**
 
-- Server not running: `bun run start`
+- Server not running: `bun run server-cli start`
 - Port conflict: Change `MADEINOZ_KNOWLEDGE_PORT` in `.env`
 - Increase timeout: Set `MADEINOZ_KNOWLEDGE_TIMEOUT=60000` in `.env`
 - Check firewall/network settings

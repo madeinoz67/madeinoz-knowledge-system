@@ -13,7 +13,7 @@ The Knowledge System solves the problem of amnesiac AI through **automatic knowl
 flowchart TB
     subgraph Input["📝 User Input"]
         UC[User Conversation]
-        DOC[Document Import]
+        DOC[Document Text Import]
     end
 
     subgraph Skill["🎯 Madeinoz Knowledge System Skill"]
@@ -26,11 +26,13 @@ flowchart TB
 
     subgraph MCP["⚙️ Graphiti MCP Server"]
         direction TB
-        LLM["LLM Extraction<br/>gpt-4o-mini / gpt-4o"]
+        LLM["LLM Extraction<br/>LLM Provider"]
         LLM --> ENT["Entity Extraction<br/>People, Organizations,<br/>Concepts, Locations"]
         LLM --> REL["Relationship Mapping<br/>Causal, Dependency,<br/>Temporal, Semantic"]
+        LLM --> DEC["Memory Decay<br/>Importance & Stability<br/>Lifecycle Management"]
         ENT --> VEC["Vector Embeddings<br/>text-embedding-3-small"]
         REL --> VEC
+        DEC --> VEC
     end
 
     subgraph DB["💾 Graph Database Backend"]
@@ -71,57 +73,11 @@ flowchart TB
     style Storage fill:#fce4ec,stroke:#880e4f
 ```
 
-??? note "ASCII Diagram (Text-Only View)"
-    ```
-User Conversation/Document
-             │
-             ▼
-    ┌─────────────────────────────────┐
-    │   Madeinoz Knowledge System Skill    │
-    │  ┌───────────────────────────┐  │
-    │  │   Intent Routing          │  │
-    │  │   - "remember this"       │  │
-    │  │   - "what do I know"      │  │
-    │  │   - "how are X and Y...   │  │
-    │  └───────────┬───────────────┘  │
-    └───────────────┼──────────────────┘
-                    │
-                    ▼
-    ┌─────────────────────────────────┐
-    │   Graphiti MCP Server           │
-    │  ┌───────────────────────────┐  │
-    │  │   LLM-Based Extraction    │  │
-    │  │   - Entities (People,     │  │
-    │  │     Organizations,        │  │
-    │  │     Concepts, Places)     │  │
-    │  │   - Relationships         │  │
-    │  │   - Temporal Context      │  │
-    │  └───────────┬───────────────┘  │
-    │             │                    │
-    │  ┌──────────▼───────────────┐  │
-    │  │   Vector Embeddings      │  │
-    │  │   - OpenAI embeddings    │  │
-    │  │   - Semantic similarity  │  │
-    │  └──────────┬───────────────┘  │
-    └─────────────┼──────────────────┘
-                  │
-                  ▼
-    ┌─────────────────────────────────┐
-    │   Graph Database Backend        │
-    │  ┌───────────────────────────┐  │
-    │  │  Neo4j (default)          │  │
-    │  │   - Native graph DB       │  │
-    │  │   - Cypher queries        │  │
-    │  │   - Browser :7474         │  │
-    │  ├───────────────────────────┤  │
-    │  │  FalkorDB (alternative)   │  │
-    │  │   - Redis-based           │  │
-    │  │   - RediSearch queries    │  │
-    │  │   - Web UI :3000          │  │
-    │  └───────────────────────────┘  │
-    │  Nodes, Edges, Episodes, Indices│
-    └─────────────────────────────────┘
-    ```
+!!! info "Architecture Diagram"
+
+    ![System Architecture Flow](../assets/images/architecture-flow-diagram.png)
+
+    **System Architecture Flow:** User conversation and document text flow through the Knowledge System Skill → Intent Routing → Graphiti MCP Server (with Memory Decay) → Graph Database Backend (Neo4j/FalkorDB) → Graph Storage (Nodes, Edges, Episodes, Indices)
 
 ## How It Works
 
@@ -131,6 +87,7 @@ Say "remember that Podman volumes use host:container syntax" and the system:
 
 - Extracts entities: "Podman", "volume mounting"
 - Identifies relationship: "uses", "syntax rule"
+- Classifies importance and stability (Feature 009)
 - Creates episode with full context
 - Stores in graph with timestamp
 
@@ -139,6 +96,7 @@ Say "remember that Podman volumes use host:container syntax" and the system:
 Ask "what do I know about container orchestration?" and the system:
 
 - Searches vector embeddings for related concepts
+- Applies weighted scoring: semantic (60%) + recency (25%) + importance (15%)
 - Returns entities: "Podman", "Kubernetes", "Docker Compose"
 - Shows relationships: "alternatives to", "similar tools"
 - Displays episodes with full context
@@ -159,7 +117,8 @@ Ask "how are FalkorDB and Graphiti connected?" and the system:
 3. **Semantic Understanding**: Vector embeddings enable concept-based search
 4. **Temporal Tracking**: Know when knowledge was added and how it evolves
 5. **Graph-Based**: Explicit relationships show how concepts connect
-6. **Complete**: Every component included - MCP server, PAI skill, workflows
+6. **Memory Prioritization**: Automatic importance/stability classification with decay scoring (Feature 009)
+7. **Complete**: Every component included - MCP server, PAI skill, workflows
 
 ## Multi-Layered Architecture
 
@@ -213,10 +172,12 @@ flowchart TB
     end
 
     subgraph L5["🧠 Layer 5: Graphiti Knowledge Graph"]
-        LLM["LLM Processing<br/>OpenAI / Compatible"]
+        LLM["LLM Processing<br/>LLM Provider"]
         LLM --> EXT["Entity Extraction<br/>People, Orgs, Concepts,<br/>Locations, Procedures"]
         EXT --> REL["Relationship Mapping<br/>Causal, Dependency,<br/>Temporal, Semantic"]
+        LLM --> DEC["Memory Decay<br/>Importance & Stability<br/>Lifecycle States"]
         REL --> VEC["Vector Embeddings<br/>text-embedding-3-small"]
+        DEC --> VEC
     end
 
     subgraph L6["💾 Layer 6: Graph Database"]
@@ -241,98 +202,22 @@ flowchart TB
     style L6 fill:#f5f5f5,stroke:#424242
 ```
 
-??? note "ASCII Diagram (Text-Only View)"
-    ```
-┌─────────────────────────────────────────────────────────────┐
-    │                    User Intent Layer                        │
-    │  Natural language triggers: "remember this", "what do I     │
-    │  know about X", "how are X and Y related"                  │
-    └────────────────────────┬────────────────────────────────────┘
-                             │
-                             ▼
-    ┌─────────────────────────────────────────────────────────────┐
-    │                  PAI Skill Routing Layer                    │
-    │  ┌──────────────────────────────────────────────────────┐  │
-    │  │  SKILL.md Frontmatter → Intent Detection             │  │
-    │  │  - USE WHEN clauses trigger based on user phrases    │  │
-    │  │  - Routes to appropriate workflow                    │  │
-    │  └──────────────────────────────────────────────────────┘  │
-    └────────────────────────┬────────────────────────────────────┘
-                             │
-                             ▼
-    ┌─────────────────────────────────────────────────────────────┐
-    │                   Workflow Execution Layer                   │
-    │  ┌──────────────────┐  ┌──────────────────┐               │
-    │  │  CaptureEpisode  │  │  SearchKnowledge │               │
-    │  │  - Adds episode  │  │  - Vector search │               │
-    │  │  - Extracts      │  │  - Returns       │               │
-    │  │    entities      │  │    entities +    │               │
-    │  │  - Creates       │  │    summaries     │               │
-    │  │    relationships │  │                  │               │
-    │  └──────────────────┘  └──────────────────┘               │
-    │                                                         │
-    │  ┌──────────────────┐  ┌──────────────────┐               │
-    │  │  SearchFacts     │  │  GetRecent       │               │
-    │  │  - Traverses     │  │  - Temporal      │               │
-    │  │    graph edges   │  │    queries       │               │
-    │  │  - Returns       │  │  - Shows         │               │
-    │  │    connections   │  │    progression   │               │
-    │  └──────────────────┘  └──────────────────┘               │
-    └────────────────────────┬────────────────────────────────────┘
-                             │
-                             ▼
-    ┌─────────────────────────────────────────────────────────────┐
-    │              MCP Server Integration Layer                   │
-    │  ┌──────────────────────────────────────────────────────┐  │
-    │  │  SSE Endpoint: localhost:8000/sse                    │  │
-    │  │  - add_memory: Store knowledge                       │  │
-    │  │  - search_memory_nodes: Semantic entity search       │  │
-    │  │  - search_memory_facts: Relationship traversal       │  │
-    │  │  - get_episodes: Temporal retrieval                  │  │
-    │  │  - delete_episode/clear_graph: Management            │  │
-    │  └──────────────────────────────────────────────────────┘  │
-    └────────────────────────┬────────────────────────────────────┘
-                             │
-                             ▼
-    ┌─────────────────────────────────────────────────────────────┐
-    │              Graphiti Knowledge Graph Layer                 │
-    │  ┌──────────────────────────────────────────────────────┐  │
-    │  │  LLM Processing (OpenAI/compatible)                  │  │
-    │  │  ┌────────────────────────────────────────────────┐ │  │
-    │  │  │  Entity Extraction                             │ │  │
-    │  │  │  - People, Organizations, Locations            │ │  │
-    │  │  │  - Concepts, Preferences, Requirements         │ │  │
-    │  │  │  - Procedures, Events, Documents               │ │  │
-    │  │  └────────────────────────────────────────────────┘ │  │
-    │  │                     │                               │  │
-    │  │  ┌──────────────────▼─────────────────────────────┐ │  │
-    │  │  │  Relationship Mapping                          │ │  │
-    │  │  │  - Causal: X caused Y                          │ │  │
-    │  │  │  - Dependency: X requires Y                    │ │  │
-    │  │  │  - Temporal: X happened before Y               │ │  │
-    │  │  │  - Semantic: X is related to Y                 │ │  │
-    │  │  └────────────────────────────────────────────────┘ │  │
-    │  │                     │                               │  │
-    │  │  ┌──────────────────▼─────────────────────────────┐ │  │
-    │  │  │  Vector Embeddings                             │ │  │
-    │  │  │  - OpenAI text-embedding-3-small               │ │  │
-    │  │  │  - Semantic similarity search                  │ │  │
-    │  │  │  - Hybrid: vector + keyword                    │ │  │
-    │  │  └────────────────────────────────────────────────┘ │  │
-    │  └──────────────────────────────────────────────────────┘  │
-    └────────────────────────┬────────────────────────────────────┘
-                             │
-                             ▼
-    ┌─────────────────────────────────────────────────────────────┐
-    │           Graph Database (Neo4j/FalkorDB)                   │
-    │  ┌──────────────────────────────────────────────────────┐  │
-    │  │  Nodes: Entities with embeddings and metadata        │  │
-    │  │  Edges: Typed relationships with timestamps          │  │
-    │  │  Episodes: Full conversation context                │  │
-    │  │  Indices: Vector search, entity lookup, time        │  │
-    │  └──────────────────────────────────────────────────────┘  │
-    └─────────────────────────────────────────────────────────────┘
-    ```
+!!! info "Multi-Layered Architecture"
+
+    The system uses progressive abstraction across 6 layers:
+
+    **Layer 1 - User Intent:** Natural language triggers ("remember this", "what do I know", "how are X and Y")
+
+    **Layer 2 - PAI Skill Routing:** SKILL.md frontmatter → Intent Detection → Workflow routing
+
+    **Layer 3 - Workflow Execution:** CaptureEpisode, SearchKnowledge, SearchFacts, GetRecent
+
+    **Layer 4 - MCP Server Integration:** SSE Endpoint (localhost:8000/sse) → add_memory, search_memory_nodes, search_memory_facts, get_episodes
+
+    **Layer 5 - Graphiti Knowledge Graph:** LLM Processing → Entity Extraction → Relationship Mapping → Memory Decay → Vector Embeddings
+
+    **Layer 6 - Graph Database:** Nodes (Entities + Embeddings), Edges (Typed Relationships), Episodes (Full Context), Indices (Vector + Keyword)
+```
 
 ## Architectural Advantages
 

@@ -48,6 +48,14 @@ The Madeinoz Knowledge System transforms your AI conversations into a permanent,
 
 **Core principle**: Work normally, knowledge handles itself.
 
+## System Architecture
+
+<p align="center">
+  <img src="assets/images/knowledge-system-architecture.png" alt="Madeinoz Knowledge System Architecture" width="100%">
+</p>
+
+The knowledge graph sits at the center, automatically organizing your conversations, documents, code, and notes into searchable entities, episodes, facts, and relationships. As memories age, they transition through lifecycle states (ACTIVE → DORMANT → ARCHIVED → EXPIRED) based on importance and stability scores, while Prometheus metrics and Grafana dashboards provide real-time observability.
+
 ## Quick Start
 
 New to the system? Follow this path:
@@ -82,6 +90,7 @@ Learn how to use the system:
 
 - **[Basic Usage](usage/basic-usage.md)** - Capturing and searching knowledge
 - **[Advanced Usage](usage/advanced.md)** - Bulk import, backup, multiple graphs
+- **[Memory Decay & Lifecycle](usage/memory-decay.md)** - Memory prioritization, decay scoring, and lifecycle management
 - **[Monitoring](usage/monitoring.md)** - Prometheus and Grafana dashboards
 
 ### Concepts
@@ -165,16 +174,40 @@ See [Observability & Metrics](reference/observability.md) for full documentation
 
 ```bash
 # Check status
-bun run status
+bun run server-cli status
 
-# Start server
-bun run start
+# Start server (production mode)
+bun run server-cli start
 
 # Stop server
-bun run stop
+bun run server-cli stop
+
+# Restart server
+bun run server-cli restart
 
 # View logs
-bun run logs
+bun run server-cli logs
+
+# View logs with options
+bun run server-cli logs --mcp --tail 50
+```
+
+### Development Mode
+
+For development and testing server code changes:
+
+```bash
+# Start in development mode (uses dev ports and env files)
+bun run server-cli start --dev
+
+# Restart in development mode
+bun run server-cli restart --dev
+
+# Dev mode differences:
+# - Neo4j Browser: http://localhost:7475 (instead of 7474)
+# - MCP Server: http://localhost:8001/mcp/ (instead of 8000)
+# - Uses /tmp/madeinoz-knowledge-*-dev.env files
+# - Safe for development without affecting production
 ```
 
 ### Memory Sync

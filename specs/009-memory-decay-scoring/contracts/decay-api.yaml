@@ -1,0 +1,456 @@
+# OpenAPI 3.1 Schema for Memory Decay Scoring MCP Tools
+# Feature: 009-memory-decay-scoring
+# Date: 2026-01-29
+
+openapi: 3.1.0
+info:
+  title: Memory Decay Scoring API
+  description: MCP tool definitions for memory decay scoring and lifecycle management
+  version: 1.0.0
+  contact:
+    name: madeinoz-knowledge-system
+
+servers:
+  - url: mcp://madeinoz-knowledge
+    description: MCP server endpoint
+
+paths:
+  /health/decay:
+    get:
+      operationId: health_decay
+      summary: Decay system health check
+      description: |
+        Returns decay system status including last maintenance run time and
+        next scheduled run. Used for health monitoring.
+      responses:
+        '200':
+          description: Health check response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DecayHealthCheck'
+
+  /metrics:
+    get:
+      operationId: get_metrics
+      summary: Prometheus metrics endpoint
+      description: |
+        Returns Prometheus-formatted metrics for scraping. Includes counters,
+        gauges, and histograms for decay system operations.
+      responses:
+        '200':
+          description: Prometheus metrics
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: |
+                  # HELP knowledge_decay_maintenance_runs_total Total maintenance runs
+                  # TYPE knowledge_decay_maintenance_runs_total counter
+                  knowledge_decay_maintenance_runs_total{status="success"} 42
+                  knowledge_decay_maintenance_runs_total{status="failure"} 1
+
+  /tools/run_decay_maintenance:
+    post:
+      operationId: run_decay_maintenance
+      summary: Run decay calculation and lifecycle maintenance
+      description: |
+        Batch process all memories to recalculate decay scores and transition
+        lifecycle states. Should be called by scheduled maintenance job.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaintenanceRequest'
+      responses:
+        '200':
+          description: Maintenance completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaintenanceResponse'
+
+  /tools/get_knowledge_health:
+    post:
+      operationId: get_knowledge_health
+      summary: Get knowledge graph health metrics
+      description: |
+        Returns aggregated health metrics including memory counts by lifecycle
+        state, average decay scores, and age distribution.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HealthRequest'
+      responses:
+        '200':
+          description: Health metrics retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /tools/recover_soft_deleted:
+    post:
+      operationId: recover_soft_deleted
+      summary: Recover a soft-deleted memory
+      description: |
+        Restores a soft-deleted memory to ARCHIVED state within the 90-day
+        retention window. Requires memory UUID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecoverRequest'
+      responses:
+        '200':
+          description: Memory recovered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecoverResponse'
+        '404':
+          description: Memory not found or outside retention window
+
+  /tools/classify_memory:
+    post:
+      operationId: classify_memory
+      summary: Classify a memory's importance and stability
+      description: |
+        Uses LLM to assign importance (1-5) and stability (1-5) scores to a
+        memory. Can be used to re-classify existing memories.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClassifyRequest'
+      responses:
+        '200':
+          description: Classification complete
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClassifyResponse'
+
+components:
+  schemas:
+    # Request Schemas
+    MaintenanceRequest:
+      type: object
+      properties:
+        batch_size:
+          type: integer
+          description: Number of memories to process per batch
+          default: 500
+          minimum: 1
+          maximum: 5000
+        dry_run:
+          type: boolean
+          description: If true, calculate but don't apply changes
+          default: false
+        group_id:
+          type: string
+          description: Optional group ID to limit maintenance scope
+
+    HealthRequest:
+      type: object
+      properties:
+        group_id:
+          type: string
+          description: Optional group ID to filter metrics
+        include_age_distribution:
+          type: boolean
+          description: Include memory age breakdown
+          default: true
+
+    RecoverRequest:
+      type: object
+      required:
+        - uuid
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          description: UUID of the soft-deleted memory to recover
+
+    ClassifyRequest:
+      type: object
+      required:
+        - uuid
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          description: UUID of the memory to classify
+        force:
+          type: boolean
+          description: Re-classify even if already classified
+          default: false
+
+    # Health Check Schema
+    DecayHealthCheck:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+          description: Overall decay system health
+        last_maintenance:
+          type: object
+          properties:
+            completed_at:
+              type: string
+              format: date-time
+            duration_seconds:
+              type: number
+              format: float
+            success:
+              type: boolean
+        next_scheduled:
+          type: string
+          format: date-time
+          description: Next scheduled maintenance run
+        metrics_endpoint:
+          type: string
+          description: URL for Prometheus metrics
+          example: "http://localhost:9090/metrics"
+        uptime_seconds:
+          type: number
+          format: float
+          description: Seconds since decay system started
+
+    # Response Schemas
+    MaintenanceResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        memories_processed:
+          type: integer
+          description: Total memories evaluated
+        decay_scores_updated:
+          type: integer
+          description: Number of decay scores recalculated
+        state_transitions:
+          type: object
+          properties:
+            active_to_dormant:
+              type: integer
+            dormant_to_archived:
+              type: integer
+            archived_to_expired:
+              type: integer
+            expired_to_soft_deleted:
+              type: integer
+        soft_deleted_purged:
+          type: integer
+          description: Memories permanently deleted (past 90-day window)
+        duration_seconds:
+          type: number
+          format: float
+        completed_at:
+          type: string
+          format: date-time
+
+    HealthResponse:
+      type: object
+      properties:
+        states:
+          type: object
+          properties:
+            active:
+              type: integer
+            dormant:
+              type: integer
+            archived:
+              type: integer
+            expired:
+              type: integer
+            soft_deleted:
+              type: integer
+            permanent:
+              type: integer
+              description: Memories exempt from decay (importance>=4 AND stability>=4)
+        aggregates:
+          type: object
+          properties:
+            total:
+              type: integer
+            average_decay:
+              type: number
+              format: float
+            average_importance:
+              type: number
+              format: float
+            average_stability:
+              type: number
+              format: float
+        age_distribution:
+          type: object
+          properties:
+            under_7_days:
+              type: integer
+            days_7_to_30:
+              type: integer
+            days_30_to_90:
+              type: integer
+            over_90_days:
+              type: integer
+        maintenance:
+          type: object
+          properties:
+            last_run:
+              type: string
+              format: date-time
+            duration_seconds:
+              type: number
+              format: float
+            processed:
+              type: integer
+            transitions:
+              type: integer
+        generated_at:
+          type: string
+          format: date-time
+
+    RecoverResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        uuid:
+          type: string
+          format: uuid
+        new_state:
+          type: string
+          enum: [ARCHIVED]
+        message:
+          type: string
+
+    ClassifyResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        uuid:
+          type: string
+          format: uuid
+        importance:
+          type: integer
+          minimum: 1
+          maximum: 5
+        stability:
+          type: integer
+          minimum: 1
+          maximum: 5
+        is_permanent:
+          type: boolean
+          description: True if importance>=4 AND stability>=4
+        classification_source:
+          type: string
+          enum: [llm, default, manual]
+
+    # Extended Search Response (modification to existing search_memory_nodes)
+    WeightedSearchResult:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        name:
+          type: string
+        summary:
+          type: string
+        weighted_score:
+          type: number
+          format: float
+          description: Combined score using weights
+        score_breakdown:
+          type: object
+          properties:
+            semantic:
+              type: number
+              format: float
+              description: Vector similarity (0-1)
+            recency:
+              type: number
+              format: float
+              description: Temporal freshness (0-1)
+            importance:
+              type: number
+              format: float
+              description: Normalized importance (0-1)
+        lifecycle_state:
+          type: string
+          enum: [ACTIVE, DORMANT, ARCHIVED]
+        importance:
+          type: integer
+        stability:
+          type: integer
+        decay_score:
+          type: number
+          format: float
+        last_accessed_at:
+          type: string
+          format: date-time
+
+# MCP Tool Definitions (FastMCP format)
+x-mcp-tools:
+  - name: run_decay_maintenance
+    description: |
+      Run batch decay calculation and lifecycle state transitions for all memories.
+      Should be called by scheduled maintenance job (e.g., nightly cron).
+      Returns metrics about processed memories and state transitions.
+    inputSchema:
+      type: object
+      properties:
+        batch_size:
+          type: integer
+          description: Memories per batch (default 500)
+        dry_run:
+          type: boolean
+          description: Preview changes without applying
+
+  - name: get_knowledge_health
+    description: |
+      Get health metrics for the knowledge graph including counts by lifecycle
+      state, average decay scores, and memory age distribution.
+    inputSchema:
+      type: object
+      properties:
+        group_id:
+          type: string
+          description: Filter by group ID
+
+  - name: recover_soft_deleted
+    description: |
+      Recover a soft-deleted memory within the 90-day retention window.
+      Memory is restored to ARCHIVED state for re-evaluation.
+    inputSchema:
+      type: object
+      required:
+        - uuid
+      properties:
+        uuid:
+          type: string
+          description: UUID of memory to recover
+
+  - name: classify_memory
+    description: |
+      Classify or re-classify a memory's importance (1-5) and stability (1-5)
+      using LLM. Returns classification and whether memory is PERMANENT.
+    inputSchema:
+      type: object
+      required:
+        - uuid
+      properties:
+        uuid:
+          type: string
+          description: UUID of memory to classify
+        force:
+          type: boolean
+          description: Re-classify even if already has scores

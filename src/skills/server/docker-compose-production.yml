@@ -22,11 +22,15 @@
 #   OPENAI_API_KEY=sk-...                   (required for LLM operations)
 #   MODEL_NAME=gpt-4o-mini                  (optional, default: gpt-4o-mini)
 #   EMBEDDING_MODEL_NAME=text-embedding-3-small  (optional)
+#   METRICS_PORT=9090                       (optional, Prometheus metrics port)
+#   PROMPT_CACHE_METRICS_ENABLED=true      (optional, enable metrics collection)
+#   DECAY_CONFIG_PATH=/path/to/config.yaml  (optional, custom decay config)
 #
 # Access:
 #   - Neo4j Browser: http://localhost:7474 (user: neo4j)
 #   - MCP HTTP endpoint: http://localhost:8000/mcp
 #   - Health check: http://localhost:8000/health
+#   - Prometheus metrics: http://localhost:9090/metrics
 #
 # Data Persistence:
 #   - Neo4j data stored in Docker volume: neo4j-data
@@ -99,6 +103,11 @@ services:
       - PORT=8000
       - HOST=0.0.0.0
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      # Feature 006 & 009: Metrics and monitoring
+      - METRICS_PORT=${METRICS_PORT:-9090}
+      - PROMPT_CACHE_METRICS_ENABLED=${PROMPT_CACHE_METRICS_ENABLED:-true}
+      # Feature 009: Memory decay configuration (optional)
+      # - DECAY_CONFIG_PATH=/path/to/custom/decay-config.yaml
     depends_on:
       neo4j:
         condition: service_healthy

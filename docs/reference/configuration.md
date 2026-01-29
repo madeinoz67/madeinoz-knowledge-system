@@ -3,6 +3,36 @@ title: "Configuration Reference"
 description: "Complete configuration guide for the Madeinoz Knowledge System"
 ---
 
+<!-- AI-FRIENDLY SUMMARY
+System: Madeinoz Knowledge System Configuration
+Purpose: Complete reference for all configuration options and environment variables
+Configuration File: ~/.claude/.env (or $PAI_DIR/.env) - single source of truth
+Reference Template: config/.env.example in the pack (NOT used directly)
+
+Environment Prefix: MADEINOZ_KNOWLEDGE_*
+
+Key Configuration Sections:
+- LLM Provider: PROVIDER, MODEL_NAME, API_KEY, BASE_URL
+- Database: BACKEND (neo4j/falkordb), NEO4J_URI, FALKORDB_URI
+- Memory Decay (Feature 009): DECAY_CONFIG_FILE, MAINTENANCE_SCHEDULE, SEARCH_WEIGHTS
+- Cache: CACHE_ENABLED, CACHE_MAX_SIZE, CACHE_TTL_SECONDS
+- Memory Sync: SYNC_LEARNING_ALGORITHM, SYNC_LEARNING_SYSTEM, SYNC_RESEARCH
+
+LLM Providers: openai, anthropic, gemini, groq, ollama
+Database Backends: neo4j (default, ports 7474/7687), falkordb (ports 3000/6379)
+
+Feature 009 Configuration: config/decay-config.yaml (copied into container at build time)
+Requires rebuild: Yes, after modifying docker/patches/ or config/decay-config.yaml
+
+Default Ports:
+- MCP Server: 8000
+- Neo4j Browser: 7474, Bolt: 7687
+- FalkorDB UI: 3000, Redis: 6379
+- Prometheus: 9090 (prod) / 9092 (dev)
+- Metrics: 9090 (prod) / 9091 (dev)
+- Grafana: 3001/3002 (prod) / 3002/3003 (dev)
+-->
+
 # Configuration Reference
 
 ## Overview
@@ -441,6 +471,151 @@ Controls prompt caching for Gemini models via OpenRouter. Default is `false` (di
     Prompt caching is now functional for Gemini models on OpenRouter. The system routes Gemini models through the `/chat/completions` endpoint which supports multipart format with cache control markers. Set to `true` to enable caching and reduce costs on repeated prompts.
 
 For detailed metrics documentation, see the [Observability & Metrics](observability.md) reference.
+
+## Memory Decay Configuration (Feature 009)
+
+!!! info "Feature 009: Memory Decay Scoring"
+    The memory decay system automatically prioritizes important memories, allows stale information to fade, and maintains sustainable graph growth. See [Memory Decay & Lifecycle Management](../usage/memory-decay.md) for complete user guide.
+
+### Configuration File
+
+**Location:** `config/decay-config.yaml`
+
+This YAML file controls all memory decay behavior. It is copied into the Docker container at build time.
+
+**To modify configuration:**
+
+1. Edit `config/decay-config.yaml`
+2. Rebuild the Docker image: `docker build -f docker/Dockerfile -t madeinoz-knowledge-system:local .`
+3. Restart containers: `bun run server-cli stop && bun run server-cli start --dev`
+
+### Decay Thresholds
+
+Control when memories transition between lifecycle states:
+
+```yaml
+decay:
+  thresholds:
+    dormant:
+      days: 30           # Days inactive before ACTIVE → DORMANT
+      decay_score: 0.3   # Decay score threshold for transition
+    archived:
+      days: 90           # Days inactive before DORMANT → ARCHIVED
+      decay_score: 0.6   # Decay score threshold for transition
+    expired:
+      days: 180          # Days inactive before ARCHIVED → EXPIRED
+      decay_score: 0.9   # Decay score threshold for transition
+      max_importance: 3  # Only expire if importance ≤ 3
+```
+
+**Lifecycle states:**
+- **ACTIVE** - Recently accessed, full relevance
+- **DORMANT** - Not accessed 30+ days, lower search priority
+- **ARCHIVED** - Not accessed 90+ days, much lower priority
+- **EXPIRED** - Marked for deletion (soft-delete)
+- **SOFT_DELETED** - Deleted but recoverable for 90 days
+
+See [Memory Decay Guide](../usage/memory-decay.md#lifecycle-states) for details.
+
+### Maintenance Schedule
+
+Configure automatic maintenance operations:
+
+```yaml
+decay:
+  maintenance:
+    batch_size: 500             # Memories to process per batch
+    max_duration_minutes: 10    # Maximum maintenance run time
+    schedule_interval_hours: 24 # Hours between automatic runs (0 = disabled)
+```
+
+**What maintenance does:**
+- Recalculates decay scores for all memories
+- Transitions memories between lifecycle states
+- Soft-deletes expired memories (90-day retention)
+- Generates health metrics for Grafana
+
+**To disable automatic maintenance:** Set `schedule_interval_hours: 0`
+
+### Search Weights
+
+Configure how search results are ranked:
+
+```yaml
+decay:
+  weights:
+    semantic: 0.60    # Vector similarity weight (0.0-1.0)
+    recency: 0.25     # Temporal freshness weight (0.0-1.0)
+    importance: 0.15  # Importance score weight (0.0-1.0)
+```
+
+**Must sum to 1.0**
+
+**Formula:** `weighted_score = (semantic × 0.60) + (recency × 0.25) + (importance × 0.15)`
+
+**Tuning guidelines:**
+- Want recent stuff more? Increase `recency`
+- Only care about accuracy? Increase `semantic`
+- Always show important stuff? Increase `importance`
+
+See [Weighted Search Results](../usage/memory-decay.md#weighted-search-results) for examples.
+
+### Classification Defaults
+
+Configure fallback values when LLM is unavailable:
+
+```yaml
+classification:
+  default_importance: 3  # MODERATE (1-5)
+  default_stability: 3   # MODERATE (1-5)
+```
+
+**Importance levels:** 1=TRIVIAL, 2=LOW, 3=MODERATE, 4=HIGH, 5=CORE
+**Stability levels:** 1=VOLATILE, 2=LOW, 3=MODERATE, 4=HIGH, 5=PERMANENT
+
+### Permanent Memory Thresholds
+
+Configure which memories are exempt from decay:
+
+```yaml
+permanent:
+  importance_threshold: 4  # Minimum importance for permanent
+  stability_threshold: 4   # Minimum stability for permanent
+```
+
+Memories with **importance ≥4 AND stability ≥4** are classified as **PERMANENT**:
+- Never accumulate decay
+- Never transition lifecycle states
+- Exempt from archival and deletion
+- Always prioritized in search
+
+### Half-Life Configuration
+
+Base decay rate (adjusted by stability factor):
+
+```yaml
+decay:
+  base_half_life_days: 30  # Base half-life in days (1-365)
+```
+
+**How it works:**
+- Stability 1 (VOLATILE): 0.5× half-life (15 days)
+- Stability 3 (MODERATE): 1.0× half-life (30 days)
+- Stability 5 (PERMANENT): ∞ half-life (never decays)
+
+Higher values = slower decay. See [Decay Score](../usage/memory-decay.md#decay-score-00-10) for details.
+
+### Retention Policy
+
+Configure soft-delete retention period:
+
+```yaml
+decay:
+  retention:
+    soft_delete_days: 90  # Days to retain soft-deleted memories
+```
+
+Soft-deleted memories are permanently purged after this period. Recovery only possible within the retention window.
 
 ## Query Sanitization (FalkorDB Only)
 

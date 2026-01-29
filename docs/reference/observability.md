@@ -14,6 +14,7 @@ Metrics are exported via OpenTelemetry with a Prometheus exporter. The system tr
 - **Token usage** - Input, output, and total tokens per model
 - **API costs** - Real-time cost tracking in USD
 - **Cache statistics** - Hit rates, tokens saved, cost savings (when caching is enabled)
+- **Memory decay** - Lifecycle states, maintenance operations, classification performance (Feature 009)
 
 ## Quick Start
 
@@ -215,6 +216,159 @@ Track episode processing volume.
 
 !!! note "Throughput Metrics Integration"
     Episode metrics require integration into the MCP tool handler and may not be active in all deployments.
+
+## Memory Decay Metrics (Feature 009)
+
+The memory decay system tracks lifecycle state transitions, maintenance operations, and classification performance. These metrics use the `knowledge_` prefix.
+
+### Health Endpoint
+
+A dedicated health endpoint provides decay system status:
+
+```bash
+curl http://localhost:9090/health/decay
+```
+
+Returns:
+
+```json
+{
+  "status": "healthy",
+  "decay_enabled": true,
+  "last_maintenance": "2026-01-28T12:00:00Z",
+  "metrics_endpoint": "/metrics"
+}
+```
+
+### Maintenance Metrics
+
+Track scheduled maintenance operations that recalculate decay scores and transition lifecycle states.
+
+| Metric | Labels | Description |
+|--------|--------|-------------|
+| `knowledge_decay_maintenance_runs_total` | `status` | Maintenance runs by status (success/failure) |
+| `knowledge_decay_scores_updated_total` | - | Decay scores recalculated |
+| `knowledge_maintenance_duration_seconds` | - | Maintenance run duration (histogram) |
+| `knowledge_memories_purged_total` | - | Soft-deleted memories permanently removed |
+
+**Duration bucket boundaries (seconds):**
+
+```
+1, 5, 30, 60, 120, 300, 600
+```
+
+Performance target: Complete within 10 minutes (600 seconds).
+
+### Lifecycle Metrics
+
+Track state transitions as memories age or are accessed.
+
+| Metric | Labels | Description |
+|--------|--------|-------------|
+| `knowledge_lifecycle_transitions_total` | `from_state`, `to_state` | State transitions by type |
+| `knowledge_memories_by_state` | `state` | Current count per lifecycle state |
+| `knowledge_memories_total` | - | Total memory count (excluding soft-deleted) |
+
+**Lifecycle states:**
+
+| State | Description |
+|-------|-------------|
+| `ACTIVE` | Recently accessed, full relevance |
+| `DORMANT` | Not accessed for 30+ days |
+| `ARCHIVED` | Not accessed for 90+ days |
+| `EXPIRED` | Marked for deletion |
+| `SOFT_DELETED` | Deleted but recoverable for 90 days |
+| `PERMANENT` | High importance + stability, never decays |
+
+### Classification Metrics
+
+Track LLM-based importance/stability classification.
+
+| Metric | Labels | Description |
+|--------|--------|-------------|
+| `knowledge_classification_requests_total` | `status` | Classification attempts (success/failure/fallback) |
+| `knowledge_classification_latency_seconds` | - | LLM response time (histogram) |
+
+**Latency bucket boundaries (seconds):**
+
+```
+0.1, 0.5, 1, 2, 5
+```
+
+**Classification statuses:**
+
+| Status | Description |
+|--------|-------------|
+| `success` | LLM classified successfully |
+| `failure` | LLM call failed, used defaults |
+| `fallback` | LLM unavailable, used defaults |
+
+### Aggregate Metrics
+
+Track average scores across the knowledge graph.
+
+| Metric | Description |
+|--------|-------------|
+| `knowledge_decay_score_avg` | Average decay score (0.0-1.0) |
+| `knowledge_importance_avg` | Average importance (1-5) |
+| `knowledge_stability_avg` | Average stability (1-5) |
+
+### Search Metrics
+
+Track weighted search operations that boost by relevance.
+
+| Metric | Labels | Description |
+|--------|--------|-------------|
+| `knowledge_weighted_searches_total` | - | Weighted search operations |
+| `knowledge_search_weighted_latency_seconds` | - | Scoring overhead (histogram) |
+
+### Example PromQL Queries
+
+**Maintenance success rate (last 24 hours):**
+
+```promql
+sum(increase(knowledge_decay_maintenance_runs_total{status="success"}[24h]))
+/
+sum(increase(knowledge_decay_maintenance_runs_total[24h]))
+```
+
+**State distribution:**
+
+```promql
+knowledge_memories_by_state
+```
+
+**Classification fallback rate:**
+
+```promql
+sum(rate(knowledge_classification_requests_total{status="fallback"}[5m]))
+/
+sum(rate(knowledge_classification_requests_total[5m]))
+```
+
+**Lifecycle transitions per hour:**
+
+```promql
+sum by (from_state, to_state) (increase(knowledge_lifecycle_transitions_total[1h]))
+```
+
+**P95 classification latency:**
+
+```promql
+histogram_quantile(0.95, rate(knowledge_classification_latency_seconds_bucket[5m]))
+```
+
+### Alert Rules
+
+Alert rules are defined in `config/monitoring/prometheus/alerts/knowledge.yml`:
+
+| Alert | Condition | Severity |
+|-------|-----------|----------|
+| `MaintenanceTimeout` | Duration > 10 minutes | warning |
+| `MaintenanceFailed` | Any failure in last hour | critical |
+| `ClassificationDegraded` | Fallback rate > 20% | warning |
+| `ExcessiveExpiration` | > 100 expired/hour | warning |
+| `SoftDeleteBacklog` | > 1000 awaiting purge | warning |
 
 ## Prometheus Integration
 

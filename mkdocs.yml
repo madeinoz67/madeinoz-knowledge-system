@@ -45,6 +45,7 @@ nav:
   - Usage:
     - Basic Usage: usage/basic-usage.md
     - Advanced: usage/advanced.md
+    - Memory Decay & Lifecycle: usage/memory-decay.md
     - Monitoring: usage/monitoring.md
     - Backup & Restore: usage/backup-restore.md
   - Concepts:

@@ -343,4 +343,4 @@ With multiple developers:
 - Verify tests fail before implementing
 - Commit after each task or logical group
 - Stop at any checkpoint to validate story independently
-- Integration tests (T044, T046) require running MCP server via `bun run start`
+- Integration tests (T044, T046) require running MCP server via `bun run server-cli start`

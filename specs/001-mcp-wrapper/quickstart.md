@@ -7,7 +7,7 @@
 
 - Bun runtime installed
 - Madeinoz Knowledge System repository cloned
-- MCP server running (`bun run start`)
+- MCP server running (`bun run server-cli start`)
 
 ## Quick Test
 

@@ -1,0 +1,48 @@
+# Memory Decay Scoring Configuration
+# Feature: 009-memory-decay-scoring
+# See: specs/009-memory-decay-scoring/data-model.md
+
+decay:
+  # Base half-life in days (adjusted by stability factor)
+  base_half_life_days: 30
+
+  # State transition thresholds
+  thresholds:
+    dormant:
+      days: 30           # Days inactive before ACTIVE -> DORMANT
+      decay_score: 0.3   # Decay score threshold for transition
+    archived:
+      days: 90           # Days inactive before DORMANT -> ARCHIVED
+      decay_score: 0.6   # Decay score threshold for transition
+    expired:
+      days: 180          # Days inactive before ARCHIVED -> EXPIRED
+      decay_score: 0.9   # Decay score threshold for transition
+      max_importance: 3  # Only expire if importance <= this value
+
+  # Soft-delete retention period
+  retention:
+    soft_delete_days: 90  # Days to retain soft-deleted memories
+
+  # Batch processing settings
+  maintenance:
+    batch_size: 500             # Memories to process per batch
+    max_duration_minutes: 10    # Maximum maintenance run time
+    schedule_interval_hours: 24 # How often to run automatic maintenance (default: daily)
+                               # Set to 0 to disable automatic scheduled maintenance
+
+  # Search scoring weights (must sum to 1.0)
+  weights:
+    semantic: 0.60    # Vector similarity weight
+    recency: 0.25     # Temporal freshness weight
+    importance: 0.15  # Importance score weight
+
+# Classification defaults (used when LLM unavailable)
+classification:
+  default_importance: 3  # MODERATE
+  default_stability: 3   # MODERATE
+
+# Permanent memory threshold
+# Memories with importance >= 4 AND stability >= 4 are PERMANENT
+permanent:
+  importance_threshold: 4
+  stability_threshold: 4
