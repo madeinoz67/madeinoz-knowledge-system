@@ -55,7 +55,7 @@ jobs:
       - name: Install dependencies with uv
         run: |
           cd docker
-          uv pip install pytest pytest-asyncio pydantic pyyaml prometheus-client
+          uv pip install --system pytest pytest-asyncio pydantic pyyaml prometheus-client
 
       - name: Run Python unit tests
         run: |
