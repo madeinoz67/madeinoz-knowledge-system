@@ -41,6 +41,12 @@ keywords: [knowledge, graph, memory, semantic search, entity extraction, relatio
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/madeinoz67/madeinoz-knowledge-system)](https://github.com/madeinoz67/madeinoz-knowledge-system/releases/latest)
 [![GitHub Container Registry](https://img.shields.io/badge/ghcr.io-madeinoz--knowledge--system-blue?logo=docker)](https://ghcr.io/madeinoz67/madeinoz-knowledge-system)
 
+## Changelog
+
+**Latest: v1.6.0** - Memory Decay Scoring & Lifecycle Management with importance/stability classification, weighted search, and automated maintenance.
+
+See [CHANGELOG.md](CHANGELOG.md) for full version history.
+
 ## Documentation
 
 **[View Full Documentation](https://madeinoz67.github.io/madeinoz-knowledge-system/)** - Complete guides, architecture, and reference.
@@ -53,41 +59,9 @@ keywords: [knowledge, graph, memory, semantic search, entity extraction, relatio
 | [Troubleshooting](https://madeinoz67.github.io/madeinoz-knowledge-system/troubleshooting/) | Common issues and solutions |
 | [Developer Notes](https://madeinoz67.github.io/madeinoz-knowledge-system/reference/developer-notes/) | Contributing and development |
 
-## Quick Start
-
-### 1. Pull the Docker Image
-
-```bash
-# From GitHub Container Registry (recommended)
-docker pull ghcr.io/madeinoz67/madeinoz-knowledge-system:latest
-
-# Or from Docker Hub
-docker pull madeinoz-knowledge-system:latest
-```
-
-### 2. Start the Server
-
-```bash
-# Neo4j backend (default)
-bun run server-cli start
-
-# FalkorDB backend
-DATABASE_TYPE=falkordb bun run server-cli start
-```
-
-### 3. Verify Installation
-
-```bash
-bun run server-cli status
-```
+## Installation
 
 See [INSTALL.md](INSTALL.md) for complete installation instructions, performance benchmarks, and [VERIFY.md](VERIFY.md) for verification checklist.
-
-## Changelog
-
-**Latest: v1.6.0** - Memory Decay Scoring & Lifecycle Management with importance/stability classification, weighted search, and automated maintenance.
-
-See [CHANGELOG.md](CHANGELOG.md) for full version history.
 
 ## Features
 
@@ -98,9 +72,10 @@ See [CHANGELOG.md](CHANGELOG.md) for full version history.
 - **Weighted Search** - Results ranked by semantic relevance, recency, and importance
 - **Lifecycle Management** - Automated memory transitions (ACTIVE → DORMANT → ARCHIVED → EXPIRED)
 - **Prometheus Metrics** - Token usage, API costs, cache statistics, and memory health metrics
+- **Automated Maintenance** - Scheduled cleanup of expired memories
+- **Grafana Dashboards** - Visualize knowledge, token usage, graph stats and memory health
 - **Temporal Tracking** - Know when knowledge was captured and how it evolves
 - **Memory Sync** - Auto-syncs learnings from PAI Memory System
-- **Query Sanitization** - Handles special characters in CTI/OSINT data
 
 ## Usage
 
@@ -146,34 +121,8 @@ bun run tools/knowledge-cli.ts search_nodes "project" --since 2026-01-01 --until
 
 | Backend | Web UI | Best For |
 |---------|--------|----------|
-| **Neo4j** (default) | http://localhost:7474 | Rich queries, special character handling |
-| **FalkorDB** | http://localhost:3000 | Simple setup, lower resources |
-
-## Configuration
-
-All configuration uses `MADEINOZ_KNOWLEDGE_*` prefixed environment variables in `~/.claude/.env`:
-
-```bash
-# LLM Provider
-MADEINOZ_KNOWLEDGE_LLM_PROVIDER=openai
-MADEINOZ_KNOWLEDGE_MODEL_NAME=gpt-4o-mini
-MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=sk-your-key-here
-
-# Database (neo4j or falkordb)
-MADEINOZ_KNOWLEDGE_DATABASE_TYPE=neo4j
-```
-
-See [config/.env.example](config/.env.example) for complete configuration reference.
-
-## Server Commands
-
-```bash
-bun run server-cli start    # Start containers
-bun run server-cli stop     # Stop containers
-bun run server-cli status   # Check status
-bun run server-cli logs     # View logs
-bun run server-cli --dev    # Development mode (isolated ports)
-```
+| **Neo4j** (default and recommended) | <http://localhost:7474> | Rich queries, special character handling |
+| **FalkorDB** (experimental) | <http://localhost:3000> | Simple setup, lower resources |
 
 ## For AI Agents
 
