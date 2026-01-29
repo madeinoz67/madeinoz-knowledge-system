@@ -83,11 +83,21 @@ bun run server-cli status
 
 See [INSTALL.md](INSTALL.md) for complete installation instructions, performance benchmarks, and [VERIFY.md](VERIFY.md) for verification checklist.
 
+## Changelog
+
+**Latest: v1.6.0** - Memory Decay Scoring & Lifecycle Management with importance/stability classification, weighted search, and automated maintenance.
+
+See [CHANGELOG.md](CHANGELOG.md) for full version history.
+
 ## Features
 
 - **Automatic Entity Extraction** - LLM-powered extraction of people, organizations, concepts, and more
 - **Relationship Mapping** - Automatically discovers connections between entities
 - **Semantic Search** - Find knowledge using natural language, not just keywords
+- **Memory Decay Scoring** - Automatic memory prioritization with importance/stability classification
+- **Weighted Search** - Results ranked by semantic relevance, recency, and importance
+- **Lifecycle Management** - Automated memory transitions (ACTIVE → DORMANT → ARCHIVED → EXPIRED)
+- **Prometheus Metrics** - Token usage, API costs, cache statistics, and memory health metrics
 - **Temporal Tracking** - Know when knowledge was captured and how it evolves
 - **Memory Sync** - Auto-syncs learnings from PAI Memory System
 - **Query Sanitization** - Handles special characters in CTI/OSINT data
@@ -180,16 +190,12 @@ This is a **PAI Pack** - a complete, self-contained module for Personal AI Infra
 - **Graph databases**: [Neo4j](https://neo4j.com/), [FalkorDB](https://www.falkordb.com/)
 - **Built for**: [Personal AI Infrastructure (PAI)](https://github.com/danielmiessler/PAI)
 
+See full [Acknowledgments](https://madeinoz67.github.io/madeinoz-knowledge-system/acknowledgments) for credits to the community and research that inspired this system.
+
 ## Related
 
 - [PAI Memory System](https://github.com/danielmiessler/PAI) - Auto-syncs learnings to knowledge graph
 - [PAI Research Skill](https://github.com/danielmiessler/PAI) - Capture research findings
-
-## Changelog
-
-See [CHANGELOG.md](CHANGELOG.md) for version history.
-
-**Latest: v1.6.0** - Memory Decay Scoring & Lifecycle Management with importance/stability classification, weighted search, and automated maintenance.
 
 ---
 
