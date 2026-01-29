@@ -275,6 +275,11 @@ async function restart(): Promise<void> {
   cli.info(`Database backend: ${databaseType}`);
   cli.blank();
 
+  // Generate environment files for containers (needed for dev mode)
+  cli.info('Regenerating container environment files...');
+  await generateEnvFiles(config, databaseType, flags.dev);
+  cli.blank();
+
   // Restart containers
   cli.info('Restarting containers...');
   const result = await compose.restart(databaseType, undefined, flags.dev);
