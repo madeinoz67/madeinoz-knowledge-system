@@ -305,7 +305,7 @@ For existing knowledge graphs created before decay scoring was implemented, run 
 cd /Users/seaton/Documents/src/madeinoz-knowledge-system
 
 # Start containers if not running
-bun run server-cli --start
+bun run server-cli start
 
 # Run backfill migration (Python)
 cd docker/patches

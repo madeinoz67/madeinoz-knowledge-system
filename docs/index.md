@@ -165,19 +165,22 @@ See [Observability & Metrics](reference/observability.md) for full documentation
 
 ```bash
 # Check status
-bun run server-cli --status
+bun run server-cli status
 
 # Start server
-bun run server-cli --start
+bun run server-cli start
 
 # Stop server
-bun run server-cli --stop
+bun run server-cli stop
 
 # Restart server
-bun run server-cli --restart
+bun run server-cli restart
 
 # View logs
-bun run server-cli --logs
+bun run server-cli logs
+
+# View logs with options
+bun run server-cli logs --mcp --tail 50
 ```
 
 ### Memory Sync

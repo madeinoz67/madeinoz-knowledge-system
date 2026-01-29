@@ -95,7 +95,7 @@ After installation, test with:
 | MCP tools not available | Verify `~/.claude.json` has madeinoz-knowledge entry |
 | API errors (401) | Check API key is valid and has quota |
 | Neo4j connection errors | Verify `MADEINOZ_KNOWLEDGE_NEO4J_URI=bolt://neo4j:7687` in `~/.claude/.env` |
-| Env file has wrong URI | Run `bun run server-cli --stop && bun run server-cli --start` to regenerate env files |
+| Env file has wrong URI | Run `bun run server-cli stop && bun run server-cli start` to regenerate env files |
 
 ## Related
 

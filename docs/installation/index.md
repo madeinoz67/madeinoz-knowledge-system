@@ -285,7 +285,7 @@ To change providers after initial setup:
 1. **Stop the server:**
 
    ```bash
-   bun run server-cli --stop
+   bun run server-cli stop
    ```
 
 2. **Edit the configuration:**
@@ -300,7 +300,7 @@ To change providers after initial setup:
 4. **Restart the server:**
 
    ```bash
-   bun run server-cli --start
+   bun run server-cli start
    ```
 
 ---
