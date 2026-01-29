@@ -109,6 +109,7 @@ class HealthMetrics:
         "average_decay": 0.0,
         "average_importance": 0.0,
         "average_stability": 0.0,
+        "orphan_entities": 0,
     })
 
     # Age distribution
@@ -194,6 +195,16 @@ MATCH (n:Entity)
 WHERE n.`attributes.lifecycle_state` IS NOT NULL
   AND n.`attributes.lifecycle_state` <> 'SOFT_DELETED'
 RETURN count(n) AS count
+"""
+
+# Query to count orphan entities (entities with no relationships)
+ORPHAN_ENTITIES_QUERY = """
+MATCH (n:Entity)
+WHERE n.`attributes.lifecycle_state` IS NOT NULL
+  AND n.`attributes.lifecycle_state` <> 'SOFT_DELETED'
+  AND NOT ()-[]->(n)
+  AND NOT (n)-[]->()
+RETURN count(n) AS orphan_count
 """
 
 
@@ -392,6 +403,12 @@ class MaintenanceService:
                     metrics.aggregates["average_importance"] = round(record["avg_importance"] or 3, 2)
                     metrics.aggregates["average_stability"] = round(record["avg_stability"] or 3, 2)
 
+                # Get orphan entities count
+                result = await session.run(ORPHAN_ENTITIES_QUERY)
+                record = await result.single()
+                if record:
+                    metrics.aggregates["orphan_entities"] = record["orphan_count"] or 0
+
                 # Get age distribution
                 result = await session.run(HEALTH_AGE_DISTRIBUTION_QUERY)
                 record = await result.single()
@@ -443,6 +460,9 @@ class MaintenanceService:
             stability=metrics.aggregates.get("average_stability", 3.0),
             total=metrics.aggregates.get("total", 0)
         )
+
+        # Update orphan entities gauge
+        decay_metrics.update_orphan_count(metrics.aggregates.get("orphan_entities", 0))
 
     async def _count_memories(self) -> int:
         """Count total memories to process."""

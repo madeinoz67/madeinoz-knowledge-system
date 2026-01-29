@@ -390,10 +390,37 @@ async def batch_update_decay_scores(driver, base_half_life: float = 30.0) -> int
     Returns:
         Number of nodes updated
     """
+    from utils.metrics_exporter import get_decay_metrics_exporter
+
     async with driver.session() as session:
+        # Update decay scores
         result = await session.run(
             BATCH_DECAY_UPDATE_QUERY,
             baseHalfLife=base_half_life
         )
         record = await result.single()
-        return record["updated"] if record else 0
+        updated_count = record["updated"] if record else 0
+
+        # Record decay scores to histogram for distribution tracking
+        if updated_count > 0:
+            decay_metrics = get_decay_metrics_exporter()
+            if decay_metrics and decay_metrics._histograms:
+                # Fetch all decay scores and record to histogram
+                try:
+                    fetch_result = await session.run("""
+                        MATCH (n:Entity)
+                        WHERE n.`attributes.decay_score` IS NOT NULL
+                          AND n.`attributes.lifecycle_state` IS NOT NULL
+                          AND n.`attributes.lifecycle_state` <> 'SOFT_DELETED'
+                        RETURN n.`attributes.decay_score` AS score
+                    """)
+
+                    scores = await fetch_result.list()
+                    for score_record in scores:
+                        decay_metrics.record_decay_score(score_record["score"])
+
+                    logger.debug(f"Recorded {len(scores)} decay scores to histogram")
+                except Exception as e:
+                    logger.error(f"Failed to record decay scores to histogram: {e}")
+
+        return updated_count

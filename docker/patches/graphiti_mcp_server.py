@@ -883,6 +883,10 @@ async def search_nodes(
     if graphiti_service is None:
         return ErrorResponse(error='Graphiti service not initialized')
 
+    # Feature 009: Track search metrics
+    import time
+    search_start = time.time()
+
     try:
         client = await graphiti_service.get_client()
 
@@ -950,6 +954,19 @@ async def search_nodes(
             logger.debug(f'Madeinoz Patch: Temporal filter applied, {len(nodes)} nodes remaining')
 
         if not nodes:
+            # Feature 009: Record zero-result search metrics
+            if _decay_metrics_available:
+                try:
+                    decay_metrics = get_decay_metrics_exporter()
+                    if decay_metrics:
+                        search_latency = time.time() - search_start
+                        decay_metrics.record_search_execution(
+                            query_latency_seconds=search_latency,
+                            result_count=0,
+                            is_zero_result=True
+                        )
+                except Exception as metrics_err:
+                    logger.debug(f'Failed to record search metrics: {metrics_err}')
             return NodeSearchResponse(message='No relevant nodes found', nodes=[])
 
         # Feature 009: Apply weighted scoring if requested
@@ -994,6 +1011,24 @@ async def search_nodes(
                     )
                 )
 
+            # Feature 009: Record search metrics for weighted results
+            if _decay_metrics_available:
+                try:
+                    decay_metrics = get_decay_metrics_exporter()
+                    if decay_metrics:
+                        search_latency = time.time() - search_start
+                        is_zero_result = len(node_results) == 0
+                        decay_metrics.record_search_execution(
+                            query_latency_seconds=search_latency,
+                            result_count=len(node_results),
+                            is_zero_result=is_zero_result
+                        )
+                        # Record memory access for retrieved nodes
+                        for node in nodes:
+                            decay_metrics.record_memory_access()
+                except Exception as metrics_err:
+                    logger.debug(f'Failed to record search metrics: {metrics_err}')
+
             return NodeSearchResponse(
                 message=f'Nodes retrieved with weighted scoring ({len(node_results)} results)',
                 nodes=node_results
@@ -1019,6 +1054,24 @@ async def search_nodes(
                     attributes=attrs,
                 )
             )
+
+        # Feature 009: Record search metrics
+        if _decay_metrics_available:
+            try:
+                decay_metrics = get_decay_metrics_exporter()
+                if decay_metrics:
+                    search_latency = time.time() - search_start
+                    is_zero_result = len(node_results) == 0
+                    decay_metrics.record_search_execution(
+                        query_latency_seconds=search_latency,
+                        result_count=len(node_results),
+                        is_zero_result=is_zero_result
+                    )
+                    # Record memory access for retrieved nodes
+                    for node in nodes:
+                        decay_metrics.record_memory_access()
+            except Exception as metrics_err:
+                logger.debug(f'Failed to record search metrics: {metrics_err}')
 
         return NodeSearchResponse(message='Nodes retrieved successfully', nodes=node_results)
     except Exception as e:
@@ -1051,6 +1104,10 @@ async def search_memory_facts(
     if graphiti_service is None:
         return ErrorResponse(error='Graphiti service not initialized')
 
+    # Feature 009: Track search metrics
+    import time
+    search_start = time.time()
+
     try:
         if max_facts <= 0:
             return ErrorResponse(error='max_facts must be a positive integer')
@@ -1078,6 +1135,19 @@ async def search_memory_facts(
         )
 
         if not relevant_edges:
+            # Feature 009: Record zero-result search metrics
+            if _decay_metrics_available:
+                try:
+                    decay_metrics = get_decay_metrics_exporter()
+                    if decay_metrics:
+                        search_latency = time.time() - search_start
+                        decay_metrics.record_search_execution(
+                            query_latency_seconds=search_latency,
+                            result_count=0,
+                            is_zero_result=True
+                        )
+                except Exception as metrics_err:
+                    logger.debug(f'Failed to record search metrics: {metrics_err}')
             return FactSearchResponse(message='No relevant facts found', facts=[])
 
         # Madeinoz Patch: Apply temporal filtering if specified
@@ -1103,9 +1173,41 @@ async def search_memory_facts(
             relevant_edges = relevant_edges[:max_facts]
 
         if not relevant_edges:
+            # Feature 009: Record zero-result search metrics
+            if _decay_metrics_available:
+                try:
+                    decay_metrics = get_decay_metrics_exporter()
+                    if decay_metrics:
+                        search_latency = time.time() - search_start
+                        decay_metrics.record_search_execution(
+                            query_latency_seconds=search_latency,
+                            result_count=0,
+                            is_zero_result=True
+                        )
+                except Exception as metrics_err:
+                    logger.debug(f'Failed to record search metrics: {metrics_err}')
             return FactSearchResponse(message='No relevant facts found', facts=[])
 
         facts = [format_fact_result(edge) for edge in relevant_edges]
+
+        # Feature 009: Record search metrics
+        if _decay_metrics_available:
+            try:
+                decay_metrics = get_decay_metrics_exporter()
+                if decay_metrics:
+                    search_latency = time.time() - search_start
+                    is_zero_result = len(facts) == 0
+                    decay_metrics.record_search_execution(
+                        query_latency_seconds=search_latency,
+                        result_count=len(facts),
+                        is_zero_result=is_zero_result
+                    )
+                    # Record memory access for retrieved facts
+                    for _ in facts:
+                        decay_metrics.record_memory_access()
+            except Exception as metrics_err:
+                logger.debug(f'Failed to record search metrics: {metrics_err}')
+
         return FactSearchResponse(message='Facts retrieved successfully', facts=facts)
     except Exception as e:
         error_msg = str(e)

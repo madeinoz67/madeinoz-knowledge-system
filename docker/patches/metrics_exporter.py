@@ -167,6 +167,35 @@ class CacheMetricsExporter:
                         boundaries=[0.01, 0.05, 0.1, 0.5, 1]
                     )
                 ),
+                # Decay score distribution: 0-1 range in 0.1 increments
+                View(
+                    instrument_name="knowledge_decay_score",
+                    aggregation=ExplicitBucketHistogramAggregation(
+                        boundaries=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+                    )
+                ),
+                # === Additional Observability Metrics ===
+                # Search query latency: sub-second to multi-second
+                View(
+                    instrument_name="knowledge_search_query_latency_seconds",
+                    aggregation=ExplicitBucketHistogramAggregation(
+                        boundaries=[0.01, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10]
+                    )
+                ),
+                # Days since last access: 1 day to 1+ years
+                View(
+                    instrument_name="knowledge_days_since_last_access",
+                    aggregation=ExplicitBucketHistogramAggregation(
+                        boundaries=[1, 7, 30, 90, 180, 365, 730, 1095]  # 1d, 1w, 1m, 3m, 6m, 1y, 2y, 3y
+                    )
+                ),
+                # Search result count: 0 to 100+ results
+                View(
+                    instrument_name="knowledge_search_result_count",
+                    aggregation=ExplicitBucketHistogramAggregation(
+                        boundaries=[0, 1, 5, 10, 25, 50, 100, 200]
+                    )
+                ),
             ]
 
             # Set up meter provider with custom views
@@ -728,6 +757,7 @@ class DecayMetricsExporter:
             "stability": 3.0,
         }
         self._total_memories: int = 0
+        self._orphan_entities: int = 0  # Track entities with no relationships
 
         if self._meter:
             self._create_counters()
@@ -774,6 +804,22 @@ class DecayMetricsExporter:
                 description="Weighted search operations",
                 unit="1"
             ),
+            # === Additional Observability Counters ===
+            "memory_access": self._meter.create_counter(
+                name="knowledge_memory_access_total",
+                description="Total memory access operations",
+                unit="1"
+            ),
+            "memories_created": self._meter.create_counter(
+                name="knowledge_memories_created_total",
+                description="Total memories created (growth tracking)",
+                unit="1"
+            ),
+            "zero_result_searches": self._meter.create_counter(
+                name="knowledge_search_zero_results_total",
+                description="Searches returning zero results",
+                unit="1"
+            ),
         }
 
     def _create_gauges(self) -> None:
@@ -798,6 +844,9 @@ class DecayMetricsExporter:
 
         def get_total(_options):
             return [metrics.Observation(self._total_memories)]
+
+        def get_orphan_count(_options):
+            return [metrics.Observation(self._orphan_entities)]
 
         self._gauges = {
             "memories_by_state": self._meter.create_observable_gauge(
@@ -837,6 +886,12 @@ class DecayMetricsExporter:
                 unit="1",
                 callbacks=[get_total]
             ),
+            "orphan_entities": self._meter.create_observable_gauge(
+                name="knowledge_orphan_entities",
+                description="Entities with no relationships (disconnected from graph)",
+                unit="1",
+                callbacks=[get_orphan_count]
+            ),
         }
 
     def _create_histograms(self) -> None:
@@ -859,6 +914,27 @@ class DecayMetricsExporter:
                 name="knowledge_search_weighted_latency_seconds",
                 description="Weighted search scoring overhead in seconds",
                 unit="s"
+            ),
+            "decay_score": self._meter.create_histogram(
+                name="knowledge_decay_score",
+                description="Decay score distribution (0=healthy, 1=expired)",
+                unit="1"
+            ),
+            # === Additional Observability Histograms ===
+            "search_query_latency": self._meter.create_histogram(
+                name="knowledge_search_query_latency_seconds",
+                description="Search query execution time in seconds",
+                unit="s"
+            ),
+            "days_since_last_access": self._meter.create_histogram(
+                name="knowledge_days_since_last_access",
+                description="Days since last memory access (age distribution)",
+                unit="d"
+            ),
+            "search_result_count": self._meter.create_histogram(
+                name="knowledge_search_result_count",
+                description="Number of results returned per search",
+                unit="1"
             ),
         }
 
@@ -985,6 +1061,92 @@ class DecayMetricsExporter:
         self._averages["importance"] = importance
         self._averages["stability"] = stability
         self._total_memories = total
+
+    def record_decay_score(self, score: float) -> None:
+        """
+        Record a decay score for distribution tracking.
+
+        Args:
+            score: Decay score value (0-1 range)
+        """
+        if not self._histograms:
+            return
+        try:
+            self._histograms["decay_score"].record(score)
+            logger.debug(f"Recorded decay score: {score:.3f}")
+        except Exception as e:
+            logger.error(f"Failed to record decay score: {e}")
+
+    def record_memory_access(self) -> None:
+        """Record a memory access operation."""
+        if not self._counters:
+            return
+        try:
+            self._counters["memory_access"].add(1)
+            logger.debug("Recorded memory access")
+        except Exception as e:
+            logger.error(f"Failed to record memory access: {e}")
+
+    def record_memory_created(self, count: int = 1) -> None:
+        """
+        Record memories being created.
+
+        Args:
+            count: Number of memories created (default 1)
+        """
+        if not self._counters:
+            return
+        try:
+            self._counters["memories_created"].add(count)
+            logger.debug(f"Recorded {count} memories created")
+        except Exception as e:
+            logger.error(f"Failed to record memories created: {e}")
+
+    def record_search_execution(
+        self,
+        query_latency_seconds: float = 0.0,
+        result_count: int = 0,
+        is_zero_result: bool = False
+    ) -> None:
+        """
+        Record a search operation.
+
+        Args:
+            query_latency_seconds: Time to execute search query
+            result_count: Number of results returned
+            is_zero_result: Whether the search returned no results
+        """
+        try:
+            # Record search (weighted search counter)
+            if self._counters:
+                self._counters["weighted_searches"].add(1)
+
+            # Record histograms if available
+            if self._histograms:
+                if query_latency_seconds > 0:
+                    self._histograms["search_query_latency"].record(query_latency_seconds)
+                if result_count >= 0:
+                    self._histograms["search_result_count"].record(result_count)
+
+            # Record zero result counter
+            if is_zero_result and self._counters:
+                self._counters["zero_result_searches"].add(1)
+
+            logger.debug(
+                f"Recorded search: latency={query_latency_seconds:.3f}s, "
+                f"results={result_count}, zero={is_zero_result}"
+            )
+        except Exception as e:
+            logger.error(f"Failed to record search metrics: {e}")
+
+    def update_orphan_count(self, count: int) -> None:
+        """
+        Update the orphan entities gauge.
+
+        Args:
+            count: Number of orphan entities (no relationships)
+        """
+        self._orphan_entities = count
 
 
 # =============================================================================
