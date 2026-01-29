@@ -184,6 +184,61 @@ interface ClearGraphResponse {
   deleted_episodes?: number;
 }
 
+// Feature 009: Memory decay response types
+interface HealthMetricsResponse {
+  states: Record<string, number>;
+  aggregates: {
+    total: number;
+    average_decay: number;
+    average_importance: number;
+    average_stability: number;
+  };
+  age_distribution: Record<string, number>;
+  maintenance: {
+    last_run: string | null;
+    duration_seconds: number;
+    processed: number;
+    transitions: number;
+  };
+  generated_at: string;
+}
+
+interface MaintenanceResultResponse {
+  success: boolean;
+  memories_processed: number;
+  nodes_classified: {
+    found: number;
+    classified: number;
+    failed: number;
+    using_llm: boolean;
+  };
+  decay_scores_updated: number;
+  state_transitions: {
+    active_to_dormant: number;
+    dormant_to_archived: number;
+    archived_to_expired: number;
+    expired_to_soft_deleted: number;
+  };
+  soft_deleted_purged: number;
+  duration_seconds: number;
+  completed_at: string | null;
+  error: string | null;
+}
+
+interface ClassificationResponse {
+  importance: number;
+  stability: number;
+  is_permanent: boolean;
+  classification_source: string;
+}
+
+interface RecoveryResponse {
+  message: string;
+  uuid: string;
+  name: string;
+  new_state: string;
+}
+
 function isSearchNodesResponse(data: unknown): data is SearchNodesResponse {
   return (
     typeof data === 'object' &&
@@ -245,6 +300,47 @@ function isClearGraphResponse(data: unknown): data is ClearGraphResponse {
     data !== null &&
     'success' in data &&
     typeof (data as ClearGraphResponse).success === 'boolean'
+  );
+}
+
+function isHealthMetricsResponse(data: unknown): data is HealthMetricsResponse {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'states' in data &&
+    'aggregates' in data &&
+    'age_distribution' in data
+  );
+}
+
+function isMaintenanceResultResponse(data: unknown): data is MaintenanceResultResponse {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'success' in data &&
+    'memories_processed' in data &&
+    'state_transitions' in data
+  );
+}
+
+function isClassificationResponse(data: unknown): data is ClassificationResponse {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'importance' in data &&
+    'stability' in data &&
+    'is_permanent' in data
+  );
+}
+
+function isRecoveryResponse(data: unknown): data is RecoveryResponse {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'message' in data &&
+    'uuid' in data &&
+    'name' in data &&
+    'new_state' in data
   );
 }
 
@@ -467,6 +563,172 @@ export function formatClearGraph(data: unknown, _options: FormatOptions): string
 }
 
 // ============================================================================
+// Feature 009: Memory Decay Formatters
+// ============================================================================
+
+/**
+ * Format get_knowledge_health response
+ * Output: Memory Lifecycle Health:
+ *         Lifecycle States: Active, Dormant, Archived, Expired, Soft Deleted, Permanent
+ *         Aggregates: Total, Avg Decay, Avg Importance, Avg Stability
+ *         Age Distribution: < 7d, 7-30d, 30-90d, > 90d
+ *         Last Maintenance: timestamp, duration, processed, transitions
+ */
+export function formatHealthMetrics(data: unknown, _options: FormatOptions): string {
+  if (!isHealthMetricsResponse(data)) {
+    throw new Error('Invalid data format for get_knowledge_health');
+  }
+
+  const lines: string[] = ['Memory Lifecycle Health:'];
+
+  // Lifecycle states
+  lines.push('\nLifecycle States:');
+  lines.push(`  Active:       ${data.states.active.toLocaleString()}`);
+  lines.push(`  Dormant:      ${data.states.dormant.toLocaleString()}`);
+  lines.push(`  Archived:     ${data.states.archived.toLocaleString()}`);
+  lines.push(`  Expired:      ${data.states.expired.toLocaleString()}`);
+  lines.push(`  Soft Deleted: ${data.states.soft_deleted.toLocaleString()}`);
+  lines.push(`  Permanent:    ${data.states.permanent.toLocaleString()}`);
+
+  // Aggregates
+  lines.push('\nAggregates:');
+  lines.push(`  Total:         ${data.aggregates.total.toLocaleString()}`);
+  lines.push(`  Avg Decay:     ${data.aggregates.average_decay.toFixed(3)}`);
+  lines.push(`  Avg Importance: ${data.aggregates.average_importance.toFixed(2)}/5`);
+  lines.push(`  Avg Stability:  ${data.aggregates.average_stability.toFixed(2)}/5`);
+
+  // Age distribution
+  lines.push('\nAge Distribution:');
+  lines.push(`  < 7 days:    ${data.age_distribution.under_7_days.toLocaleString()}`);
+  lines.push(`  7-30 days:   ${data.age_distribution.days_7_to_30.toLocaleString()}`);
+  lines.push(`  30-90 days:  ${data.age_distribution.days_30_to_90.toLocaleString()}`);
+  lines.push(`  > 90 days:   ${data.age_distribution.over_90_days.toLocaleString()}`);
+
+  // Maintenance info
+  if (data.maintenance.last_run) {
+    lines.push('\nLast Maintenance:');
+    lines.push(`  Run: ${relativeTime(data.maintenance.last_run)}`);
+    lines.push(`  Duration: ${data.maintenance.duration_seconds.toFixed(1)}s`);
+    lines.push(`  Processed: ${data.maintenance.processed.toLocaleString()}`);
+    lines.push(`  Transitions: ${data.maintenance.transitions.toLocaleString()}`);
+  }
+
+  return lines.join('\n');
+}
+
+/**
+ * Format run_decay_maintenance response
+ * Output: ✓ Maintenance completed successfully
+ *         Processed: N memories
+ *         Duration: X.Xs
+ *         Classification: Found/Classified/Failed
+ *         Decay scores updated: N
+ *         State Transitions: ACTIVE→DORMANT, etc.
+ *         Purged: N soft-deleted memories
+ */
+export function formatMaintenanceResult(data: unknown, _options: FormatOptions): string {
+  if (!isMaintenanceResultResponse(data)) {
+    throw new Error('Invalid data format for run_decay_maintenance');
+  }
+
+  const lines: string[] = [];
+
+  if (data.success) {
+    lines.push('✓ Maintenance completed successfully');
+  } else {
+    lines.push(`✗ Maintenance failed: ${data.error || 'Unknown error'}`);
+  }
+
+  lines.push(`  Processed: ${data.memories_processed.toLocaleString()} memories`);
+  lines.push(`  Duration: ${data.duration_seconds.toFixed(1)}s`);
+
+  // Classification results
+  if (data.nodes_classified.classified > 0) {
+    lines.push('\nClassification:');
+    lines.push(`  Found: ${data.nodes_classified.found}`);
+    lines.push(`  Classified: ${data.nodes_classified.classified} (${data.nodes_classified.using_llm ? 'LLM' : 'default'})`);
+    if (data.nodes_classified.failed > 0) {
+      lines.push(`  Failed: ${data.nodes_classified.failed}`);
+    }
+  }
+
+  // Decay scores
+  if (data.decay_scores_updated > 0) {
+    lines.push(`\nDecay scores updated: ${data.decay_scores_updated.toLocaleString()}`);
+  }
+
+  // State transitions
+  const st = data.state_transitions;
+  const total = st.active_to_dormant + st.dormant_to_archived + st.archived_to_expired + st.expired_to_soft_deleted;
+  if (total > 0) {
+    lines.push('\nState Transitions:');
+    lines.push(`  ACTIVE → DORMANT:     ${st.active_to_dormant}`);
+    lines.push(`  DORMANT → ARCHIVED:   ${st.dormant_to_archived}`);
+    lines.push(`  ARCHIVED → EXPIRED:   ${st.archived_to_expired}`);
+    lines.push(`  EXPIRED → SOFT_DEL:   ${st.expired_to_soft_deleted}`);
+    lines.push(`  Total:                ${total}`);
+  }
+
+  // Purged
+  if (data.soft_deleted_purged > 0) {
+    lines.push(`\nPurged: ${data.soft_deleted_purged.toLocaleString()} soft-deleted memories`);
+  }
+
+  if (data.completed_at) {
+    lines.push(`\nCompleted: ${relativeTime(data.completed_at)}`);
+  }
+
+  return lines.join('\n');
+}
+
+/**
+ * Format classify_memory response
+ * Output: Memory Classification:
+ *         Importance: 3/3 ★★★☆☆
+ *         Stability:  4/5 ★★★★☆
+ *         Source: llm
+ *         Status: Subject to decay / PERMANENT (exempt from decay)
+ */
+export function formatClassification(data: unknown, _options: FormatOptions): string {
+  if (!isClassificationResponse(data)) {
+    throw new Error('Invalid data format for classify_memory');
+  }
+
+  const lines: string[] = ['Memory Classification:'];
+  lines.push(`  Importance: ${data.importance}/5 ${'★'.repeat(data.importance)}${'☆'.repeat(5 - data.importance)}`);
+  lines.push(`  Stability:  ${data.stability}/5 ${'★'.repeat(data.stability)}${'☆'.repeat(5 - data.stability)}`);
+  lines.push(`  Source:     ${data.classification_source}`);
+
+  if (data.is_permanent) {
+    lines.push(`  Status:     PERMANENT (exempt from decay)`);
+  } else {
+    lines.push(`  Status:     Subject to decay`);
+  }
+
+  return lines.join('\n');
+}
+
+/**
+ * Format recover_soft_deleted response
+ * Output: ✓ Memory recovered successfully
+ *         Name: Memory Name
+ *         UUID: ...uuid8
+ *         New State: ARCHIVED
+ */
+export function formatRecovery(data: unknown, _options: FormatOptions): string {
+  if (!isRecoveryResponse(data)) {
+    throw new Error('Invalid data format for recover_soft_deleted');
+  }
+
+  const lines: string[] = [`✓ ${data.message}`];
+  lines.push(`  Name: ${data.name}`);
+  lines.push(`  UUID: ...${data.uuid.slice(-8)}`);
+  lines.push(`  New State: ${data.new_state}`);
+
+  return lines.join('\n');
+}
+
+// ============================================================================
 // Main Entry Point (T021)
 // ============================================================================
 
@@ -482,6 +744,11 @@ registerFormatter('get_status', formatGetStatus);
 registerFormatter('delete_episode', formatDelete);
 registerFormatter('delete_entity_edge', formatDelete);
 registerFormatter('clear_graph', formatClearGraph);
+// Feature 009: Memory decay formatters
+registerFormatter('get_knowledge_health', formatHealthMetrics);
+registerFormatter('run_decay_maintenance', formatMaintenanceResult);
+registerFormatter('classify_memory', formatClassification);
+registerFormatter('recover_soft_deleted', formatRecovery);
 
 /**
  * Main entry point for formatting MCP responses.

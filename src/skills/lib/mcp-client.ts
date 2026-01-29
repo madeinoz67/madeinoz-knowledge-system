@@ -38,6 +38,11 @@ export const MCP_TOOLS = {
   DELETE_EPISODE: 'delete_episode',
   DELETE_ENTITY_EDGE: 'delete_entity_edge',
   GET_ENTITY_EDGE: 'get_entity_edge',
+  // Feature 009: Memory decay scoring
+  GET_KNOWLEDGE_HEALTH: 'get_knowledge_health',
+  RUN_DECAY_MAINTENANCE: 'run_decay_maintenance',
+  CLASSIFY_MEMORY: 'classify_memory',
+  RECOVER_SOFT_DELETED: 'recover_soft_deleted',
 } as const;
 
 /**
@@ -101,6 +106,24 @@ export interface DeleteEntityEdgeParams {
 }
 
 export interface GetEntityEdgeParams {
+  uuid: string;
+}
+
+// Feature 009: Memory decay scoring parameters
+export interface GetKnowledgeHealthParams {
+  group_id?: string;
+}
+
+export interface RunDecayMaintenanceParams {
+  dry_run?: boolean;
+}
+
+export interface ClassifyMemoryParams {
+  content: string;
+  source_description?: string;
+}
+
+export interface RecoverSoftDeletedParams {
   uuid: string;
 }
 
@@ -616,6 +639,57 @@ export class MCPClient {
    */
   async getEntityEdge(params: GetEntityEdgeParams): Promise<MCPClientResponse<unknown>> {
     return await this.callTool<unknown>(MCP_TOOLS.GET_ENTITY_EDGE, params as unknown as Record<string, unknown>);
+  }
+
+  /**
+   * Feature 009: Get knowledge graph health metrics
+   */
+  async getKnowledgeHealth(
+    params: GetKnowledgeHealthParams = {}
+  ): Promise<MCPClientResponse<unknown>> {
+    const serverParams: Record<string, unknown> = {};
+    if (params.group_id) {
+      serverParams.group_id = params.group_id;
+    }
+    return await this.callTool<unknown>(MCP_TOOLS.GET_KNOWLEDGE_HEALTH, serverParams);
+  }
+
+  /**
+   * Feature 009: Run decay maintenance cycle
+   */
+  async runDecayMaintenance(
+    params: RunDecayMaintenanceParams = {}
+  ): Promise<MCPClientResponse<unknown>> {
+    const serverParams: Record<string, unknown> = {
+      dry_run: params.dry_run ?? false,
+    };
+    return await this.callTool<unknown>(MCP_TOOLS.RUN_DECAY_MAINTENANCE, serverParams);
+  }
+
+  /**
+   * Feature 009: Classify memory importance and stability
+   */
+  async classifyMemory(
+    params: ClassifyMemoryParams
+  ): Promise<MCPClientResponse<unknown>> {
+    const serverParams: Record<string, unknown> = {
+      content: params.content,
+    };
+    if (params.source_description) {
+      serverParams.source_description = params.source_description;
+    }
+    return await this.callTool<unknown>(MCP_TOOLS.CLASSIFY_MEMORY, serverParams);
+  }
+
+  /**
+   * Feature 009: Recover soft-deleted memory
+   */
+  async recoverSoftDeleted(
+    params: RecoverSoftDeletedParams
+  ): Promise<MCPClientResponse<unknown>> {
+    return await this.callTool<unknown>(MCP_TOOLS.RECOVER_SOFT_DELETED, {
+      uuid: params.uuid,
+    });
   }
 
   /**
