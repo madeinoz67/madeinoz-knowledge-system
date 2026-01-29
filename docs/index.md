@@ -295,8 +295,8 @@ MADEINOZ_KNOWLEDGE_PROMPT_CACHE_METRICS_ENABLED=true
 
 **Note:** Episode body size is not explicitly limited. Very large episodes (>100KB) may cause slow processing or LLM context overflow. For bulk imports, consider chunking large documents.
 
-## Credits
+## Credits & Acknowledgments
 
-- **Knowledge graph engine**: [Graphiti](https://github.com/getzep/graphiti) by Zep AI
-- **Graph databases**: [Neo4j](https://neo4j.com/) and [FalkorDB](https://www.falkordb.com/)
-- **Part of**: [Personal AI Infrastructure (PAI)](https://github.com/danielmiessler/PAI)
+This system is built on [Graphiti](https://github.com/getzep/graphiti) by Zep AI, with graph database support from [Neo4j](https://neo4j.com/) and [FalkorDB](https://www.falkordb.com/). It is part of the [Personal AI Infrastructure (PAI)](https://github.com/danielmiessler/PAI) ecosystem.
+
+**See [Acknowledgments](acknowledgments.md)** for full credits to projects, research, and the community that inspired this system.

@@ -64,6 +64,7 @@ nav:
     - Benchmarks: reference/benchmarks.md
     - Developer Notes: reference/developer-notes.md
     - Release Process: reference/releases.md
+  - Acknowledgments: acknowledgments.md
 
 plugins:
   - search
