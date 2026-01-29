@@ -14,16 +14,31 @@ The Madeinoz Knowledge System provides command-line tools for managing the knowl
 ### Start Server
 
 ```bash
+# Production mode
 bun run server-cli start
+
+# Development mode
+bun run server-cli start --dev
 ```
 
 Launches the Graphiti MCP server with the configured database backend (Neo4j or FalkorDB).
 
 **Options:**
 
+- `--dev` or `-d`: Enable development mode (uses different ports and env files)
 - Detects container runtime (Podman or Docker) automatically
 - Loads configuration from PAI .env file
+- Generates container environment files
 - Waits for server initialization before returning
+
+**Development Mode Differences:**
+
+| Feature | Production | Development |
+|---------|-----------|-------------|
+| Neo4j Browser | http://localhost:7474 | http://localhost:7475 |
+| MCP Server | http://localhost:8000/mcp/ | http://localhost:8001/mcp/ |
+| Env Files | `/tmp/madeinoz-knowledge-*.env` | `/tmp/madeinoz-knowledge-*-dev.env` |
+| Use Case | Production usage | Code development/testing |
 
 **Expected Output:**
 
@@ -31,21 +46,32 @@ Launches the Graphiti MCP server with the configured database backend (Neo4j or 
 ✓ Server is running and healthy!
 ```
 
-### Start Services
+### Restart Server
 
 ```bash
-bun run server-cli start
+# Production mode
+bun run server-cli restart
+
+# Development mode
+bun run server-cli restart --dev
 ```
 
-Starts the containerized MCP server and database backend.
+Restarts the server containers while preserving data. Regenerates environment files before restarting to ensure configuration changes take effect.
 
-### Stop Services
+**When to use:**
+- After configuration changes
+- After code updates (development mode)
+- To refresh the server environment
+
+### Stop Server
 
 ```bash
 bun run server-cli stop
 ```
 
 Stops and removes the running containers.
+
+**Note:** Database data is persisted in Docker/Podman volumes and will be available when you restart.
 
 ### Check Status
 
@@ -57,10 +83,11 @@ Displays current container status and server health.
 
 **Output includes:**
 
+- Container runtime type (Podman/Docker)
+- Database backend (Neo4j/FalkorDB)
 - Container status (running/stopped)
-- MCP server health
-- Database backend status
-- Port availability
+- MCP server health check result
+- Port availability and access URLs
 
 ### View Logs
 
@@ -70,14 +97,27 @@ bun run server-cli logs
 
 Streams logs from the running MCP server container.
 
+**Options:**
+
+- `--mcp`: Show only MCP server logs (not database)
+- `--db`: Show only database logs (not MCP server)
+- `--tail N`: Number of lines to show (default: 100)
+- `--no-follow`: Don't follow log output (show current logs and exit)
+
 **Usage:**
 
 ```bash
-# Follow logs in real-time
+# Follow all logs in real-time
 bun run server-cli logs
 
-# View last N lines
-bun run server-cli logs --lines 100
+# Show only MCP server logs
+bun run server-cli logs --mcp
+
+# Show last 50 lines and exit
+bun run server-cli logs --tail 50 --no-follow
+
+# Show only database logs
+bun run server-cli logs --db
 ```
 
 ## Knowledge Operations

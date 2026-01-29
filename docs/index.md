@@ -167,7 +167,7 @@ See [Observability & Metrics](reference/observability.md) for full documentation
 # Check status
 bun run server-cli status
 
-# Start server
+# Start server (production mode)
 bun run server-cli start
 
 # Stop server
@@ -181,6 +181,24 @@ bun run server-cli logs
 
 # View logs with options
 bun run server-cli logs --mcp --tail 50
+```
+
+### Development Mode
+
+For development and testing server code changes:
+
+```bash
+# Start in development mode (uses dev ports and env files)
+bun run server-cli start --dev
+
+# Restart in development mode
+bun run server-cli restart --dev
+
+# Dev mode differences:
+# - Neo4j Browser: http://localhost:7475 (instead of 7474)
+# - MCP Server: http://localhost:8001/mcp/ (instead of 8000)
+# - Uses /tmp/madeinoz-knowledge-*-dev.env files
+# - Safe for development without affecting production
 ```
 
 ### Memory Sync
