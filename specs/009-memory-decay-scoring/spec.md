@@ -258,3 +258,9 @@ The health report MCP tool (`get_knowledge_health`) provides data for dashboards
 - Real-time decay recalculation on every query (batch processing only).
 - Machine learning model training for custom importance prediction.
 - Integration with external calendar/task systems for context-aware importance.
+
+## Acknowledgments
+
+The memory decay scoring and lifecycle management concepts specified in this feature were inspired by the [Personal AI_Infrastructure community](https://github.com/danielmiessler/Personal_AI_Infrastructure), specifically [Discussion #527: Knowledge System Long-term Memory Strategy](https://github.com/danielmiessler/Personal_AI_Infrastructure/discussions/527).
+
+This feature adapts those concepts for implementation in a Graphiti-based knowledge graph system, building on the foundational research from MemOS, Mem0, and A-MEM (NeurIPS 2025).

@@ -509,3 +509,9 @@ The stability level adjusts the base half-life:
 - [Observability & Metrics](../reference/observability.md) - Prometheus metrics reference
 - [Configuration Reference](../reference/configuration.md) - Full configuration guide
 - [Monitoring Guide](./monitoring.md) - Grafana dashboard setup
+
+## Acknowledgments
+
+The memory decay scoring and lifecycle management concepts in this feature were inspired by discussions in the [Personal AI_Infrastructure community](https://github.com/danielmiessler/Personal_AI_Infrastructure/discussions/527), specifically around [PAI Discussion #527: Knowledge System Long-term Memory Strategy](https://github.com/danielmiessler/Personal_AI_Infrastructure/discussions/527).
+
+The implementation adapts these concepts for a Graphiti-based knowledge graph, with automated importance/stability classification, weighted search scoring, and lifecycle state transitions.

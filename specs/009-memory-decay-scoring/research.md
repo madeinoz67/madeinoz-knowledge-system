@@ -363,3 +363,6 @@ start_http_server(port=9090, addr='0.0.0.0')
 - [FSRS - Free Spaced Repetition Scheduler](https://github.com/open-spaced-repetition/fsrs4anki)
 - [MemOS: An Operating System for LLM Agents](https://arxiv.org/abs/2410.16787)
 - [A-MEM: Agentic Memory for LLMs - NeurIPS 2025](https://arxiv.org/abs/2502.12345)
+
+**Community & Inspiration**:
+- [Personal AI_Infrastructure Discussion #527 - Knowledge System Long-term Memory Strategy](https://github.com/danielmiessler/Personal_AI_Infrastructure/discussions/527) - Initial inspiration for memory decay concepts in knowledge management systems
