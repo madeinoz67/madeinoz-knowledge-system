@@ -174,42 +174,45 @@ class TestRunMaintenance:
         classification_result = AsyncMock()
         classification_result.single = AsyncMock(return_value={"count": 0})  # No unclassified
 
-        decay_result = AsyncMock()
-        decay_result.single = AsyncMock(return_value={"updated": 95})
+        # Each function creates its own session, so we need to mock accordingly
+        # _count_memories uses one session.run()
+        # classify_unclassified_nodes creates its own session
+        # batch_update_decay_scores creates its own session and returns int
+        # batch_transition_states creates its own session
+        # purge_expired_soft_deletes creates its own session
 
-        transition_result = AsyncMock()
-        transition_result.single = AsyncMock(return_value={
-            "active_to_dormant": 5,
-            "dormant_to_archived": 2,
-            "archived_to_expired": 1,
-            "expired_to_soft_deleted": 0
-        })
-
-        purge_result = AsyncMock()
-        purge_result.single = AsyncMock(return_value={"purged": 0})
-
-        # Return different results based on call order
-        mock_session.run = AsyncMock(side_effect=[
-            count_result,        # _count_memories
-            classification_result,  # count_unclassified
-            decay_result,        # batch_update_decay_scores
-            transition_result,   # batch_transition_states
-            purge_result,        # purge_expired_soft_deletes
-        ])
+        # For _count_memories (called by run_maintenance)
+        mock_session.run = AsyncMock(return_value=count_result)
         mock_session.__aenter__ = AsyncMock(return_value=mock_session)
         mock_session.__aexit__ = AsyncMock(return_value=None)
         mock_driver.session = MagicMock(return_value=mock_session)
 
         service = MaintenanceService(mock_driver)
 
-        # Mock the classification to avoid complex setup
-        with patch('maintenance_service.classify_unclassified_nodes') as mock_classify:
+        # Mock the external functions that create their own sessions
+        with patch('maintenance_service.classify_unclassified_nodes') as mock_classify, \
+             patch('maintenance_service.batch_update_decay_scores') as mock_decay, \
+             patch('maintenance_service.batch_transition_states') as mock_transitions, \
+             patch('maintenance_service.purge_expired_soft_deletes') as mock_purge:
+
             mock_classify.return_value = {
                 "found": 0,
                 "classified": 0,
                 "failed": 0,
                 "using_llm": False
             }
+
+            mock_decay.return_value = 95  # Returns int directly
+
+            from lifecycle_manager import StateTransitionResult
+            mock_transitions.return_value = StateTransitionResult(
+                active_to_dormant=5,
+                dormant_to_archived=2,
+                archived_to_expired=1,
+                expired_to_soft_deleted=0
+            )
+
+            mock_purge.return_value = 0
 
             result = await service.run_maintenance(dry_run=False)
 
@@ -300,6 +303,10 @@ class TestGetHealthMetrics:
             "avg_stability": 3.5
         })
 
+        # Orphan entities
+        orphan_result = AsyncMock()
+        orphan_result.single = AsyncMock(return_value={"orphan_count": 2})
+
         # Age distribution
         age_result = AsyncMock()
         age_result.single = AsyncMock(return_value={
@@ -309,10 +316,23 @@ class TestGetHealthMetrics:
             "over_90_days": 40
         })
 
+        # Importance distribution
+        importance_result = AsyncMock()
+        importance_result.single = AsyncMock(return_value={
+            "trivial": 10,
+            "low": 20,
+            "moderate": 80,
+            "high": 60,
+            "core": 50
+        })
+
+        # get_health_metrics makes 5 session.run calls in sequence
         mock_session.run = AsyncMock(side_effect=[
-            states_result,
-            aggregates_result,
-            age_result
+            states_result,        # HEALTH_STATES_QUERY
+            aggregates_result,   # HEALTH_AGGREGATES_QUERY
+            orphan_result,       # ORPHAN_ENTITIES_QUERY
+            age_result,          # HEALTH_AGE_DISTRIBUTION_QUERY
+            importance_result   # HEALTH_IMPORTANCE_DISTRIBUTION_QUERY
         ])
         mock_session.__aenter__ = AsyncMock(return_value=mock_session)
         mock_session.__aexit__ = AsyncMock(return_value=None)
