@@ -1,7 +1,7 @@
 ---
 name: Knowledge
 version: 1.5.0
-description: Personal knowledge management using Graphiti knowledge graph with Neo4j/FalkorDB. USE WHEN 'store this', 'remember this', 'add to knowledge', 'search my knowledge', 'what do I know about', 'find in knowledge base', 'save to memory', 'graphiti', 'knowledge graph', 'entity extraction', 'relationship mapping', 'semantic search', 'episode', 'install knowledge', 'setup knowledge system', 'configure knowledge graph', knowledge capture, retrieval, synthesis.
+description: Personal knowledge management using Graphiti knowledge graph with Neo4j/FalkorDB. USE WHEN 'store this', 'remember this', 'add to knowledge', 'search my knowledge', 'what do I know about', 'find in knowledge base', 'save to memory', 'graphiti', 'knowledge graph', 'entity extraction', 'relationship mapping', 'semantic search', 'episode', 'install knowledge', 'setup knowledge system', 'configure knowledge graph', knowledge capture, retrieval, synthesis, memory decay, decay scoring, lifecycle state, importance classification, stability classification, health metrics, run maintenance, permanent memory, soft-delete.
 tools:
   # MCP Wrapper CLI (76%+ token savings vs direct MCP calls)
   - Bash(bun run */knowledge-cli.ts add_episode *)
@@ -11,6 +11,11 @@ tools:
   - Bash(bun run */knowledge-cli.ts get_status)
   - Bash(bun run */knowledge-cli.ts clear_graph *)
   - Bash(bun run */knowledge-cli.ts health)
+  # Feature 009: Memory decay and lifecycle
+  - Bash(bun run */knowledge-cli.ts health_metrics *)
+  - Bash(bun run */knowledge-cli.ts run_maintenance *)
+  - Bash(bun run */knowledge-cli.ts classify_memory *)
+  - Bash(bun run */knowledge-cli.ts recover_memory *)
   # Server management
   - Bash(bun run server-cli *)
 ---
@@ -134,6 +139,13 @@ bun run tools/knowledge-cli.ts clear_graph --force
 
 # Check server health
 bun run tools/knowledge-cli.ts health
+
+# Feature 009: Memory decay and lifecycle
+bun run tools/knowledge-cli.ts health_metrics
+bun run tools/knowledge-cli.ts run_maintenance
+bun run tools/knowledge-cli.ts run_maintenance --dry-run
+bun run tools/knowledge-cli.ts classify_memory "content" --source "description"
+bun run tools/knowledge-cli.ts recover_memory <uuid>
 ```
 
 **Options:**
@@ -251,6 +263,10 @@ http://localhost:8000/mcp/
 | `get_entity_edge` | Edge | "Get relationship details" |
 | `clear_graph` | Graph | "Clear all knowledge" |
 | `get_status` | - | "Check knowledge status" |
+| `get_knowledge_health` | - | "Get memory decay and lifecycle metrics" |
+| `run_decay_maintenance` | - | "Run decay maintenance cycle" |
+| `classify_memory` | - | "Classify memory importance and stability" |
+| `recover_soft_deleted` | - | "Recover soft-deleted memory" |
 
 **Naming Convention (Hybrid Approach):**
 

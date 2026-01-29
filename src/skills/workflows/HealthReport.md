@@ -19,7 +19,13 @@ Running the **HealthReport** workflow from the **MadeinozKnowledgeSystem** skill
 
 ## Step 2: Get Knowledge Health Metrics
 
-**Use MCP tool for detailed health metrics:**
+**Use CLI (primary) for detailed health metrics:**
+
+```bash
+bun run tools/knowledge-cli.ts health_metrics
+```
+
+**Or use MCP tool (fallback only if CLI fails):**
 
 ```typescript
 // Get comprehensive health report with decay metrics
@@ -197,7 +203,7 @@ See `RunMaintenance.md` workflow for detailed instructions.
 - GetStatus - Ensure server is healthy before requesting health report
 
 **After:**
-- RunMaintenance - If health shows stale decay scores
+- RunMaintenance - If health shows stale decay scores, run: `bun run tools/knowledge-cli.ts run_maintenance`
 - SearchKnowledge - Review memories in concerning lifecycle states
 
 **Related Workflows:**

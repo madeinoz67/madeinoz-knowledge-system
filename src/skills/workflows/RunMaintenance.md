@@ -22,7 +22,7 @@ Running the **RunMaintenance** workflow from the **MadeinozKnowledgeSystem** ski
 **Check server is running:**
 
 ```bash
-bun run ~/.claude/skills/Knowledge/tools/knowledge-cli.ts health
+bun run tools/knowledge-cli.ts health
 ```
 
 **Expected response:**
@@ -38,7 +38,17 @@ bun run ~/.claude/skills/Knowledge/tools/knowledge-cli.ts health
 
 ## Step 3: Run Maintenance Cycle
 
-**Use MCP tool to trigger maintenance:**
+**Use CLI (primary) to trigger maintenance:**
+
+```bash
+# Run full maintenance cycle
+bun run tools/knowledge-cli.ts run_maintenance
+
+# Dry run to preview changes
+bun run tools/knowledge-cli.ts run_maintenance --dry-run
+```
+
+**Or use MCP tool (fallback only if CLI fails):**
 
 ```typescript
 // Run full maintenance cycle
@@ -237,18 +247,9 @@ run_decay_maintenance({ batch_size: 100 })
 
 **Slow Maintenance:**
 
-1. Reduce batch size:
-   ```typescript
-   run_decay_maintenance({ batch_size: 100 })
-   ```
-
-2. Check database performance:
-   ```bash
-   # Neo4j
-   # Query to check slow transactions
-   ```
-
-3. Consider running during off-peak hours
+1. Run during off-peak hours
+2. Check database performance
+3. Review config/decay-config.yaml for batch_size settings (requires server restart)
 
 **Classification Failures:**
 
@@ -263,8 +264,8 @@ run_decay_maintenance({ batch_size: 100 })
 **After Successful Maintenance:**
 
 1. **Review Health Report:**
-   ```typescript
-   get_knowledge_health({})
+   ```bash
+   bun run tools/knowledge-cli.ts health_metrics
    ```
 
 2. **Check for Unexpected Transitions:**
@@ -273,19 +274,14 @@ run_decay_maintenance({ batch_size: 100 })
    - High number of expired memories?
 
 3. **Search by Lifecycle State:**
-   ```typescript
-   // Find archived memories that might need recovery
-   search_memory_nodes({
-     query: "[topic]",
-     lifecycle_state: "ARCHIVED"
-   })
+   ```bash
+   # Find archived memories that might need recovery
+   bun run tools/knowledge-cli.ts search_nodes "[topic]" --since 30d
    ```
 
 4. **Recover Important Memories (if needed):**
-   ```typescript
-   recover_soft_deleted({
-     memory_uuid: "[uuid]"
-   })
+   ```bash
+   bun run tools/knowledge-cli.ts recover_memory "[uuid]"
    ```
 
 ---
@@ -297,7 +293,7 @@ run_decay_maintenance({ batch_size: 100 })
 - HealthReport - Get baseline metrics before maintenance
 
 **After:**
-- HealthReport - Compare post-maintenance metrics
+- HealthReport - Compare post-maintenance metrics: `bun run tools/knowledge-cli.ts health_metrics`
 - SearchKnowledge - Find memories in specific states
 
 **Related Workflows:**
