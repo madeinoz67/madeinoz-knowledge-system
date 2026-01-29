@@ -57,6 +57,19 @@ jobs:
           cd docker
           uv pip install --system pytest pytest-asyncio pydantic pyyaml prometheus-client
 
+      - name: Setup test directory structure
+        run: |
+          cd docker
+          # Create utils subdirectory for proper import paths
+          mkdir -p patches/utils
+          # Symlink all patch files into utils/ to match container structure
+          for f in patches/*.py; do
+            basename=$(basename "$f")
+            if [ ! -f "patches/utils/$basename" ]; then
+              ln -sf "../$basename" "patches/utils/$basename"
+            fi
+          done
+
       - name: Run Python unit tests
         run: |
           cd docker
