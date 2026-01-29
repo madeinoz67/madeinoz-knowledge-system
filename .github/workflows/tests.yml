@@ -1,4 +1,4 @@
-name: CI
+name: Tests
 
 on:
   push:
@@ -8,16 +8,14 @@ on:
   workflow_dispatch:
 
 jobs:
-  ci:
-    name: CI
+  # TypeScript Tests
+  typescript:
+    name: TypeScript Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ========================================
-      # TypeScript Linting
-      # ========================================
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
@@ -26,6 +24,9 @@ jobs:
       - name: Install dependencies
         run: bun install
 
+      - name: Run tests
+        run: bun test
+
       - name: Run linter
         run: bun run lint
 
@@ -33,11 +34,13 @@ jobs:
         run: bun run typecheck
         continue-on-error: true
 
-      # ========================================
-      # Parallel Tests
-      # ========================================
-      - name: TypeScript Tests
-        run: bun test
+  # Python Tests (Feature 009 - Memory Decay)
+  python:
+    name: Python Tests (Feature 009)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Install uv
         run: |
@@ -49,12 +52,12 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install Python dependencies
+      - name: Install dependencies with uv
         run: |
           cd docker
           uv pip install --system pytest pytest-asyncio pydantic pyyaml prometheus-client
 
-      - name: Setup Python test directory structure
+      - name: Setup test directory structure
         run: |
           cd docker
           # Create utils subdirectory for proper import paths
@@ -67,7 +70,13 @@ jobs:
             fi
           done
 
-      - name: Python Tests
+      - name: Run Python unit tests
         run: |
           cd docker
           python -m pytest tests/unit/ -v
+
+      - name: Run Python integration tests
+        run: |
+          cd docker
+          python -m pytest tests/integration/ -v
+        continue-on-error: true  # Integration tests may need container
