@@ -90,6 +90,7 @@ Learn how to use the system:
 
 - **[Basic Usage](usage/basic-usage.md)** - Capturing and searching knowledge
 - **[Advanced Usage](usage/advanced.md)** - Bulk import, backup, multiple graphs
+- **[Memory Decay & Lifecycle](usage/memory-decay.md)** - Memory prioritization, decay scoring, and lifecycle management
 - **[Monitoring](usage/monitoring.md)** - Prometheus and Grafana dashboards
 
 ### Concepts

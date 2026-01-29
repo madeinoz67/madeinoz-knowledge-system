@@ -3,6 +3,51 @@ title: "Quick Reference Card"
 description: "One-page reference guide for common commands and configurations in the Madeinoz Knowledge System"
 ---
 
+<!-- AI-FRIENDLY SUMMARY
+System: Madeinoz Knowledge System Quick Reference
+Purpose: One-page command and configuration reference for rapid context loading
+
+Natural Language Triggers:
+- Capture: "Remember that [knowledge]", "Store this: [information]"
+- Search: "What do I know about [topic]?", "Search my knowledge for [subject]"
+- Connections: "How are [X] and [Y] connected?"
+- Status: "Show knowledge graph status", "Check memory health"
+
+CLI Commands (bun run):
+- start: Start all containers
+- stop: Stop all containers
+- status: Check container status
+- logs: Tail container logs
+- build: Build TypeScript to dist/
+- test: Run all tests
+- typecheck: Type check only
+- diagnose: System diagnostics
+
+Health & Status:
+- curl http://localhost:8000/health | jq: Full system health
+- curl http://localhost:8000/health | jq '.maintenance': Maintenance status (Feature 009)
+- curl http://localhost:8000/health | jq '.memory_counts.by_state': Lifecycle distribution
+
+Metrics:
+- http://localhost:9091/metrics: Prometheus metrics (dev)
+- http://localhost:9090/metrics: Prometheus metrics (prod)
+
+Dashboards:
+- Grafana: http://localhost:3002 (dev) / http://localhost:3001 (prod)
+- Neo4j Browser: http://localhost:7474 (Neo4j backend only)
+- FalkorDB UI: http://localhost:3000 (FalkorDB backend only)
+
+Lifecycle States (Feature 009):
+- ACTIVE: Recently accessed, full relevance
+- DORMANT: Not accessed 30+ days, lower priority
+- ARCHIVED: Not accessed 90+ days, much lower priority
+- EXPIRED: Marked for deletion
+- SOFT_DELETED: Deleted but recoverable (90 days)
+
+Importance Levels (Feature 009): TRIVIAL (1), LOW (2), MODERATE (3), HIGH (4), CORE (5)
+Stability Levels (Feature 009): VOLATILE (1), LOW (2), MODERATE (3), HIGH (4), PERMANENT (5)
+-->
+
 # Quick Reference Card
 
 One-page reference for the Madeinoz Knowledge System.
@@ -60,6 +105,52 @@ One-page reference for the Madeinoz Knowledge System.
 "Show me knowledge stats"
 "Is the system healthy?"
 ```
+
+## Memory Health & Lifecycle (Feature 009)
+
+### Check Memory Health
+
+```
+"Show me my memory health"
+"What's the state of my knowledge graph?"
+"How many memories do I have?"
+```
+
+### Check Maintenance Status
+
+```bash
+# Check last maintenance run
+curl http://localhost:8000/health | jq '.maintenance'
+
+# View memory counts by state
+curl http://localhost:8000/health | jq '.memory_counts.by_state'
+```
+
+### Manual Maintenance
+
+```bash
+# Trigger maintenance manually (if MCP tool exposed)
+# Note: Automatic maintenance runs every 24 hours by default
+```
+
+### View Lifecycle Breakdown
+
+```bash
+# Via health endpoint
+curl http://localhost:8000/health | jq '.memory_counts.by_state'
+
+# Via Grafana Dashboard
+# http://localhost:3002/d/memory-decay-dashboard
+```
+
+**Lifecycle States:**
+- **ACTIVE** - Recently accessed, full relevance
+- **DORMANT** - Not accessed 30+ days
+- **ARCHIVED** - Not accessed 90+ days
+- **EXPIRED** - Marked for deletion
+- **SOFT_DELETED** - Deleted but recoverable (90 days)
+
+See [Memory Decay & Lifecycle Management](../usage/memory-decay.md) for complete guide.
 
 ## Server Management
 
