@@ -82,7 +82,7 @@ services:
 
   # Graphiti MCP Server
   knowledge-mcp:
-    image: ghcr.io/madeinoz67/madeinoz-knowledge-system:1.4.1
+    image: ghcr.io/madeinoz67/madeinoz-knowledge-system:1.6.0
     container_name: knowledge-mcp
     restart: unless-stopped
     networks:
