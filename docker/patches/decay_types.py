@@ -188,6 +188,7 @@ class MaintenanceConfig(BaseModel):
     """Configuration for maintenance batch processing."""
     batch_size: int = Field(default=500, ge=1, le=5000, description="Memories per batch")
     max_duration_minutes: int = Field(default=10, ge=1, description="Maximum run time in minutes")
+    schedule_interval_hours: int = Field(default=24, ge=0, le=168, description="Hours between automatic maintenance runs (0 = disabled)")
 
 
 class WeightsConfig(BaseModel):

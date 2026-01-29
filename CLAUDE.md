@@ -411,4 +411,69 @@ After implementing or updating decay features:
 - [ ] Permanent memories never transition from ACTIVE
 - [ ] Soft-deleted memories purged after 90 days
 
+## Container Development Workflow
+
+**Important:** When modifying code in `docker/patches/`, you must rebuild the Docker image for changes to take effect.
+
+### When to Rebuild
+
+Rebuild the Docker image after making changes to any of these files:
+- `docker/patches/*.py` (MCP server code)
+- `docker/Dockerfile` (build configuration)
+- `config/decay-config.yaml` (configuration copied into image)
+
+### Rebuild Procedure
+
+**Development mode (recommended for testing):**
+```bash
+# 1. Rebuild the image
+docker build -f docker/Dockerfile -t madeinoz-knowledge-system:local .
+
+# 2. Stop and remove the container to clear cached layers
+bun run server-cli stop
+
+# 3. Restart with fresh container
+bun run server-cli start --dev
+```
+
+**Force clean rebuild (if caching issues persist):**
+```bash
+# 1. Remove the image completely
+docker rmi madeinoz-knowledge-system:local
+
+# 2. Rebuild without cache
+docker build --no-cache -f docker/Dockerfile -t madeinoz-knowledge-system:local .
+
+# 3. Restart containers
+bun run server-cli restart --dev
+```
+
+**Production mode:**
+```bash
+# 1. Rebuild the image
+docker build -f docker/Dockerfile -t madeinoz-knowledge-system:local .
+
+# 2. Restart production containers
+bun run server-cli restart
+```
+
+### Troubleshooting
+
+**Symptom:** Code changes don't appear to take effect after restart.
+
+**Cause:** Docker layer caching may cause the container to use old code layers even after rebuilding the image.
+
+**Solution:** Always stop and remove containers before restarting to ensure fresh layers are used:
+```bash
+bun run server-cli stop
+# Wait for containers to fully stop
+bun run server-cli start --dev
+```
+
+**Verification:** Check that the running container has your changes:
+```bash
+# Example: Check if your query exists in the container
+podman exec madeinoz-knowledge-graph-mcp-dev grep "YOUR_NEW_CODE" /app/mcp/src/utils/maintenance_service.py
+```
+
 <!-- MANUAL ADDITIONS END -->

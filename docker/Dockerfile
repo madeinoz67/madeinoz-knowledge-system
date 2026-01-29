@@ -20,7 +20,7 @@ COPY docker/patches/falkordb_lucene.py /app/mcp/src/utils/falkordb_lucene.py
 # Install prompt caching dependencies (OpenTelemetry + Prometheus)
 # Add to uv project dependencies
 WORKDIR /app/mcp
-RUN uv add "opentelemetry-api>=1.20.0" "opentelemetry-sdk>=1.20.0" "opentelemetry-exporter-prometheus>=0.41b0" "prometheus-client>=0.17.0" "pyyaml>=6.0"
+RUN uv add "opentelemetry-api>=1.20.0" "opentelemetry-sdk>=1.20.0" "opentelemetry-exporter-prometheus>=0.41b0" "prometheus-client>=0.17.0" "pyyaml>=6.0" "pydantic>=2.0"
 
 # Prompt caching implementation (Feature 006)
 COPY docker/patches/cache_metrics.py /app/mcp/src/utils/cache_metrics.py
@@ -28,6 +28,7 @@ COPY docker/patches/session_metrics.py /app/mcp/src/utils/session_metrics.py
 COPY docker/patches/message_formatter.py /app/mcp/src/utils/message_formatter.py
 COPY docker/patches/caching_wrapper.py /app/mcp/src/utils/caching_wrapper.py
 COPY docker/patches/caching_llm_client.py /app/mcp/src/utils/caching_llm_client.py
+# Cache bust: 2026-01-29-13-30
 COPY docker/patches/metrics_exporter.py /app/mcp/src/utils/metrics_exporter.py
 COPY docker/patches/diagnostic_wrapper.py /app/mcp/src/utils/diagnostic_wrapper.py
 
@@ -40,6 +41,7 @@ COPY docker/patches/importance_classifier.py /app/mcp/src/utils/importance_class
 COPY docker/patches/lifecycle_manager.py /app/mcp/src/utils/lifecycle_manager.py
 COPY docker/patches/maintenance_service.py /app/mcp/src/utils/maintenance_service.py
 COPY docker/patches/memory_decay.py /app/mcp/src/utils/memory_decay.py
+# Cache bust: 2026-01-29-13-30
 COPY docker/patches/metrics_exporter.py /app/mcp/src/utils/metrics_exporter.py
 
 # Copy both Neo4j and FalkorDB configs

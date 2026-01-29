@@ -751,6 +751,13 @@ class DecayMetricsExporter:
             "SOFT_DELETED": 0,
             "PERMANENT": 0,
         }
+        self._importance_counts: Dict[str, int] = {
+            "TRIVIAL": 0,    # Importance level 1
+            "LOW": 0,        # Importance level 2
+            "MODERATE": 0,   # Importance level 3
+            "HIGH": 0,       # Importance level 4
+            "CORE": 0,       # Importance level 5
+        }
         self._averages: Dict[str, float] = {
             "decay_score": 0.0,
             "importance": 3.0,
@@ -833,6 +840,12 @@ class DecayMetricsExporter:
                 return [metrics.Observation(self._state_counts.get(state, 0), {"state": state})]
             return callback
 
+        def get_importance_count(level: str):
+            """Factory for importance level count callbacks."""
+            def callback(_options):
+                return [metrics.Observation(self._importance_counts.get(level, 0), {"level": level})]
+            return callback
+
         def get_decay_avg(_options):
             return [metrics.Observation(self._averages["decay_score"])]
 
@@ -860,6 +873,18 @@ class DecayMetricsExporter:
                     get_state_count("EXPIRED"),
                     get_state_count("SOFT_DELETED"),
                     get_state_count("PERMANENT"),
+                ]
+            ),
+            "memories_by_importance": self._meter.create_observable_gauge(
+                name="knowledge_memories_by_importance",
+                description="Current memory count per importance level",
+                unit="1",
+                callbacks=[
+                    get_importance_count("TRIVIAL"),
+                    get_importance_count("LOW"),
+                    get_importance_count("MODERATE"),
+                    get_importance_count("HIGH"),
+                    get_importance_count("CORE"),
                 ]
             ),
             "decay_score_avg": self._meter.create_observable_gauge(
@@ -1046,6 +1071,17 @@ class DecayMetricsExporter:
         for state, count in counts.items():
             if state in self._state_counts:
                 self._state_counts[state] = count
+
+    def update_importance_counts(self, counts: Dict[str, int]) -> None:
+        """
+        Update current memory counts by importance level.
+
+        Args:
+            counts: Dict mapping importance level names to counts (TRIVIAL/LOW/MODERATE/HIGH/CORE)
+        """
+        for level, count in counts.items():
+            if level in self._importance_counts:
+                self._importance_counts[level] = count
 
     def update_averages(self, decay: float, importance: float, stability: float, total: int) -> None:
         """

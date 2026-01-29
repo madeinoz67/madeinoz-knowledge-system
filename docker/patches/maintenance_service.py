@@ -120,6 +120,15 @@ class HealthMetrics:
         "over_90_days": 0,
     })
 
+    # Importance distribution
+    importance_distribution: dict = field(default_factory=lambda: {
+        "trivial": 0,     # Importance level 1
+        "low": 0,         # Importance level 2
+        "moderate": 0,    # Importance level 3
+        "high": 0,        # Importance level 4
+        "core": 0,        # Importance level 5
+    })
+
     # Last maintenance info
     maintenance: dict = field(default_factory=lambda: {
         "last_run": None,
@@ -136,6 +145,7 @@ class HealthMetrics:
             "states": self.states,
             "aggregates": self.aggregates,
             "age_distribution": self.age_distribution,
+            "importance_distribution": self.importance_distribution,
             "maintenance": self.maintenance,
             "generated_at": self.generated_at,
         }
@@ -162,6 +172,21 @@ RETURN
     sum(CASE WHEN state = 'SOFT_DELETED' THEN 1 ELSE 0 END) AS soft_deleted,
     sum(CASE WHEN importance >= 4 AND stability >= 4 THEN 1 ELSE 0 END) AS permanent,
     count(n) AS total
+"""
+
+HEALTH_IMPORTANCE_DISTRIBUTION_QUERY = """
+MATCH (n:Entity)
+WHERE n.`attributes.lifecycle_state` IS NOT NULL
+  AND n.`attributes.lifecycle_state` <> 'SOFT_DELETED'
+
+WITH coalesce(n.`attributes.importance`, 3) AS importance
+
+RETURN
+    sum(CASE WHEN importance = 1 THEN 1 ELSE 0 END) AS trivial,
+    sum(CASE WHEN importance = 2 THEN 1 ELSE 0 END) AS low,
+    sum(CASE WHEN importance = 3 THEN 1 ELSE 0 END) AS moderate,
+    sum(CASE WHEN importance = 4 THEN 1 ELSE 0 END) AS high,
+    sum(CASE WHEN importance = 5 THEN 1 ELSE 0 END) AS core
 """
 
 HEALTH_AGGREGATES_QUERY = """
@@ -246,6 +271,11 @@ class MaintenanceService:
         self.batch_size = batch_size or config.decay.maintenance.batch_size
         self.max_duration_minutes = max_duration_minutes or config.decay.maintenance.max_duration_minutes
         self.base_half_life = config.decay.base_half_life_days
+
+        # Scheduled maintenance settings
+        self.schedule_interval_hours = config.decay.maintenance.schedule_interval_hours
+        self._scheduled_task: Optional[asyncio.Task] = None
+        self._shutdown_event = asyncio.Event()
 
         # Track last maintenance for health metrics
         self._last_result: Optional[MaintenanceResult] = None
@@ -420,6 +450,18 @@ class MaintenanceService:
                         "over_90_days": record["over_90_days"],
                     }
 
+                # Get importance distribution
+                result = await session.run(HEALTH_IMPORTANCE_DISTRIBUTION_QUERY)
+                record = await result.single()
+                if record:
+                    metrics.importance_distribution = {
+                        "trivial": record["trivial"],
+                        "low": record["low"],
+                        "moderate": record["moderate"],
+                        "high": record["high"],
+                        "core": record["core"],
+                    }
+
                 # Add last maintenance info
                 if self._last_result:
                     metrics.maintenance = {
@@ -451,6 +493,15 @@ class MaintenanceService:
             "EXPIRED": metrics.states.get("expired", 0),
             "SOFT_DELETED": metrics.states.get("soft_deleted", 0),
             "PERMANENT": metrics.states.get("permanent", 0),
+        })
+
+        # Update importance distribution
+        decay_metrics.update_importance_counts({
+            "TRIVIAL": metrics.importance_distribution.get("trivial", 0),
+            "LOW": metrics.importance_distribution.get("low", 0),
+            "MODERATE": metrics.importance_distribution.get("moderate", 0),
+            "HIGH": metrics.importance_distribution.get("high", 0),
+            "CORE": metrics.importance_distribution.get("core", 0),
         })
 
         # Update averages
@@ -498,6 +549,92 @@ class MaintenanceService:
         # Record purged memories
         if result.soft_deleted_purged > 0:
             decay_metrics.record_memories_purged(result.soft_deleted_purged)
+
+    async def start_scheduled_maintenance(self) -> None:
+        """
+        Start the automatic maintenance scheduler.
+
+        Runs maintenance every schedule_interval_hours until shutdown.
+        Use stop_scheduled_maintenance() or shutdown_event to stop gracefully.
+        """
+        if self.schedule_interval_hours <= 0:
+            logger.info(f"Scheduled maintenance disabled (schedule_interval_hours={self.schedule_interval_hours})")
+            return
+
+        if self._scheduled_task is not None:
+            logger.warning("Scheduled maintenance already running")
+            return
+
+        interval_seconds = self.schedule_interval_hours * 3600
+        logger.info(f"Starting scheduled maintenance every {self.schedule_interval_hours} hours")
+
+        async def maintenance_loop():
+            """Background task that runs maintenance periodically."""
+            try:
+                while not self._shutdown_event.is_set():
+                    # Run maintenance
+                    try:
+                        logger.info("Running scheduled maintenance cycle")
+                        result = await self.run_maintenance(dry_run=False)
+                        if result.success:
+                            logger.info(
+                                f"Scheduled maintenance completed: "
+                                f"{result.memories_processed} processed, "
+                                f"{result.decay_scores_updated} scores updated, "
+                                f"{result.state_transitions.total} transitions"
+                            )
+                        else:
+                            logger.error(f"Scheduled maintenance failed: {result.error}")
+                    except Exception as e:
+                        logger.error(f"Error in scheduled maintenance: {e}")
+
+                    # Wait for next interval or shutdown
+                    try:
+                        await asyncio.wait_for(
+                            self._shutdown_event.wait(),
+                            timeout=interval_seconds
+                        )
+                        # If we're here, shutdown was signaled
+                        break
+                    except asyncio.TimeoutError:
+                        # Timeout is expected - means interval elapsed, continue loop
+                        continue
+
+            except asyncio.CancelledError:
+                logger.info("Scheduled maintenance task cancelled")
+            except Exception as e:
+                logger.error(f"Scheduled maintenance loop error: {e}")
+            finally:
+                logger.info("Scheduled maintenance stopped")
+
+        self._scheduled_task = asyncio.create_task(maintenance_loop())
+
+    async def stop_scheduled_maintenance(self) -> None:
+        """
+        Stop the automatic maintenance scheduler gracefully.
+        """
+        if self._scheduled_task is None:
+            return
+
+        logger.info("Stopping scheduled maintenance...")
+        self._shutdown_event.set()
+
+        try:
+            # Wait for task to finish (with timeout)
+            await asyncio.wait_for(self._scheduled_task, timeout=30)
+        except asyncio.TimeoutError:
+            logger.warning("Scheduled maintenance task did not stop gracefully, cancelling...")
+            self._scheduled_task.cancel()
+        except asyncio.CancelledError:
+            pass  # Task was cancelled
+        finally:
+            self._scheduled_task = None
+            self._shutdown_event.clear()
+            logger.info("Scheduled maintenance stopped")
+
+    def is_scheduled(self) -> bool:
+        """Check if scheduled maintenance is currently running."""
+        return self._scheduled_task is not None and not self._scheduled_task.done()
 
 
 # Global maintenance service instance (initialized on first use)

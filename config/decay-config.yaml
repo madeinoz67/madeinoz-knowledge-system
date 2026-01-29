@@ -25,8 +25,10 @@ decay:
 
   # Batch processing settings
   maintenance:
-    batch_size: 500          # Memories to process per batch
-    max_duration_minutes: 10 # Maximum maintenance run time
+    batch_size: 500             # Memories to process per batch
+    max_duration_minutes: 10    # Maximum maintenance run time
+    schedule_interval_hours: 24 # How often to run automatic maintenance (default: daily)
+                               # Set to 0 to disable automatic scheduled maintenance
 
   # Search scoring weights (must sum to 1.0)
   weights:

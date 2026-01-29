@@ -594,6 +594,9 @@ queue_service: QueueService | None = None
 graphiti_client: Graphiti | None = None
 semaphore: asyncio.Semaphore
 
+# Feature 009: Global maintenance service reference for shutdown
+_maintenance_service: Optional[Any] = None
+
 
 class GraphitiService:
     """Graphiti service using the unified configuration system."""
@@ -777,6 +780,22 @@ class GraphitiService:
                     if migration_result.get('indexes', {}):
                         logger.info('Feature 009: Decay indexes created/verified')
                     logger.info('Feature 009: Memory decay scoring system initialized')
+
+                    # Feature 009: Calculate initial health metrics to update dashboard counts
+                    try:
+                        from utils.maintenance_service import get_maintenance_service
+                        global _maintenance_service
+                        maintenance = get_maintenance_service(self.client.driver)
+                        _maintenance_service = maintenance  # Store for shutdown
+                        health_metrics = await maintenance.get_health_metrics()
+                        total_memories = health_metrics.aggregates.get('total', 0)
+                        logger.info(f"Feature 009: Initial health metrics calculated - {total_memories} memories, dashboard counts updated")
+
+                        # Feature 009: Start scheduled maintenance if configured
+                        await maintenance.start_scheduled_maintenance()
+                    except Exception as health_err:
+                        logger.warning(f'Feature 009: Initial health metrics calculation failed (non-critical): {health_err}')
+
                 except Exception as decay_err:
                     logger.warning(f'Feature 009: Decay migration failed (non-critical): {decay_err}')
             else:
@@ -1861,6 +1880,16 @@ async def run_mcp_server():
         )
 
 
+async def shutdown_maintenance():
+    """Stop scheduled maintenance gracefully on shutdown."""
+    global _maintenance_service
+    if _maintenance_service is not None:
+        try:
+            await _maintenance_service.stop_scheduled_maintenance()
+        except Exception as e:
+            logger.warning(f'Error stopping scheduled maintenance: {e}')
+
+
 def main():
     """Main function to run the Graphiti MCP server."""
     # Feature 006: Initialize Gemini Prompt Caching metrics exporter
@@ -1887,6 +1916,11 @@ def main():
         asyncio.run(run_mcp_server())
     except KeyboardInterrupt:
         logger.info('Server shutting down...')
+        # Feature 009: Stop scheduled maintenance
+        try:
+            asyncio.run(shutdown_maintenance())
+        except Exception as shutdown_err:
+            logger.warning(f'Error during maintenance shutdown: {shutdown_err}')
     except Exception as e:
         logger.error(f'Error initializing Graphiti MCP server: {str(e)}')
         raise
