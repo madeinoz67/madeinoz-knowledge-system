@@ -1,0 +1,69 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, develop, "*"]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  # TypeScript Tests
+  typescript:
+    name: TypeScript Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run tests
+        run: bun test
+
+      - name: Run linter
+        run: bun run lint
+
+      - name: Type check
+        run: bun run typecheck
+        continue-on-error: true
+
+  # Python Tests (Feature 009 - Memory Decay)
+  python:
+    name: Python Tests (Feature 009)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies with uv
+        run: |
+          cd docker
+          uv pip install pytest pytest-asyncio pydantic pyyaml prometheus-client
+
+      - name: Run Python unit tests
+        run: |
+          cd docker
+          python -m pytest tests/unit/ -v
+
+      - name: Run Python integration tests
+        run: |
+          cd docker
+          python -m pytest tests/integration/ -v
+        continue-on-error: true  # Integration tests may need container
