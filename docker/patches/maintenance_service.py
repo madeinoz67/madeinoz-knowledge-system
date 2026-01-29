@@ -20,16 +20,16 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Optional, Any
 
-from decay_config import get_decay_config
-from decay_types import LifecycleState
-from importance_classifier import classify_unclassified_nodes
-from lifecycle_manager import (
+from utils.decay_config import get_decay_config
+from utils.decay_types import LifecycleState
+from utils.importance_classifier import classify_unclassified_nodes
+from utils.lifecycle_manager import (
     batch_transition_states,
     purge_expired_soft_deletes,
     StateTransitionResult,
 )
-from memory_decay import batch_update_decay_scores
-from metrics_exporter import get_decay_metrics_exporter
+from utils.memory_decay import batch_update_decay_scores
+from utils.metrics_exporter import get_decay_metrics_exporter
 
 logger = logging.getLogger(__name__)
 

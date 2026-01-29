@@ -14,7 +14,7 @@ from typing import Optional
 
 import yaml
 
-from decay_types import DecayConfig
+from utils.decay_types import DecayConfig
 
 logger = logging.getLogger(__name__)
 

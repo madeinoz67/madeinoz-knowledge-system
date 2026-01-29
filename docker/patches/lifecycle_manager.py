@@ -19,9 +19,9 @@ from dataclasses import dataclass
 from datetime import datetime, timezone, timedelta
 from typing import Optional, Any
 
-from decay_config import get_decay_config
-from decay_types import LifecycleState, is_permanent
-from metrics_exporter import get_decay_metrics_exporter
+from utils.decay_config import get_decay_config
+from utils.decay_types import LifecycleState, is_permanent
+from utils.metrics_exporter import get_decay_metrics_exporter
 
 logger = logging.getLogger(__name__)
 

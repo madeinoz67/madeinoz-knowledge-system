@@ -27,8 +27,8 @@ from datetime import datetime, timezone
 from math import exp, log
 from typing import Optional, Any
 
-from decay_config import get_decay_config, get_weights
-from decay_types import is_permanent
+from utils.decay_config import get_decay_config, get_weights
+from utils.decay_types import is_permanent
 
 logger = logging.getLogger(__name__)
 

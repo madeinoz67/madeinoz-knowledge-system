@@ -176,7 +176,7 @@ export interface MCPClientConfig {
 /**
  * Default MCP server URL
  */
-const DEFAULT_BASE_URL = 'http://localhost:8000/mcp';
+const DEFAULT_BASE_URL = 'http://localhost:8001/mcp';
 const DEFAULT_TIMEOUT = 30000; // 30 seconds
 
 /**

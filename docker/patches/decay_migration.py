@@ -13,7 +13,7 @@ import logging
 from datetime import datetime, timezone
 from typing import Any
 
-from decay_types import LifecycleState
+from utils.decay_types import LifecycleState
 
 logger = logging.getLogger(__name__)
 

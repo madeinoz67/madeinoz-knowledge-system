@@ -32,8 +32,8 @@ import re
 import time
 from typing import Optional, Tuple, Any
 
-from decay_config import get_default_classification, get_permanent_thresholds
-from metrics_exporter import get_decay_metrics_exporter
+from utils.decay_config import get_default_classification, get_permanent_thresholds
+from utils.metrics_exporter import get_decay_metrics_exporter
 
 logger = logging.getLogger(__name__)
 

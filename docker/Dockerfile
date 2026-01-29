@@ -4,8 +4,8 @@
 
 FROM zepai/knowledge-graph-mcp:standalone
 
-LABEL description="Madeinoz Knowledge System - Graphiti MCP with Ollama/OpenRouter support, Neo4j + FalkorDB, Lucene sanitization, Prompt Caching"
-LABEL version="1.4.1"
+LABEL description="Madeinoz Knowledge System - Graphiti MCP with Ollama/OpenRouter support, Neo4j + FalkorDB, Lucene sanitization, Prompt Caching, Memory Decay Scoring"
+LABEL version="1.5.0"
 
 # Apply patches by replacing original files
 # factories.py - Adds Ollama/OpenRouter support (fixes GitHub #1116)
@@ -20,7 +20,7 @@ COPY docker/patches/falkordb_lucene.py /app/mcp/src/utils/falkordb_lucene.py
 # Install prompt caching dependencies (OpenTelemetry + Prometheus)
 # Add to uv project dependencies
 WORKDIR /app/mcp
-RUN uv add "opentelemetry-api>=1.20.0" "opentelemetry-sdk>=1.20.0" "opentelemetry-exporter-prometheus>=0.41b0" "prometheus-client>=0.17.0"
+RUN uv add "opentelemetry-api>=1.20.0" "opentelemetry-sdk>=1.20.0" "opentelemetry-exporter-prometheus>=0.41b0" "prometheus-client>=0.17.0" "pyyaml>=6.0"
 
 # Prompt caching implementation (Feature 006)
 COPY docker/patches/cache_metrics.py /app/mcp/src/utils/cache_metrics.py
@@ -31,9 +31,23 @@ COPY docker/patches/caching_llm_client.py /app/mcp/src/utils/caching_llm_client.
 COPY docker/patches/metrics_exporter.py /app/mcp/src/utils/metrics_exporter.py
 COPY docker/patches/diagnostic_wrapper.py /app/mcp/src/utils/diagnostic_wrapper.py
 
+# Memory decay scoring implementation (Feature 009)
+# Adds importance/stability classification, lifecycle management, and maintenance service
+COPY docker/patches/decay_config.py /app/mcp/src/utils/decay_config.py
+COPY docker/patches/decay_migration.py /app/mcp/src/utils/decay_migration.py
+COPY docker/patches/decay_types.py /app/mcp/src/utils/decay_types.py
+COPY docker/patches/importance_classifier.py /app/mcp/src/utils/importance_classifier.py
+COPY docker/patches/lifecycle_manager.py /app/mcp/src/utils/lifecycle_manager.py
+COPY docker/patches/maintenance_service.py /app/mcp/src/utils/maintenance_service.py
+COPY docker/patches/memory_decay.py /app/mcp/src/utils/memory_decay.py
+COPY docker/patches/metrics_exporter.py /app/mcp/src/utils/metrics_exporter.py
+
 # Copy both Neo4j and FalkorDB configs
 COPY src/skills/server/config-neo4j.yaml /tmp/config-neo4j.yaml
 COPY src/skills/server/config-falkordb.yaml /tmp/config-falkordb.yaml
+
+# Copy Feature 009 memory decay configuration
+COPY config/decay-config.yaml /tmp/decay-config.yaml
 
 # Copy and configure entrypoint script for config selection
 # Note: Environment variables are provided by docker compose via env_file

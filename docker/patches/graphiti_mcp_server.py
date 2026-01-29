@@ -55,7 +55,7 @@ except ImportError:
 
 # Feature 009: Decay metrics exporter
 try:
-    from metrics_exporter import initialize_decay_metrics_exporter, get_decay_metrics_exporter
+    from utils.metrics_exporter import initialize_decay_metrics_exporter, get_decay_metrics_exporter
     _decay_metrics_available = True
 except ImportError:
     _decay_metrics_available = False
@@ -64,21 +64,21 @@ except ImportError:
 # Feature 009: Memory Decay Scoring - Import decay modules
 # ==============================================================================
 try:
-    from decay_config import get_decay_config
-    from decay_types import LifecycleState, MemoryDecayAttributes
-    from importance_classifier import classify_memory as classify_memory_impl, is_permanent
-    from memory_decay import (
+    from utils.decay_config import get_decay_config
+    from utils.decay_types import LifecycleState, MemoryDecayAttributes
+    from utils.importance_classifier import classify_memory as classify_memory_impl, is_permanent
+    from utils.memory_decay import (
         DecayCalculator,
         calculate_weighted_score,
         apply_weighted_scoring,
         WeightedSearchResult,
     )
-    from lifecycle_manager import (
+    from utils.lifecycle_manager import (
         LifecycleManager,
         update_access_on_retrieval,
         recover_soft_deleted as recover_soft_deleted_impl,
     )
-    from maintenance_service import (
+    from utils.maintenance_service import (
         MaintenanceService,
         get_maintenance_service,
         MaintenanceResult,
@@ -765,7 +765,7 @@ class GraphitiService:
             # Feature 009: Initialize decay system if available
             if _decay_modules_available:
                 try:
-                    from decay_migration import run_migration
+                    from utils.decay_migration import run_migration
                     migration_result = await run_migration(
                         self.client.driver,
                         create_indexes=True,
