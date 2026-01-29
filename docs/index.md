@@ -165,16 +165,19 @@ See [Observability & Metrics](reference/observability.md) for full documentation
 
 ```bash
 # Check status
-bun run status
+bun run server-cli --status
 
 # Start server
-bun run start
+bun run server-cli --start
 
 # Stop server
-bun run stop
+bun run server-cli --stop
+
+# Restart server
+bun run server-cli --restart
 
 # View logs
-bun run logs
+bun run server-cli --logs
 ```
 
 ### Memory Sync

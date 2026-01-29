@@ -1234,7 +1234,7 @@ class Installer {
       }
     } catch {
       cli.warning('Server health check inconclusive');
-      cli.dim('Check logs with: bun run logs');
+      cli.dim('Check logs with: bun run server-cli --logs');
     }
   }
 
@@ -1532,11 +1532,11 @@ class Installer {
     cli.blank();
 
     cli.info('Management Commands:');
-    cli.dim('  View logs:    bun run logs');
-    cli.dim('  Restart:      bun run stop && bun run start');
-    cli.dim('  Stop:         bun run stop');
-    cli.dim('  Start:        bun run start');
-    cli.dim('  Status:       bun run status');
+    cli.dim('  View logs:    bun run server-cli --logs');
+    cli.dim('  Restart:      bun run server-cli --restart');
+    cli.dim('  Stop:         bun run server-cli --stop');
+    cli.dim('  Start:        bun run server-cli --start');
+    cli.dim('  Status:       bun run server-cli --status');
     cli.blank();
 
     cli.success('Installation complete!');

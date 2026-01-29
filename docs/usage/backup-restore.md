@@ -117,7 +117,7 @@ To restore your knowledge graph from a backup:
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
 
 # 1. Stop the running containers
-bun run stop
+bun run server-cli --stop
 
 # 2. Find your backup file
 ls -la backups/
@@ -127,10 +127,10 @@ podman run --rm -v ./backups:/backups:ro -v madeinoz-knowledge-neo4j-data:/data 
     neo4j-admin database load neo4j --from-stdin < ./backups/knowledge-YYYYMMDD-HHMMSS.dump --overwrite-destination
 
 # 4. Restart the knowledge system
-bun run start
+bun run server-cli --start
 
 # 5. Verify restoration
-bun run status
+bun run server-cli --status
 ```
 
 **Neo4j (Default) - Docker:**
@@ -139,7 +139,7 @@ bun run status
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
 
 # 1. Stop the running containers
-bun run stop
+bun run server-cli --stop
 
 # 2. Find your backup file
 ls -la backups/
@@ -149,10 +149,10 @@ docker run --rm -v ./backups:/backups:ro -v madeinoz-knowledge-neo4j-data:/data 
     neo4j-admin database load neo4j --from-stdin < ./backups/knowledge-YYYYMMDD-HHMMSS.dump --overwrite-destination
 
 # 4. Restart the knowledge system
-bun run start
+bun run server-cli --start
 
 # 5. Verify restoration
-bun run status
+bun run server-cli --status
 ```
 
 Replace `knowledge-YYYYMMDD-HHMMSS.dump` with your actual backup filename.
@@ -163,7 +163,7 @@ Replace `knowledge-YYYYMMDD-HHMMSS.dump` with your actual backup filename.
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
 
 # 1. Stop the running containers
-bun run stop
+bun run server-cli --stop
 
 # 2. Find your backup file
 ls -la backups/
@@ -173,10 +173,10 @@ podman run --rm -v ./backups:/backups:ro -v madeinoz-knowledge-data:/data falkor
     sh -c "cp /backups/knowledge-YYYYMMDD-HHMMSS.rdb /data/dump.rdb"
 
 # 4. Restart the knowledge system
-bun run start
+bun run server-cli --start
 
 # 5. Verify restoration
-bun run status
+bun run server-cli --status
 ```
 
 **FalkorDB Backend - Docker:**
@@ -185,7 +185,7 @@ bun run status
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
 
 # 1. Stop the running containers
-bun run stop
+bun run server-cli --stop
 
 # 2. Find your backup file
 ls -la backups/
@@ -195,10 +195,10 @@ docker run --rm -v ./backups:/backups:ro -v madeinoz-knowledge-data:/data falkor
     sh -c "cp /backups/knowledge-YYYYMMDD-HHMMSS.rdb /data/dump.rdb"
 
 # 4. Restart the knowledge system
-bun run start
+bun run server-cli --start
 
 # 5. Verify restoration
-bun run status
+bun run server-cli --status
 ```
 
 Replace `knowledge-YYYYMMDD-HHMMSS.rdb` with your actual backup filename.
@@ -265,13 +265,13 @@ For a complete backup including all container data:
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
 
 # 1. Stop containers
-bun run stop
+bun run server-cli --stop
 
 # 2. Export the entire volume
 podman volume export madeinoz-knowledge-data > backups/volume-$(date +%Y%m%d-%H%M%S).tar
 
 # 3. Restart containers
-bun run start
+bun run server-cli --start
 
 echo "✓ Full volume backup created"
 ```
@@ -282,14 +282,14 @@ echo "✓ Full volume backup created"
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
 
 # 1. Stop containers
-bun run stop
+bun run server-cli --stop
 
 # 2. Export the entire volume (Docker requires a helper container)
 docker run --rm -v madeinoz-knowledge-data:/data -v $(pwd)/backups:/backup alpine \
     tar cvf /backup/volume-$(date +%Y%m%d-%H%M%S).tar -C /data .
 
 # 3. Restart containers
-bun run start
+bun run server-cli --start
 
 echo "✓ Full volume backup created"
 ```
@@ -302,7 +302,7 @@ echo "✓ Full volume backup created"
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
 
 # 1. Stop containers
-bun run stop
+bun run server-cli --stop
 
 # 2. Remove existing volume (WARNING: destroys current data)
 podman volume rm madeinoz-knowledge-data
@@ -312,10 +312,10 @@ podman volume create madeinoz-knowledge-data
 podman volume import madeinoz-knowledge-data < backups/volume-YYYYMMDD-HHMMSS.tar
 
 # 4. Restart containers
-bun run start
+bun run server-cli --start
 
 # 5. Verify
-bun run status
+bun run server-cli --status
 ```
 
 **Docker:**
@@ -324,7 +324,7 @@ bun run status
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
 
 # 1. Stop containers
-bun run stop
+bun run server-cli --stop
 
 # 2. Remove existing volume (WARNING: destroys current data)
 docker volume rm madeinoz-knowledge-data
@@ -335,10 +335,10 @@ docker run --rm -v madeinoz-knowledge-data:/data -v $(pwd)/backups:/backup alpin
     sh -c "cd /data && tar xvf /backup/volume-YYYYMMDD-HHMMSS.tar"
 
 # 4. Restart containers
-bun run start
+bun run server-cli --start
 
 # 5. Verify
-bun run status
+bun run server-cli --status
 ```
 
 ## Migration to New Machine
@@ -351,9 +351,9 @@ To move your knowledge graph to a new computer:
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
 
 # Create portable backup
-bun run stop
+bun run server-cli --stop
 podman volume export madeinoz-knowledge-data > knowledge-migration.tar
-bun run start
+bun run server-cli --start
 
 # Transfer the file
 scp knowledge-migration.tar user@newmachine:~/
@@ -370,8 +370,8 @@ podman volume create madeinoz-knowledge-data
 podman volume import madeinoz-knowledge-data < ~/knowledge-migration.tar
 
 # Start the system
-bun run start
-bun run status
+bun run server-cli --start
+bun run server-cli --status
 ```
 
 **Docker - On the old machine:**
@@ -380,10 +380,10 @@ bun run status
 cd ~/.config/pai/Packs/madeinoz-knowledge-system
 
 # Create portable backup
-bun run stop
+bun run server-cli --stop
 docker run --rm -v madeinoz-knowledge-data:/data -v $(pwd):/backup alpine \
     tar cvf /backup/knowledge-migration.tar -C /data .
-bun run start
+bun run server-cli --start
 
 # Transfer the file
 scp knowledge-migration.tar user@newmachine:~/
@@ -401,8 +401,8 @@ docker run --rm -v madeinoz-knowledge-data:/data -v ~/:/backup alpine \
     sh -c "cd /data && tar xvf /backup/knowledge-migration.tar"
 
 # Start the system
-bun run start
-bun run status
+bun run server-cli --start
+bun run server-cli --status
 ```
 
 ## Backup Best Practices
