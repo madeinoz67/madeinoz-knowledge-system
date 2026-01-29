@@ -30,7 +30,7 @@ dependencies: []
 keywords: [knowledge, graph, memory, semantic search, entity extraction, relationships, graphiti, falkordb, neo4j, mcp, persistent, ai, storage, retrieval, organizational, learning, documentation]
 ---
 
-<p align="center"><img src="./icons/madeinoz-knowledge-system.png" alt="Madeinoz Knowledge System" width="256"></p>
+<p align="center"><img src="./icons/knowledge-system-architecture.png" alt="Madeinoz Knowledge System Architecture"></p>
 
 # Knowledge
 

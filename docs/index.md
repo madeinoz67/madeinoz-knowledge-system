@@ -48,6 +48,14 @@ The Madeinoz Knowledge System transforms your AI conversations into a permanent,
 
 **Core principle**: Work normally, knowledge handles itself.
 
+## System Architecture
+
+<p align="center">
+  <img src="assets/images/knowledge-system-architecture.png" alt="Madeinoz Knowledge System Architecture" width="100%">
+</p>
+
+The knowledge graph sits at the center, automatically organizing your conversations, documents, code, and notes into searchable entities, episodes, facts, and relationships. As memories age, they transition through lifecycle states (ACTIVE → DORMANT → ARCHIVED → EXPIRED) based on importance and stability scores, while Prometheus metrics and Grafana dashboards provide real-time observability.
+
 ## Quick Start
 
 New to the system? Follow this path:
