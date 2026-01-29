@@ -29,7 +29,9 @@ Persistent personal knowledge system powered by Graphiti knowledge graph with Ne
 | **Search Facts** | "what's the connection", "how are these related", "show relationships" | `workflows/SearchFacts.md` |
 | **Search By Date** | "what did I learn today", "knowledge from last week", "show January entries", "yesterday's knowledge" | `workflows/SearchByDate.md` |
 | **Get Recent Episodes** | "what did I learn", "recent additions", "latest knowledge" | `workflows/GetRecent.md` |
-| **Get Status** | "knowledge status", "graph health", "knowledge stats" | `workflows/GetStatus.md` |
+| **Get Status** | "knowledge status", "graph health", "knowledge stats", "system health", "memory health" | `workflows/GetStatus.md` |
+| **Health Report** | "knowledge health report", "memory decay status", "lifecycle report", "decay metrics" | `workflows/HealthReport.md` |
+| **Run Maintenance** | "run knowledge maintenance", "update decay scores", "recalculate memory decay" | `workflows/RunMaintenance.md` |
 | **Clear Graph** | "clear knowledge", "reset graph", "delete all knowledge" | `workflows/ClearGraph.md` |
 | **Bulk Import** | "import these documents", "bulk knowledge import" | `workflows/BulkImport.md` |
 

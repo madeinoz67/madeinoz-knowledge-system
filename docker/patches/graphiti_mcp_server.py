@@ -53,6 +53,43 @@ try:
 except ImportError:
     _metrics_exporter_available = False
 
+# Feature 009: Decay metrics exporter
+try:
+    from metrics_exporter import initialize_decay_metrics_exporter, get_decay_metrics_exporter
+    _decay_metrics_available = True
+except ImportError:
+    _decay_metrics_available = False
+
+# ==============================================================================
+# Feature 009: Memory Decay Scoring - Import decay modules
+# ==============================================================================
+try:
+    from decay_config import get_decay_config
+    from decay_types import LifecycleState, MemoryDecayAttributes
+    from importance_classifier import classify_memory as classify_memory_impl, is_permanent
+    from memory_decay import (
+        DecayCalculator,
+        calculate_weighted_score,
+        apply_weighted_scoring,
+        WeightedSearchResult,
+    )
+    from lifecycle_manager import (
+        LifecycleManager,
+        update_access_on_retrieval,
+        recover_soft_deleted as recover_soft_deleted_impl,
+    )
+    from maintenance_service import (
+        MaintenanceService,
+        get_maintenance_service,
+        MaintenanceResult,
+        HealthMetrics,
+    )
+    _decay_modules_available = True
+except ImportError as e:
+    _decay_modules_available = False
+    logging.getLogger(__name__).debug(f'Decay modules not available: {e}')
+# ==============================================================================
+
 # ============================================================================
 # Madeinoz Patch: Date Input Parsing for Temporal Search
 # ============================================================================
@@ -725,6 +762,26 @@ class GraphitiService:
             logger.info(f'Using database: {self.config.database.provider}')
             logger.info(f'Using group_id: {self.config.graphiti.group_id}')
 
+            # Feature 009: Initialize decay system if available
+            if _decay_modules_available:
+                try:
+                    from decay_migration import run_migration
+                    migration_result = await run_migration(
+                        self.client.driver,
+                        create_indexes=True,
+                        backfill=True,
+                        dry_run=False,
+                    )
+                    if migration_result.get('backfill', {}).get('nodes_updated', 0) > 0:
+                        logger.info(f"Feature 009: Backfilled {migration_result['backfill']['nodes_updated']} nodes with decay attributes")
+                    if migration_result.get('indexes', {}):
+                        logger.info('Feature 009: Decay indexes created/verified')
+                    logger.info('Feature 009: Memory decay scoring system initialized')
+                except Exception as decay_err:
+                    logger.warning(f'Feature 009: Decay migration failed (non-critical): {decay_err}')
+            else:
+                logger.debug('Feature 009: Decay modules not available')
+
         except Exception as e:
             logger.error(f'Failed to initialize Graphiti client: {e}')
             raise
@@ -806,8 +863,10 @@ async def search_nodes(
     entity_types: list[str] | None = None,
     created_after: str | None = None,
     created_before: str | None = None,
+    include_weighted_scores: bool = False,
+    exclude_lifecycle_states: list[str] | None = None,
 ) -> NodeSearchResponse | ErrorResponse:
-    """Search for nodes in the graph memory with optional temporal filtering.
+    """Search for nodes in the graph memory with optional temporal filtering and weighted scoring.
 
     Args:
         query: The search query
@@ -816,6 +875,8 @@ async def search_nodes(
         entity_types: Optional list of entity type names to filter by
         created_after: Return nodes created after this date (ISO 8601 or relative: "today", "7d", "1 week ago")
         created_before: Return nodes created before this date (ISO 8601 or relative)
+        include_weighted_scores: If True, apply weighted scoring (60% semantic + 25% recency + 15% importance) and include score breakdown
+        exclude_lifecycle_states: Optional list of lifecycle states to exclude (e.g., ['SOFT_DELETED', 'EXPIRED'])
     """
     global graphiti_service
 
@@ -843,8 +904,8 @@ async def search_nodes(
         # Use the search_ method with node search config
         from graphiti_core.search.search_config_recipes import NODE_HYBRID_SEARCH_RRF
 
-        # If temporal filtering is needed, fetch more results to filter
-        fetch_limit = max_nodes * 3 if has_temporal_filter else max_nodes
+        # If temporal filtering or weighted scoring is needed, fetch more results
+        fetch_limit = max_nodes * 3 if (has_temporal_filter or include_weighted_scores) else max_nodes
 
         results = await client.search_(
             query=query,
@@ -855,6 +916,18 @@ async def search_nodes(
 
         # Extract nodes from results
         nodes = results.nodes if results.nodes else []
+
+        # Feature 009: Filter by lifecycle state if requested
+        if exclude_lifecycle_states and _decay_modules_available:
+            exclude_states = set(s.upper() for s in exclude_lifecycle_states)
+            filtered_nodes = []
+            for node in nodes:
+                attrs = node.attributes if hasattr(node, 'attributes') else {}
+                state = attrs.get('lifecycle_state', 'ACTIVE')
+                if state.upper() not in exclude_states:
+                    filtered_nodes.append(node)
+            nodes = filtered_nodes
+            logger.debug(f'Feature 009: Lifecycle filter applied, {len(nodes)} nodes remaining')
 
         # Madeinoz Patch: Apply temporal filtering if specified
         if has_temporal_filter and nodes:
@@ -876,11 +949,58 @@ async def search_nodes(
             nodes = filtered_nodes
             logger.debug(f'Madeinoz Patch: Temporal filter applied, {len(nodes)} nodes remaining')
 
-        # Apply limit after filtering
-        nodes = nodes[:max_nodes]
-
         if not nodes:
             return NodeSearchResponse(message='No relevant nodes found', nodes=[])
+
+        # Feature 009: Apply weighted scoring if requested
+        if include_weighted_scores and _decay_modules_available:
+            # Generate synthetic semantic scores (in production, these would come from the search)
+            # For now, use position-based scores (first result = highest)
+            semantic_scores = [1.0 - (i * 0.05) for i in range(len(nodes))]
+
+            # Apply weighted scoring
+            weighted_results = apply_weighted_scoring(nodes, semantic_scores)
+
+            # Update access tracking for retrieved nodes (async, non-blocking)
+            for node in nodes:
+                try:
+                    await update_access_on_retrieval(client.driver, node.uuid)
+                except Exception as e:
+                    logger.warning(f'Failed to update access for node {node.uuid}: {e}')
+
+            # Apply limit after re-ranking
+            weighted_results = weighted_results[:max_nodes]
+
+            # Format results with weighted scores
+            node_results = []
+            for wr in weighted_results:
+                node_results.append(
+                    NodeResult(
+                        uuid=wr.uuid,
+                        name=wr.name,
+                        labels=[],  # Labels not available in WeightedSearchResult
+                        created_at=wr.last_accessed_at,  # Use last_accessed as created fallback
+                        summary=wr.summary,
+                        group_id='',  # Group ID not available in WeightedSearchResult
+                        attributes={
+                            'weighted_score': wr.weighted_score,
+                            'score_breakdown': wr.score_breakdown,
+                            'lifecycle_state': wr.lifecycle_state,
+                            'importance': wr.importance,
+                            'stability': wr.stability,
+                            'decay_score': wr.decay_score,
+                            'last_accessed_at': wr.last_accessed_at,
+                        },
+                    )
+                )
+
+            return NodeSearchResponse(
+                message=f'Nodes retrieved with weighted scoring ({len(node_results)} results)',
+                nodes=node_results
+            )
+
+        # Apply limit after filtering (standard path without weighted scoring)
+        nodes = nodes[:max_nodes]
 
         # Format the results
         node_results = []
@@ -1198,6 +1318,238 @@ async def health_check(request) -> JSONResponse:
     return JSONResponse({'status': 'healthy'})
 
 
+@mcp.custom_route('/health/decay', methods=['GET'])
+async def health_decay_check(request) -> JSONResponse:
+    """
+    Decay system health check endpoint.
+
+    Returns decay system status including last maintenance run time,
+    next scheduled run, and metrics endpoint location.
+
+    Per contracts/decay-api.yaml DecayHealthCheck schema.
+    """
+    import time
+
+    global graphiti_service, _server_start_time
+
+    # Default response for degraded state
+    response = {
+        'status': 'degraded',
+        'last_maintenance': None,
+        'next_scheduled': None,
+        'metrics_endpoint': f"http://localhost:{os.getenv('METRICS_PORT', '9090')}/metrics",
+        'uptime_seconds': time.time() - getattr(health_decay_check, '_start_time', time.time()),
+    }
+
+    if not _decay_modules_available:
+        response['status'] = 'unhealthy'
+        return JSONResponse(response)
+
+    if graphiti_service is None:
+        response['status'] = 'unhealthy'
+        return JSONResponse(response)
+
+    try:
+        client = await graphiti_service.get_client()
+        maintenance = get_maintenance_service(client.driver)
+
+        # Get last maintenance result if available
+        if maintenance._last_result:
+            response['last_maintenance'] = {
+                'completed_at': maintenance._last_result.completed_at,
+                'duration_seconds': round(maintenance._last_result.duration_seconds, 2),
+                'success': maintenance._last_result.success,
+            }
+            response['status'] = 'healthy'
+        else:
+            # No maintenance run yet - still healthy, just no history
+            response['status'] = 'healthy'
+
+        return JSONResponse(response)
+
+    except Exception as e:
+        logger.error(f"Health decay check failed: {e}")
+        response['status'] = 'unhealthy'
+        return JSONResponse(response)
+
+
+# Store server start time for uptime calculation
+health_decay_check._start_time = time.time()
+
+
+# ==============================================================================
+# Feature 009: Memory Decay Scoring - MCP Tools
+# ==============================================================================
+
+@mcp.tool()
+async def run_decay_maintenance(
+    dry_run: bool = False,
+) -> dict[str, Any] | ErrorResponse:
+    """Run maintenance to recalculate decay scores and transition lifecycle states.
+
+    This performs batch operations:
+    1. Recalculates decay scores for all eligible memories
+    2. Transitions lifecycle states based on thresholds (ACTIVE→DORMANT→ARCHIVED→EXPIRED→SOFT_DELETED)
+    3. Purges soft-deleted memories past the 90-day retention window
+
+    Args:
+        dry_run: If True, calculate but don't apply changes (default: False)
+
+    Returns:
+        MaintenanceResult with operation counts and duration
+    """
+    global graphiti_service
+
+    if not _decay_modules_available:
+        return ErrorResponse(error='Decay modules not available')
+
+    if graphiti_service is None:
+        return ErrorResponse(error='Graphiti service not initialized')
+
+    try:
+        client = await graphiti_service.get_client()
+        maintenance = get_maintenance_service(client.driver)
+        result = await maintenance.run_maintenance(dry_run=dry_run)
+        return result.to_dict()
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f'Error running decay maintenance: {error_msg}')
+        return ErrorResponse(error=f'Error running decay maintenance: {error_msg}')
+
+
+@mcp.tool()
+async def get_knowledge_health(
+    group_id: str | None = None,
+) -> dict[str, Any] | ErrorResponse:
+    """Get health metrics for the knowledge graph.
+
+    Returns aggregated statistics about memory lifecycle states,
+    decay scores, importance/stability distributions, and age distribution.
+
+    Args:
+        group_id: Optional group ID to filter metrics (not yet implemented)
+
+    Returns:
+        HealthMetrics with state counts, aggregates, age distribution, and last maintenance info
+    """
+    global graphiti_service
+
+    if not _decay_modules_available:
+        return ErrorResponse(error='Decay modules not available')
+
+    if graphiti_service is None:
+        return ErrorResponse(error='Graphiti service not initialized')
+
+    try:
+        client = await graphiti_service.get_client()
+        maintenance = get_maintenance_service(client.driver)
+        metrics = await maintenance.get_health_metrics(group_id=group_id)
+        return metrics.to_dict()
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f'Error getting knowledge health: {error_msg}')
+        return ErrorResponse(error=f'Error getting knowledge health: {error_msg}')
+
+
+@mcp.tool()
+async def recover_soft_deleted(
+    uuid: str,
+) -> dict[str, Any] | ErrorResponse:
+    """Recover a soft-deleted memory within the 90-day retention window.
+
+    Soft-deleted memories can be recovered if they haven't been permanently
+    purged yet. Recovery transitions the memory back to ARCHIVED state.
+
+    Args:
+        uuid: UUID of the soft-deleted memory to recover
+
+    Returns:
+        Dictionary with recovered memory info (uuid, name, new_state) or error
+    """
+    global graphiti_service
+
+    if not _decay_modules_available:
+        return ErrorResponse(error='Decay modules not available')
+
+    if graphiti_service is None:
+        return ErrorResponse(error='Graphiti service not initialized')
+
+    try:
+        client = await graphiti_service.get_client()
+        result = await recover_soft_deleted_impl(client.driver, uuid)
+
+        if result is None:
+            return ErrorResponse(
+                error=f'Memory {uuid} not found, not soft-deleted, or past retention window'
+            )
+
+        return {
+            'message': f"Memory '{result['name']}' recovered successfully",
+            'uuid': result['uuid'],
+            'name': result['name'],
+            'new_state': result['new_state'],
+        }
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f'Error recovering soft-deleted memory: {error_msg}')
+        return ErrorResponse(error=f'Error recovering memory: {error_msg}')
+
+
+@mcp.tool()
+async def classify_memory(
+    content: str,
+    source_description: str | None = None,
+) -> dict[str, Any] | ErrorResponse:
+    """Classify memory content for importance and stability scores.
+
+    Uses LLM to analyze content and assign:
+    - Importance (1-5): How critical is this information?
+    - Stability (1-5): How likely is this to change over time?
+
+    Memories with importance >= 4 AND stability >= 4 are marked as PERMANENT
+    and exempt from decay.
+
+    Args:
+        content: The memory content to classify
+        source_description: Optional source context for better classification
+
+    Returns:
+        Classification result with importance, stability, is_permanent, and source
+    """
+    global graphiti_service
+
+    if not _decay_modules_available:
+        return ErrorResponse(error='Decay modules not available')
+
+    if graphiti_service is None:
+        return ErrorResponse(error='Graphiti service not initialized')
+
+    try:
+        # Get LLM client from graphiti service
+        client = await graphiti_service.get_client()
+        llm_client = client.llm_client if hasattr(client, 'llm_client') else None
+
+        importance, stability = await classify_memory_impl(
+            content=content,
+            llm_client=llm_client,
+            source_description=source_description,
+        )
+
+        return {
+            'importance': importance,
+            'stability': stability,
+            'is_permanent': is_permanent(importance, stability),
+            'classification_source': 'llm' if llm_client else 'default',
+        }
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f'Error classifying memory: {error_msg}')
+        return ErrorResponse(error=f'Error classifying memory: {error_msg}')
+
+
+# ==============================================================================
+
+
 async def initialize_server() -> ServerConfig:
     """Parse CLI arguments and initialize the Graphiti server configuration."""
     global config, graphiti_service, queue_service, graphiti_client, semaphore
@@ -1419,6 +1771,15 @@ def main():
             logger.info(f"Prompt caching metrics exporter initialized (enabled={metrics_enabled}, port={metrics_port})")
         except Exception as e:
             logger.warning(f"Failed to initialize metrics exporter: {e}")
+
+    # Feature 009: Initialize decay metrics exporter (shares meter with cache metrics)
+    if _decay_metrics_available and _metrics_exporter_available:
+        try:
+            decay_exporter = initialize_decay_metrics_exporter()
+            if decay_exporter:
+                logger.info("Madeinoz Patch: Feature 009 - Decay metrics exporter initialized")
+        except Exception as e:
+            logger.warning(f"Failed to initialize decay metrics exporter: {e}")
 
     try:
         asyncio.run(run_mcp_server())

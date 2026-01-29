@@ -1,0 +1,154 @@
+# Prometheus Alert Rules for Madeinoz Knowledge System
+# Feature: 009-memory-decay-scoring
+# See: specs/009-memory-decay-scoring/data-model.md
+#
+# These alerts monitor the memory decay system health and trigger
+# when maintenance operations fail or system behavior degrades.
+
+groups:
+  - name: knowledge_decay_alerts
+    rules:
+      # =======================================================================
+      # Maintenance Alerts
+      # =======================================================================
+
+      - alert: MaintenanceTimeout
+        expr: knowledge_maintenance_duration_seconds > 600
+        for: 1m
+        labels:
+          severity: warning
+          service: knowledge-system
+        annotations:
+          summary: "Memory decay maintenance exceeded 10 minute limit"
+          description: >-
+            Maintenance run took {{ $value | humanizeDuration }} which exceeds
+            the 10-minute performance target. This may indicate database
+            performance issues or an unusually large number of memories.
+          runbook_url: "https://github.com/madeinoz/knowledge-system/docs/runbooks/maintenance-timeout.md"
+
+      - alert: MaintenanceFailed
+        expr: increase(knowledge_maintenance_total{status="failure"}[1h]) > 0
+        for: 0m
+        labels:
+          severity: critical
+          service: knowledge-system
+        annotations:
+          summary: "Memory decay maintenance failed"
+          description: >-
+            A maintenance run failed in the last hour. Check logs for error
+            details. Decay scores and lifecycle transitions may be stale.
+          runbook_url: "https://github.com/madeinoz/knowledge-system/docs/runbooks/maintenance-failed.md"
+
+      # =======================================================================
+      # Classification Alerts
+      # =======================================================================
+
+      - alert: ClassificationDegraded
+        expr: >-
+          (
+            sum(rate(knowledge_classification_total{status="fallback"}[5m]))
+            /
+            sum(rate(knowledge_classification_total[5m]))
+          ) > 0.2
+        for: 5m
+        labels:
+          severity: warning
+          service: knowledge-system
+        annotations:
+          summary: "Memory classification fallback rate exceeds 20%"
+          description: >-
+            More than 20% of memory classifications are falling back to
+            defaults instead of using LLM inference. This may indicate
+            LLM service issues or rate limiting. Current fallback rate:
+            {{ $value | humanizePercentage }}
+          runbook_url: "https://github.com/madeinoz/knowledge-system/docs/runbooks/classification-degraded.md"
+
+      - alert: ClassificationLatencyHigh
+        expr: >-
+          histogram_quantile(0.95,
+            sum(rate(knowledge_classification_latency_seconds_bucket[5m])) by (le)
+          ) > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: knowledge-system
+        annotations:
+          summary: "Memory classification P95 latency exceeds 5 seconds"
+          description: >-
+            95th percentile classification latency is {{ $value | humanizeDuration }}.
+            This may impact add_memory performance.
+          runbook_url: "https://github.com/madeinoz/knowledge-system/docs/runbooks/classification-latency.md"
+
+      # =======================================================================
+      # Lifecycle Alerts
+      # =======================================================================
+
+      - alert: ExcessiveExpiration
+        expr: >-
+          sum(increase(knowledge_lifecycle_transitions_total{to_state="EXPIRED"}[1h])) > 100
+        for: 0m
+        labels:
+          severity: warning
+          service: knowledge-system
+        annotations:
+          summary: "High memory expiration rate detected"
+          description: >-
+            {{ $value }} memories transitioned to EXPIRED state in the last
+            hour. This may indicate decay configuration issues or unexpected
+            usage patterns. Review decay thresholds if this persists.
+          runbook_url: "https://github.com/madeinoz/knowledge-system/docs/runbooks/excessive-expiration.md"
+
+      - alert: SoftDeleteBacklog
+        expr: knowledge_state_count{state="SOFT_DELETED"} > 1000
+        for: 1h
+        labels:
+          severity: warning
+          service: knowledge-system
+        annotations:
+          summary: "Large soft-deleted memory backlog"
+          description: >-
+            {{ $value }} memories are in SOFT_DELETED state awaiting purge.
+            This backlog may indicate maintenance is not running or purge
+            logic has issues.
+          runbook_url: "https://github.com/madeinoz/knowledge-system/docs/runbooks/soft-delete-backlog.md"
+
+      # =======================================================================
+      # System Health Alerts
+      # =======================================================================
+
+      - alert: DecayScoreDrift
+        expr: >-
+          abs(
+            avg(knowledge_decay_score_average)
+            - avg(knowledge_decay_score_average offset 1d)
+          ) > 0.3
+        for: 1h
+        labels:
+          severity: info
+          service: knowledge-system
+        annotations:
+          summary: "Significant shift in average decay score"
+          description: >-
+            Average decay score has shifted by more than 0.3 compared to
+            24 hours ago. Current average: {{ $value }}. This may be
+            normal after bulk operations or configuration changes.
+          runbook_url: "https://github.com/madeinoz/knowledge-system/docs/runbooks/decay-drift.md"
+
+      - alert: PermanentMemoryRatioLow
+        expr: >-
+          (
+            knowledge_state_count{state="PERMANENT"}
+            /
+            sum(knowledge_state_count)
+          ) < 0.05
+        for: 24h
+        labels:
+          severity: info
+          service: knowledge-system
+        annotations:
+          summary: "Low permanent memory ratio"
+          description: >-
+            Less than 5% of memories are classified as permanent.
+            This may be expected for new systems or indicate that
+            importance/stability classification needs adjustment.
+          runbook_url: "https://github.com/madeinoz/knowledge-system/docs/runbooks/permanent-ratio.md"
