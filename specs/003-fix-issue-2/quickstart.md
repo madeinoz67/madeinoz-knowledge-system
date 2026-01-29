@@ -11,7 +11,7 @@ This quickstart guide helps you test the sync hook fix locally before deploying 
 
 1. **Bun runtime** installed: `brew install bun`
 2. **Podman or Docker** installed and running
-3. **Neo4j or FalkorDB** containers started: `bun run start`
+3. **Neo4j or FalkorDB** containers started: `bun run server-cli start`
 4. **PAI Memory System** with test files in `~/.claude/MEMORY/`
 
 ## Environment Setup
@@ -20,12 +20,12 @@ This quickstart guide helps you test the sync hook fix locally before deploying 
 
 ```bash
 cd /path/to/madeinoz-knowledge-system
-bun run start
+bun run server-cli start
 ```
 
 Verify server is running:
 ```bash
-bun run status
+bun run server-cli status
 ```
 
 Expected output:
@@ -183,7 +183,7 @@ Test that sync fails gracefully when MCP server is offline:
 
 ```bash
 # Stop the server
-bun run stop
+bun run server-cli stop
 
 # Run sync (should not crash)
 bun run src/hooks/sync-memory-to-knowledge.ts --verbose
@@ -197,7 +197,7 @@ Expected output:
 
 Restart server:
 ```bash
-bun run start
+bun run server-cli start
 ```
 
 ## Verification Checklist
@@ -220,9 +220,9 @@ bun run start
 
 **Fix**:
 ```bash
-bun run status
+bun run server-cli status
 # If stopped:
-bun run start
+bun run server-cli start
 # Check URL:
 echo $MADEINOZ_KNOWLEDGE_MCP_URL
 ```

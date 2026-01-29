@@ -20,7 +20,7 @@ This document contains actionable implementation tasks organized by user story. 
 
 ### Tasks
 
-- [X] T001 Verify MCP server is running at http://localhost:8000 using bun run status
+- [X] T001 Verify MCP server is running at http://localhost:8000 using bun run server-cli status
 - [X] T002 Verify database backend (Neo4j or FalkorDB) is accessible via containers
 - [X] T003 Set MADEINOZ_KNOWLEDGE_DB environment variable to 'neo4j' or 'falkorodb'
 

@@ -19,7 +19,7 @@
 cd /Users/seaton/Documents/src/madeinoz-knowledge-system
 
 # Start containers (Neo4j + MCP server)
-bun run start
+bun run server-cli start
 
 # Verify health
 curl http://localhost:8000/health

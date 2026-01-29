@@ -275,9 +275,9 @@ docs/
 7. Create PR with clear description of changes
 
 **Container Changes:**
-1. Test locally with `bun run start` / `bun run stop`
-2. Verify health checks pass via `bun run status`
-3. Check logs for errors via `bun run logs`
+1. Test locally with `bun run server-cli start` / `bun run server-cli stop`
+2. Verify health checks pass via `bun run server-cli status`
+3. Check logs for errors via `bun run server-cli logs`
 4. Document any new environment variables required
 
 **Documentation Updates:**
