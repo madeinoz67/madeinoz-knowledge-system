@@ -1,0 +1,178 @@
+# Classification API Contract
+
+**Feature**: 011-maintenance-llm-client-fix
+**Note**: This is a documentation artifact - no new API endpoints are introduced. The fix ensures existing endpoints use the LLM client correctly.
+
+## Existing MCP Tools (No Changes)
+
+### add_memory
+
+**Description**: Add an episode to memory. Now spawns immediate background classification.
+
+**Input**:
+```typescript
+{
+  name: string,           // Episode name
+  episode_body: string,   // Content to store
+  group_id?: string,      // Optional group ID
+  source?: string,        // 'text' | 'json' | 'message'
+  source_description?: string,
+  uuid?: string
+}
+```
+
+**Output**:
+```typescript
+{
+  message: string  // "Episode '{name}' queued for processing in group '{group_id}'"
+}
+```
+
+**Side Effect**: Spawns background classification task (non-blocking).
+
+---
+
+### run_decay_maintenance
+
+**Description**: Run maintenance cycle. Now uses LLM for classification (was using defaults).
+
+**Input**:
+```typescript
+{
+  dry_run?: boolean  // If true, count only without modifying
+}
+```
+
+**Output**:
+```typescript
+{
+  success: boolean,
+  memories_processed: number,
+  nodes_classified: {
+    found: number,
+    classified: number,
+    failed: number,
+    using_llm: boolean  // NOW true (was false due to bug)
+  },
+  decay_scores_updated: number,
+  state_transitions: { /* ... */ },
+  soft_deleted_purged: number,
+  duration_seconds: number,
+  completed_at: string,
+  error?: string
+}
+```
+
+---
+
+### get_knowledge_health
+
+**Description**: Get health metrics. Now reports accurate classification stats.
+
+**Input**:
+```typescript
+{
+  group_id?: string  // Optional group filter
+}
+```
+
+**Output**:
+```typescript
+{
+  states: {
+    active: number,
+    dormant: number,
+    archived: number,
+    expired: number,
+    soft_deleted: number
+  },
+  aggregates: {
+    avg_decay: number,
+    avg_importance: number,  // NOW varies (was always 3.0 due to bug)
+    avg_stability: number,   // NOW varies (was always 3.0 due to bug)
+    total: number
+  },
+  importance_distribution: {
+    trivial: number,    // 1
+    low: number,        // 2
+    moderate: number,   // 3 (default)
+    high: number,       // 4
+    core: number        // 5
+  },
+  age_distribution: { /* ... */ },
+  maintenance: { /* ... */ },
+  generated_at: string
+}
+```
+
+## Internal Functions (No API Exposure)
+
+### classify_unclassified_nodes
+
+**Module**: `utils.importance_classifier`
+
+**Signature**:
+```python
+async def classify_unclassified_nodes(
+    driver,
+    llm_client,      # NOW passed correctly (was None due to bug)
+    batch_size: int = 50,
+    max_nodes: int = 500
+) -> dict
+```
+
+**Returns**: Classification result dictionary
+
+---
+
+### get_maintenance_service
+
+**Module**: `utils.maintenance_service`
+
+**Signature**:
+```python
+def get_maintenance_service(
+    driver,
+    llm_client: Any = None  # NOW passed from caller (was defaulting to None)
+) -> MaintenanceService
+```
+
+**Returns**: MaintenanceService instance
+
+## Behavior Changes
+
+### Before Fix
+
+| Operation | Behavior |
+|-----------|----------|
+| `add_memory` | Episodes queued, entities created with importance=NULL |
+| `run_decay_maintenance` | Classification uses defaults (3, 3) - LLM ignored |
+| `get_knowledge_health` | avg_importance always 3.0, avg_stability always 3.0 |
+| Classification delay | Hours/days (until next maintenance cycle) |
+
+### After Fix
+
+| Operation | Behavior |
+|-----------|----------|
+| `add_memory` | Episodes queued, **immediate background classification spawned** |
+| `run_decay_maintenance` | Classification uses LLM model (or falls back to defaults) |
+| `get_knowledge_health` | avg_importance varies 1-5, avg_stability varies 1-5 |
+| Classification delay | **Seconds/minutes** (immediate background task) |
+
+## Error Handling
+
+| Error Scenario | Behavior |
+|----------------|----------|
+| LLM client unavailable | Falls back to defaults (3, 3), logs warning |
+| LLM API error | Falls back to defaults (3, 3), logs error, continues |
+| Invalid LLM response | Clamps values to 1-5 range, logs warning |
+| Background task spawn fails | Logs warning, maintenance cycle still processes |
+| Neo4j unavailable | Returns error, no classification attempted |
+
+## Performance Expectations
+
+| Operation | Target | Notes |
+|-----------|--------|-------|
+| Immediate classification (100 nodes) | < 2 minutes | Small batch for responsiveness |
+| Maintenance classification (500 nodes) | < 30 seconds | Part of 10-minute maintenance window |
+| add_memory response time | < 1 second | Non-blocking, returns immediately |

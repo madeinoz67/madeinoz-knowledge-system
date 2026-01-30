@@ -74,6 +74,30 @@ Every memory is assigned an **importance score** at ingestion time:
 - Default fallback: `3` (MODERATE) if LLM unavailable
 - Higher importance = slower decay, prioritized in search
 
+!!! info "LLM Central Tendency Bias"
+    **Problem:** All LLMs exhibit a well-documented "central tendency bias" or "neutrality bias" - they systematically avoid extreme ratings and cluster toward middle options (like rating everything as importance=3/MODERATE).
+
+    **Research findings:**
+    - This bias affects all LLM models regardless of provider
+    - RLHF (Reinforcement Learning from Human Feedback) can exacerbate the problem by pushing models toward over-neutralization
+    - Without intervention, most content gets rated as 3/3 regardless of actual importance
+
+    **Our mitigation:** The classification prompt uses **forced-choice techniques** to overcome this bias:
+    - Explicit instructions to avoid neutral ratings
+    - Decision framework forcing 2/4 choices over default 3
+    - Specific examples for each importance level with test questions
+    - "When in doubt, choose 2 or 4" reinforcement
+
+    **Results:** With forced-choice prompting:
+    - SSN → 5/5 (correctly identified as CORE)
+    - "Wonder about weather" → 1/1 (correctly identified as TRIVIAL)
+    - "Paris is capital of France" → 2/5 (correctly identified as LOW but permanent)
+
+    **References:**
+    - [Prompt Perturbations Reveal Human-Like Biases in LLMs](https://arxiv.org/html/2507.07188v2)
+    - [FadeMem: Biologically-Inspired Forgetting](https://arxiv.org/html/2601.18642v1)
+    - [Quantifying and Mitigating Label Bias in LLMs](https://aclanthology.org/2024.naacl-long.378.pdf)
+
 ### Stability Classification (1-5)
 
 Every memory is assigned a **stability score** predicting how likely it is to change:

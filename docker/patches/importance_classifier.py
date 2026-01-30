@@ -28,6 +28,7 @@ Permanent Classification:
 
 import json
 import logging
+import os
 import re
 import time
 from typing import Optional, Tuple, Any
@@ -37,30 +38,127 @@ from utils.metrics_exporter import get_decay_metrics_exporter
 
 logger = logging.getLogger(__name__)
 
+# ==============================================================================
+# Dedicated Classification LLM Client
+# ==============================================================================
+
+_classification_llm_client = None
+
+
+def get_classification_llm_client():
+    """
+    Get or create the dedicated LLM client for memory classification.
+
+    Uses a separate model (liquid/lfm-2.5-1.2b-thinking:free) for classification
+    while using the same environment configuration as the main LLM.
+
+    Returns:
+        LLM client instance or None if configuration is invalid
+    """
+    global _classification_llm_client
+
+    if _classification_llm_client is not None:
+        return _classification_llm_client
+
+    try:
+        from services.factories import LLMClientFactory
+        from config.schema import LLMConfig, LLMProvidersConfig, OpenAIProviderConfig
+
+        # Use same env config as main LLM, just different model
+        classification_model = "openai/gpt-4o-mini"
+        api_key = os.environ.get("OPENAI_API_KEY")
+        base_url = os.environ.get("OPENAI_BASE_URL", os.environ.get("MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL", "https://openrouter.ai/api/v1"))
+
+        if not api_key:
+            logger.warning("No OPENAI_API_KEY found, classification will use defaults")
+            return None
+
+        # Create LLMConfig for classification (same env, different model)
+        llm_config = LLMConfig(
+            provider="openai",
+            model=classification_model,
+            temperature=0.0,  # Deterministic for classification
+            max_tokens=100,  # Only need JSON response
+            providers=LLMProvidersConfig(
+                openai=OpenAIProviderConfig(
+                    api_key=api_key,
+                    api_url=base_url
+                )
+            )
+        )
+
+        # Create dedicated client for classification
+        _classification_llm_client = LLMClientFactory.create(llm_config)
+
+        logger.info(f"Created dedicated classification LLM client: {classification_model}")
+        return _classification_llm_client
+
+    except Exception as e:
+        logger.warning(f"Failed to create classification LLM client: {e}")
+        return None
+
 
 # ==============================================================================
 # Classification Prompt
 # ==============================================================================
 
-CLASSIFICATION_PROMPT = """Classify this memory for importance and stability.
+CLASSIFICATION_PROMPT = """Classify the following memory for long-term value and change frequency.
+
+CRITICAL INSTRUCTION: AVOID NEUTRAL RATINGS. You MUST commit to a definite assessment.
+- Rate 1 or 5 for extreme cases
+- Rate 2 or 4 for clear cases
+- Reserve 3 ONLY for genuine ambiguity - when truly uncertain, choose 2 or 4 instead
 
 Memory: {content}
 
-Importance (1-5):
-1 = Trivial (can forget immediately)
-2 = Low (useful but replaceable)
-3 = Moderate (general knowledge)
-4 = High (important to work/identity)
-5 = Core (fundamental, never forget)
+Importance (1–5) - Cost if forgotten:
 
-Stability (1-5):
-1 = Volatile (changes in hours/days)
-2 = Low (changes in days/weeks)
-3 = Moderate (changes in weeks/months)
-4 = High (changes in months/years)
-5 = Permanent (never changes)
+Rate 5 (CORE) if: Critical identity, credentials, security, financial access, fundamental life facts
+  Examples: SSN, passwords, API keys, private keys, account numbers, birth certificate, passport
+  Test: Would losing this cause identity theft, financial loss, or lockout? → 5
 
-Respond with JSON only: {{"importance": N, "stability": N}}"""
+Rate 4 (HIGH) if: Important to work/identity, frequently accessed, domain-specific knowledge
+  Examples: Key project decisions, technical preferences, important relationships, career milestones, research findings
+  Test: Is this referenced weekly or essential for work/identity? → 4
+
+Rate 3 (MODERATE) ONLY if: Genuinely ambiguous - moderately useful but not critical
+  Examples: General processes, explanations, reference information, non-critical insights, meeting notes
+  Test: Is this useful context but easily recovered or not frequently needed? → 3
+
+Rate 2 (LOW) if: Easily rediscovered, replaceable, generic public information
+  Examples: Public facts (capital cities, common knowledge), general references, Wikipedia-style info, basic documentation
+  Test: Could this be found with 30 seconds of googling? Is it common knowledge? → 2
+
+Rate 1 (TRIVIAL) if: No lasting value, transient context, disposable thoughts, vagueness without specifics
+  Examples: "remember to call back", "wonder about X", temporary notes, fleeting thoughts, throwaway context, vague musings, unfinished ideas, casual observations, weather comments, idle questions
+  Test: Is this a temporary reminder, vague thought, question, or trivial observation that adds no lasting value? → 1
+
+Stability (1–5) - Likelihood of change:
+
+Rate 5 (PERMANENT) if: Never changes - historical facts, fixed identity, unchangeable past events
+  Test: Will this still be true in 10 years? → 5
+
+Rate 4 (HIGH) if: Changes in months/years - long-term plans, established practices, core beliefs
+  Test: Will this likely be true 6 months from now? → 4
+
+Rate 3 (MODERATE) ONLY if: Changes in weeks/months - ongoing projects, evolving processes
+  Test: Might this change in the next 1-2 months? → 3
+
+Rate 2 (LOW) if: Changes in days/weeks - drafts, evolving ideas, short-term plans, current status
+  Test: Is this likely to change within the next week? → 2
+
+Rate 1 (VOLATILE) if: Changes in hours/days - temporary states, breaking news, momentary thoughts, fleeting contexts
+  Test: Is this relevant only right now or for the next few hours? → 1
+
+DECISION FRAMEWORK:
+1. First ask: Is this CRITICAL (5) or TRIVIAL (1)? Most content falls between.
+2. Then ask: Is this IMPORTANT to maintain (4) or EASILY REPLACED (2)?
+3. Only use 3 if genuinely uncertain after steps 1-2.
+
+Remember: When in doubt, choose 2 or 4. Avoid 3 unless truly ambiguous.
+
+Respond with JSON only:
+{{"importance": N, "stability": N}}"""
 
 
 # ==============================================================================
@@ -132,6 +230,13 @@ def parse_classification_response(response: str) -> Tuple[int, int]:
     Raises:
         ValueError: If response cannot be parsed
     """
+    # Handle dict response from Graphiti's generate_response
+    if isinstance(response, dict):
+        importance = validate_score(response.get("importance"), "importance")
+        stability = validate_score(response.get("stability"), "stability")
+        return importance, stability
+
+    # Handle string response
     # Strip whitespace
     response = response.strip()
 
@@ -162,14 +267,15 @@ async def classify_memory(
     """
     Classify a memory's importance and stability using LLM.
 
-    Falls back to neutral defaults (3, 3) if:
+    Uses the provided llm_client with forced-choice prompts to overcome
+    central tendency bias. Falls back to neutral defaults (3, 3) if:
     - LLM client is not available
     - LLM call fails
     - Response cannot be parsed
 
     Args:
         content: Memory content to classify
-        llm_client: Graphiti LLM client instance (or None)
+        llm_client: Graphiti LLM client instance for classification
         source_description: Optional source context for better classification
 
     Returns:
@@ -179,8 +285,11 @@ async def classify_memory(
     default_importance, default_stability = get_default_classification()
     decay_metrics = get_decay_metrics_exporter()
 
-    # If no LLM client, return defaults
-    if llm_client is None:
+    # Use provided LLM client (forced-choice prompt addresses bias better than model switching)
+    client_to_use = llm_client
+
+    # If no LLM client available, return defaults
+    if client_to_use is None:
         logger.debug("No LLM client available, using default classification")
         if decay_metrics:
             decay_metrics.record_classification(status="fallback", latency_seconds=0.0)
@@ -195,9 +304,18 @@ async def classify_memory(
         if source_description:
             prompt = f"Source: {source_description}\n\n{prompt}"
 
-        # Call LLM
-        response = await llm_client.generate_response(prompt)
+        # Import Message type for proper format
+        from graphiti_core.prompts.models import Message
+
+        # Create message in format expected by Graphiti's generate_response
+        messages = [Message(role="user", content=prompt)]
+
+        # Call LLM with proper message format
+        response = await client_to_use.generate_response(messages)
         latency = time.time() - start_time
+
+        # Debug: log raw response type and content for troubleshooting
+        logger.debug(f"Raw LLM response type: {type(response)}, content: {response}")
 
         # Parse response
         importance, stability = parse_classification_response(response)
@@ -215,7 +333,8 @@ async def classify_memory(
 
     except Exception as e:
         latency = time.time() - start_time
-        logger.warning(f"Classification failed, using defaults: {e}")
+        import traceback
+        logger.warning(f"Classification failed, using defaults: {e}\nTraceback: {traceback.format_exc()}")
 
         # Record failure metrics
         if decay_metrics:
@@ -337,10 +456,13 @@ async def count_unclassified_nodes(driver) -> int:
     Returns:
         Number of unclassified nodes
     """
+    logger.info(f"count_unclassified_nodes: driver={driver}, running query: {COUNT_UNCLASSIFIED_QUERY.strip()}")
     async with driver.session() as session:
         result = await session.run(COUNT_UNCLASSIFIED_QUERY)
         record = await result.single()
-        return record["count"] if record else 0
+        count = record["count"] if record else 0
+        logger.info(f"count_unclassified_nodes: found {count} unclassified nodes (record={record})")
+        return count
 
 
 async def classify_and_initialize_node(

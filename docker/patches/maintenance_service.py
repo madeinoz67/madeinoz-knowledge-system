@@ -272,6 +272,9 @@ class MaintenanceService:
         self.max_duration_minutes = max_duration_minutes or config.decay.maintenance.max_duration_minutes
         self.base_half_life = config.decay.base_half_life_days
 
+        # Log the driver connection info for debugging
+        logger.info(f"MaintenanceService initialized with driver: {driver}")
+
         # Scheduled maintenance settings
         self.schedule_interval_hours = config.decay.maintenance.schedule_interval_hours
         self._scheduled_task: Optional[asyncio.Task] = None
@@ -651,5 +654,8 @@ def get_maintenance_service(driver, llm_client: Any = None) -> MaintenanceServic
     """
     global _maintenance_service
     if _maintenance_service is None:
+        logger.info(f"Creating new MaintenanceService singleton with llm_client={llm_client is not None}")
         _maintenance_service = MaintenanceService(driver, llm_client=llm_client)
+    else:
+        logger.debug(f"Returning existing MaintenanceService singleton (llm_client={_maintenance_service._llm_client is not None})")
     return _maintenance_service
