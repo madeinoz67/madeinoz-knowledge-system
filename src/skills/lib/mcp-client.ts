@@ -301,20 +301,22 @@ function createHTTPSOptions(tls?: TLSConfig): RequestInit {
     // Bun doesn't have a direct way to disable verification in fetch
     // This is a known limitation - users should use valid certificates
     // or configure their system to trust the self-signed certificate
-    console.warn('TLS certificate verification is DISABLED. This is not secure for production.');
+    if (process.env.DEBUG === '1') {
+      console.warn('TLS certificate verification is DISABLED. This is not secure for production.');
+    }
   }
 
   // T024 [US2]: Add MADEINOZ_KNOWLEDGE_TLS_CA environment variable support
   // T023 [US2]: Add MADEINOZ_KNOWLEDGE_TLS_VERIFY environment variable support
   // Note: Bun's fetch API doesn't directly support custom CA certificates
   // Users need to configure system-level certificate trust or use a proxy
-  if (tls.ca) {
+  if (tls.ca && process.env.DEBUG === '1') {
     console.warn(`Custom CA certificate specified: ${tls.ca}`);
     console.warn('Bun fetch requires system-level certificate configuration. Use NODE_OPTIONS=--use-openssl-ca or configure certificate trust at OS level.');
   }
 
   // Client certificate authentication (mTLS)
-  if (tls.cert && tls.key) {
+  if (tls.cert && tls.key && process.env.DEBUG === '1') {
     console.warn(`Client certificates specified: cert=${tls.cert}, key=${tls.key}`);
     console.warn('Bun fetch does not directly support client certificates. Consider using Node.js for mTLS support.');
   }
@@ -360,12 +362,13 @@ export class MCPClient {
     // Store TLS configuration for HTTPS connections
     this.tlsConfig = config.tls;
 
-    // Log TLS configuration for HTTPS URLs
+    // TLS configuration is active - file paths are not logged for security
+    // To debug TLS issues, temporarily enable: DEBUG=1 bun run ...
     if (this.baseURL.startsWith('https://')) {
       const verify = this.tlsConfig?.verify !== false;
-      const ca = this.tlsConfig?.ca ? ` (CA: ${this.tlsConfig.ca})` : '';
-      const cert = this.tlsConfig?.cert ? ` (cert: ${this.tlsConfig.cert})` : '';
-      console.log(`[MCPClient] HTTPS mode enabled - verify: ${verify}${ca}${cert}`);
+      if (process.env.DEBUG === '1' && !verify) {
+        console.warn('[MCPClient] TLS verification disabled - not secure for production');
+      }
     }
 
     // Initialize cache if enabled (default: enabled for search operations)

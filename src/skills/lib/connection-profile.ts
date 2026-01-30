@@ -478,19 +478,34 @@ function parseEnvValue(key: string, value: string): string | number | boolean {
 
 /**
  * Set nested object property using dot notation
+ * Guards against prototype pollution by validating key names
  */
 function setNestedProperty(obj: Record<string, unknown>, path: string, value: unknown): void {
   const keys = path.split('.');
   let current = obj;
 
   for (let i = 0; i < keys.length - 1; i++) {
-    if (!(keys[i] in current)) {
-      current[keys[i]] = {};
+    const key = keys[i];
+
+    // Guard against prototype pollution: validate key is alphanumeric
+    // Only allow alphanumeric characters and underscores in property names
+    if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(key)) {
+      throw new Error(`Invalid property name: "${key}". Property names must be alphanumeric.`);
     }
-    current = current[keys[i]] as Record<string, unknown>;
+
+    if (!(key in current)) {
+      current[key] = {};
+    }
+    current = current[key] as Record<string, unknown>;
   }
 
-  current[keys[keys.length - 1]] = value;
+  const finalKey = keys[keys.length - 1];
+  // Validate final key as well
+  if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(finalKey)) {
+    throw new Error(`Invalid property name: "${finalKey}". Property names must be alphanumeric.`);
+  }
+
+  current[finalKey] = value;
 }
 
 /**
