@@ -9,16 +9,17 @@ decay:
   base_half_life_days: 180
 
   # State transition thresholds
+  # These align with 180-day half-life - transitions occur when BOTH conditions met
   thresholds:
     dormant:
-      days: 30           # Days inactive before ACTIVE -> DORMANT
-      decay_score: 0.3   # Decay score threshold for transition
+      days: 90           # Days inactive before ACTIVE -> DORMANT (minimum)
+      decay_score: 0.3   # Decay score threshold for transition (~93 days actual)
     archived:
-      days: 90           # Days inactive before DORMANT -> ARCHIVED
-      decay_score: 0.6   # Decay score threshold for transition
+      days: 180          # Days inactive before DORMANT -> ARCHIVED (minimum)
+      decay_score: 0.6   # Decay score threshold for transition (~238 days actual)
     expired:
-      days: 180          # Days inactive before ARCHIVED -> EXPIRED
-      decay_score: 0.9   # Decay score threshold for transition
+      days: 360          # Days inactive before ARCHIVED -> EXPIRED (minimum)
+      decay_score: 0.9   # Decay score threshold for transition (~598 days actual)
       max_importance: 3  # Only expire if importance <= this value
 
   # Soft-delete retention period

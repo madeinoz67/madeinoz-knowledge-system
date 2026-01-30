@@ -20,7 +20,7 @@ Grafana Dashboard: Memory Decay (http://localhost:3002/d/memory-decay-dashboard)
 
 Importance Levels: TRIVIAL (1), LOW (2), MODERATE (3), HIGH (4), CORE (5)
 Stability Levels: VOLATILE (1), LOW (2), MODERATE (3), HIGH (4), PERMANENT (5)
-Lifecycle States: ACTIVE, DORMANT (30+ days), ARCHIVED (90+ days), EXPIRED (180+ days), SOFT_DELETED (90-day retention)
+Lifecycle States: ACTIVE, DORMANT (90+ days), ARCHIVED (180+ days), EXPIRED (360+ days), SOFT_DELETED (90-day retention)
 
 Permanent Memory Rule: importance >= 4 AND stability >= 4 = never decays
 
@@ -30,7 +30,7 @@ Maintenance Schedule: Every 24 hours (configurable via schedule_interval_hours)
 Batch Size: 500 memories per maintenance run
 Max Duration: 10 minutes per maintenance run
 
-Decay Thresholds: DORMANT (30 days, score >= 0.3), ARCHIVED (90 days, score >= 0.6), EXPIRED (180 days, score >= 0.9, importance <= 3)
+Decay Thresholds: DORMANT (90 days, score >= 0.3), ARCHIVED (180 days, score >= 0.6), EXPIRED (360 days, score >= 0.9, importance <= 3)
 -->
 
 # Memory Decay & Lifecycle Management
@@ -172,9 +172,9 @@ Memories transition through **5 lifecycle states** based on decay score and time
 | State | Description | Search Behavior | Recovery |
 |-------|-------------|-----------------|----------|
 | **ACTIVE** | Recently accessed, full relevance | Ranked normally | N/A |
-| **DORMANT** | Not accessed for 30+ days | Lower priority | Auto-reactivates on access |
-| **ARCHIVED** | Not accessed for 90+ days | Much lower priority | Auto-reactivates on access |
-| **EXPIRED** | Marked for deletion | Excluded from search | Manual recovery only |
+| **DORMANT** | Not accessed for 90+ days | Lower priority | Auto-reactivates on access |
+| **ARCHIVED** | Not accessed for 180+ days | Much lower priority | Auto-reactivates on access |
+| **EXPIRED** | Not accessed for 360+ days | Excluded from search | Manual recovery only |
 | **SOFT_DELETED** | Deleted, 90-day recovery window | Hidden from search | Admin recovery within 90 days |
 
 **Permanent memories exempt:** Importance ≥4 AND Stability ≥4 = PERMANENT (never decays)
@@ -239,9 +239,9 @@ Memories automatically transition states based on:
 
 | Transition | Criteria |
 |------------|----------|
-| ACTIVE → DORMANT | 30 days inactive AND decay_score ≥ 0.3 |
-| DORMANT → ARCHIVED | 90 days inactive AND decay_score ≥ 0.6 |
-| ARCHIVED → EXPIRED | 180 days inactive AND decay_score ≥ 0.9 AND importance ≤ 3 |
+| ACTIVE → DORMANT | 90 days inactive AND decay_score ≥ 0.3 |
+| DORMANT → ARCHIVED | 180 days inactive AND decay_score ≥ 0.6 |
+| ARCHIVED → EXPIRED | 360 days inactive AND decay_score ≥ 0.9 AND importance ≤ 3 |
 | EXPIRED → SOFT_DELETED | Maintenance runs (automatic) |
 
 **Reactivation:** Any memory access (search result, explicit retrieval) immediately transitions DORMANT or ARCHIVED memories back to ACTIVE.
@@ -334,13 +334,13 @@ bun run server-cli start --dev
 decay:
   thresholds:
     dormant:
-      days: 30           # Days before ACTIVE → DORMANT
+      days: 90           # Days before ACTIVE → DORMANT
       decay_score: 0.3   # Decay score threshold
     archived:
-      days: 90           # Days before DORMANT → ARCHIVED
+      days: 180          # Days before DORMANT → ARCHIVED
       decay_score: 0.6   # Decay score threshold
     expired:
-      days: 180          # Days before ARCHIVED → EXPIRED
+      days: 360          # Days before ARCHIVED → EXPIRED
       decay_score: 0.9   # Decay score threshold
       max_importance: 3  # Only expire if importance ≤ 3
 ```
@@ -353,11 +353,11 @@ With the default 180-day half-life for MODERATE memories:
 
 | Transition | Config (minimum) | Actual timing | Decay at minimum days |
 |------------|------------------|---------------|----------------------|
-| ACTIVE → DORMANT | 30 days + decay ≥ 0.3 | **~93 days** | Day 30: decay ≈ 0.11 |
-| DORMANT → ARCHIVED | 90 days + decay ≥ 0.6 | **~238 days** | Day 90: decay ≈ 0.29 |
-| ARCHIVED → EXPIRED | 180 days + decay ≥ 0.9 | **~598 days** | Day 180: decay ≈ 0.50 |
+| ACTIVE → DORMANT | 90 days + decay ≥ 0.3 | **~93 days** | Day 90: decay ≈ 0.29 |
+| DORMANT → ARCHIVED | 180 days + decay ≥ 0.6 | **~238 days** | Day 180: decay ≈ 0.50 |
+| ARCHIVED → EXPIRED | 360 days + decay ≥ 0.9 | **~598 days** | Day 360: decay ≈ 0.75 |
 
-The days threshold is a **minimum**—actual transitions occur later when decay_score reaches the threshold.
+The days threshold is a **minimum**—actual transitions occur when decay_score reaches the threshold.
 
 #### Maintenance Schedule
 
