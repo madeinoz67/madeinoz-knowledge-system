@@ -1,0 +1,3689 @@
+<!DOCTYPE html><html lang="en" class="no-js"><head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Command-line interface reference for the Madeinoz Knowledge System">
+      
+      
+        <meta name="author" content="madeinoz67">
+      
+      
+        <link rel="canonical" href="https://madeinoz67.github.io/madeinoz-knowledge-system/reference/cli.html">
+      
+      
+        <link rel="prev" href="../troubleshooting/known-issues.html">
+      
+      
+        <link rel="next" href="configuration.html">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>CLI Reference - Madeinoz Knowledge System (PAI Pack)</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+        <script src="https://unpkg.com/iframe-worker/shim"></script>
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  <link href="../assets/stylesheets/glightbox.min.css" rel="stylesheet"><script src="../assets/javascripts/glightbox.min.js"></script><style id="glightbox-style">
+            html.glightbox-open { overflow: initial; height: 100%; }
+            .gslide-title { margin-top: 0px; user-select: text; }
+            .gslide-desc { color: #666; user-select: text; }
+            .gslide-image img { background: white; }
+            .gscrollbar-fixer { padding-right: 15px; }
+            .gdesc-inner { font-size: 0.75rem; }
+            body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color); }
+            body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color); }
+            body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color); }
+        </style></head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="light-blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#cli-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../index.html" title="Madeinoz Knowledge System (PAI Pack)" class="md-header__button md-logo" aria-label="Madeinoz Knowledge System (PAI Pack)" data-md-component="logo">
+      
+  <img src="../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Madeinoz Knowledge System (PAI Pack)
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              CLI Reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="light-blue" aria-label="Switch to dark mode" type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="light-blue" aria-label="Switch to light mode" type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/madeinoz67/madeinoz-knowledge-system" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+  </div>
+  <div class="md-source__repository">
+    madeinoz67/madeinoz-knowledge-system
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../index.html" title="Madeinoz Knowledge System (PAI Pack)" class="md-nav__button md-logo" aria-label="Madeinoz Knowledge System (PAI Pack)" data-md-component="logo">
+      
+  <img src="../assets/logo.png" alt="logo">
+
+    </a>
+    Madeinoz Knowledge System (PAI Pack)
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/madeinoz67/madeinoz-knowledge-system" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+  </div>
+  <div class="md-source__repository">
+    madeinoz67/madeinoz-knowledge-system
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2">
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/overview.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/quick-reference.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3">
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Installation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/requirements.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/verification.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/remote-deployment.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Remote Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../remote-access.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Remote Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4">
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Usage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/basic-usage.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Basic Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/advanced.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/memory-decay.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory Decay &amp; Lifecycle
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/monitoring.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/backup-restore.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backup &amp; Restore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5">
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/architecture.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/knowledge-graph.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Knowledge Graph
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/hooks-integration.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hooks &amp; Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6">
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Troubleshooting
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/common-issues.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Common Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/known-issues.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Known Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="cli.html" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#quick-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Reference
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#server-management-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Server Management Commands
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Server Management Commands">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#start-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Start Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#restart-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Restart Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stop-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stop Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#check-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Check Status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#view-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        View Logs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#knowledge-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Knowledge Operations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Knowledge Operations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#add-knowledge-capture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add Knowledge (Capture)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#search-knowledge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Search Knowledge
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#find-relationships" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Find Relationships
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#view-recent-knowledge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        View Recent Knowledge
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#check-system-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Check System Status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#clear-knowledge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Clear Knowledge
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#knowledge-cli-token-efficient-wrapper" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Knowledge CLI (Token-Efficient Wrapper)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Knowledge CLI (Token-Efficient Wrapper)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Syntax
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Commands
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Commands">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#add_episode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        add_episode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#search_nodes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        search_nodes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#search_facts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        search_facts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get_episodes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_episodes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get_status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#clear_graph" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        clear_graph
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#health" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        health
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#temporal-search-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Temporal Search Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Variables
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metrics-tracking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Metrics Tracking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metrics-file-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Metrics File Format
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#remote-access-cli-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Remote Access CLI Options
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Remote Access CLI Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#connection-profiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connection Profiles
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cli-flags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI Flags
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#environment-variable-overrides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Variable Overrides
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#profile-configuration-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Profile Configuration File
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-commands-feature-010" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New Commands (Feature 010)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="New Commands (Feature 010)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#list_profiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        list_profiles
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interactive-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interactive Installation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#utilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Utilities
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Utilities">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#health-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Health Check
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcp-endpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MCP Endpoint
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variables_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Variables
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#port-already-in-use" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Port already in use"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#container-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Container not found"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#health-check-failed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Health check failed"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connection-refused" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Connection refused"
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Files
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pai-environment-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PAI Environment File
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-compose-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker Compose Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Template
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related Commands
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="configuration.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="observability.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Observability &amp; Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="cache-implementation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cache Implementation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-guide.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="benchmarks.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmarks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="developer-notes.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="releases.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release Process
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../acknowledgments.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Acknowledgments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#quick-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Reference
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#server-management-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Server Management Commands
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Server Management Commands">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#start-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Start Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#restart-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Restart Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stop-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stop Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#check-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Check Status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#view-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        View Logs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#knowledge-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Knowledge Operations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Knowledge Operations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#add-knowledge-capture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add Knowledge (Capture)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#search-knowledge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Search Knowledge
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#find-relationships" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Find Relationships
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#view-recent-knowledge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        View Recent Knowledge
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#check-system-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Check System Status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#clear-knowledge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Clear Knowledge
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#knowledge-cli-token-efficient-wrapper" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Knowledge CLI (Token-Efficient Wrapper)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Knowledge CLI (Token-Efficient Wrapper)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Syntax
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Commands
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Commands">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#add_episode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        add_episode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#search_nodes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        search_nodes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#search_facts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        search_facts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get_episodes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_episodes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get_status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#clear_graph" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        clear_graph
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#health" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        health
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#temporal-search-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Temporal Search Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Variables
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metrics-tracking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Metrics Tracking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metrics-file-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Metrics File Format
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#remote-access-cli-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Remote Access CLI Options
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Remote Access CLI Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#connection-profiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connection Profiles
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cli-flags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI Flags
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#environment-variable-overrides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Variable Overrides
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#profile-configuration-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Profile Configuration File
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-commands-feature-010" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New Commands (Feature 010)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="New Commands (Feature 010)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#list_profiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        list_profiles
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interactive-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interactive Installation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#utilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Utilities
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Utilities">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#health-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Health Check
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcp-endpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MCP Endpoint
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variables_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Variables
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#port-already-in-use" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Port already in use"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#container-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Container not found"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#health-check-failed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Health check failed"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connection-refused" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Connection refused"
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Files
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pai-environment-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PAI Environment File
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-compose-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker Compose Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Template
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related Commands
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<!-- AI-FRIENDLY SUMMARY
+System: Madeinoz Knowledge System - CLI Tools
+Purpose: Command-line interface for knowledge graph management, server operations, and remote access
+Key Components: server-cli (container management), knowledge-cli (knowledge operations with remote access support)
+
+Key Tools/Commands:
+- server-cli: start/stop/restart/status/logs for MCP server containers
+- knowledge-cli: add_episode, search_nodes, search_facts, get_episodes, get_status, clear_graph, health, status, list_profiles
+
+Configuration Prefix: MADEINOZ_KNOWLEDGE_
+Default Ports: 8001 (MCP HTTP), 8000 (MCP Server), 7474 (Neo4j Browser), 7687 (Neo4j Bolt)
+
+Remote Access (Feature 010):
+- Connection profiles via YAML config: $PAI_DIR/config/knowledge-profiles.yaml
+- CLI flags: --profile, --host, --port, --protocol
+- Environment variable overrides: MADEINOZ_KNOWLEDGE_HOST, MADEINOZ_KNOWLEDGE_PORT, etc.
+- TLS/SSL support for HTTPS connections
+--><h1 id="cli-reference">CLI Reference<a class="headerlink" href="#cli-reference" title="Permanent link">¶</a></h1>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">¶</a></h2>
+<p>The Madeinoz Knowledge System provides command-line tools for managing the knowledge graph server and performing knowledge operations.</p>
+<h3 id="quick-reference">Quick Reference<a class="headerlink" href="#quick-reference" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Purpose</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bun run server-cli start</code></td>
+<td>Start MCP server containers</td>
+<td><code>bun run server-cli start --dev</code></td>
+</tr>
+<tr>
+<td><code>bun run knowledge-cli.ts status</code></td>
+<td>Show connection status</td>
+<td><code>bun run knowledge-cli.ts status --profile production</code></td>
+</tr>
+<tr>
+<td><code>bun run knowledge-cli.ts list_profiles</code></td>
+<td>List available profiles</td>
+<td><code>bun run knowledge-cli.ts list_profiles</code></td>
+</tr>
+<tr>
+<td><code>bun run knowledge-cli.ts search_nodes</code></td>
+<td>Search knowledge graph</td>
+<td><code>bun run knowledge-cli.ts search_nodes "query" --profile remote</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="server-management-commands">Server Management Commands<a class="headerlink" href="#server-management-commands" title="Permanent link">¶</a></h2>
+<h3 id="start-server">Start Server<a class="headerlink" href="#start-server" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Production mode</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>start
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># Development mode</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>start<span class="w"> </span>--dev
+</span></code></pre></div>
+<p>Launches the Graphiti MCP server with the configured database backend (Neo4j or FalkorDB).</p>
+<p><strong>Options:</strong></p>
+<ul>
+<li><code>--dev</code> or <code>-d</code>: Enable development mode (uses different ports and env files)</li>
+<li>Detects container runtime (Podman or Docker) automatically</li>
+<li>Loads configuration from PAI .env file</li>
+<li>Generates container environment files</li>
+<li>Waits for server initialization before returning</li>
+</ul>
+<p><strong>Development Mode Differences:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Production</th>
+<th>Development</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Neo4j Browser</td>
+<td>http://localhost:7474</td>
+<td>http://localhost:7475</td>
+</tr>
+<tr>
+<td>MCP Server</td>
+<td>http://localhost:8000/mcp/</td>
+<td>http://localhost:8001/mcp/</td>
+</tr>
+<tr>
+<td>Env Files</td>
+<td><code>/tmp/madeinoz-knowledge-*.env</code></td>
+<td><code>/tmp/madeinoz-knowledge-*-dev.env</code></td>
+</tr>
+<tr>
+<td>Use Case</td>
+<td>Production usage</td>
+<td>Code development/testing</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Expected Output:</strong></p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>✓ Server is running and healthy!
+</span></code></pre></div>
+<h3 id="restart-server">Restart Server<a class="headerlink" href="#restart-server" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Production mode</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>restart
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># Development mode</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>restart<span class="w"> </span>--dev
+</span></code></pre></div>
+<p>Restarts the server containers while preserving data. Regenerates environment files before restarting to ensure configuration changes take effect.</p>
+<p><strong>When to use:</strong>
+- After configuration changes
+- After code updates (development mode)
+- To refresh the server environment</p>
+<h3 id="stop-server">Stop Server<a class="headerlink" href="#stop-server" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>stop
+</span></code></pre></div>
+<p>Stops and removes the running containers.</p>
+<p><strong>Note:</strong> Database data is persisted in Docker/Podman volumes and will be available when you restart.</p>
+<h3 id="check-status">Check Status<a class="headerlink" href="#check-status" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>status
+</span></code></pre></div>
+<p>Displays current container status and server health.</p>
+<p><strong>Output includes:</strong></p>
+<ul>
+<li>Container runtime type (Podman/Docker)</li>
+<li>Database backend (Neo4j/FalkorDB)</li>
+<li>Container status (running/stopped)</li>
+<li>MCP server health check result</li>
+<li>Port availability and access URLs</li>
+</ul>
+<h3 id="view-logs">View Logs<a class="headerlink" href="#view-logs" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>logs
+</span></code></pre></div>
+<p>Streams logs from the running MCP server container.</p>
+<p><strong>Options:</strong></p>
+<ul>
+<li><code>--mcp</code>: Show only MCP server logs (not database)</li>
+<li><code>--db</code>: Show only database logs (not MCP server)</li>
+<li><code>--tail N</code>: Number of lines to show (default: 100)</li>
+<li><code>--no-follow</code>: Don't follow log output (show current logs and exit)</li>
+</ul>
+<p><strong>Usage:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Follow all logs in real-time</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>logs
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># Show only MCP server logs</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>logs<span class="w"> </span>--mcp
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="c1"># Show last 50 lines and exit</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>logs<span class="w"> </span>--tail<span class="w"> </span><span class="m">50</span><span class="w"> </span>--no-follow
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="c1"># Show only database logs</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>logs<span class="w"> </span>--db
+</span></code></pre></div>
+<h2 id="knowledge-operations">Knowledge Operations<a class="headerlink" href="#knowledge-operations" title="Permanent link">¶</a></h2>
+<h3 id="add-knowledge-capture">Add Knowledge (Capture)<a class="headerlink" href="#add-knowledge-capture" title="Permanent link">¶</a></h3>
+<p>Via Claude Code skill:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>Remember that [your knowledge here]
+</span></code></pre></div>
+<p>This triggers the CaptureEpisode workflow which:</p>
+<ol>
+<li>Sends content to MCP server</li>
+<li>Extracts entities and relationships</li>
+<li>Creates vector embeddings</li>
+<li>Stores in graph database with timestamp</li>
+</ol>
+<h3 id="search-knowledge">Search Knowledge<a class="headerlink" href="#search-knowledge" title="Permanent link">¶</a></h3>
+<p>Via Claude Code skill:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>What do I know about [topic]?
+</span></code></pre></div>
+<p>This triggers the SearchKnowledge workflow which:</p>
+<ol>
+<li>Converts query to vector embedding</li>
+<li>Searches graph for semantically similar entities</li>
+<li>Returns entities with summaries and facts</li>
+</ol>
+<h3 id="find-relationships">Find Relationships<a class="headerlink" href="#find-relationships" title="Permanent link">¶</a></h3>
+<p>Via Claude Code skill:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>How are [entity A] and [entity B] related?
+</span></code></pre></div>
+<p>This triggers the SearchFacts workflow which:</p>
+<ol>
+<li>Traverses edges between entities in graph</li>
+<li>Returns direct relationships</li>
+<li>Shows temporal context of relationships</li>
+</ol>
+<h3 id="view-recent-knowledge">View Recent Knowledge<a class="headerlink" href="#view-recent-knowledge" title="Permanent link">¶</a></h3>
+<p>Via Claude Code skill:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>What did I learn recently?
+</span></code></pre></div>
+<p>This triggers the GetRecent workflow which:</p>
+<ol>
+<li>Queries graph for recent episodes</li>
+<li>Returns chronological list</li>
+<li>Shows timestamps and summaries</li>
+</ol>
+<h3 id="check-system-status">Check System Status<a class="headerlink" href="#check-system-status" title="Permanent link">¶</a></h3>
+<p>Via Claude Code skill:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>Show the knowledge graph status
+</span></code></pre></div>
+<p>This triggers the GetStatus workflow which:</p>
+<ol>
+<li>Connects to MCP server</li>
+<li>Returns entity count, episode count, last update</li>
+<li>Shows database health</li>
+</ol>
+<h3 id="clear-knowledge">Clear Knowledge<a class="headerlink" href="#clear-knowledge" title="Permanent link">¶</a></h3>
+<p>Via Claude Code skill:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>Clear my knowledge graph
+</span></code></pre></div>
+<p>This triggers the ClearGraph workflow which:</p>
+<ol>
+<li>Confirms destructive action</li>
+<li>Deletes all entities and relationships</li>
+<li>Rebuilds indices</li>
+</ol>
+<h2 id="knowledge-cli-token-efficient-wrapper">Knowledge CLI (Token-Efficient Wrapper)<a class="headerlink" href="#knowledge-cli-token-efficient-wrapper" title="Permanent link">¶</a></h2>
+<p>The <code>knowledge</code> CLI provides a token-efficient wrapper around MCP operations with compact output formatting and metrics tracking. Achieves 25-35% token savings through intelligent formatting.</p>
+<h3 id="syntax">Syntax<a class="headerlink" href="#syntax" title="Permanent link">¶</a></h3>
+<p><strong>Run from the project directory:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>&lt;command&gt;<span class="w"> </span><span class="o">[</span>args...<span class="o">]</span><span class="w"> </span><span class="o">[</span>options<span class="o">]</span>
+</span></code></pre></div>
+<p><strong>Note:</strong> All CLI commands should be run from the installed skill directory (<code>~/.claude/skills/Knowledge/</code>) where tools are available at <code>tools/knowledge-cli.ts</code>.</p>
+<h3 id="commands">Commands<a class="headerlink" href="#commands" title="Permanent link">¶</a></h3>
+<h4 id="add_episode">add_episode<a class="headerlink" href="#add_episode" title="Permanent link">¶</a></h4>
+<p>Add knowledge to the graph:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>add_episode<span class="w"> </span><span class="s2">"Episode title"</span><span class="w"> </span><span class="s2">"Episode body content"</span>
+</span></code></pre></div>
+<p>With optional source description:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>add_episode<span class="w"> </span><span class="s2">"CTI Research"</span><span class="w"> </span><span class="s2">"Analysis of threat actor"</span><span class="w"> </span><span class="s2">"osint-recon"</span>
+</span></code></pre></div>
+<p><strong>Arguments:</strong></p>
+<ul>
+<li><code>&lt;title&gt;</code> (required): Episode title</li>
+<li><code>&lt;body&gt;</code> (required): Episode content</li>
+<li><code>[source_description]</code> (optional): Source identifier (e.g., 'user-input', 'api-import', 'osint-recon')</li>
+</ul>
+<h4 id="search_nodes">search_nodes<a class="headerlink" href="#search_nodes" title="Permanent link">¶</a></h4>
+<p>Search for entities in the knowledge graph:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"container orchestration"</span>
+</span></code></pre></div>
+<p>Limit results:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"container orchestration"</span><span class="w"> </span><span class="m">10</span>
+</span></code></pre></div>
+<p><strong>Arguments:</strong></p>
+<ul>
+<li><code>&lt;query&gt;</code> (required): Search query</li>
+<li><code>[limit]</code> (optional): Max results (default: 5)</li>
+</ul>
+<p><strong>Output format:</strong></p>
+<ul>
+<li>Compact format showing entity name, type, and summary</li>
+<li>~30% token savings vs raw MCP output</li>
+</ul>
+<h4 id="search_facts">search_facts<a class="headerlink" href="#search_facts" title="Permanent link">¶</a></h4>
+<p>Find relationships between entities:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_facts<span class="w"> </span><span class="s2">"Podman"</span>
+</span></code></pre></div>
+<p>Limit facts returned:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_facts<span class="w"> </span><span class="s2">"Podman"</span><span class="w"> </span><span class="m">10</span>
+</span></code></pre></div>
+<p><strong>Arguments:</strong></p>
+<ul>
+<li><code>&lt;query&gt;</code> (required): Entity name or search query</li>
+<li><code>[limit]</code> (optional): Max facts (default: 5)</li>
+</ul>
+<p><strong>Output format:</strong></p>
+<ul>
+<li>Shows relationship text and type</li>
+<li>~30% token savings vs raw MCP output</li>
+</ul>
+<h4 id="get_episodes">get_episodes<a class="headerlink" href="#get_episodes" title="Permanent link">¶</a></h4>
+<p>Retrieve recent episodes from the knowledge graph:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>get_episodes
+</span></code></pre></div>
+<p>Limit number of episodes:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>get_episodes<span class="w"> </span><span class="m">10</span>
+</span></code></pre></div>
+<p><strong>Arguments:</strong></p>
+<ul>
+<li><code>[limit]</code> (optional): Max episodes to retrieve (default: 5)</li>
+</ul>
+<p><strong>Output format:</strong></p>
+<ul>
+<li>Shows episode content and timestamp</li>
+<li>~30% token savings vs raw MCP output</li>
+</ul>
+<h4 id="get_status">get_status<a class="headerlink" href="#get_status" title="Permanent link">¶</a></h4>
+<p>Get knowledge graph status and health:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>get_status
+</span></code></pre></div>
+<p><strong>Output includes:</strong></p>
+<ul>
+<li>Entity count</li>
+<li>Episode count</li>
+<li>Last update timestamp</li>
+<li>Database health status</li>
+</ul>
+<h4 id="clear_graph">clear_graph<a class="headerlink" href="#clear_graph" title="Permanent link">¶</a></h4>
+<p>Delete all knowledge from the graph (destructive operation):</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>clear_graph<span class="w"> </span>--force
+</span></code></pre></div>
+<p><strong>Safety:</strong></p>
+<ul>
+<li>Requires <code>--force</code> flag to confirm</li>
+<li>Deletes ALL entities, relationships, and episodes</li>
+<li>Cannot be undone</li>
+</ul>
+<h4 id="health">health<a class="headerlink" href="#health" title="Permanent link">¶</a></h4>
+<p>Check MCP server health:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>health
+</span></code></pre></div>
+<p><strong>Output:</strong></p>
+<ul>
+<li>Server status</li>
+<li>Connection state</li>
+<li>Response time</li>
+</ul>
+<h3 id="options">Options<a class="headerlink" href="#options" title="Permanent link">¶</a></h3>
+<p>All commands support the following flags:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>--raw<span class="w">              </span><span class="c1"># Output raw JSON instead of compact format</span>
+</span><span id="__span-25-2"><a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>--metrics<span class="w">          </span><span class="c1"># Display token metrics after operation</span>
+</span><span id="__span-25-3"><a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>--metrics-file<span class="w"> </span>&lt;p&gt;<span class="w"> </span><span class="c1"># Write metrics to JSONL file</span>
+</span><span id="__span-25-4"><a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a>--since<span class="w"> </span>&lt;date&gt;<span class="w">     </span><span class="c1"># Filter results created after this date</span>
+</span><span id="__span-25-5"><a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a>--until<span class="w"> </span>&lt;date&gt;<span class="w">     </span><span class="c1"># Filter results created before this date</span>
+</span><span id="__span-25-6"><a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a>-h,<span class="w"> </span>--help<span class="w">         </span><span class="c1"># Show help message</span>
+</span></code></pre></div>
+<p><strong>Temporal Filter Options:</strong></p>
+<p>The <code>--since</code> and <code>--until</code> flags enable date-based filtering for <code>search_nodes</code> and <code>search_facts</code> commands.</p>
+<p><strong>Supported date formats:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Format</th>
+<th>Example</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>today</code></td>
+<td><code>--since today</code></td>
+<td>Start of current day (UTC)</td>
+</tr>
+<tr>
+<td><code>yesterday</code></td>
+<td><code>--since yesterday</code></td>
+<td>Start of previous day (UTC)</td>
+</tr>
+<tr>
+<td><code>Nd</code></td>
+<td><code>--since 7d</code></td>
+<td>N days ago</td>
+</tr>
+<tr>
+<td><code>Nw</code></td>
+<td><code>--since 2w</code></td>
+<td>N weeks ago</td>
+</tr>
+<tr>
+<td><code>Nm</code></td>
+<td><code>--since 1m</code></td>
+<td>N months ago (30 days per month)</td>
+</tr>
+<tr>
+<td>ISO 8601</td>
+<td><code>--since 2026-01-15</code></td>
+<td>Specific date</td>
+</tr>
+<tr>
+<td>ISO 8601</td>
+<td><code>--since 2026-01-15T14:30:00Z</code></td>
+<td>Specific datetime</td>
+</tr>
+</tbody>
+</table>
+<h3 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¶</a></h3>
+<p><strong>Add knowledge with metrics:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>add_episode<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-26-2"><a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="w">  </span><span class="s2">"Test Episode"</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-26-3"><a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a><span class="w">  </span><span class="s2">"This is a test episode"</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-26-4"><a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a><span class="w">  </span>--metrics
+</span></code></pre></div>
+<p><strong>Search with raw JSON output:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"PAI"</span><span class="w"> </span>--raw
+</span></code></pre></div>
+<p><strong>Search with metrics logging:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"PAI"</span><span class="w"> </span><span class="m">10</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-28-2"><a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a><span class="w">  </span>--metrics-file<span class="w"> </span>~/.madeinoz-knowledge/metrics.jsonl
+</span></code></pre></div>
+<p><strong>Get status and track metrics:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>get_status<span class="w"> </span>--metrics
+</span></code></pre></div>
+<h3 id="temporal-search-examples">Temporal Search Examples<a class="headerlink" href="#temporal-search-examples" title="Permanent link">¶</a></h3>
+<p><strong>Search for today's knowledge:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"PAI"</span><span class="w"> </span>--since<span class="w"> </span>today
+</span></code></pre></div>
+<p><strong>Search from the last 7 days:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_facts<span class="w"> </span><span class="s2">"decisions"</span><span class="w"> </span>--since<span class="w"> </span>7d
+</span></code></pre></div>
+<p><strong>Search within a specific date range:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"project"</span><span class="w"> </span>--since<span class="w"> </span><span class="m">2026</span>-01-01<span class="w"> </span>--until<span class="w"> </span><span class="m">2026</span>-01-15
+</span></code></pre></div>
+<p><strong>Search yesterday's knowledge:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"learning"</span><span class="w"> </span>--since<span class="w"> </span>yesterday<span class="w"> </span>--until<span class="w"> </span>today
+</span></code></pre></div>
+<p><strong>Search from last month:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_facts<span class="w"> </span><span class="s2">"architecture"</span><span class="w"> </span>--since<span class="w"> </span>1m
+</span></code></pre></div>
+<p><strong>Combine temporal filters with other options:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"AI"</span><span class="w"> </span><span class="m">20</span><span class="w"> </span>--since<span class="w"> </span>7d<span class="w"> </span>--metrics
+</span></code></pre></div>
+<h3 id="environment-variables">Environment Variables<a class="headerlink" href="#environment-variables" title="Permanent link">¶</a></h3>
+<p>The Knowledge CLI respects the following environment variables for customization:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-36-1"><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="c1"># Disable compact output (use raw JSON by default)</span>
+</span><span id="__span-36-2"><a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_WRAPPER_COMPACT</span><span class="o">=</span><span class="nb">false</span>
+</span><span id="__span-36-3"><a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a>
+</span><span id="__span-36-4"><a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a><span class="c1"># Enable metrics collection by default</span>
+</span><span id="__span-36-5"><a id="__codelineno-36-5" name="__codelineno-36-5" href="#__codelineno-36-5"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_WRAPPER_METRICS</span><span class="o">=</span><span class="nb">true</span>
+</span><span id="__span-36-6"><a id="__codelineno-36-6" name="__codelineno-36-6" href="#__codelineno-36-6"></a>
+</span><span id="__span-36-7"><a id="__codelineno-36-7" name="__codelineno-36-7" href="#__codelineno-36-7"></a><span class="c1"># Default metrics file path</span>
+</span><span id="__span-36-8"><a id="__codelineno-36-8" name="__codelineno-36-8" href="#__codelineno-36-8"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_WRAPPER_METRICS_FILE</span><span class="o">=</span>~/.madeinoz-knowledge/metrics.jsonl
+</span><span id="__span-36-9"><a id="__codelineno-36-9" name="__codelineno-36-9" href="#__codelineno-36-9"></a>
+</span><span id="__span-36-10"><a id="__codelineno-36-10" name="__codelineno-36-10" href="#__codelineno-36-10"></a><span class="c1"># Error log path for transformation issues</span>
+</span><span id="__span-36-11"><a id="__codelineno-36-11" name="__codelineno-36-11" href="#__codelineno-36-11"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_WRAPPER_LOG_FILE</span><span class="o">=</span>~/.madeinoz-knowledge/errors.log
+</span><span id="__span-36-12"><a id="__codelineno-36-12" name="__codelineno-36-12" href="#__codelineno-36-12"></a>
+</span><span id="__span-36-13"><a id="__codelineno-36-13" name="__codelineno-36-13" href="#__codelineno-36-13"></a><span class="c1"># Slow processing threshold in milliseconds (default: 50)</span>
+</span><span id="__span-36-14"><a id="__codelineno-36-14" name="__codelineno-36-14" href="#__codelineno-36-14"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_WRAPPER_SLOW_THRESHOLD</span><span class="o">=</span><span class="m">50</span>
+</span><span id="__span-36-15"><a id="__codelineno-36-15" name="__codelineno-36-15" href="#__codelineno-36-15"></a>
+</span><span id="__span-36-16"><a id="__codelineno-36-16" name="__codelineno-36-16" href="#__codelineno-36-16"></a><span class="c1"># Processing timeout in milliseconds (default: 100)</span>
+</span><span id="__span-36-17"><a id="__codelineno-36-17" name="__codelineno-36-17" href="#__codelineno-36-17"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_WRAPPER_TIMEOUT</span><span class="o">=</span><span class="m">100</span>
+</span></code></pre></div>
+<h3 id="metrics-tracking">Metrics Tracking<a class="headerlink" href="#metrics-tracking" title="Permanent link">¶</a></h3>
+<p>When <code>--metrics</code> flag is enabled or <code>MADEINOZ_WRAPPER_METRICS=true</code>, the CLI displays token usage statistics:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-37-1"><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"AI models"</span><span class="w"> </span>--metrics
+</span></code></pre></div>
+<p><strong>Metrics output includes:</strong></p>
+<ul>
+<li>Operation name</li>
+<li>Raw size (bytes and estimated tokens)</li>
+<li>Compact size (bytes and estimated tokens)</li>
+<li>Savings percentage</li>
+<li>Tokens saved</li>
+<li>Processing time (milliseconds)</li>
+</ul>
+<p><strong>Example output:</strong></p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-38-1"><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a>--- Token Metrics ---
+</span><span id="__span-38-2"><a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a>Operation: search_nodes
+</span><span id="__span-38-3"><a id="__codelineno-38-3" name="__codelineno-38-3" href="#__codelineno-38-3"></a>Raw size: 12,345 bytes (3,086 est. tokens)
+</span><span id="__span-38-4"><a id="__codelineno-38-4" name="__codelineno-38-4" href="#__codelineno-38-4"></a>Compact size: 8,234 bytes (2,059 est. tokens)
+</span><span id="__span-38-5"><a id="__codelineno-38-5" name="__codelineno-38-5" href="#__codelineno-38-5"></a>Savings: 33.3% (1,027 tokens saved)
+</span><span id="__span-38-6"><a id="__codelineno-38-6" name="__codelineno-38-6" href="#__codelineno-38-6"></a>Processing time: 42ms
+</span></code></pre></div>
+<h3 id="metrics-file-format">Metrics File Format<a class="headerlink" href="#metrics-file-format" title="Permanent link">¶</a></h3>
+<p>When using <code>--metrics-file</code>, metrics are written as JSONL (one JSON object per line):</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-39-1"><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a>{"operation":"search_nodes","timestamp":"2025-01-19T12:34:56.789Z","rawBytes":12345,"compactBytes":8234,"savingsPercent":33.3,"estimatedTokensBefore":3086,"estimatedTokensAfter":2059,"processingTimeMs":42}
+</span><span id="__span-39-2"><a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a>{"operation":"get_status","timestamp":"2025-01-19T12:35:12.345Z","rawBytes":567,"compactBytes":234,"savingsPercent":58.7,"estimatedTokensBefore":142,"estimatedTokensAfter":59,"processingTimeMs":15}
+</span></code></pre></div>
+<p>This format is ideal for:</p>
+<ul>
+<li>Time-series analysis</li>
+<li>Performance monitoring</li>
+<li>Cost tracking</li>
+<li>Optimization validation</li>
+</ul>
+<h2 id="remote-access-cli-options">Remote Access CLI Options<a class="headerlink" href="#remote-access-cli-options" title="Permanent link">¶</a></h2>
+<p>The Knowledge CLI supports remote MCP access via connection profiles and CLI flags. See <a href="../remote-access.html">Remote Access Documentation</a> for complete details.</p>
+<h3 id="connection-profiles">Connection Profiles<a class="headerlink" href="#connection-profiles" title="Permanent link">¶</a></h3>
+<p>Use predefined connection profiles for different environments:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-40-1"><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a><span class="c1"># List all available profiles</span>
+</span><span id="__span-40-2"><a id="__codelineno-40-2" name="__codelineno-40-2" href="#__codelineno-40-2"></a>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli.ts<span class="w"> </span>list_profiles
+</span><span id="__span-40-3"><a id="__codelineno-40-3" name="__codelineno-40-3" href="#__codelineno-40-3"></a>
+</span><span id="__span-40-4"><a id="__codelineno-40-4" name="__codelineno-40-4" href="#__codelineno-40-4"></a><span class="c1"># Use specific profile</span>
+</span><span id="__span-40-5"><a id="__codelineno-40-5" name="__codelineno-40-5" href="#__codelineno-40-5"></a>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"query"</span><span class="w"> </span>--profile<span class="w"> </span>production
+</span><span id="__span-40-6"><a id="__codelineno-40-6" name="__codelineno-40-6" href="#__codelineno-40-6"></a>
+</span><span id="__span-40-7"><a id="__codelineno-40-7" name="__codelineno-40-7" href="#__codelineno-40-7"></a><span class="c1"># Show current connection status</span>
+</span><span id="__span-40-8"><a id="__codelineno-40-8" name="__codelineno-40-8" href="#__codelineno-40-8"></a>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli.ts<span class="w"> </span>status
+</span></code></pre></div>
+<p><strong>Profile Configuration Priority:</strong></p>
+<ol>
+<li>CLI flags (<code>--host</code>, <code>--port</code>, <code>--protocol</code>)</li>
+<li>Individual environment variables (<code>MADEINOZ_KNOWLEDGE_HOST</code>)</li>
+<li>Selected profile (<code>--profile</code> or <code>MADEINOZ_KNOWLEDGE_PROFILE</code>)</li>
+<li>Default profile in YAML file</li>
+<li>Code defaults (localhost:8001, http)</li>
+</ol>
+<h3 id="cli-flags">CLI Flags<a class="headerlink" href="#cli-flags" title="Permanent link">¶</a></h3>
+<p>All commands support these remote access flags:</p>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--profile &lt;name&gt;</code></td>
+<td>Use specific connection profile</td>
+<td><code>--profile production</code></td>
+</tr>
+<tr>
+<td><code>--host &lt;hostname&gt;</code></td>
+<td>Override profile host</td>
+<td><code>--host knowledge.example.com</code></td>
+</tr>
+<tr>
+<td><code>--port &lt;port&gt;</code></td>
+<td>Override profile port</td>
+<td><code>--port 443</code></td>
+</tr>
+<tr>
+<td><code>--protocol &lt;proto&gt;</code></td>
+<td>Override protocol (http/https)</td>
+<td><code>--protocol https</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="environment-variable-overrides">Environment Variable Overrides<a class="headerlink" href="#environment-variable-overrides" title="Permanent link">¶</a></h3>
+<p>Override any profile setting via environment variables:</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Description</th>
+<th>Default</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MADEINOZ_KNOWLEDGE_PROFILE</code></td>
+<td>Profile name to use</td>
+<td><code>default</code></td>
+<td><code>production</code></td>
+</tr>
+<tr>
+<td><code>MADEINOZ_KNOWLEDGE_HOST</code></td>
+<td>Server hostname or IP</td>
+<td><code>localhost</code></td>
+<td><code>knowledge.example.com</code></td>
+</tr>
+<tr>
+<td><code>MADEINOZ_KNOWLEDGE_PORT</code></td>
+<td>Server port</td>
+<td><code>8001</code></td>
+<td><code>443</code></td>
+</tr>
+<tr>
+<td><code>MADEINOZ_KNOWLEDGE_PROTOCOL</code></td>
+<td>Connection protocol</td>
+<td><code>http</code></td>
+<td><code>https</code></td>
+</tr>
+<tr>
+<td><code>MADEINOZ_KNOWLEDGE_TLS_VERIFY</code></td>
+<td>Verify TLS certificates</td>
+<td><code>true</code></td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>MADEINOZ_KNOWLEDGE_TLS_CA</code></td>
+<td>CA certificate path</td>
+<td>-</td>
+<td><code>/etc/ssl/certs/ca.pem</code></td>
+</tr>
+<tr>
+<td><code>MADEINOZ_KNOWLEDGE_TIMEOUT</code></td>
+<td>Connection timeout (ms)</td>
+<td><code>30000</code></td>
+<td><code>60000</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example usage:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-41-1"><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a><span class="c1"># Use environment variables for remote connection</span>
+</span><span id="__span-41-2"><a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_KNOWLEDGE_HOST</span><span class="o">=</span><span class="m">192</span>.168.1.100
+</span><span id="__span-41-3"><a id="__codelineno-41-3" name="__codelineno-41-3" href="#__codelineno-41-3"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_KNOWLEDGE_PORT</span><span class="o">=</span><span class="m">8001</span>
+</span><span id="__span-41-4"><a id="__codelineno-41-4" name="__codelineno-41-4" href="#__codelineno-41-4"></a>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"my query"</span>
+</span><span id="__span-41-5"><a id="__codelineno-41-5" name="__codelineno-41-5" href="#__codelineno-41-5"></a>
+</span><span id="__span-41-6"><a id="__codelineno-41-6" name="__codelineno-41-6" href="#__codelineno-41-6"></a><span class="c1"># Combine profile with host override</span>
+</span><span id="__span-41-7"><a id="__codelineno-41-7" name="__codelineno-41-7" href="#__codelineno-41-7"></a>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli.ts<span class="w"> </span>get_status<span class="w"> </span>--profile<span class="w"> </span>production<span class="w"> </span>--host<span class="w"> </span>backup.example.com
+</span></code></pre></div>
+<h3 id="profile-configuration-file">Profile Configuration File<a class="headerlink" href="#profile-configuration-file" title="Permanent link">¶</a></h3>
+<p>Connection profiles are stored in:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-42-1"><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a><span class="c1"># Priority location</span>
+</span><span id="__span-42-2"><a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a><span class="nv">$PAI_DIR</span>/config/knowledge-profiles.yaml
+</span><span id="__span-42-3"><a id="__codelineno-42-3" name="__codelineno-42-3" href="#__codelineno-42-3"></a>
+</span><span id="__span-42-4"><a id="__codelineno-42-4" name="__codelineno-42-4" href="#__codelineno-42-4"></a><span class="c1"># Fallback location</span>
+</span><span id="__span-42-5"><a id="__codelineno-42-5" name="__codelineno-42-5" href="#__codelineno-42-5"></a>~/.claude/config/knowledge-profiles.yaml
+</span></code></pre></div>
+<p><strong>Example profile configuration:</strong></p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-43-1"><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">"1.0"</span>
+</span><span id="__span-43-2"><a id="__codelineno-43-2" name="__codelineno-43-2" href="#__codelineno-43-2"></a><span class="nt">default_profile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+</span><span id="__span-43-3"><a id="__codelineno-43-3" name="__codelineno-43-3" href="#__codelineno-43-3"></a>
+</span><span id="__span-43-4"><a id="__codelineno-43-4" name="__codelineno-43-4" href="#__codelineno-43-4"></a><span class="nt">profiles</span><span class="p">:</span>
+</span><span id="__span-43-5"><a id="__codelineno-43-5" name="__codelineno-43-5" href="#__codelineno-43-5"></a><span class="w">  </span><span class="nt">default</span><span class="p">:</span>
+</span><span id="__span-43-6"><a id="__codelineno-43-6" name="__codelineno-43-6" href="#__codelineno-43-6"></a><span class="w">    </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">localhost</span>
+</span><span id="__span-43-7"><a id="__codelineno-43-7" name="__codelineno-43-7" href="#__codelineno-43-7"></a><span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8001</span>
+</span><span id="__span-43-8"><a id="__codelineno-43-8" name="__codelineno-43-8" href="#__codelineno-43-8"></a><span class="w">    </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+</span><span id="__span-43-9"><a id="__codelineno-43-9" name="__codelineno-43-9" href="#__codelineno-43-9"></a>
+</span><span id="__span-43-10"><a id="__codelineno-43-10" name="__codelineno-43-10" href="#__codelineno-43-10"></a><span class="w">  </span><span class="nt">production</span><span class="p">:</span>
+</span><span id="__span-43-11"><a id="__codelineno-43-11" name="__codelineno-43-11" href="#__codelineno-43-11"></a><span class="w">    </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">knowledge.example.com</span>
+</span><span id="__span-43-12"><a id="__codelineno-43-12" name="__codelineno-43-12" href="#__codelineno-43-12"></a><span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span>
+</span><span id="__span-43-13"><a id="__codelineno-43-13" name="__codelineno-43-13" href="#__codelineno-43-13"></a><span class="w">    </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https</span>
+</span><span id="__span-43-14"><a id="__codelineno-43-14" name="__codelineno-43-14" href="#__codelineno-43-14"></a><span class="w">    </span><span class="nt">tls</span><span class="p">:</span>
+</span><span id="__span-43-15"><a id="__codelineno-43-15" name="__codelineno-43-15" href="#__codelineno-43-15"></a><span class="w">      </span><span class="nt">verify</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id="__span-43-16"><a id="__codelineno-43-16" name="__codelineno-43-16" href="#__codelineno-43-16"></a><span class="w">      </span><span class="nt">minVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TLSv1.3</span>
+</span><span id="__span-43-17"><a id="__codelineno-43-17" name="__codelineno-43-17" href="#__codelineno-43-17"></a>
+</span><span id="__span-43-18"><a id="__codelineno-43-18" name="__codelineno-43-18" href="#__codelineno-43-18"></a><span class="w">  </span><span class="nt">development</span><span class="p">:</span>
+</span><span id="__span-43-19"><a id="__codelineno-43-19" name="__codelineno-43-19" href="#__codelineno-43-19"></a><span class="w">    </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.168.1.100</span>
+</span><span id="__span-43-20"><a id="__codelineno-43-20" name="__codelineno-43-20" href="#__codelineno-43-20"></a><span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8001</span>
+</span><span id="__span-43-21"><a id="__codelineno-43-21" name="__codelineno-43-21" href="#__codelineno-43-21"></a><span class="w">    </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+</span></code></pre></div>
+<h3 id="new-commands-feature-010">New Commands (Feature 010)<a class="headerlink" href="#new-commands-feature-010" title="Permanent link">¶</a></h3>
+<h4 id="status">status<a class="headerlink" href="#status" title="Permanent link">¶</a></h4>
+<p>Show connection status and active profile:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-44-1"><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli.ts<span class="w"> </span>status
+</span></code></pre></div>
+<p><strong>Output includes:</strong></p>
+<ul>
+<li>Active profile name</li>
+<li>Connection status (connected/disconnected/error)</li>
+<li>Connected host and port</li>
+<li>Protocol (http/https)</li>
+<li>Server version (if available)</li>
+<li>Last connection time</li>
+</ul>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-45-1"><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a>$<span class="w"> </span>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli.ts<span class="w"> </span>status<span class="w"> </span>--profile<span class="w"> </span>production
+</span><span id="__span-45-2"><a id="__codelineno-45-2" name="__codelineno-45-2" href="#__codelineno-45-2"></a>
+</span><span id="__span-45-3"><a id="__codelineno-45-3" name="__codelineno-45-3" href="#__codelineno-45-3"></a>Knowledge<span class="w"> </span>CLI<span class="w"> </span>Connection<span class="w"> </span><span class="nv">Status</span>
+</span><span id="__span-45-4"><a id="__codelineno-45-4" name="__codelineno-45-4" href="#__codelineno-45-4"></a><span class="o">================================</span>
+</span><span id="__span-45-5"><a id="__codelineno-45-5" name="__codelineno-45-5" href="#__codelineno-45-5"></a>Profile:<span class="w"> </span>production
+</span><span id="__span-45-6"><a id="__codelineno-45-6" name="__codelineno-45-6" href="#__codelineno-45-6"></a>Status:<span class="w"> </span>connected
+</span><span id="__span-45-7"><a id="__codelineno-45-7" name="__codelineno-45-7" href="#__codelineno-45-7"></a>Host:<span class="w"> </span>knowledge.example.com
+</span><span id="__span-45-8"><a id="__codelineno-45-8" name="__codelineno-45-8" href="#__codelineno-45-8"></a>Port:<span class="w"> </span><span class="m">443</span>
+</span><span id="__span-45-9"><a id="__codelineno-45-9" name="__codelineno-45-9" href="#__codelineno-45-9"></a>Protocol:<span class="w"> </span>https
+</span><span id="__span-45-10"><a id="__codelineno-45-10" name="__codelineno-45-10" href="#__codelineno-45-10"></a>Server<span class="w"> </span>Version:<span class="w"> </span><span class="m">1</span>.7.0
+</span><span id="__span-45-11"><a id="__codelineno-45-11" name="__codelineno-45-11" href="#__codelineno-45-11"></a>Last<span class="w"> </span>Connected:<span class="w"> </span><span class="m">2026</span>-01-30T12:34:56Z
+</span></code></pre></div>
+<h4 id="list_profiles">list_profiles<a class="headerlink" href="#list_profiles" title="Permanent link">¶</a></h4>
+<p>List all available connection profiles:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-46-1"><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli.ts<span class="w"> </span>list_profiles
+</span></code></pre></div>
+<p><strong>Output includes:</strong></p>
+<ul>
+<li>All profile names from configuration</li>
+<li>Default profile indicator</li>
+<li>Configuration file path</li>
+</ul>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-47-1"><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a>$<span class="w"> </span>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli.ts<span class="w"> </span>list_profiles
+</span><span id="__span-47-2"><a id="__codelineno-47-2" name="__codelineno-47-2" href="#__codelineno-47-2"></a>
+</span><span id="__span-47-3"><a id="__codelineno-47-3" name="__codelineno-47-3" href="#__codelineno-47-3"></a>Available<span class="w"> </span><span class="nv">Profiles</span>
+</span><span id="__span-47-4"><a id="__codelineno-47-4" name="__codelineno-47-4" href="#__codelineno-47-4"></a><span class="o">==================</span>
+</span><span id="__span-47-5"><a id="__codelineno-47-5" name="__codelineno-47-5" href="#__codelineno-47-5"></a>Configuration:<span class="w"> </span>~/.claude/config/knowledge-profiles.yaml
+</span><span id="__span-47-6"><a id="__codelineno-47-6" name="__codelineno-47-6" href="#__codelineno-47-6"></a>Default<span class="w"> </span>Profile:<span class="w"> </span>default
+</span><span id="__span-47-7"><a id="__codelineno-47-7" name="__codelineno-47-7" href="#__codelineno-47-7"></a>
+</span><span id="__span-47-8"><a id="__codelineno-47-8" name="__codelineno-47-8" href="#__codelineno-47-8"></a>Profiles:
+</span><span id="__span-47-9"><a id="__codelineno-47-9" name="__codelineno-47-9" href="#__codelineno-47-9"></a><span class="w">  </span>-<span class="w"> </span>default<span class="w"> </span><span class="o">(</span>localhost:8001,<span class="w"> </span>http<span class="o">)</span>
+</span><span id="__span-47-10"><a id="__codelineno-47-10" name="__codelineno-47-10" href="#__codelineno-47-10"></a><span class="w">  </span>-<span class="w"> </span>production<span class="w"> </span><span class="o">(</span>knowledge.example.com:443,<span class="w"> </span>https<span class="o">)</span>
+</span><span id="__span-47-11"><a id="__codelineno-47-11" name="__codelineno-47-11" href="#__codelineno-47-11"></a><span class="w">  </span>-<span class="w"> </span>development<span class="w"> </span><span class="o">(</span><span class="m">192</span>.168.1.100:8001,<span class="w"> </span>http<span class="o">)</span>
+</span></code></pre></div>
+<h2 id="interactive-installation">Interactive Installation<a class="headerlink" href="#interactive-installation" title="Permanent link">¶</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-48-1"><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a><span class="nb">cd</span><span class="w"> </span>~/.claude/skills/Knowledge
+</span><span id="__span-48-2"><a id="__codelineno-48-2" name="__codelineno-48-2" href="#__codelineno-48-2"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/install.ts
+</span></code></pre></div>
+<p>Guides through:</p>
+<ol>
+<li>System analysis and conflict detection</li>
+<li>LLM provider selection</li>
+<li>API key configuration</li>
+<li>Database backend selection</li>
+<li>Service startup</li>
+</ol>
+<p><strong>Options:</strong></p>
+<ul>
+<li><code>--yes</code> / <code>-y</code>: Non-interactive mode with defaults</li>
+<li><code>--update</code> / <code>-u</code>: Update existing installation</li>
+</ul>
+<h2 id="utilities">Utilities<a class="headerlink" href="#utilities" title="Permanent link">¶</a></h2>
+<h3 id="health-check">Health Check<a class="headerlink" href="#health-check" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-49-1"><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a>curl<span class="w"> </span>http://localhost:8000/health
+</span></code></pre></div>
+<p>Returns server health status as JSON:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-50-1"><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a><span class="p">{</span>
+</span><span id="__span-50-2"><a id="__codelineno-50-2" name="__codelineno-50-2" href="#__codelineno-50-2"></a><span class="w">  </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"healthy"</span><span class="p">,</span>
+</span><span id="__span-50-3"><a id="__codelineno-50-3" name="__codelineno-50-3" href="#__codelineno-50-3"></a><span class="w">  </span><span class="nt">"service"</span><span class="p">:</span><span class="w"> </span><span class="s2">"graphiti-mcp"</span><span class="p">,</span>
+</span><span id="__span-50-4"><a id="__codelineno-50-4" name="__codelineno-50-4" href="#__codelineno-50-4"></a><span class="w">  </span><span class="nt">"patch"</span><span class="p">:</span><span class="w"> </span><span class="s2">"madeinoz-all-groups-enabled"</span>
+</span><span id="__span-50-5"><a id="__codelineno-50-5" name="__codelineno-50-5" href="#__codelineno-50-5"></a><span class="p">}</span>
+</span></code></pre></div>
+<h3 id="mcp-endpoint">MCP Endpoint<a class="headerlink" href="#mcp-endpoint" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-51-1"><a id="__codelineno-51-1" name="__codelineno-51-1" href="#__codelineno-51-1"></a>curl<span class="w"> </span>http://localhost:8000/mcp
+</span></code></pre></div>
+<p>SSE endpoint for MCP protocol communication.</p>
+<h2 id="environment-variables_1">Environment Variables<a class="headerlink" href="#environment-variables_1" title="Permanent link">¶</a></h2>
+<p>All CLI commands read from PAI configuration:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-52-1"><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a><span class="c1"># Set PAI directory (defaults to ~/.claude)</span>
+</span><span id="__span-52-2"><a id="__codelineno-52-2" name="__codelineno-52-2" href="#__codelineno-52-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PAI_DIR</span><span class="o">=</span>/path/to/pai
+</span><span id="__span-52-3"><a id="__codelineno-52-3" name="__codelineno-52-3" href="#__codelineno-52-3"></a>
+</span><span id="__span-52-4"><a id="__codelineno-52-4" name="__codelineno-52-4" href="#__codelineno-52-4"></a><span class="c1"># Set database type</span>
+</span><span id="__span-52-5"><a id="__codelineno-52-5" name="__codelineno-52-5" href="#__codelineno-52-5"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_KNOWLEDGE_DATABASE_TYPE</span><span class="o">=</span>neo4j
+</span><span id="__span-52-6"><a id="__codelineno-52-6" name="__codelineno-52-6" href="#__codelineno-52-6"></a>
+</span><span id="__span-52-7"><a id="__codelineno-52-7" name="__codelineno-52-7" href="#__codelineno-52-7"></a><span class="c1"># Set logging level</span>
+</span><span id="__span-52-8"><a id="__codelineno-52-8" name="__codelineno-52-8" href="#__codelineno-52-8"></a><span class="nb">export</span><span class="w"> </span><span class="nv">LOG_LEVEL</span><span class="o">=</span>debug
+</span></code></pre></div>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">¶</a></h2>
+<h3 id="port-already-in-use">"Port already in use"<a class="headerlink" href="#port-already-in-use" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-53-1"><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a><span class="c1"># Find process using port 8000</span>
+</span><span id="__span-53-2"><a id="__codelineno-53-2" name="__codelineno-53-2" href="#__codelineno-53-2"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:8000
+</span><span id="__span-53-3"><a id="__codelineno-53-3" name="__codelineno-53-3" href="#__codelineno-53-3"></a>
+</span><span id="__span-53-4"><a id="__codelineno-53-4" name="__codelineno-53-4" href="#__codelineno-53-4"></a><span class="c1"># Kill process if needed</span>
+</span><span id="__span-53-5"><a id="__codelineno-53-5" name="__codelineno-53-5" href="#__codelineno-53-5"></a><span class="nb">kill</span><span class="w"> </span>-9<span class="w"> </span><span class="o">[</span>PID<span class="o">]</span>
+</span><span id="__span-53-6"><a id="__codelineno-53-6" name="__codelineno-53-6" href="#__codelineno-53-6"></a>
+</span><span id="__span-53-7"><a id="__codelineno-53-7" name="__codelineno-53-7" href="#__codelineno-53-7"></a><span class="c1"># Or use different port by modifying the Docker Compose files</span>
+</span></code></pre></div>
+<h3 id="container-not-found">"Container not found"<a class="headerlink" href="#container-not-found" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-54-1"><a id="__codelineno-54-1" name="__codelineno-54-1" href="#__codelineno-54-1"></a><span class="c1"># List all containers</span>
+</span><span id="__span-54-2"><a id="__codelineno-54-2" name="__codelineno-54-2" href="#__codelineno-54-2"></a>podman<span class="w"> </span>ps<span class="w"> </span>-a
+</span><span id="__span-54-3"><a id="__codelineno-54-3" name="__codelineno-54-3" href="#__codelineno-54-3"></a><span class="c1"># or: docker ps -a</span>
+</span><span id="__span-54-4"><a id="__codelineno-54-4" name="__codelineno-54-4" href="#__codelineno-54-4"></a>
+</span><span id="__span-54-5"><a id="__codelineno-54-5" name="__codelineno-54-5" href="#__codelineno-54-5"></a><span class="c1"># Start services</span>
+</span><span id="__span-54-6"><a id="__codelineno-54-6" name="__codelineno-54-6" href="#__codelineno-54-6"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>start
+</span></code></pre></div>
+<h3 id="health-check-failed">"Health check failed"<a class="headerlink" href="#health-check-failed" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-55-1"><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a><span class="c1"># Check logs</span>
+</span><span id="__span-55-2"><a id="__codelineno-55-2" name="__codelineno-55-2" href="#__codelineno-55-2"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>logs
+</span><span id="__span-55-3"><a id="__codelineno-55-3" name="__codelineno-55-3" href="#__codelineno-55-3"></a>
+</span><span id="__span-55-4"><a id="__codelineno-55-4" name="__codelineno-55-4" href="#__codelineno-55-4"></a><span class="c1"># Verify server is responding</span>
+</span><span id="__span-55-5"><a id="__codelineno-55-5" name="__codelineno-55-5" href="#__codelineno-55-5"></a>curl<span class="w"> </span>--max-time<span class="w"> </span><span class="m">5</span><span class="w"> </span>http://localhost:8000/health
+</span></code></pre></div>
+<h3 id="connection-refused">"Connection refused"<a class="headerlink" href="#connection-refused" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-56-1"><a id="__codelineno-56-1" name="__codelineno-56-1" href="#__codelineno-56-1"></a><span class="c1"># Verify MCP server endpoint</span>
+</span><span id="__span-56-2"><a id="__codelineno-56-2" name="__codelineno-56-2" href="#__codelineno-56-2"></a>curl<span class="w"> </span>http://localhost:8000/health
+</span><span id="__span-56-3"><a id="__codelineno-56-3" name="__codelineno-56-3" href="#__codelineno-56-3"></a>
+</span><span id="__span-56-4"><a id="__codelineno-56-4" name="__codelineno-56-4" href="#__codelineno-56-4"></a><span class="c1"># If unavailable, start server</span>
+</span><span id="__span-56-5"><a id="__codelineno-56-5" name="__codelineno-56-5" href="#__codelineno-56-5"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>start
+</span></code></pre></div>
+<h2 id="configuration-files">Configuration Files<a class="headerlink" href="#configuration-files" title="Permanent link">¶</a></h2>
+<h3 id="pai-environment-file">PAI Environment File<a class="headerlink" href="#pai-environment-file" title="Permanent link">¶</a></h3>
+<p>Location: <code>~/.claude/.env</code> (or <code>$PAI_DIR/.env</code>)</p>
+<p>Contains all Madeinoz Knowledge System configuration:</p>
+<ul>
+<li>API keys</li>
+<li>LLM provider settings</li>
+<li>Database backend configuration</li>
+<li>Performance tuning options</li>
+</ul>
+<h3 id="docker-compose-files">Docker Compose Files<a class="headerlink" href="#docker-compose-files" title="Permanent link">¶</a></h3>
+<ul>
+<li><code>docker/docker-compose-falkordb.yml</code> - FalkorDB backend (Docker)</li>
+<li><code>docker/docker-compose-neo4j.yml</code> - Neo4j backend (Docker)</li>
+<li><code>docker/podman-compose-falkordb.yml</code> - FalkorDB backend (Podman)</li>
+<li><code>docker/podman-compose-neo4j.yml</code> - Neo4j backend (Podman)</li>
+</ul>
+<h3 id="configuration-template">Configuration Template<a class="headerlink" href="#configuration-template" title="Permanent link">¶</a></h3>
+<p>Reference file: <code>config/.env.example</code></p>
+<p>Complete example of all available configuration options.</p>
+<h2 id="related-commands">Related Commands<a class="headerlink" href="#related-commands" title="Permanent link">¶</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-57-1"><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a><span class="c1"># View all available skills (from installed location)</span>
+</span><span id="__span-57-2"><a id="__codelineno-57-2" name="__codelineno-57-2" href="#__codelineno-57-2"></a>ls<span class="w"> </span>-la<span class="w"> </span>~/.claude/skills/Knowledge/workflows/
+</span><span id="__span-57-3"><a id="__codelineno-57-3" name="__codelineno-57-3" href="#__codelineno-57-3"></a>
+</span><span id="__span-57-4"><a id="__codelineno-57-4" name="__codelineno-57-4" href="#__codelineno-57-4"></a><span class="c1"># Test LLM connectivity</span>
+</span><span id="__span-57-5"><a id="__codelineno-57-5" name="__codelineno-57-5" href="#__codelineno-57-5"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/install.ts
+</span><span id="__span-57-6"><a id="__codelineno-57-6" name="__codelineno-57-6" href="#__codelineno-57-6"></a>
+</span><span id="__span-57-7"><a id="__codelineno-57-7" name="__codelineno-57-7" href="#__codelineno-57-7"></a><span class="c1"># Export knowledge data</span>
+</span><span id="__span-57-8"><a id="__codelineno-57-8" name="__codelineno-57-8" href="#__codelineno-57-8"></a><span class="c1"># (Via MCP: get_episodes with limit=999999)</span>
+</span><span id="__span-57-9"><a id="__codelineno-57-9" name="__codelineno-57-9" href="#__codelineno-57-9"></a>
+</span><span id="__span-57-10"><a id="__codelineno-57-10" name="__codelineno-57-10" href="#__codelineno-57-10"></a><span class="c1"># Monitor memory sync</span>
+</span><span id="__span-57-11"><a id="__codelineno-57-11" name="__codelineno-57-11" href="#__codelineno-57-11"></a>bun<span class="w"> </span>run<span class="w"> </span>~/.claude/hooks/sync-memory-to-knowledge.ts<span class="w"> </span>--verbose
+</span></code></pre></div>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"></path></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer">
+        
+          
+          <a href="../troubleshooting/known-issues.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Known Issues">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Known Issues
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="configuration.html" class="md-footer__link md-footer__link--next" aria-label="Next: Configuration">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Configuration
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"></path></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/madeinoz67/madeinoz-knowledge-system" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"></path></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "search.suggest", "search.highlight", "content.code.copy", "content.tabs.link", "content.lightbox"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  
+<script id="init-glightbox">const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});
+document$.subscribe(()=>{ lightbox.reload(); });
+</script></body></html>

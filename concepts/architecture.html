@@ -1,0 +1,2215 @@
+<!DOCTYPE html><html lang="en" class="no-js"><head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Deep dive into the ßKnowledge System architecture, component stack, and how information flows through the system">
+      
+      
+        <meta name="author" content="madeinoz67">
+      
+      
+        <link rel="canonical" href="https://madeinoz67.github.io/madeinoz-knowledge-system/concepts/architecture.html">
+      
+      
+        <link rel="prev" href="../usage/backup-restore.html">
+      
+      
+        <link rel="next" href="knowledge-graph.html">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Architecture - Madeinoz Knowledge System (PAI Pack)</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+        <script src="https://unpkg.com/iframe-worker/shim"></script>
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  <link href="../assets/stylesheets/glightbox.min.css" rel="stylesheet"><script src="../assets/javascripts/glightbox.min.js"></script><style id="glightbox-style">
+            html.glightbox-open { overflow: initial; height: 100%; }
+            .gslide-title { margin-top: 0px; user-select: text; }
+            .gslide-desc { color: #666; user-select: text; }
+            .gslide-image img { background: white; }
+            .gscrollbar-fixer { padding-right: 15px; }
+            .gdesc-inner { font-size: 0.75rem; }
+            body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color); }
+            body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color); }
+            body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color); }
+        </style></head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="light-blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#architecture" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../index.html" title="Madeinoz Knowledge System (PAI Pack)" class="md-header__button md-logo" aria-label="Madeinoz Knowledge System (PAI Pack)" data-md-component="logo">
+      
+  <img src="../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Madeinoz Knowledge System (PAI Pack)
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Architecture
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="light-blue" aria-label="Switch to dark mode" type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="light-blue" aria-label="Switch to light mode" type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/madeinoz67/madeinoz-knowledge-system" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+  </div>
+  <div class="md-source__repository">
+    madeinoz67/madeinoz-knowledge-system
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../index.html" title="Madeinoz Knowledge System (PAI Pack)" class="md-nav__button md-logo" aria-label="Madeinoz Knowledge System (PAI Pack)" data-md-component="logo">
+      
+  <img src="../assets/logo.png" alt="logo">
+
+    </a>
+    Madeinoz Knowledge System (PAI Pack)
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/madeinoz67/madeinoz-knowledge-system" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+  </div>
+  <div class="md-source__repository">
+    madeinoz67/madeinoz-knowledge-system
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2">
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/overview.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/quick-reference.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3">
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Installation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/requirements.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/verification.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/remote-deployment.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Remote Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../remote-access.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Remote Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4">
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Usage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/basic-usage.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Basic Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/advanced.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/memory-decay.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory Decay &amp; Lifecycle
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/monitoring.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/backup-restore.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backup &amp; Restore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="architecture.html" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#core-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Architecture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How It Works">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-natural-capture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Natural Capture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-semantic-search" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Semantic Search
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-relationship-discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Relationship Discovery
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#design-principles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design Principles
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#multi-layered-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-Layered Architecture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architectural-advantages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architectural Advantages
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Architectural Advantages">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-separation-of-concerns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Separation of Concerns
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-bidirectional-knowledge-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Bidirectional Knowledge Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-multi-dimensional-retrieval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Multi-Dimensional Retrieval
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-automatic-entity-extraction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Automatic Entity Extraction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-temporal-context-tracking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Temporal Context Tracking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-lucene-query-sanitization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Lucene Query Sanitization
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#component-stack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Component Stack
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#knowledge-architecture-innovation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Knowledge Architecture Innovation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problems-this-architecture-prevents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problems This Architecture Prevents
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="knowledge-graph.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Knowledge Graph
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hooks-integration.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hooks &amp; Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6">
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Troubleshooting
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/common-issues.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Common Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/known-issues.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Known Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7">
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/cli.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/configuration.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/observability.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Observability &amp; Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/cache-implementation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cache Implementation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/model-guide.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/benchmarks.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmarks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/developer-notes.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/releases.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release Process
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../acknowledgments.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Acknowledgments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#core-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Architecture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How It Works">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-natural-capture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Natural Capture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-semantic-search" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Semantic Search
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-relationship-discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Relationship Discovery
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#design-principles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design Principles
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#multi-layered-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-Layered Architecture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architectural-advantages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architectural Advantages
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Architectural Advantages">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-separation-of-concerns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Separation of Concerns
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-bidirectional-knowledge-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Bidirectional Knowledge Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-multi-dimensional-retrieval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Multi-Dimensional Retrieval
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-automatic-entity-extraction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Automatic Entity Extraction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-temporal-context-tracking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Temporal Context Tracking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-lucene-query-sanitization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Lucene Query Sanitization
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#component-stack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Component Stack
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#knowledge-architecture-innovation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Knowledge Architecture Innovation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problems-this-architecture-prevents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problems This Architecture Prevents
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">¶</a></h1>
+<p>The Knowledge System solves the problem of amnesiac AI through <strong>automatic knowledge graph construction</strong>. Instead of requiring manual note-taking, it extracts and structures knowledge as a natural byproduct of conversation.</p>
+<h2 id="core-architecture">Core Architecture<a class="headerlink" href="#core-architecture" title="Permanent link">¶</a></h2>
+<p><a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="../images/architecture-core-system.png" data-desc-position="bottom"><img alt="Knowledge System Core Architecture" src="../images/architecture-core-system.png"></a></p>
+<p><em>User conversation and document text flow through the Knowledge System Skill → Intent Routing → Graphiti MCP Server (with Memory Decay) → Graph Database Backend (Neo4j/FalkorDB) → Graph Storage (Nodes, Edges, Episodes, Indices)</em></p>
+<h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">¶</a></h2>
+<h3 id="1-natural-capture">1. Natural Capture<a class="headerlink" href="#1-natural-capture" title="Permanent link">¶</a></h3>
+<p>Say "remember that Podman volumes use host:container syntax" and the system:</p>
+<ul>
+<li>Extracts entities: "Podman", "volume mounting"</li>
+<li>Identifies relationship: "uses", "syntax rule"</li>
+<li>Classifies importance and stability (Feature 009)</li>
+<li>Creates episode with full context</li>
+<li>Stores in graph with timestamp</li>
+</ul>
+<h3 id="2-semantic-search">2. Semantic Search<a class="headerlink" href="#2-semantic-search" title="Permanent link">¶</a></h3>
+<p>Ask "what do I know about container orchestration?" and the system:</p>
+<ul>
+<li>Searches vector embeddings for related concepts</li>
+<li>Applies weighted scoring: semantic (60%) + recency (25%) + importance (15%)</li>
+<li>Returns entities: "Podman", "Kubernetes", "Docker Compose"</li>
+<li>Shows relationships: "alternatives to", "similar tools"</li>
+<li>Displays episodes with full context</li>
+</ul>
+<h3 id="3-relationship-discovery">3. Relationship Discovery<a class="headerlink" href="#3-relationship-discovery" title="Permanent link">¶</a></h3>
+<p>Ask "how are FalkorDB and Graphiti connected?" and the system:</p>
+<ul>
+<li>Traverses graph edges between entities</li>
+<li>Returns: "FalkorDB is the graph database backend for Graphiti"</li>
+<li>Shows temporal context: "learned on 2025-01-03"</li>
+<li>Displays related entities and connections</li>
+</ul>
+<h2 id="design-principles">Design Principles<a class="headerlink" href="#design-principles" title="Permanent link">¶</a></h2>
+<ol>
+<li><strong>Zero Friction</strong>: Capture knowledge through natural conversation</li>
+<li><strong>Automatic Extraction</strong>: LLM-powered entity and relationship detection</li>
+<li><strong>Semantic Understanding</strong>: Vector embeddings enable concept-based search</li>
+<li><strong>Temporal Tracking</strong>: Know when knowledge was added and how it evolves</li>
+<li><strong>Graph-Based</strong>: Explicit relationships show how concepts connect</li>
+<li><strong>Memory Prioritization</strong>: Automatic importance/stability classification with decay scoring (Feature 009)</li>
+<li><strong>Complete</strong>: Every component included - MCP server, PAI skill, workflows</li>
+</ol>
+<h2 id="multi-layered-architecture">Multi-Layered Architecture<a class="headerlink" href="#multi-layered-architecture" title="Permanent link">¶</a></h2>
+<p><a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="../images/architecture-multi-layered.png" data-desc-position="bottom"><img alt="Multi-Layered Architecture" src="../images/architecture-multi-layered.png"></a></p>
+<p><em>The system uses progressive abstraction across 6 layers:</em></p>
+<p><em><strong>Layer 1 - User Intent:</strong> Natural language triggers ("remember this", "what do I know", "how are X and Y")</em></p>
+<p><em><strong>Layer 2 - PAI Skill Routing:</strong> SKILL.md frontmatter → Intent Detection → Workflow routing</em></p>
+<p><em><strong>Layer 3 - Workflow Execution:</strong> CaptureEpisode, SearchKnowledge, SearchFacts, GetRecent</em></p>
+<p><em><strong>Layer 4 - MCP Server Integration:</strong> SSE Endpoint (localhost:8000/sse) → add_memory, search_memory_nodes, search_memory_facts, get_episodes</em></p>
+<p><em><strong>Layer 5 - Graphiti Knowledge Graph:</strong> LLM Processing → Entity Extraction → Relationship Mapping → Memory Decay → Vector Embeddings</em></p>
+<p><em><strong>Layer 6 - Graph Database:</strong> Nodes (Entities + Embeddings), Edges (Typed Relationships), Episodes (Full Context), Indices (Vector + Keyword)</em></p>
+<h2 id="architectural-advantages">Architectural Advantages<a class="headerlink" href="#architectural-advantages" title="Permanent link">¶</a></h2>
+<h3 id="1-separation-of-concerns">1. Separation of Concerns<a class="headerlink" href="#1-separation-of-concerns" title="Permanent link">¶</a></h3>
+<p>Each layer has a single responsibility:</p>
+<ul>
+<li><strong>Intent Layer</strong>: Natural language understanding</li>
+<li><strong>Routing Layer</strong>: Direct user intent to workflow</li>
+<li><strong>Workflow Layer</strong>: Operational procedures</li>
+<li><strong>Server Layer</strong>: API abstraction</li>
+<li><strong>Graph Layer</strong>: Knowledge operations</li>
+<li><strong>Database Layer</strong>: Persistent storage</li>
+</ul>
+<p>This is FUNDAMENTALLY DIFFERENT from "just storing notes" because:</p>
+<ul>
+<li>Progressive abstraction (not everything in one layer)</li>
+<li>Explicit intent routing (not fuzzy keyword matching)</li>
+<li>Separation of operations (capture, search, retrieve distinct)</li>
+<li>Deterministic execution (workflows map intent to MCP calls)</li>
+</ul>
+<h3 id="2-bidirectional-knowledge-flow">2. Bidirectional Knowledge Flow<a class="headerlink" href="#2-bidirectional-knowledge-flow" title="Permanent link">¶</a></h3>
+<p><a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="../images/architecture-bidirectional-flow.png" data-desc-position="bottom"><img alt="Bidirectional Knowledge Flow" src="../images/architecture-bidirectional-flow.png"></a></p>
+<p><em>Capture path (green): User says "Remember X" → Capture Episode → Extract Entities → Create Relationships → Store in Graph</em></p>
+<p><em>Retrieval path (blue): Graph Query → Semantic Similarity → Vector Search → Search Results → User asks "What about X"</em></p>
+<p><em>Center: Knowledge compounds over time (dotted arrow)</em></p>
+<p>Every knowledge addition improves future retrieval. Every search result can trigger new knowledge capture.</p>
+<h3 id="3-multi-dimensional-retrieval">3. Multi-Dimensional Retrieval<a class="headerlink" href="#3-multi-dimensional-retrieval" title="Permanent link">¶</a></h3>
+<p>Traditional search: Keyword matching in flat text
+Knowledge graph: Three retrieval dimensions</p>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Mechanism</th>
+<th>Example Query</th>
+<th>Result Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Semantic</strong></td>
+<td>Vector embeddings</td>
+<td>"container orchestration"</td>
+<td>Podman, Kubernetes, Docker</td>
+</tr>
+<tr>
+<td><strong>Relational</strong></td>
+<td>Graph traversal</td>
+<td>"how are X and Y related"</td>
+<td>"X uses Y as backend"</td>
+</tr>
+<tr>
+<td><strong>Temporal</strong></td>
+<td>Episode timestamps</td>
+<td>"what did I learn about X"</td>
+<td>Chronological episodes</td>
+</tr>
+</tbody>
+</table>
+<h3 id="4-automatic-entity-extraction">4. Automatic Entity Extraction<a class="headerlink" href="#4-automatic-entity-extraction" title="Permanent link">¶</a></h3>
+<p>LLM-powered extraction identifies:</p>
+<ul>
+<li><strong>Named Entities</strong>: People, organizations, locations</li>
+<li><strong>Abstract Concepts</strong>: Technologies, methodologies, patterns</li>
+<li><strong>Procedural Knowledge</strong>: Workflows, SOPs, how-to guides</li>
+<li><strong>Preferences</strong>: Choices, configurations, opinions</li>
+<li><strong>Requirements</strong>: Features, needs, specifications</li>
+</ul>
+<p>This happens AUTOMATICALLY - no manual tagging required.</p>
+<h3 id="5-temporal-context-tracking">5. Temporal Context Tracking<a class="headerlink" href="#5-temporal-context-tracking" title="Permanent link">¶</a></h3>
+<p>Every episode includes:</p>
+<ul>
+<li>Timestamp: When knowledge was added</li>
+<li>Source: Conversation or document</li>
+<li>Entity State: How understanding evolved</li>
+<li>Relationship Creation: When connections were made</li>
+</ul>
+<p>Example: "FalkorDB backend for Graphiti (learned 2025-01-03, updated 2025-01-05)"</p>
+<h3 id="6-lucene-query-sanitization">6. Lucene Query Sanitization<a class="headerlink" href="#6-lucene-query-sanitization" title="Permanent link">¶</a></h3>
+<p>The knowledge system includes automatic query sanitization to handle special characters in search terms, particularly important for CTI/OSINT data with hyphenated identifiers (e.g., <code>apt-28</code>, <code>threat-intel</code>).</p>
+<div class="admonition note">
+<p class="admonition-title">Full Documentation</p>
+<p>For detailed information about Lucene query sanitization, including the problem, solution, and sanitization functions, see the <a href="../troubleshooting/known-issues.html#lucene-query-sanitization">Known Issues</a> page.</p>
+</div>
+<h2 id="component-stack">Component Stack<a class="headerlink" href="#component-stack" title="Permanent link">¶</a></h2>
+<p>The architecture includes every component needed for end-to-end operation:</p>
+<ul>
+<li>✅ <strong>MCP Server</strong>: <code>bun run server-cli start</code> starts Graphiti + Neo4j/FalkorDB</li>
+<li>✅ <strong>PAI Skill</strong>: <code>SKILL.md</code> with intent routing</li>
+<li>✅ <strong>Workflows</strong>: 7 complete operational procedures</li>
+<li>✅ <strong>Installation</strong>: Step-by-step in <code>tools/Install.md</code></li>
+<li>✅ <strong>Configuration</strong>: All settings in PAI config (<code>$PAI_DIR/.env</code>)</li>
+<li>✅ <strong>Documentation</strong>: README, INSTALL, VERIFY</li>
+<li>✅ <strong>Query Sanitization</strong>: Handles special characters automatically</li>
+</ul>
+<p>NOT: "You need to set up your own vector database" - FalkorDB is included
+NOT: "Implement your own entity extraction" - Graphiti handles it
+NOT: "Configure your own embeddings" - OpenAI integration built-in
+NOT: "Handle special characters manually" - Lucene sanitization built-in</p>
+<h2 id="knowledge-architecture-innovation">Knowledge Architecture Innovation<a class="headerlink" href="#knowledge-architecture-innovation" title="Permanent link">¶</a></h2>
+<p>The key insight is that <strong>knowledge is relational, not transactional</strong>. Traditional note-taking treats each piece of information as an isolated transaction. The Madeinoz Knowledge System treats knowledge as a graph of interconnected entities with temporal context.</p>
+<p>This isn't just "better search" - it's a fundamentally different paradigm:</p>
+<ul>
+<li><strong>Transaction</strong>: "Note about Podman volumes" (isolated, static)</li>
+<li><strong>Relational</strong>: "Podman → uses → volume mounting → syntax → host:container" (connected, queryable, temporal)</li>
+</ul>
+<p>The graph structure allows queries impossible with flat notes:</p>
+<ul>
+<li>"Show me all technologies related to container orchestration I learned about in the past month"</li>
+<li>"What debugging solutions led to architectural decisions?"</li>
+<li>"How do my preferences for dev tools relate to past troubleshooting sessions?"</li>
+<li>"Find all CTI indicators from group 'apt-28'"</li>
+</ul>
+<p>This architecture makes your AI infrastructure genuinely intelligent, not just a better filing cabinet.</p>
+<h2 id="problems-this-architecture-prevents">Problems This Architecture Prevents<a class="headerlink" href="#problems-this-architecture-prevents" title="Permanent link">¶</a></h2>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>Traditional Approach</th>
+<th>Knowledge Graph Approach</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Keyword limits</strong></td>
+<td>Must know exact terms</td>
+<td>Semantic similarity finds related concepts</td>
+</tr>
+<tr>
+<td><strong>Siloed information</strong></td>
+<td>Notes in separate files</td>
+<td>Graph connects everything</td>
+</tr>
+<tr>
+<td><strong>Lost context</strong></td>
+<td>No temporal tracking</td>
+<td>Every episode has timestamp</td>
+</tr>
+<tr>
+<td><strong>No relationships</strong></td>
+<td>Flat documents</td>
+<td>Explicit edges between entities</td>
+</tr>
+<tr>
+<td><strong>Manual organization</strong></td>
+<td>Tag and categorize yourself</td>
+<td>Automatic entity extraction</td>
+</tr>
+<tr>
+<td><strong>Scattered knowledge</strong></td>
+<td>Multiple tools</td>
+<td>Single unified graph</td>
+</tr>
+<tr>
+<td><strong>Hyphenated identifiers</strong></td>
+<td>Query syntax errors</td>
+<td>Automatic sanitization</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"></path></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer">
+        
+          
+          <a href="../usage/backup-restore.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Backup &amp; Restore">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Backup &amp; Restore
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="knowledge-graph.html" class="md-footer__link md-footer__link--next" aria-label="Next: Knowledge Graph">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Knowledge Graph
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"></path></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/madeinoz67/madeinoz-knowledge-system" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"></path></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "search.suggest", "search.highlight", "content.code.copy", "content.tabs.link", "content.lightbox"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  
+<script id="init-glightbox">const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});
+document$.subscribe(()=>{ lightbox.reload(); });
+</script></body></html>

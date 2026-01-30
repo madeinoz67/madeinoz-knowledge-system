@@ -1,0 +1,3346 @@
+<!DOCTYPE html><html lang="en" class="no-js"><head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Getting started with the Madeinoz Knowledge System - capture, search, and review knowledge">
+      
+      
+        <meta name="author" content="madeinoz67">
+      
+      
+        <link rel="canonical" href="https://madeinoz67.github.io/madeinoz-knowledge-system/usage/basic-usage.html">
+      
+      
+        <link rel="prev" href="../remote-access.html">
+      
+      
+        <link rel="next" href="advanced.html">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Basic Usage - Madeinoz Knowledge System (PAI Pack)</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+        <script src="https://unpkg.com/iframe-worker/shim"></script>
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  <link href="../assets/stylesheets/glightbox.min.css" rel="stylesheet"><script src="../assets/javascripts/glightbox.min.js"></script><style id="glightbox-style">
+            html.glightbox-open { overflow: initial; height: 100%; }
+            .gslide-title { margin-top: 0px; user-select: text; }
+            .gslide-desc { color: #666; user-select: text; }
+            .gslide-image img { background: white; }
+            .gscrollbar-fixer { padding-right: 15px; }
+            .gdesc-inner { font-size: 0.75rem; }
+            body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color); }
+            body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color); }
+            body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color); }
+        </style></head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="light-blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#basic-usage-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../index.html" title="Madeinoz Knowledge System (PAI Pack)" class="md-header__button md-logo" aria-label="Madeinoz Knowledge System (PAI Pack)" data-md-component="logo">
+      
+  <img src="../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Madeinoz Knowledge System (PAI Pack)
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Basic Usage
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="light-blue" aria-label="Switch to dark mode" type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="light-blue" aria-label="Switch to light mode" type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/madeinoz67/madeinoz-knowledge-system" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+  </div>
+  <div class="md-source__repository">
+    madeinoz67/madeinoz-knowledge-system
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../index.html" title="Madeinoz Knowledge System (PAI Pack)" class="md-nav__button md-logo" aria-label="Madeinoz Knowledge System (PAI Pack)" data-md-component="logo">
+      
+  <img src="../assets/logo.png" alt="logo">
+
+    </a>
+    Madeinoz Knowledge System (PAI Pack)
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/madeinoz67/madeinoz-knowledge-system" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+  </div>
+  <div class="md-source__repository">
+    madeinoz67/madeinoz-knowledge-system
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2">
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/overview.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/quick-reference.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3">
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Installation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/requirements.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/verification.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/remote-deployment.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Remote Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../remote-access.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Remote Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Usage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Basic Usage
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="basic-usage.html" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Basic Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#capturing-knowledge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Capturing Knowledge
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Capturing Knowledge">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-capture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Capture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alternative-phrases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alternative Phrases
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#capturing-different-types-of-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Capturing Different Types of Information
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Capturing Different Types of Information">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#technical-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Technical Decisions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#personal-preferences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Personal Preferences
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#procedures-and-how-tos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Procedures and How-Tos
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes-and-solutions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug Fixes and Solutions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-snippets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Snippets
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#searching-knowledge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Searching Knowledge
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Searching Knowledge">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-search" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Search
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alternative-search-phrases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alternative Search Phrases
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#searching-by-topic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Searching by Topic
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#searching-for-procedures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Searching for Procedures
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#searching-for-preferences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Searching for Preferences
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#searching-for-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Searching for Decisions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filtering-by-entity-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filtering by Entity Type
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#finding-connections" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Finding Connections
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Finding Connections">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#discover-relationships" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Discover Relationships
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alternative-phrases_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alternative Phrases
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#finding-related-concepts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Finding Related Concepts
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reviewing-your-knowledge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reviewing Your Knowledge
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Reviewing Your Knowledge">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#recent-additions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recent Additions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filtered-recent-additions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filtered Recent Additions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#temporal-search-date-filtering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Temporal Search (Date Filtering)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getting-system-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Getting System Status
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#managing-your-knowledge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Managing Your Knowledge
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Managing Your Knowledge">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bulk-import" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bulk Import
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#clearing-the-graph" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Clearing the Graph
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-the-llm-processes-your-knowledge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How the LLM Processes Your Knowledge
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tips-for-effective-knowledge-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tips for Effective Knowledge Management
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tips for Effective Knowledge Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-be-specific" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Be Specific
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-include-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Include Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-explain-relationships" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Explain Relationships
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-add-temporal-context-when-relevant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Add Temporal Context When Relevant
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-review-regularly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Review Regularly
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#working-with-multiple-knowledge-graphs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Working with Multiple Knowledge Graphs
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Working with Multiple Knowledge Graphs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#setting-up-groups" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setting Up Groups
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-cases-for-multiple-groups" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Cases for Multiple Groups
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#switching-between-groups" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Switching Between Groups
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integration-with-other-pai-systems" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integration with Other PAI Systems
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Integration with Other PAI Systems">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#memory-system-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory System Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#checking-sync-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Checking Sync Status
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#search-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Search Caching
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Search Caching">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-cache-refreshes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When Cache Refreshes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#if-you-need-fresh-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        If You Need Fresh Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#whats-cached-vs-not-cached" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Cached vs Not Cached
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="advanced.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="memory-decay.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory Decay &amp; Lifecycle
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="monitoring.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="backup-restore.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backup &amp; Restore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5">
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/architecture.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/knowledge-graph.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Knowledge Graph
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/hooks-integration.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hooks &amp; Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6">
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Troubleshooting
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/common-issues.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Common Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/known-issues.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Known Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7">
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/cli.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/configuration.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/observability.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Observability &amp; Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/cache-implementation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cache Implementation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/model-guide.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/benchmarks.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmarks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/developer-notes.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/releases.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release Process
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../acknowledgments.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Acknowledgments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#capturing-knowledge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Capturing Knowledge
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Capturing Knowledge">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-capture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Capture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alternative-phrases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alternative Phrases
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#capturing-different-types-of-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Capturing Different Types of Information
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Capturing Different Types of Information">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#technical-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Technical Decisions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#personal-preferences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Personal Preferences
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#procedures-and-how-tos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Procedures and How-Tos
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes-and-solutions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug Fixes and Solutions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-snippets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Snippets
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#searching-knowledge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Searching Knowledge
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Searching Knowledge">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-search" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Search
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alternative-search-phrases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alternative Search Phrases
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#searching-by-topic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Searching by Topic
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#searching-for-procedures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Searching for Procedures
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#searching-for-preferences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Searching for Preferences
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#searching-for-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Searching for Decisions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filtering-by-entity-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filtering by Entity Type
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#finding-connections" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Finding Connections
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Finding Connections">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#discover-relationships" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Discover Relationships
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alternative-phrases_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alternative Phrases
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#finding-related-concepts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Finding Related Concepts
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reviewing-your-knowledge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reviewing Your Knowledge
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Reviewing Your Knowledge">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#recent-additions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recent Additions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filtered-recent-additions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filtered Recent Additions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#temporal-search-date-filtering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Temporal Search (Date Filtering)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getting-system-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Getting System Status
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#managing-your-knowledge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Managing Your Knowledge
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Managing Your Knowledge">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bulk-import" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bulk Import
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#clearing-the-graph" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Clearing the Graph
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-the-llm-processes-your-knowledge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How the LLM Processes Your Knowledge
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tips-for-effective-knowledge-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tips for Effective Knowledge Management
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tips for Effective Knowledge Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-be-specific" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Be Specific
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-include-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Include Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-explain-relationships" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Explain Relationships
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-add-temporal-context-when-relevant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Add Temporal Context When Relevant
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-review-regularly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Review Regularly
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#working-with-multiple-knowledge-graphs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Working with Multiple Knowledge Graphs
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Working with Multiple Knowledge Graphs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#setting-up-groups" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setting Up Groups
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-cases-for-multiple-groups" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Cases for Multiple Groups
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#switching-between-groups" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Switching Between Groups
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integration-with-other-pai-systems" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integration with Other PAI Systems
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Integration with Other PAI Systems">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#memory-system-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory System Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#checking-sync-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Checking Sync Status
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#search-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Search Caching
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Search Caching">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-cache-refreshes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When Cache Refreshes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#if-you-need-fresh-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        If You Need Fresh Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#whats-cached-vs-not-cached" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Cached vs Not Cached
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="basic-usage-guide">Basic Usage Guide<a class="headerlink" href="#basic-usage-guide" title="Permanent link">¶</a></h1>
+<p>This guide shows you how to use the Madeinoz Knowledge System in everyday situations. All commands are shown as natural language - just talk to your AI assistant normally.</p>
+<h2 id="capturing-knowledge">Capturing Knowledge<a class="headerlink" href="#capturing-knowledge" title="Permanent link">¶</a></h2>
+<h3 id="basic-capture">Basic Capture<a class="headerlink" href="#basic-capture" title="Permanent link">¶</a></h3>
+<p>The simplest way to add knowledge is to just say "remember this":</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>You: Remember that Podman is a daemonless container engine.
+</span></code></pre></div>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>AI: Knowledge Captured
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>Stored episode: Podman Architecture
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>Entities extracted:
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>- Podman (Tool)
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>- container engine (Concept)
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>- daemonless (Property)
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>Relationships identified:
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>- Podman -&gt; is a -&gt; container engine
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>- Podman -&gt; has property -&gt; daemonless
+</span></code></pre></div>
+<h3 id="alternative-phrases">Alternative Phrases<a class="headerlink" href="#alternative-phrases" title="Permanent link">¶</a></h3>
+<p>All of these work the same way:</p>
+<ul>
+<li>"Remember this"</li>
+<li>"Store this"</li>
+<li>"Add to my knowledge"</li>
+<li>"Save this information"</li>
+<li>"Log this"</li>
+<li>"Keep track of this"</li>
+</ul>
+<h3 id="capturing-different-types-of-information">Capturing Different Types of Information<a class="headerlink" href="#capturing-different-types-of-information" title="Permanent link">¶</a></h3>
+<h4 id="technical-decisions">Technical Decisions<a class="headerlink" href="#technical-decisions" title="Permanent link">¶</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>You: Remember that we chose FalkorDB over Neo4j because it's lighter weight and uses Redis as the backend.
+</span></code></pre></div>
+<p>The system uses an LLM (GPT-4) to automatically extract:</p>
+<ul>
+<li>The decision (FalkorDB vs Neo4j)</li>
+<li>The reasoning (lighter weight, Redis backend)</li>
+<li>Temporal context (when you made this decision)</li>
+<li>Relationships between concepts</li>
+</ul>
+<h4 id="personal-preferences">Personal Preferences<a class="headerlink" href="#personal-preferences" title="Permanent link">¶</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>You: Store this: I prefer writing documentation in Markdown rather than Word documents because it's easier to version control.
+</span></code></pre></div>
+<p>The system extracts:</p>
+<ul>
+<li>Preference: Markdown over Word</li>
+<li>Reason: version control compatibility</li>
+<li>Type: personal preference</li>
+</ul>
+<h4 id="procedures-and-how-tos">Procedures and How-Tos<a class="headerlink" href="#procedures-and-how-tos" title="Permanent link">¶</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>You: Remember this procedure: To reset the knowledge graph, use the clear graph command, then restart the MCP server to rebuild the indices.
+</span></code></pre></div>
+<p>The system creates:</p>
+<ul>
+<li>A procedure entity</li>
+<li>Steps in sequence</li>
+<li>Related tools and commands</li>
+</ul>
+<h4 id="bug-fixes-and-solutions">Bug Fixes and Solutions<a class="headerlink" href="#bug-fixes-and-solutions" title="Permanent link">¶</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>You: Remember this fix: When Podman containers can't access the internet, run 'podman network reload' to refresh the network stack.
+</span></code></pre></div>
+<p>Perfect for capturing solutions to problems you've solved.</p>
+<h4 id="configuration-snippets">Configuration Snippets<a class="headerlink" href="#configuration-snippets" title="Permanent link">¶</a></h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>You: Save my tmux configuration: I use Ctrl+A as prefix, enable mouse mode, and set the history limit to 50000 lines.
+</span></code></pre></div>
+<p>Great for keeping track of your preferred settings.</p>
+<h2 id="searching-knowledge">Searching Knowledge<a class="headerlink" href="#searching-knowledge" title="Permanent link">¶</a></h2>
+<h3 id="basic-search">Basic Search<a class="headerlink" href="#basic-search" title="Permanent link">¶</a></h3>
+<p>Ask questions in natural language:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>You: What do I know about Podman?
+</span></code></pre></div>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>AI: Knowledge Found: Podman
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>Based on your knowledge graph:
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>Key Entities:
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>1. Podman (Tool)
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>   - Daemonless container engine
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>   - Alternative to Docker
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>   - CLI-compatible with Docker commands
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>   - Uses libpod library
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>
+</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>Relationships:
+</span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>- Podman -&gt; alternative to -&gt; Docker
+</span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>- Podman -&gt; is a -&gt; container engine
+</span><span id="__span-8-15"><a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a>- Podman -&gt; has property -&gt; daemonless
+</span><span id="__span-8-16"><a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a>
+</span><span id="__span-8-17"><a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a>Episodes:
+</span><span id="__span-8-18"><a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a>- "Podman Architecture" (2025-01-08)
+</span><span id="__span-8-19"><a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a>- "Container Networking Fix" (2025-01-07)
+</span></code></pre></div>
+<h3 id="alternative-search-phrases">Alternative Search Phrases<a class="headerlink" href="#alternative-search-phrases" title="Permanent link">¶</a></h3>
+<p>These all trigger searches:</p>
+<ul>
+<li>"What do I know about X?"</li>
+<li>"Search my knowledge for X"</li>
+<li>"Find information about X"</li>
+<li>"What have I learned about X?"</li>
+<li>"Recall what I know about X"</li>
+</ul>
+<h3 id="searching-by-topic">Searching by Topic<a class="headerlink" href="#searching-by-topic" title="Permanent link">¶</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>You: What do I know about knowledge graphs?
+</span></code></pre></div>
+<p>Returns everything related to knowledge graphs - Graphiti, Neo4j, entities, relationships, etc.</p>
+<h3 id="searching-for-procedures">Searching for Procedures<a class="headerlink" href="#searching-for-procedures" title="Permanent link">¶</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>You: What do I know about resetting the knowledge graph?
+</span></code></pre></div>
+<p>Returns procedural knowledge about graph operations.</p>
+<h3 id="searching-for-preferences">Searching for Preferences<a class="headerlink" href="#searching-for-preferences" title="Permanent link">¶</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>You: What are my development environment preferences?
+</span></code></pre></div>
+<p>Returns your stored preferences about editors, tools, settings, etc.</p>
+<h3 id="searching-for-decisions">Searching for Decisions<a class="headerlink" href="#searching-for-decisions" title="Permanent link">¶</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>You: What architectural decisions have I made?
+</span></code></pre></div>
+<p>Returns episodes about technical choices and their reasoning.</p>
+<h3 id="filtering-by-entity-type">Filtering by Entity Type<a class="headerlink" href="#filtering-by-entity-type" title="Permanent link">¶</a></h3>
+<p>You can narrow searches to specific types of knowledge:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>You: Search my knowledge for procedures about container setup
+</span></code></pre></div>
+<p><strong>Available Entity Types:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>What It Captures</th>
+<th>Example Query</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Preference</strong></td>
+<td>Your choices and settings</td>
+<td>"Find my preferences about editors"</td>
+</tr>
+<tr>
+<td><strong>Procedure</strong></td>
+<td>How-to guides and processes</td>
+<td>"Search for procedures about deployment"</td>
+</tr>
+<tr>
+<td><strong>Learning</strong></td>
+<td>Knowledge from learning sessions</td>
+<td>"What learnings do I have about APIs?"</td>
+</tr>
+<tr>
+<td><strong>Research</strong></td>
+<td>Findings from research</td>
+<td>"Show research about database options"</td>
+</tr>
+<tr>
+<td><strong>Decision</strong></td>
+<td>Architectural choices</td>
+<td>"Find decisions about architecture"</td>
+</tr>
+<tr>
+<td><strong>Feature</strong></td>
+<td>Feature implementations</td>
+<td>"Search for features we've built"</td>
+</tr>
+<tr>
+<td><strong>Person</strong></td>
+<td>Individual people</td>
+<td>"What do I know about team members?"</td>
+</tr>
+<tr>
+<td><strong>Organization</strong></td>
+<td>Companies and teams</td>
+<td>"Find information about vendors"</td>
+</tr>
+<tr>
+<td><strong>Concept</strong></td>
+<td>Ideas and technologies</td>
+<td>"Search concepts about microservices"</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Examples:</strong></p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>You: Find only my procedures about Podman
+</span></code></pre></div>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>You: What research have I done about knowledge graphs?
+</span></code></pre></div>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>You: Show me my learning about TypeScript
+</span></code></pre></div>
+<p>This is especially useful when you have lots of knowledge and want to focus on a specific type.</p>
+<h2 id="finding-connections">Finding Connections<a class="headerlink" href="#finding-connections" title="Permanent link">¶</a></h2>
+<h3 id="discover-relationships">Discover Relationships<a class="headerlink" href="#discover-relationships" title="Permanent link">¶</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>You: How are Graphiti and FalkorDB related?
+</span></code></pre></div>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>AI: Relationships between Graphiti and Neo4j:
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>Direct Relationships:
+</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>- Graphiti -&gt; uses as backend -&gt; Neo4j
+</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>- Neo4j -&gt; provides storage for -&gt; Graphiti
+</span><span id="__span-18-6"><a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>
+</span><span id="__span-18-7"><a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>Context:
+</span><span id="__span-18-8"><a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a>"Graphiti is a knowledge graph framework that uses Neo4j as its
+</span><span id="__span-18-9"><a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a>graph database backend. Neo4j provides native graph storage
+</span><span id="__span-18-10"><a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a>with Cypher query support." (captured 2025-01-08)
+</span></code></pre></div>
+<h3 id="alternative-phrases_1">Alternative Phrases<a class="headerlink" href="#alternative-phrases_1" title="Permanent link">¶</a></h3>
+<ul>
+<li>"How are X and Y connected?"</li>
+<li>"What's the relationship between X and Y?"</li>
+<li>"Show me connections between X and Y"</li>
+</ul>
+<h3 id="finding-related-concepts">Finding Related Concepts<a class="headerlink" href="#finding-related-concepts" title="Permanent link">¶</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>You: What's related to container orchestration in my knowledge?
+</span></code></pre></div>
+<p>Shows all entities connected to that topic - Docker, Podman, Kubernetes, Docker Compose, etc.</p>
+<h2 id="reviewing-your-knowledge">Reviewing Your Knowledge<a class="headerlink" href="#reviewing-your-knowledge" title="Permanent link">¶</a></h2>
+<h3 id="recent-additions">Recent Additions<a class="headerlink" href="#recent-additions" title="Permanent link">¶</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>You: What did I learn recently?
+</span></code></pre></div>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>AI: Recent Knowledge Additions:
+</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>
+</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>Past 7 Days:
+</span><span id="__span-21-4"><a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>1. "Madeinoz Knowledge System Setup" (2025-01-08)
+</span><span id="__span-21-5"><a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>   - Installation and configuration
+</span><span id="__span-21-6"><a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>   - MCP server setup
+</span><span id="__span-21-7"><a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a>
+</span><span id="__span-21-8"><a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a>2. "Podman Networking Fix" (2025-01-07)
+</span><span id="__span-21-9"><a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a>   - Network reload command
+</span><span id="__span-21-10"><a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a>   - Troubleshooting connectivity
+</span><span id="__span-21-11"><a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a>
+</span><span id="__span-21-12"><a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a>3. "Bun vs npm Performance" (2025-01-06)
+</span><span id="__span-21-13"><a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a>   - Package installation speed
+</span><span id="__span-21-14"><a id="__codelineno-21-14" name="__codelineno-21-14" href="#__codelineno-21-14"></a>   - Runtime comparison
+</span></code></pre></div>
+<h3 id="filtered-recent-additions">Filtered Recent Additions<a class="headerlink" href="#filtered-recent-additions" title="Permanent link">¶</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>You: What did I learn about containers this week?
+</span></code></pre></div>
+<p>Shows only recent knowledge about containers.</p>
+<h3 id="temporal-search-date-filtering">Temporal Search (Date Filtering)<a class="headerlink" href="#temporal-search-date-filtering" title="Permanent link">¶</a></h3>
+<p>Search your knowledge by date using the <code>--since</code> and <code>--until</code> flags:</p>
+<p><strong>Today's knowledge:</strong></p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>You: What did I learn today?
+</span></code></pre></div>
+<p><strong>Last 7 days:</strong></p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>You: What did I learn this week about APIs?
+</span></code></pre></div>
+<p><strong>Using CLI for precise date filtering:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="c1"># Today's knowledge</span>
+</span><span id="__span-25-2"><a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"AI"</span><span class="w"> </span>--since<span class="w"> </span>today
+</span><span id="__span-25-3"><a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>
+</span><span id="__span-25-4"><a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a><span class="c1"># Last 7 days</span>
+</span><span id="__span-25-5"><a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_facts<span class="w"> </span><span class="s2">"decisions"</span><span class="w"> </span>--since<span class="w"> </span>7d
+</span><span id="__span-25-6"><a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a>
+</span><span id="__span-25-7"><a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a><span class="c1"># Specific date range</span>
+</span><span id="__span-25-8"><a id="__codelineno-25-8" name="__codelineno-25-8" href="#__codelineno-25-8"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"project"</span><span class="w"> </span>--since<span class="w"> </span><span class="m">2026</span>-01-01<span class="w"> </span>--until<span class="w"> </span><span class="m">2026</span>-01-15
+</span><span id="__span-25-9"><a id="__codelineno-25-9" name="__codelineno-25-9" href="#__codelineno-25-9"></a>
+</span><span id="__span-25-10"><a id="__codelineno-25-10" name="__codelineno-25-10" href="#__codelineno-25-10"></a><span class="c1"># Yesterday only</span>
+</span><span id="__span-25-11"><a id="__codelineno-25-11" name="__codelineno-25-11" href="#__codelineno-25-11"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"learning"</span><span class="w"> </span>--since<span class="w"> </span>yesterday<span class="w"> </span>--until<span class="w"> </span>today
+</span></code></pre></div>
+<p><strong>Supported date formats:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Format</th>
+<th>Example</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>today</code></td>
+<td><code>--since today</code></td>
+<td>Start of current day</td>
+</tr>
+<tr>
+<td><code>yesterday</code></td>
+<td><code>--since yesterday</code></td>
+<td>Start of previous day</td>
+</tr>
+<tr>
+<td><code>Nd</code></td>
+<td><code>--since 7d</code></td>
+<td>N days ago</td>
+</tr>
+<tr>
+<td><code>Nw</code></td>
+<td><code>--since 2w</code></td>
+<td>N weeks ago</td>
+</tr>
+<tr>
+<td><code>Nm</code></td>
+<td><code>--since 1m</code></td>
+<td>N months ago</td>
+</tr>
+<tr>
+<td>ISO 8601</td>
+<td><code>--since 2026-01-15</code></td>
+<td>Specific date</td>
+</tr>
+</tbody>
+</table>
+<p>Temporal search helps you:</p>
+<ul>
+<li>Review what you learned on a specific day</li>
+<li>Find decisions made during a particular period</li>
+<li>Track knowledge accumulation over time</li>
+</ul>
+<h3 id="getting-system-status">Getting System Status<a class="headerlink" href="#getting-system-status" title="Permanent link">¶</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>You: Show me knowledge graph status
+</span></code></pre></div>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>AI: Knowledge Graph Status:
+</span><span id="__span-27-2"><a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>
+</span><span id="__span-27-3"><a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a>Database:
+</span><span id="__span-27-4"><a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a>  Total Entities: 156
+</span><span id="__span-27-5"><a id="__codelineno-27-5" name="__codelineno-27-5" href="#__codelineno-27-5"></a>  Total Facts: 342
+</span><span id="__span-27-6"><a id="__codelineno-27-6" name="__codelineno-27-6" href="#__codelineno-27-6"></a>  Total Episodes: 89
+</span><span id="__span-27-7"><a id="__codelineno-27-7" name="__codelineno-27-7" href="#__codelineno-27-7"></a>
+</span><span id="__span-27-8"><a id="__codelineno-27-8" name="__codelineno-27-8" href="#__codelineno-27-8"></a>Server:
+</span><span id="__span-27-9"><a id="__codelineno-27-9" name="__codelineno-27-9" href="#__codelineno-27-9"></a>  Status: Running
+</span><span id="__span-27-10"><a id="__codelineno-27-10" name="__codelineno-27-10" href="#__codelineno-27-10"></a>  Uptime: 3 days, 4 hours
+</span><span id="__span-27-11"><a id="__codelineno-27-11" name="__codelineno-27-11" href="#__codelineno-27-11"></a>  MCP Endpoint: http://localhost:8000/sse
+</span><span id="__span-27-12"><a id="__codelineno-27-12" name="__codelineno-27-12" href="#__codelineno-27-12"></a>
+</span><span id="__span-27-13"><a id="__codelineno-27-13" name="__codelineno-27-13" href="#__codelineno-27-13"></a>Recent Activity:
+</span><span id="__span-27-14"><a id="__codelineno-27-14" name="__codelineno-27-14" href="#__codelineno-27-14"></a>  Last capture: 2 hours ago
+</span><span id="__span-27-15"><a id="__codelineno-27-15" name="__codelineno-27-15" href="#__codelineno-27-15"></a>  Last search: 5 minutes ago
+</span></code></pre></div>
+<h2 id="managing-your-knowledge">Managing Your Knowledge<a class="headerlink" href="#managing-your-knowledge" title="Permanent link">¶</a></h2>
+<h3 id="bulk-import">Bulk Import<a class="headerlink" href="#bulk-import" title="Permanent link">¶</a></h3>
+<p>Import multiple documents at once:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>You: Import these documents to my knowledge:
+</span><span id="__span-28-2"><a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>[list of files or paste content]
+</span></code></pre></div>
+<p>The system processes each document and extracts entities from all of them.</p>
+<h3 id="clearing-the-graph">Clearing the Graph<a class="headerlink" href="#clearing-the-graph" title="Permanent link">¶</a></h3>
+<p><strong>Warning: This deletes everything!</strong></p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>You: Clear my knowledge graph
+</span></code></pre></div>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>AI: ⚠️  Warning: This will delete all your knowledge
+</span><span id="__span-30-2"><a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a>
+</span><span id="__span-30-3"><a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a>Current State:
+</span><span id="__span-30-4"><a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a>- Entities: 156
+</span><span id="__span-30-5"><a id="__codelineno-30-5" name="__codelineno-30-5" href="#__codelineno-30-5"></a>- Facts: 342
+</span><span id="__span-30-6"><a id="__codelineno-30-6" name="__codelineno-30-6" href="#__codelineno-30-6"></a>- Episodes: 89
+</span><span id="__span-30-7"><a id="__codelineno-30-7" name="__codelineno-30-7" href="#__codelineno-30-7"></a>
+</span><span id="__span-30-8"><a id="__codelineno-30-8" name="__codelineno-30-8" href="#__codelineno-30-8"></a>Are you sure? (Type 'yes' to confirm)
+</span></code></pre></div>
+<p>Use this when you want to start completely fresh.</p>
+<h2 id="how-the-llm-processes-your-knowledge">How the LLM Processes Your Knowledge<a class="headerlink" href="#how-the-llm-processes-your-knowledge" title="Permanent link">¶</a></h2>
+<p>When you capture knowledge, the system uses LLMs in two ways:</p>
+<ol>
+<li><strong>Entity Extraction (GPT-4)</strong> - Identifies people, tools, concepts, procedures, and their relationships</li>
+<li><strong>Embedding Generation (text-embedding-3-small)</strong> - Creates searchable vectors for semantic search</li>
+</ol>
+<p>This means:</p>
+<ul>
+<li>You write naturally, the AI structures it for you</li>
+<li>Search works by meaning, not just keywords</li>
+<li>Relationships are automatically discovered</li>
+</ul>
+<p><strong>Pro tip:</strong> More detailed input = better extraction. "Podman is fast" extracts less than "Podman starts containers faster than Docker because it doesn't need a daemon."</p>
+<p>See <a href="../concepts/knowledge-graph.html#the-role-of-llms-language-models">concepts/knowledge-graph.md</a> for a deep dive on LLM roles and cost optimization.</p>
+<h2 id="tips-for-effective-knowledge-management">Tips for Effective Knowledge Management<a class="headerlink" href="#tips-for-effective-knowledge-management" title="Permanent link">¶</a></h2>
+<h3 id="1-be-specific">1. Be Specific<a class="headerlink" href="#1-be-specific" title="Permanent link">¶</a></h3>
+<p><strong>Instead of:</strong></p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>Remember Docker.
+</span></code></pre></div>
+<p><strong>Try:</strong></p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>Remember that Docker requires a daemon process running as root,
+</span><span id="__span-32-2"><a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a>which is why Podman is often preferred for rootless containers.
+</span></code></pre></div>
+<p>More detail = better entity extraction.</p>
+<h3 id="2-include-context">2. Include Context<a class="headerlink" href="#2-include-context" title="Permanent link">¶</a></h3>
+<p><strong>Instead of:</strong></p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>Remember that config file.
+</span></code></pre></div>
+<p><strong>Try:</strong></p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>Remember my VS Code settings: 2-space tabs, auto-save enabled,
+</span><span id="__span-34-2"><a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>Dracula theme, and JetBrains Mono font.
+</span></code></pre></div>
+<p>Context helps with future searches.</p>
+<h3 id="3-explain-relationships">3. Explain Relationships<a class="headerlink" href="#3-explain-relationships" title="Permanent link">¶</a></h3>
+<p><strong>Instead of:</strong></p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>Remember Graphiti and FalkorDB.
+</span></code></pre></div>
+<p><strong>Try:</strong></p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-36-1"><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a>Remember that Graphiti uses FalkorDB as its graph database backend
+</span><span id="__span-36-2"><a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a>for storing entities and relationships.
+</span></code></pre></div>
+<p>Explicit relationships make connections clearer.</p>
+<h3 id="4-add-temporal-context-when-relevant">4. Add Temporal Context When Relevant<a class="headerlink" href="#4-add-temporal-context-when-relevant" title="Permanent link">¶</a></h3>
+<p><strong>Instead of:</strong></p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-37-1"><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>Remember we had a bug.
+</span></code></pre></div>
+<p><strong>Try:</strong></p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-38-1"><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a>Remember that on January 8th we fixed the container networking bug
+</span><span id="__span-38-2"><a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a>by adding a network reload command to the startup script.
+</span></code></pre></div>
+<p>Temporal context helps track how your knowledge evolves.</p>
+<h3 id="5-review-regularly">5. Review Regularly<a class="headerlink" href="#5-review-regularly" title="Permanent link">¶</a></h3>
+<p>Once a week, run:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-39-1"><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a>What did I learn this week?
+</span></code></pre></div>
+<p>This helps reinforce knowledge and spot gaps.</p>
+<h2 id="working-with-multiple-knowledge-graphs">Working with Multiple Knowledge Graphs<a class="headerlink" href="#working-with-multiple-knowledge-graphs" title="Permanent link">¶</a></h2>
+<p>You can maintain separate graphs for different purposes:</p>
+<h3 id="setting-up-groups">Setting Up Groups<a class="headerlink" href="#setting-up-groups" title="Permanent link">¶</a></h3>
+<p>In your PAI config (<code>$PAI_DIR/.env</code> or <code>~/.claude/.env</code>):</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-40-1"><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a><span class="nv">MADEINOZ_KNOWLEDGE_GROUP_ID</span><span class="o">=</span>work
+</span></code></pre></div>
+<p>Or specify in commands:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-41-1"><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a>Remember this in my work knowledge: [information]
+</span></code></pre></div>
+<h3 id="use-cases-for-multiple-groups">Use Cases for Multiple Groups<a class="headerlink" href="#use-cases-for-multiple-groups" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>work</strong> - Professional knowledge, project decisions</li>
+<li><strong>personal</strong> - Personal preferences, life organization</li>
+<li><strong>research</strong> - Academic or exploratory learning</li>
+<li><strong>code</strong> - Programming patterns and solutions</li>
+</ul>
+<h3 id="switching-between-groups">Switching Between Groups<a class="headerlink" href="#switching-between-groups" title="Permanent link">¶</a></h3>
+<p>Change the GROUP_ID in your config and restart the server, or use group-specific commands if your AI assistant supports them.</p>
+<h2 id="integration-with-other-pai-systems">Integration with Other PAI Systems<a class="headerlink" href="#integration-with-other-pai-systems" title="Permanent link">¶</a></h2>
+<h3 id="memory-system-integration">Memory System Integration<a class="headerlink" href="#memory-system-integration" title="Permanent link">¶</a></h3>
+<p>The PAI Memory System (~/.claude/MEMORY/) automatically syncs with the sync hook:</p>
+<p><strong>What Gets Synced:</strong></p>
+<ul>
+<li>Learning captures from LEARNING/ALGORITHM/ (task execution insights)</li>
+<li>Learning captures from LEARNING/SYSTEM/ (PAI/tooling insights)</li>
+<li>Research findings from RESEARCH/</li>
+</ul>
+<p><strong>Automatic Sync:</strong>
+The hook runs at session start and syncs new captures automatically.</p>
+<p><strong>Manual Sync:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-42-1"><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a>bun<span class="w"> </span>run<span class="w"> </span>~/.claude/hooks/sync-memory-to-knowledge.ts<span class="w"> </span>--verbose
+</span></code></pre></div>
+<h3 id="checking-sync-status">Checking Sync Status<a class="headerlink" href="#checking-sync-status" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-43-1"><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a><span class="c1"># Dry run - see what would be synced</span>
+</span><span id="__span-43-2"><a id="__codelineno-43-2" name="__codelineno-43-2" href="#__codelineno-43-2"></a>bun<span class="w"> </span>run<span class="w"> </span>~/.claude/hooks/sync-memory-to-knowledge.ts<span class="w"> </span>--dry-run
+</span><span id="__span-43-3"><a id="__codelineno-43-3" name="__codelineno-43-3" href="#__codelineno-43-3"></a>
+</span><span id="__span-43-4"><a id="__codelineno-43-4" name="__codelineno-43-4" href="#__codelineno-43-4"></a><span class="c1"># View sync history</span>
+</span><span id="__span-43-5"><a id="__codelineno-43-5" name="__codelineno-43-5" href="#__codelineno-43-5"></a>cat<span class="w"> </span>~/.claude/MEMORY/STATE/knowledge-sync/sync-state.json
+</span></code></pre></div>
+<h2 id="search-caching">Search Caching<a class="headerlink" href="#search-caching" title="Permanent link">¶</a></h2>
+<p>The knowledge system caches search results to make repeated queries faster.</p>
+<h3 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">¶</a></h3>
+<p>When you search for something, the result is cached for 5 minutes. If you ask the same question again within that time, you get an instant response without waiting for the database.</p>
+<p><strong>Example:</strong></p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-44-1"><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a>You: What do I know about Podman?
+</span><span id="__span-44-2"><a id="__codelineno-44-2" name="__codelineno-44-2" href="#__codelineno-44-2"></a>AI: [fetches from database - takes ~500ms]
+</span><span id="__span-44-3"><a id="__codelineno-44-3" name="__codelineno-44-3" href="#__codelineno-44-3"></a>
+</span><span id="__span-44-4"><a id="__codelineno-44-4" name="__codelineno-44-4" href="#__codelineno-44-4"></a>You: What do I know about Podman?
+</span><span id="__span-44-5"><a id="__codelineno-44-5" name="__codelineno-44-5" href="#__codelineno-44-5"></a>AI: [returns cached result - instant]
+</span></code></pre></div>
+<h3 id="when-cache-refreshes">When Cache Refreshes<a class="headerlink" href="#when-cache-refreshes" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Automatically:</strong> After 5 minutes, the next search fetches fresh data</li>
+<li><strong>After adding knowledge:</strong> New knowledge becomes searchable after cache expires</li>
+</ul>
+<h3 id="if-you-need-fresh-results">If You Need Fresh Results<a class="headerlink" href="#if-you-need-fresh-results" title="Permanent link">¶</a></h3>
+<p>After adding new knowledge and wanting to search for it immediately:</p>
+<ol>
+<li>Wait 5 minutes for automatic refresh, <strong>or</strong></li>
+<li>Ask a slightly different question (different queries aren't cached together):</li>
+</ol>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-45-1"><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a>You: Tell me about Podman containers
+</span></code></pre></div>
+<p>instead of</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-46-1"><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a>You: What do I know about Podman?
+</span></code></pre></div>
+<h3 id="whats-cached-vs-not-cached">What's Cached vs Not Cached<a class="headerlink" href="#whats-cached-vs-not-cached" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Cached?</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Searching knowledge</td>
+<td>✅ Yes</td>
+<td>Speeds up repeated queries</td>
+</tr>
+<tr>
+<td>Searching relationships</td>
+<td>✅ Yes</td>
+<td>Speeds up repeated queries</td>
+</tr>
+<tr>
+<td>Adding knowledge</td>
+<td>❌ No</td>
+<td>Must always save to database</td>
+</tr>
+<tr>
+<td>Getting recent episodes</td>
+<td>❌ No</td>
+<td>Needs real-time data</td>
+</tr>
+<tr>
+<td>Checking system status</td>
+<td>❌ No</td>
+<td>Needs real-time data</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Tip:</strong> Caching is transparent - you don't need to think about it. It just makes things faster.</p>
+<h2 id="best-practices-summary">Best Practices Summary<a class="headerlink" href="#best-practices-summary" title="Permanent link">¶</a></h2>
+<ol>
+<li><strong>Capture immediately</strong> - Don't wait to remember details later</li>
+<li><strong>Be descriptive</strong> - More detail is better than less</li>
+<li><strong>Use natural language</strong> - Write as you'd explain to a friend</li>
+<li><strong>Review weekly</strong> - See what you've learned</li>
+<li><strong>Search first</strong> - Before researching externally, check your knowledge</li>
+<li><strong>Connect concepts</strong> - Explicitly mention relationships when you know them</li>
+<li><strong>Don't worry about organization</strong> - The system handles that automatically</li>
+</ol>
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">¶</a></h2>
+<ul>
+<li>Learn more about <a href="../concepts/knowledge-graph.html">how the system works</a></li>
+<li>Explore <a href="advanced.html">advanced usage patterns</a></li>
+<li>Troubleshoot issues in the <a href="../troubleshooting/common-issues.html">troubleshooting guide</a></li>
+</ul>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"></path></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer">
+        
+          
+          <a href="../remote-access.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Remote Access">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Remote Access
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="advanced.html" class="md-footer__link md-footer__link--next" aria-label="Next: Advanced">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Advanced
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"></path></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/madeinoz67/madeinoz-knowledge-system" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"></path></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "search.suggest", "search.highlight", "content.code.copy", "content.tabs.link", "content.lightbox"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  
+<script id="init-glightbox">const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});
+document$.subscribe(()=>{ lightbox.reload(); });
+</script></body></html>

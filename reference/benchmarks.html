@@ -1,0 +1,3132 @@
+<!DOCTYPE html><html lang="en" class="no-js"><head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Performance benchmarks for LLM and embedding models with the Madeinoz Knowledge System">
+      
+      
+        <meta name="author" content="madeinoz67">
+      
+      
+        <link rel="canonical" href="https://madeinoz67.github.io/madeinoz-knowledge-system/reference/benchmarks.html">
+      
+      
+        <link rel="prev" href="model-guide.html">
+      
+      
+        <link rel="next" href="developer-notes.html">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Model Benchmark Results - Madeinoz Knowledge System (PAI Pack)</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+        <script src="https://unpkg.com/iframe-worker/shim"></script>
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  <link href="../assets/stylesheets/glightbox.min.css" rel="stylesheet"><script src="../assets/javascripts/glightbox.min.js"></script><style id="glightbox-style">
+            html.glightbox-open { overflow: initial; height: 100%; }
+            .gslide-title { margin-top: 0px; user-select: text; }
+            .gslide-desc { color: #666; user-select: text; }
+            .gslide-image img { background: white; }
+            .gscrollbar-fixer { padding-right: 15px; }
+            .gdesc-inner { font-size: 0.75rem; }
+            body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color); }
+            body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color); }
+            body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color); }
+        </style></head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="light-blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#model-benchmark-results-madeinoz-knowledge-system" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../index.html" title="Madeinoz Knowledge System (PAI Pack)" class="md-header__button md-logo" aria-label="Madeinoz Knowledge System (PAI Pack)" data-md-component="logo">
+      
+  <img src="../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Madeinoz Knowledge System (PAI Pack)
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Model Benchmark Results
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="light-blue" aria-label="Switch to dark mode" type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="light-blue" aria-label="Switch to light mode" type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/madeinoz67/madeinoz-knowledge-system" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+  </div>
+  <div class="md-source__repository">
+    madeinoz67/madeinoz-knowledge-system
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../index.html" title="Madeinoz Knowledge System (PAI Pack)" class="md-nav__button md-logo" aria-label="Madeinoz Knowledge System (PAI Pack)" data-md-component="logo">
+      
+  <img src="../assets/logo.png" alt="logo">
+
+    </a>
+    Madeinoz Knowledge System (PAI Pack)
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/madeinoz67/madeinoz-knowledge-system" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+  </div>
+  <div class="md-source__repository">
+    madeinoz67/madeinoz-knowledge-system
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2">
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/overview.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/quick-reference.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3">
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Installation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/requirements.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/verification.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/remote-deployment.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Remote Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../remote-access.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Remote Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4">
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Usage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/basic-usage.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Basic Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/advanced.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/memory-decay.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory Decay &amp; Lifecycle
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/monitoring.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/backup-restore.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backup &amp; Restore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5">
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/architecture.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/knowledge-graph.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Knowledge Graph
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/hooks-integration.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hooks &amp; Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6">
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Troubleshooting
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/common-issues.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Common Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/known-issues.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Known Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="cli.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="configuration.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="observability.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Observability &amp; Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="cache-implementation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cache Implementation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-guide.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmarks
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="benchmarks.html" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmarks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#executive-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Executive Summary
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Executive Summary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#real-world-test-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Real-World Test Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recommended-configurations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommended Configurations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#embedding-models-local-vs-cloud" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Embedding Models: Local vs Cloud
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Embedding Models: Local vs Cloud">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-embeddings-matter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Embeddings Matter
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#benchmark-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Benchmark Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-insights" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Insights
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#critical-changing-embedding-models-breaks-everything" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⚠️ CRITICAL: Changing Embedding Models Breaks Everything
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#llm-models-what-actually-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LLM Models: What Actually Works
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="LLM Models: What Actually Works">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#real-life-mcp-integration-test-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Real-Life MCP Integration Test Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#working-models-615" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Working Models (6/15)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#failed-models-915" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ❌ Failed Models (9/15)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cost-vs-performance-vs-accuracy-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cost vs Performance vs Accuracy Matrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#best-value-configuration-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Value Configuration (Recommended)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#production-proven-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Production-Proven Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#speed-critical-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Speed-Critical Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cloud-only-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cloud-Only Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cost-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cost Analysis
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cost Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#monthly-cost-comparison-10000-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Monthly Cost Comparison (10,000 operations)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-you-actually-pay-for" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What You Actually Pay For
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#real-life-validation-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Real-Life Validation Tests
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Real-Life Validation Tests">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#test-1-business-entity-extraction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test 1: Business Entity Extraction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-2-technical-team-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test 2: Technical Team Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-3-mcp-operation-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test 3: MCP Operation Performance
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#technical-testing-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Technical Testing Details
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Technical Testing Details">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#test-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Environment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Scripts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#methodology" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Methodology
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conclusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conclusion
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Conclusion">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#migration-from-other-configs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migration from Other Configs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#future-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Future Considerations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="developer-notes.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="releases.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release Process
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../acknowledgments.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Acknowledgments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#executive-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Executive Summary
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Executive Summary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#real-world-test-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Real-World Test Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recommended-configurations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommended Configurations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#embedding-models-local-vs-cloud" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Embedding Models: Local vs Cloud
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Embedding Models: Local vs Cloud">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-embeddings-matter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Embeddings Matter
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#benchmark-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Benchmark Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-insights" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Insights
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#critical-changing-embedding-models-breaks-everything" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⚠️ CRITICAL: Changing Embedding Models Breaks Everything
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#llm-models-what-actually-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LLM Models: What Actually Works
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="LLM Models: What Actually Works">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#real-life-mcp-integration-test-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Real-Life MCP Integration Test Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#working-models-615" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Working Models (6/15)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#failed-models-915" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ❌ Failed Models (9/15)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cost-vs-performance-vs-accuracy-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cost vs Performance vs Accuracy Matrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#best-value-configuration-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Value Configuration (Recommended)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#production-proven-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Production-Proven Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#speed-critical-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Speed-Critical Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cloud-only-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cloud-Only Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cost-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cost Analysis
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cost Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#monthly-cost-comparison-10000-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Monthly Cost Comparison (10,000 operations)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-you-actually-pay-for" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What You Actually Pay For
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#real-life-validation-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Real-Life Validation Tests
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Real-Life Validation Tests">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#test-1-business-entity-extraction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test 1: Business Entity Extraction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-2-technical-team-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test 2: Technical Team Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-3-mcp-operation-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test 3: MCP Operation Performance
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#technical-testing-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Technical Testing Details
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Technical Testing Details">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#test-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Environment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Scripts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#methodology" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Methodology
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conclusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conclusion
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Conclusion">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#migration-from-other-configs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migration from Other Configs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#future-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Future Considerations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="model-benchmark-results-madeinoz-knowledge-system">Model Benchmark Results - MadeInOz Knowledge System<a class="headerlink" href="#model-benchmark-results-madeinoz-knowledge-system" title="Permanent link">¶</a></h1>
+<p><strong>Last Updated:</strong> 2026-01-18
+<strong>Database:</strong> Neo4j (neo4j:5.28.0)
+<strong>MCP Server:</strong> zepai/knowledge-graph-mcp:standalone
+<strong>Local Ollama Tests:</strong> NVIDIA RTX 4090 GPU (24GB VRAM)</p>
+<hr>
+<h2 id="executive-summary">Executive Summary<a class="headerlink" href="#executive-summary" title="Permanent link">¶</a></h2>
+<div class="admonition success">
+<p class="admonition-title">Key Finding: Hybrid Architecture is Optimal</p>
+<p>The best configuration combines <strong>cloud LLM for entity extraction</strong> with <strong>local Ollama embeddings for search</strong>. This approach delivers cloud-quality accuracy with local speed and cost savings.</p>
+</div>
+<h3 id="real-world-test-results">Real-World Test Results<a class="headerlink" href="#real-world-test-results" title="Permanent link">¶</a></h3>
+<p>We tested 15 different models with actual MCP integration via Graphiti. The results were decisive:</p>
+<ul>
+<li>✅ <strong>6 models work</strong> with Graphiti's strict Pydantic schemas</li>
+<li>❌ <strong>9 models fail</strong> with validation errors or timeouts</li>
+<li>🏆 <strong>Gemini 2.0 Flash is the best value</strong> - cheapest working model with best entity extraction</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Critical Discovery</p>
+<p>ALL open-source models (Llama 3.1 8B, Llama 3.3 70B, Mistral 7B, DeepSeek V3) <strong>FAIL</strong> in real MCP integration despite passing simple JSON tests. They produce Pydantic validation errors with Graphiti's entity/relationship schemas.</p>
+</div>
+<hr>
+<h2 id="recommended-configurations">Recommended Configurations<a class="headerlink" href="#recommended-configurations" title="Permanent link">¶</a></h2>
+<table>
+<thead>
+<tr>
+<th>Use Case</th>
+<th>LLM</th>
+<th>Embedding</th>
+<th>Cost/1K Ops</th>
+<th>Why This?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Best Value</strong></td>
+<td>Gemini 2.0 Flash</td>
+<td>MxBai (Ollama)</td>
+<td>$0.125</td>
+<td>Cheapest working model, extracts 8 entities, 16.4s</td>
+</tr>
+<tr>
+<td><strong>Most Reliable</strong></td>
+<td>GPT-4o Mini</td>
+<td>MxBai (Ollama)</td>
+<td>$0.129</td>
+<td>Production-proven, 7 entities, 18.4s</td>
+</tr>
+<tr>
+<td><strong>Fastest</strong></td>
+<td>GPT-4o</td>
+<td>MxBai (Ollama)</td>
+<td>$2.155</td>
+<td>12.4s extraction, 6 entities</td>
+</tr>
+<tr>
+<td><strong>Premium</strong></td>
+<td>Claude 3.5 Haiku</td>
+<td>MxBai (Ollama)</td>
+<td>$0.816</td>
+<td>7 entities, 24.7s</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Hybrid Approach = Best Results</p>
+<p>Use <strong>cloud LLM</strong> (accurate entity extraction) + <strong>local Ollama embeddings</strong> (free, 9x faster). This combines the strengths of both approaches.</p>
+</div>
+<hr>
+<h2 id="embedding-models-local-vs-cloud">Embedding Models: Local vs Cloud<a class="headerlink" href="#embedding-models-local-vs-cloud" title="Permanent link">¶</a></h2>
+<h3 id="why-embeddings-matter">Why Embeddings Matter<a class="headerlink" href="#why-embeddings-matter" title="Permanent link">¶</a></h3>
+<p>Embeddings power semantic search. Every time you search your knowledge graph, embeddings convert your query into a vector and find similar vectors in the database. <strong>Choose wisely - you cannot change models without re-indexing all data.</strong></p>
+<h3 id="benchmark-results">Benchmark Results<a class="headerlink" href="#benchmark-results" title="Permanent link">¶</a></h3>
+<p>Tested for semantic similarity accuracy using 8 test pairs (5 similar, 3 dissimilar).</p>
+<table>
+<thead>
+<tr>
+<th>Rank</th>
+<th>Model</th>
+<th>Provider</th>
+<th>Quality</th>
+<th>Cost/1M</th>
+<th>Speed</th>
+<th>Dimensions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Embed 3 Small</strong></td>
+<td>OpenRouter</td>
+<td>78.2%</td>
+<td>$0.02</td>
+<td>824ms</td>
+<td>1536</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Embed 3 Large</td>
+<td>OpenRouter</td>
+<td>77.3%</td>
+<td>$0.13</td>
+<td>863ms</td>
+<td>3072</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>MxBai Embed Large</strong> ⭐</td>
+<td>Ollama</td>
+<td>73.9%</td>
+<td><strong>FREE</strong></td>
+<td><strong>87ms</strong></td>
+<td>1024</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Nomic Embed Text</td>
+<td>Ollama</td>
+<td>63.5%</td>
+<td>FREE</td>
+<td>93ms</td>
+<td>768</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Ada 002</td>
+<td>OpenRouter</td>
+<td>58.8%</td>
+<td>$0.10</td>
+<td>801ms</td>
+<td>1536</td>
+</tr>
+</tbody>
+</table>
+<p>⭐ <strong>Recommended</strong>: MxBai Embed Large via Ollama</p>
+<h3 id="key-insights">Key Insights<a class="headerlink" href="#key-insights" title="Permanent link">¶</a></h3>
+<div class="admonition success">
+<p class="admonition-title">MxBai Embed Large Wins</p>
+<ul>
+<li><strong>Quality</strong>: 73.9% (only 4% lower than best paid model)</li>
+<li><strong>Speed</strong>: 87ms (9x faster than cloud models)</li>
+<li><strong>Cost</strong>: FREE (runs locally via Ollama)</li>
+<li><strong>Dimensions</strong>: 1024 (good balance - not too large, not too small)</li>
+</ul>
+</div>
+<div class="admonition info">
+<p class="admonition-title">When to Use Cloud Embeddings</p>
+<p>Use <strong>Embed 3 Small</strong> if you:
+- Don't have GPU/can't run Ollama locally
+- Need absolute best quality (78.2% vs 73.9%)
+- Don't mind 9x slower queries and $0.02/1M cost</p>
+</div>
+<h3 id="critical-changing-embedding-models-breaks-everything">⚠️ CRITICAL: Changing Embedding Models Breaks Everything<a class="headerlink" href="#critical-changing-embedding-models-breaks-everything" title="Permanent link">¶</a></h3>
+<div class="admonition danger">
+<p class="admonition-title">No Migration Path - Choose Once</p>
+<p><strong>Switching embedding models requires re-indexing ALL data.</strong> Each model produces different vector dimensions:</p>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Dimensions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>mxbai-embed-large</td>
+<td>1024</td>
+</tr>
+<tr>
+<td>nomic-embed-text</td>
+<td>768</td>
+</tr>
+<tr>
+<td>text-embedding-3-small</td>
+<td>1536</td>
+</tr>
+<tr>
+<td>text-embedding-3-large</td>
+<td>3072</td>
+</tr>
+</tbody>
+</table>
+<p>Neo4j's vector search requires all vectors to have identical dimensions. If you index with Model A (768 dims) then switch to Model B (1024 dims), <strong>all searches fail</strong> with:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Invalid input for 'vector.similarity.cosine()':
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>The supplied vectors do not have the same number of dimensions
+</span></code></pre></div>
+</div>
+<p><strong>To switch models safely:</strong></p>
+<ol>
+<li><strong>Export important knowledge</strong> (manually note key facts)</li>
+<li><strong>Clear the graph</strong>: Use <code>clear_graph</code> MCP tool</li>
+<li><strong>Update config</strong>:</li>
+</ol>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL=your-new-model
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS=matching-dimension
+</span></code></pre></div>
+<ol>
+<li><strong>Restart the server</strong></li>
+<li><strong>Re-add all knowledge</strong></li>
+</ol>
+<div class="admonition tip">
+<p class="admonition-title">Best Practice</p>
+<p>Choose <code>mxbai-embed-large</code> at installation and never change it. Best balance of quality (73.9%), speed (87ms), and cost (FREE).</p>
+</div>
+<hr>
+<h2 id="llm-models-what-actually-works">LLM Models: What Actually Works<a class="headerlink" href="#llm-models-what-actually-works" title="Permanent link">¶</a></h2>
+<h3 id="real-life-mcp-integration-test-results">Real-Life MCP Integration Test Results<a class="headerlink" href="#real-life-mcp-integration-test-results" title="Permanent link">¶</a></h3>
+<p>We tested <strong>all 15 models</strong> with actual Graphiti integration, not just simple JSON extraction. The test used a complex business scenario requiring extraction of companies, people, locations, and relationships.</p>
+<p><strong>Test Input:</strong></p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>"During the Q4 planning meeting at TechCorp headquarters in Austin, CEO Sarah
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>Martinez announced a strategic partnership with CloudBase Inc, brokered by
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>Morgan Stanley. The deal includes cloud infrastructure migration and a
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>200-person engineering team based in Seattle."
+</span></code></pre></div>
+<p><strong>Expected Entities:</strong> TechCorp, Sarah Martinez, CloudBase Inc, Morgan Stanley, Austin, Seattle</p>
+<h3 id="working-models-615">✅ Working Models (6/15)<a class="headerlink" href="#working-models-615" title="Permanent link">¶</a></h3>
+<p>These models successfully extract entities AND relationships, passing Graphiti's strict Pydantic validation:</p>
+<table>
+<thead>
+<tr>
+<th>Rank</th>
+<th>Model</th>
+<th>Cost/1K</th>
+<th>Entities</th>
+<th>Time</th>
+<th>Quality Score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Gemini 2.0 Flash</strong> 🏆</td>
+<td>$0.125</td>
+<td>8/5</td>
+<td>16.4s</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Qwen 2.5 72B</td>
+<td>$0.126</td>
+<td>8/5</td>
+<td>30.8s</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td>3</td>
+<td>GPT-4o Mini</td>
+<td>$0.129</td>
+<td>7/5</td>
+<td>18.4s</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Claude 3.5 Haiku</td>
+<td>$0.816</td>
+<td>7/5</td>
+<td>24.7s</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td>5</td>
+<td>GPT-4o</td>
+<td>$2.155</td>
+<td>6/5</td>
+<td>12.4s</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Grok 3</td>
+<td>$2.163</td>
+<td>8/5</td>
+<td>22.5s</td>
+<td>⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Entity Count Explanation</p>
+<p>"8/5" means: Extracted 8 entities total (including extras beyond the 5 required). This shows the model identified additional relevant entities like "cloud infrastructure" or "Q4 planning meeting".</p>
+</div>
+<h3 id="failed-models-915">❌ Failed Models (9/15)<a class="headerlink" href="#failed-models-915" title="Permanent link">¶</a></h3>
+<p>These models <strong>DO NOT WORK</strong> with Graphiti despite passing simple JSON tests:</p>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Cost/1K</th>
+<th>Error Type</th>
+<th>Why It Fails</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Llama 3.1 8B</td>
+<td>$0.0145</td>
+<td>Pydantic validation</td>
+<td>Invalid ExtractedEdges schema</td>
+</tr>
+<tr>
+<td>Llama 3.3 70B</td>
+<td>$0.114</td>
+<td>Processing timeout</td>
+<td>Cannot complete extraction</td>
+</tr>
+<tr>
+<td>Mistral 7B</td>
+<td>$0.0167</td>
+<td>Pydantic validation</td>
+<td>Invalid ExtractedEntities schema</td>
+</tr>
+<tr>
+<td>DeepSeek V3</td>
+<td>$0.0585</td>
+<td>Pydantic validation</td>
+<td>Invalid ExtractedEntities schema</td>
+</tr>
+<tr>
+<td>Claude Sonnet 4</td>
+<td>$4.215</td>
+<td>Processing timeout</td>
+<td>Too slow for Graphiti</td>
+</tr>
+<tr>
+<td>Grok 4 Fast</td>
+<td>$0.280</td>
+<td>Pydantic validation</td>
+<td>Invalid ExtractedEntities schema</td>
+</tr>
+<tr>
+<td>Grok 4.1 Fast</td>
+<td>$0.434</td>
+<td>Processing timeout</td>
+<td>Cannot complete extraction</td>
+</tr>
+<tr>
+<td>Grok 3 Mini</td>
+<td>$0.560</td>
+<td>Processing timeout</td>
+<td>Cannot complete extraction</td>
+</tr>
+<tr>
+<td>Grok 4</td>
+<td>$11.842</td>
+<td>Processing timeout</td>
+<td>Even most expensive Grok fails</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Why Open-Source Models Fail</p>
+<p>Llama, Mistral, and DeepSeek models cannot produce JSON that matches Graphiti's strict Pydantic schemas. They work for simple JSON extraction but fail when integrated with the actual knowledge graph system. The "cheap" models listed in early benchmarks <strong>DO NOT WORK</strong> in production.</p>
+</div>
+<h3 id="cost-vs-performance-vs-accuracy-matrix">Cost vs Performance vs Accuracy Matrix<a class="headerlink" href="#cost-vs-performance-vs-accuracy-matrix" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Cost</th>
+<th>Speed</th>
+<th>Entities</th>
+<th>Best For</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Gemini 2.0 Flash</strong></td>
+<td>💰 Cheapest</td>
+<td>⚡ Fast (16s)</td>
+<td>🎯 Most (8)</td>
+<td><strong>RECOMMENDED</strong></td>
+</tr>
+<tr>
+<td>GPT-4o Mini</td>
+<td>💰 Cheap</td>
+<td>⚡ Fast (18s)</td>
+<td>🎯 Good (7)</td>
+<td>Reliability</td>
+</tr>
+<tr>
+<td>Qwen 2.5 72B</td>
+<td>💰 Cheap</td>
+<td>🐌 Slow (31s)</td>
+<td>🎯 Most (8)</td>
+<td>Quality over speed</td>
+</tr>
+<tr>
+<td>Claude 3.5 Haiku</td>
+<td>💰💰 Mid</td>
+<td>⚡ Medium (25s)</td>
+<td>🎯 Good (7)</td>
+<td>Claude ecosystem</td>
+</tr>
+<tr>
+<td>GPT-4o</td>
+<td>💰💰💰 Premium</td>
+<td>⚡⚡ Fastest (12s)</td>
+<td>🎯 Good (6)</td>
+<td>Speed critical</td>
+</tr>
+<tr>
+<td>Grok 3</td>
+<td>💰💰💰 Premium</td>
+<td>⚡ Medium (23s)</td>
+<td>🎯 Most (8)</td>
+<td>xAI ecosystem</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Model Selection Guide</p>
+<ul>
+<li><strong>Default choice</strong>: Gemini 2.0 Flash ($0.125/1K, 8 entities, fast)</li>
+<li><strong>Need reliability</strong>: GPT-4o Mini ($0.129/1K, production-proven)</li>
+<li><strong>Need speed</strong>: GPT-4o ($2.155/1K, 12s extraction)</li>
+<li><strong>Already use Claude</strong>: Claude 3.5 Haiku ($0.816/1K)</li>
+<li><strong>Already use xAI</strong>: Grok 3 only (all other Grok variants fail)</li>
+</ul>
+</div>
+<hr>
+<h2 id="configuration-examples">Configuration Examples<a class="headerlink" href="#configuration-examples" title="Permanent link">¶</a></h2>
+<h3 id="best-value-configuration-recommended">Best Value Configuration (Recommended)<a class="headerlink" href="#best-value-configuration-recommended" title="Permanent link">¶</a></h3>
+<p>Use <strong>Gemini 2.0 Flash + MxBai Embed Large</strong> for optimal cost/performance:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a># LLM: Gemini 2.0 Flash via OpenRouter
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>MADEINOZ_KNOWLEDGE_LLM_PROVIDER=openrouter
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=sk-or-v1-...
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL=https://openrouter.ai/api/v1
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>MADEINOZ_KNOWLEDGE_MODEL_NAME=google/gemini-2.0-flash-001
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a># Embeddings: MxBai via Ollama (local)
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER=ollama
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>MADEINOZ_KNOWLEDGE_EMBEDDER_BASE_URL=http://localhost:11434/v1
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL=mxbai-embed-large
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS=1024
+</span></code></pre></div>
+<p><strong>Cost</strong>: $0.125/1K operations + FREE embeddings
+<strong>Performance</strong>: 16.4s extraction, 87ms search
+<strong>Quality</strong>: 8 entities extracted, 73.9% embedding quality</p>
+<h3 id="production-proven-configuration">Production-Proven Configuration<a class="headerlink" href="#production-proven-configuration" title="Permanent link">¶</a></h3>
+<p>Use <strong>GPT-4o Mini + MxBai</strong> for reliability:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a># LLM: GPT-4o Mini via OpenRouter
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>MADEINOZ_KNOWLEDGE_LLM_PROVIDER=openrouter
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=sk-or-v1-...
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL=https://openrouter.ai/api/v1
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>MADEINOZ_KNOWLEDGE_MODEL_NAME=openai/gpt-4o-mini
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a># Embeddings: MxBai via Ollama (local)
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER=ollama
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>MADEINOZ_KNOWLEDGE_EMBEDDER_BASE_URL=http://localhost:11434/v1
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL=mxbai-embed-large
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS=1024
+</span></code></pre></div>
+<p><strong>Cost</strong>: $0.129/1K operations + FREE embeddings
+<strong>Performance</strong>: 18.4s extraction, 87ms search
+<strong>Quality</strong>: 7 entities extracted, 73.9% embedding quality</p>
+<h3 id="speed-critical-configuration">Speed-Critical Configuration<a class="headerlink" href="#speed-critical-configuration" title="Permanent link">¶</a></h3>
+<p>Use <strong>GPT-4o + MxBai</strong> when speed matters more than cost:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a># LLM: GPT-4o via OpenRouter
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>MADEINOZ_KNOWLEDGE_LLM_PROVIDER=openrouter
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=sk-or-v1-...
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL=https://openrouter.ai/api/v1
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>MADEINOZ_KNOWLEDGE_MODEL_NAME=openai/gpt-4o
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a># Embeddings: MxBai via Ollama (local)
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER=ollama
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>MADEINOZ_KNOWLEDGE_EMBEDDER_BASE_URL=http://localhost:11434/v1
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL=mxbai-embed-large
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS=1024
+</span></code></pre></div>
+<p><strong>Cost</strong>: $2.155/1K operations + FREE embeddings
+<strong>Performance</strong>: 12.4s extraction (fastest), 87ms search
+<strong>Quality</strong>: 6 entities extracted, 73.9% embedding quality</p>
+<h3 id="cloud-only-configuration">Cloud-Only Configuration<a class="headerlink" href="#cloud-only-configuration" title="Permanent link">¶</a></h3>
+<p>Use <strong>GPT-4o Mini + Embed 3 Small</strong> if you can't run Ollama locally:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a># LLM: GPT-4o Mini via OpenRouter
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>MADEINOZ_KNOWLEDGE_LLM_PROVIDER=openrouter
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=sk-or-v1-...
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL=https://openrouter.ai/api/v1
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>MADEINOZ_KNOWLEDGE_MODEL_NAME=openai/gpt-4o-mini
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a># Embeddings: Embed 3 Small via OpenRouter
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER=openrouter
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>MADEINOZ_KNOWLEDGE_EMBEDDER_BASE_URL=https://openrouter.ai/api/v1
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL=openai/text-embedding-3-small
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS=1536
+</span></code></pre></div>
+<p><strong>Cost</strong>: $0.129/1K + $0.02/1M embeddings
+<strong>Performance</strong>: 18.4s extraction, 824ms search (9x slower)
+<strong>Quality</strong>: 7 entities extracted, 78.2% embedding quality (4% better)</p>
+<hr>
+<h2 id="cost-analysis">Cost Analysis<a class="headerlink" href="#cost-analysis" title="Permanent link">¶</a></h2>
+<h3 id="monthly-cost-comparison-10000-operations">Monthly Cost Comparison (10,000 operations)<a class="headerlink" href="#monthly-cost-comparison-10000-operations" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Configuration</th>
+<th>LLM Cost</th>
+<th>Embed Cost</th>
+<th>Total/Month</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Gemini 2.0 Flash + MxBai</strong> (Recommended)</td>
+<td>$1.25</td>
+<td>$0</td>
+<td><strong>$1.25</strong></td>
+</tr>
+<tr>
+<td>GPT-4o Mini + MxBai (Production)</td>
+<td>$1.29</td>
+<td>$0</td>
+<td><strong>$1.29</strong></td>
+</tr>
+<tr>
+<td>GPT-4o + MxBai (Speed)</td>
+<td>$21.55</td>
+<td>$0</td>
+<td><strong>$21.55</strong></td>
+</tr>
+<tr>
+<td>GPT-4o Mini + Embed 3 Small (Cloud-only)</td>
+<td>$1.29</td>
+<td>$0.20</td>
+<td><strong>$1.49</strong></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition success">
+<p class="admonition-title">Cost Savings with Hybrid</p>
+<p>Using local Ollama embeddings saves <strong>$0.20/10K operations</strong> compared to cloud embeddings, while delivering 9x faster search queries.</p>
+</div>
+<h3 id="what-you-actually-pay-for">What You Actually Pay For<a class="headerlink" href="#what-you-actually-pay-for" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>LLM calls</strong>: Every <code>add_memory</code> operation (entity/relationship extraction)</li>
+<li><strong>Embedding calls</strong>: Every <code>add_memory</code> (encode episode) + every search query</li>
+<li><strong>Database</strong>: FREE (self-hosted Neo4j or FalkorDB)</li>
+</ul>
+<p><strong>Example monthly breakdown</strong> (1000 episodes added, 5000 searches):</p>
+<ul>
+<li>Gemini 2.0 Flash (1000 extractions): $0.125</li>
+<li>MxBai embeddings (1000 + 5000 operations): $0.00 (local)</li>
+<li><strong>Total</strong>: $0.125/month</li>
+</ul>
+<hr>
+<h2 id="real-life-validation-tests">Real-Life Validation Tests<a class="headerlink" href="#real-life-validation-tests" title="Permanent link">¶</a></h2>
+<h3 id="test-1-business-entity-extraction">Test 1: Business Entity Extraction<a class="headerlink" href="#test-1-business-entity-extraction" title="Permanent link">¶</a></h3>
+<p><strong>Input:</strong></p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>"During the Q4 planning meeting, CEO Michael Chen announced that TechVentures
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>Inc will acquire DataFlow Systems for $500 million. The deal, brokered by
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>Goldman Sachs, includes all patents and the 200-person engineering team based
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>in Seattle."
+</span></code></pre></div>
+<p><strong>Results with GPT-4o Mini:</strong></p>
+<p>✅ <strong>Extracted Entities</strong> (verified in Neo4j):</p>
+<ul>
+<li>DataFlow Systems</li>
+<li>Goldman Sachs</li>
+<li>Michael Chen</li>
+<li>Seattle</li>
+<li>TechVentures Inc</li>
+</ul>
+<p>✅ <strong>Extracted Facts</strong>:</p>
+<ul>
+<li>"The acquisition deal of DataFlow Systems was brokered by Goldman Sachs"</li>
+<li>"TechVentures Inc will acquire DataFlow Systems for $500 million"</li>
+<li>"DataFlow Systems has a 200-person engineering team based in Seattle"</li>
+</ul>
+<p><strong>Validation</strong>: 5/5 entities, 3 relationship facts extracted successfully</p>
+<h3 id="test-2-technical-team-context">Test 2: Technical Team Context<a class="headerlink" href="#test-2-technical-team-context" title="Permanent link">¶</a></h3>
+<p><strong>Input:</strong></p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>"Team uses TypeScript with Bun runtime. Sarah, our tech lead, chose Hono for
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>the HTTP framework because it's lightweight and fast."
+</span></code></pre></div>
+<p><strong>Results with GPT-4o Mini:</strong></p>
+<p>✅ <strong>Extracted Entities</strong>:</p>
+<ul>
+<li>TypeScript</li>
+<li>Bun</li>
+<li>Sarah</li>
+<li>Hono</li>
+<li>HTTP framework</li>
+</ul>
+<p>✅ <strong>Extracted Facts</strong>:</p>
+<ul>
+<li>"The team uses TypeScript with Bun"</li>
+<li>"Hono is an HTTP framework"</li>
+<li>"Sarah chose Hono as the HTTP framework"</li>
+</ul>
+<p><strong>Validation</strong>: All entities and relationships captured correctly</p>
+<h3 id="test-3-mcp-operation-performance">Test 3: MCP Operation Performance<a class="headerlink" href="#test-3-mcp-operation-performance" title="Permanent link">¶</a></h3>
+<p>Tested all MCP operations with real data:</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Success Rate</th>
+<th>Avg Time</th>
+<th>Results</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>add_memory</td>
+<td>100% (3/3)</td>
+<td>~6ms</td>
+<td>All episodes queued</td>
+</tr>
+<tr>
+<td>search_nodes</td>
+<td>100% (3/3)</td>
+<td>~60ms</td>
+<td>10 nodes per query</td>
+</tr>
+<tr>
+<td>search_memory_facts</td>
+<td>100% (3/3)</td>
+<td>~50ms</td>
+<td>9 facts per query</td>
+</tr>
+<tr>
+<td>get_episodes</td>
+<td>100% (1/1)</td>
+<td>~5ms</td>
+<td>All episodes retrieved</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition success">
+<p class="admonition-title">Production Ready</p>
+<p>All MCP operations work reliably with the recommended Gemini 2.0 Flash + MxBai configuration.</p>
+</div>
+<hr>
+<h2 id="technical-testing-details">Technical Testing Details<a class="headerlink" href="#technical-testing-details" title="Permanent link">¶</a></h2>
+<h3 id="test-environment">Test Environment<a class="headerlink" href="#test-environment" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Database</strong>: Neo4j 5.28.0 (docker)</li>
+<li><strong>MCP Server</strong>: zepai/knowledge-graph-mcp:standalone</li>
+<li><strong>Ollama</strong>: Running on NVIDIA RTX 4090 GPU (24GB VRAM)</li>
+<li><strong>Network</strong>: Local Docker network for Neo4j, separate Ollama instance</li>
+</ul>
+<h3 id="test-scripts">Test Scripts<a class="headerlink" href="#test-scripts" title="Permanent link">¶</a></h3>
+<ul>
+<li><code>test-all-llms-mcp.ts</code> - Comprehensive MCP test for 10 benchmark models</li>
+<li><code>test-grok-llms-mcp.ts</code> - Grok models MCP test (5 variants)</li>
+<li><code>test-search-debug.ts</code> - MCP integration validation script</li>
+</ul>
+<h3 id="methodology">Methodology<a class="headerlink" href="#methodology" title="Permanent link">¶</a></h3>
+<ol>
+<li><strong>Entity Extraction Test</strong>: Complex business scenario with 5+ entities</li>
+<li><strong>Validation</strong>: Check Neo4j directly for extracted entities/relationships</li>
+<li><strong>Schema Compliance</strong>: Verify Pydantic validation passes</li>
+<li><strong>Timeout</strong>: 60s limit for extraction (production realistic)</li>
+<li><strong>Success Criteria</strong>: All entities extracted + valid JSON schemas</li>
+</ol>
+<hr>
+<h2 id="conclusion">Conclusion<a class="headerlink" href="#conclusion" title="Permanent link">¶</a></h2>
+<h3 id="key-takeaways">Key Takeaways<a class="headerlink" href="#key-takeaways" title="Permanent link">¶</a></h3>
+<div class="admonition success">
+<p class="admonition-title">What Works</p>
+<ol>
+<li><strong>Hybrid architecture</strong> (cloud LLM + local embeddings) is optimal</li>
+<li><strong>Gemini 2.0 Flash</strong> is the best value at $0.125/1K</li>
+<li><strong>MxBai Embed Large</strong> via Ollama is best embedding choice (free, fast, good quality)</li>
+<li><strong>Only 6 models work</strong> with Graphiti - ignore benchmarks showing cheap open-source models</li>
+</ol>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">What Doesn't Work</p>
+<ol>
+<li><strong>ALL open-source LLMs fail</strong> (Llama, Mistral, DeepSeek) - Pydantic validation errors</li>
+<li><strong>Most Grok variants fail</strong> - Only Grok 3 works ($2.16/1K)</li>
+<li><strong>"Fast" models fail</strong> - Speed optimizations break schema compliance</li>
+<li><strong>Simple JSON tests lie</strong> - Real MCP integration is the only valid test</li>
+</ol>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Recommended Setup</p>
+<p>Start with <strong>Gemini 2.0 Flash + MxBai Embed Large</strong>:
+- Costs $0.125/1K operations (cheapest working model)
+- Extracts 8 entities (best performance)
+- 16.4s extraction time (fast enough)
+- FREE, fast local embeddings (87ms searches)
+- Total cost: ~$1.25/month for 10K operations</p>
+</div>
+<h3 id="migration-from-other-configs">Migration from Other Configs<a class="headerlink" href="#migration-from-other-configs" title="Permanent link">¶</a></h3>
+<p>If you're currently using:</p>
+<ul>
+<li><strong>GPT-4o Mini</strong>: Switch to Gemini 2.0 Flash (3% savings, 1 more entity extracted)</li>
+<li><strong>Claude Sonnet 4</strong>: Switch to Gemini 2.0 Flash (97% savings, no timeouts)</li>
+<li><strong>Llama/Mistral/DeepSeek</strong>: Switch to Gemini 2.0 Flash (these don't actually work)</li>
+<li><strong>Any cloud embeddings</strong>: Switch to MxBai via Ollama (saves $0.02-$0.13/1M, 9x faster)</li>
+</ul>
+<h3 id="future-considerations">Future Considerations<a class="headerlink" href="#future-considerations" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Watch for Graphiti updates</strong> that might support open-source models</li>
+<li><strong>Monitor Ollama</strong> for new embedding models with better quality</li>
+<li><strong>Test new cloud models</strong> as they're released (especially cheaper options)</li>
+</ul>
+<p><strong>The bottom line</strong>: Don't trust simple JSON benchmarks. Real MCP integration with Graphiti is the only valid test. Use this guide to choose models that actually work in production.</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"></path></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer">
+        
+          
+          <a href="model-guide.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Model Guide">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Model Guide
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="developer-notes.html" class="md-footer__link md-footer__link--next" aria-label="Next: Developer Notes">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Developer Notes
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"></path></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/madeinoz67/madeinoz-knowledge-system" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"></path></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "search.suggest", "search.highlight", "content.code.copy", "content.tabs.link", "content.lightbox"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  
+<script id="init-glightbox">const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});
+document$.subscribe(()=>{ lightbox.reload(); });
+</script></body></html>

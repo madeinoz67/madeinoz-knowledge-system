@@ -1,0 +1,3393 @@
+<!DOCTYPE html><html lang="en" class="no-js"><head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="How madeinoz-knowledge-system automatically syncs PAI Memory to your knowledge graph using session lifecycle hooks">
+      
+      
+        <meta name="author" content="madeinoz67">
+      
+      
+        <link rel="canonical" href="https://madeinoz67.github.io/madeinoz-knowledge-system/concepts/hooks-integration.html">
+      
+      
+        <link rel="prev" href="knowledge-graph.html">
+      
+      
+        <link rel="next" href="../troubleshooting/common-issues.html">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Hooks &amp; PAI Memory Integration - Madeinoz Knowledge System (PAI Pack)</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+        <script src="https://unpkg.com/iframe-worker/shim"></script>
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  <link href="../assets/stylesheets/glightbox.min.css" rel="stylesheet"><script src="../assets/javascripts/glightbox.min.js"></script><style id="glightbox-style">
+            html.glightbox-open { overflow: initial; height: 100%; }
+            .gslide-title { margin-top: 0px; user-select: text; }
+            .gslide-desc { color: #666; user-select: text; }
+            .gslide-image img { background: white; }
+            .gscrollbar-fixer { padding-right: 15px; }
+            .gdesc-inner { font-size: 0.75rem; }
+            body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color); }
+            body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color); }
+            body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color); }
+        </style></head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="light-blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#hooks-pai-memory-integration" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../index.html" title="Madeinoz Knowledge System (PAI Pack)" class="md-header__button md-logo" aria-label="Madeinoz Knowledge System (PAI Pack)" data-md-component="logo">
+      
+  <img src="../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Madeinoz Knowledge System (PAI Pack)
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Hooks &amp; PAI Memory Integration
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="light-blue" aria-label="Switch to dark mode" type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="light-blue" aria-label="Switch to light mode" type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/madeinoz67/madeinoz-knowledge-system" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+  </div>
+  <div class="md-source__repository">
+    madeinoz67/madeinoz-knowledge-system
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../index.html" title="Madeinoz Knowledge System (PAI Pack)" class="md-nav__button md-logo" aria-label="Madeinoz Knowledge System (PAI Pack)" data-md-component="logo">
+      
+  <img src="../assets/logo.png" alt="logo">
+
+    </a>
+    Madeinoz Knowledge System (PAI Pack)
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/madeinoz67/madeinoz-knowledge-system" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+  </div>
+  <div class="md-source__repository">
+    madeinoz67/madeinoz-knowledge-system
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2">
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/overview.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/quick-reference.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3">
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Installation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/requirements.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/verification.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/remote-deployment.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Remote Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../remote-access.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Remote Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4">
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Usage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/basic-usage.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Basic Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/advanced.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/memory-decay.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory Decay &amp; Lifecycle
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/monitoring.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/backup-restore.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backup &amp; Restore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="architecture.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="knowledge-graph.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Knowledge Graph
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hooks &amp; Integration
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="hooks-integration.html" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hooks &amp; Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#component-stack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Component Stack
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#available-hooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Available Hooks
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Available Hooks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sync-memory-to-knowledge-sessionstart-hook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sync-memory-to-knowledge (SessionStart Hook)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pai-memory-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PAI Memory Integration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="PAI Memory Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#memory-directory-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory Directory Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#yaml-frontmatter-parsing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        YAML Frontmatter Parsing
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sync-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sync Sources
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Sync Sources">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-learningalgorithm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. LEARNING/ALGORITHM/
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-learningsystem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. LEARNING/SYSTEM/
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-research" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. RESEARCH/
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configurable-sync" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configurable Sync
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configurable Sync">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration File
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Variables
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#anti-loop-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Anti-Loop Detection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-exclude-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Exclude Patterns
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cli-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI Commands
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How It Works">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sessionstart-sync-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SessionStart Sync Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-by-step-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step-by-Step Process
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deduplication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deduplication
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Deduplication">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-content-hashing-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Content Hashing Works
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sync-state-file-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sync State File Format
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#benefits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Benefits
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mcp-protocol-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MCP Protocol Details
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MCP Protocol Details">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#protocol-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Protocol Selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#neo4j-protocol-http-post" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Neo4j Protocol (HTTP POST)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#falkordb-protocol-sse-get" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FalkorDB Protocol (SSE GET)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#query-sanitization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Query Sanitization
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#environment-variables_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Variables
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hook-specific-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hook-Specific Settings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#customizing-sync-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Customizing Sync Behavior
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hooks-not-running" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hooks Not Running
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#duplicate-entries-in-knowledge-graph" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Duplicate Entries in Knowledge Graph
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#memory-files-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory Files Not Found
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sync-failures-with-retry-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sync Failures with Retry Errors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#frontmatter-parsing-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Frontmatter Parsing Errors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#files-being-skipped-anti-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Files Being Skipped (Anti-Loop)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6">
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Troubleshooting
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/common-issues.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Common Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/known-issues.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Known Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7">
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/cli.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/configuration.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/observability.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Observability &amp; Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/cache-implementation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cache Implementation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/model-guide.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/benchmarks.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmarks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/developer-notes.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/releases.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release Process
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../acknowledgments.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Acknowledgments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#component-stack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Component Stack
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#available-hooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Available Hooks
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Available Hooks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sync-memory-to-knowledge-sessionstart-hook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sync-memory-to-knowledge (SessionStart Hook)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pai-memory-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PAI Memory Integration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="PAI Memory Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#memory-directory-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory Directory Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#yaml-frontmatter-parsing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        YAML Frontmatter Parsing
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sync-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sync Sources
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Sync Sources">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-learningalgorithm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. LEARNING/ALGORITHM/
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-learningsystem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. LEARNING/SYSTEM/
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-research" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. RESEARCH/
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configurable-sync" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configurable Sync
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configurable Sync">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration File
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Variables
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#anti-loop-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Anti-Loop Detection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-exclude-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Exclude Patterns
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cli-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI Commands
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How It Works">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sessionstart-sync-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SessionStart Sync Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-by-step-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step-by-Step Process
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deduplication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deduplication
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Deduplication">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-content-hashing-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Content Hashing Works
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sync-state-file-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sync State File Format
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#benefits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Benefits
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mcp-protocol-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MCP Protocol Details
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MCP Protocol Details">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#protocol-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Protocol Selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#neo4j-protocol-http-post" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Neo4j Protocol (HTTP POST)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#falkordb-protocol-sse-get" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FalkorDB Protocol (SSE GET)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#query-sanitization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Query Sanitization
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#environment-variables_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Variables
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hook-specific-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hook-Specific Settings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#customizing-sync-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Customizing Sync Behavior
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hooks-not-running" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hooks Not Running
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#duplicate-entries-in-knowledge-graph" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Duplicate Entries in Knowledge Graph
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#memory-files-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory Files Not Found
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sync-failures-with-retry-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sync Failures with Retry Errors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#frontmatter-parsing-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Frontmatter Parsing Errors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#files-being-skipped-anti-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Files Being Skipped (Anti-Loop)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<!-- AI-FRIENDLY SUMMARY
+System: Memory Sync Hook
+Purpose: Automatically syncs PAI Memory files to knowledge graph at session start
+
+Key Features:
+- Configurable sync sources (LEARNING/ALGORITHM, LEARNING/SYSTEM, RESEARCH)
+- Anti-loop detection prevents knowledge query results from being re-synced
+- Custom exclude patterns via config file or environment variable
+- Content-based deduplication using SHA-256 hashes
+
+Configuration File: ~/.claude/config/sync-sources.json (installed) or config/sync-sources.json (development)
+Environment Prefix: MADEINOZ_KNOWLEDGE_SYNC_*
+
+Key Environment Variables:
+- MADEINOZ_KNOWLEDGE_SYNC_LEARNING_ALGORITHM: Enable/disable LEARNING/ALGORITHM sync (default: true)
+- MADEINOZ_KNOWLEDGE_SYNC_LEARNING_SYSTEM: Enable/disable LEARNING/SYSTEM sync (default: true)
+- MADEINOZ_KNOWLEDGE_SYNC_RESEARCH: Enable/disable RESEARCH sync (default: true)
+- MADEINOZ_KNOWLEDGE_SYNC_EXCLUDE_PATTERNS: Comma-separated patterns (overrides config file)
+- MADEINOZ_KNOWLEDGE_SYNC_MAX_FILES: Max files per sync run (default: 50)
+- MADEINOZ_KNOWLEDGE_SYNC_VERBOSE: Enable verbose logging (default: false)
+
+CLI Commands:
+- bun run src/hooks/sync-memory-to-knowledge.ts --status: Show sync status
+- bun run src/hooks/sync-memory-to-knowledge.ts --all: Sync all files
+- bun run src/hooks/sync-memory-to-knowledge.ts --dry-run: Preview without syncing
+
+Anti-Loop Patterns (16 built-in):
+- MCP tool invocations: mcp__madeinoz-knowledge__
+- Query phrases: "what do I know about", "search my knowledge"
+- Formatted output: "Knowledge Found:", "Key Entities:"
+--><h1 id="hooks-pai-memory-integration">Hooks &amp; PAI Memory Integration<a class="headerlink" href="#hooks-pai-memory-integration" title="Permanent link">¶</a></h1>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">¶</a></h2>
+<p>The madeinoz-knowledge-system seamlessly integrates with the <strong>PAI Memory System</strong> through automated session lifecycle hooks. This integration ensures your learning, research, and system improvements are automatically captured in your personal knowledge graph without manual intervention.</p>
+<p><strong>Hooks</strong> are automated scripts that run at specific points in your Claude Code session lifecycle. They enable zero-effort knowledge capture by monitoring PAI Memory directories and syncing new or updated content to your knowledge graph.</p>
+<div class="admonition info">
+<p class="admonition-title">Zero-Effort Knowledge Capture</p>
+<p>Once configured, the hooks system automatically:</p>
+<ul>
+<li>Syncs PAI Memory files to your knowledge graph at session start</li>
+<li>Captures the most recent learnings immediately after session end</li>
+<li>Prevents duplicate entries using content hashing</li>
+<li>Handles errors gracefully with retry logic</li>
+</ul>
+</div>
+<h3 id="component-stack">Component Stack<a class="headerlink" href="#component-stack" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    subgraph "Claude Code Session"
+        CC[Claude Code CLI]
+        SS[SessionStart Event]
+    end
+
+    subgraph "Hook Layer"
+        H1[sync-memory-to-knowledge.ts]
+        CFG[sync-sources.json]
+        ALP[Anti-Loop Patterns]
+    end
+
+    subgraph "PAI Memory System"
+        M1[LEARNING/ALGORITHM/]
+        M2[LEARNING/SYSTEM/]
+        M3[RESEARCH/]
+    end
+
+    subgraph "Processing"
+        FP[Frontmatter Parser]
+        CH[Content Hasher&lt;br/&gt;SHA-256]
+        ST[Sync State Tracker]
+    end
+
+    subgraph "MCP Server"
+        MCP[Graphiti MCP Server&lt;br/&gt;localhost:8000/mcp/]
+        API[add_memory Tool&lt;br/&gt;HTTP POST + JSON-RPC 2.0]
+    end
+
+    subgraph "Knowledge Graph"
+        DB[(Neo4j / FalkorDB)]
+        ENT[Entities]
+        REL[Relationships]
+        EPI[Episodes]
+    end
+
+    CC --&gt; SS
+    SS --&gt; H1
+    CFG --&gt; H1
+    ALP --&gt; H1
+
+    H1 --&gt; M1
+    H1 --&gt; M2
+    H1 --&gt; M3
+
+    M1 --&gt; FP
+    M2 --&gt; FP
+    M3 --&gt; FP
+
+    FP --&gt; CH
+    FP --&gt; ALP
+    CH --&gt; ST
+    ST --&gt; MCP
+    MCP --&gt; API
+    API --&gt; DB
+
+    DB --&gt; ENT
+    DB --&gt; REL
+    DB --&gt; EPI
+
+    style CC fill:#4a90d9,color:#fff
+    style MCP fill:#28a745,color:#fff
+    style DB fill:#6f42c1,color:#fff
+    style CFG fill:#f0ad4e,color:#000
+    style ALP fill:#d9534f,color:#fff</code></pre>
+<h2 id="available-hooks">Available Hooks<a class="headerlink" href="#available-hooks" title="Permanent link">¶</a></h2>
+<p>The system provides a single consolidated hook for memory synchronization:</p>
+<table>
+<thead>
+<tr>
+<th>Hook</th>
+<th>Trigger Point</th>
+<th>Purpose</th>
+<th>Sync Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>sync-memory-to-knowledge</strong></td>
+<td><code>SessionStart</code></td>
+<td>Comprehensive sync of all configured PAI Memory files</td>
+<td>Configurable (LEARNING/ALGORITHM/, LEARNING/SYSTEM/, RESEARCH/)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sync-memory-to-knowledge-sessionstart-hook">sync-memory-to-knowledge (SessionStart Hook)<a class="headerlink" href="#sync-memory-to-knowledge-sessionstart-hook" title="Permanent link">¶</a></h3>
+<p>This hook performs comprehensive synchronization when you start a new Claude Code session. It scans all configured memory directories and syncs any new or modified files to your knowledge graph.</p>
+<p><strong>Key Features:</strong></p>
+<ul>
+<li><strong>Configurable sync sources</strong> - Enable/disable each directory via environment variables or config file</li>
+<li><strong>Anti-loop detection</strong> - Prevents knowledge query results from being re-synced (16 built-in patterns)</li>
+<li><strong>Custom exclude patterns</strong> - Add your own patterns to skip specific content</li>
+<li>Full directory scanning across all enabled memory sources</li>
+<li>Batched processing for efficiency</li>
+<li>YAML frontmatter metadata extraction</li>
+<li>Content-based deduplication (SHA-256)</li>
+<li>Exponential backoff retry logic</li>
+<li>Dry-run mode for testing</li>
+<li>Status command for visibility</li>
+</ul>
+<h2 id="pai-memory-integration">PAI Memory Integration<a class="headerlink" href="#pai-memory-integration" title="Permanent link">¶</a></h2>
+<p>The hooks system integrates with the <a href="https://github.com/danielmiessler/PAI">PAI Memory System v7.0</a>, which organizes AI-assisted learning into structured markdown files with YAML frontmatter.</p>
+<h3 id="memory-directory-structure">Memory Directory Structure<a class="headerlink" href="#memory-directory-structure" title="Permanent link">¶</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>~/.claude/MEMORY/
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>├── LEARNING/
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│   ├── ALGORITHM/          # Improvements to The Algorithm
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│   └── SYSTEM/             # System-level learnings
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>└── RESEARCH/               # Research findings and analysis
+</span></code></pre></div>
+<h3 id="yaml-frontmatter-parsing">YAML Frontmatter Parsing<a class="headerlink" href="#yaml-frontmatter-parsing" title="Permanent link">¶</a></h3>
+<p>Each PAI Memory file contains structured metadata in YAML frontmatter that enriches the knowledge graph:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nn">---</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="s">"Advanced</span><span class="nv"> </span><span class="s">Error</span><span class="nv"> </span><span class="s">Handling</span><span class="nv"> </span><span class="s">Patterns"</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nt">tags</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"error-handling"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"resilience"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"typescript"</span><span class="p p-Indicator">]</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="s">"Production</span><span class="nv"> </span><span class="s">debugging</span><span class="nv"> </span><span class="s">session"</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="nt">confidence</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">high</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="nt">date</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2026-01-19</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="nn">---</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="c1"># Learning content here...</span>
+</span></code></pre></div>
+<p>The hooks extract this metadata and pass it to the knowledge graph as structured context, enabling:</p>
+<ul>
+<li><strong>Rich semantic search</strong> using title and tags</li>
+<li><strong>Source attribution</strong> for provenance tracking</li>
+<li><strong>Confidence filtering</strong> for quality assessment</li>
+<li><strong>Temporal organization</strong> using date metadata</li>
+</ul>
+<h2 id="sync-sources">Sync Sources<a class="headerlink" href="#sync-sources" title="Permanent link">¶</a></h2>
+<p>The hooks monitor three distinct PAI Memory directories, each serving a specific purpose:</p>
+<h3 id="1-learningalgorithm">1. LEARNING/ALGORITHM/<a class="headerlink" href="#1-learningalgorithm" title="Permanent link">¶</a></h3>
+<p><strong>Purpose:</strong> Captures improvements and refinements to "The Algorithm" - the core problem-solving methodology used by PAI agents.</p>
+<p><strong>Content Types:</strong></p>
+<ul>
+<li>New reasoning patterns discovered during sessions</li>
+<li>Refinements to existing problem-solving steps</li>
+<li>Meta-learnings about effective approaches</li>
+<li>Algorithm performance optimizations</li>
+</ul>
+<p><strong>Why Sync This?</strong> Algorithm learnings represent your highest-value knowledge—they're the distilled insights about <em>how to think</em> and solve problems effectively. By syncing these to your knowledge graph:</p>
+<ul>
+<li><strong>Compounding Intelligence</strong>: Each algorithm improvement builds on previous ones; the graph connects related insights across sessions</li>
+<li><strong>Pattern Discovery</strong>: Semantic search reveals when similar approaches solved different problems</li>
+<li><strong>Methodology Evolution</strong>: Track how your problem-solving methodology improves over time through temporal queries</li>
+</ul>
+<p><strong>Example File:</strong> <code>~/.claude/MEMORY/LEARNING/ALGORITHM/debugging-methodology-improvement.md</code></p>
+<h3 id="2-learningsystem">2. LEARNING/SYSTEM/<a class="headerlink" href="#2-learningsystem" title="Permanent link">¶</a></h3>
+<p><strong>Purpose:</strong> Documents system-level knowledge about tools, configurations, and infrastructure.</p>
+<p><strong>Content Types:</strong></p>
+<ul>
+<li>Tool usage patterns and best practices</li>
+<li>Configuration discoveries</li>
+<li>Environment-specific learnings</li>
+<li>Integration insights</li>
+</ul>
+<p><strong>Why Sync This?</strong> System learnings prevent you from re-solving the same technical problems. This is the knowledge that saves hours of debugging and configuration headaches:</p>
+<ul>
+<li><strong>Instant Recall</strong>: Ask "how did I configure MkDocs?" instead of re-reading documentation</li>
+<li><strong>Cross-Tool Connections</strong>: The graph links related tools (e.g., Podman configurations connect to Docker knowledge)</li>
+<li><strong>Environment Context</strong>: Learnings about your specific setup—your machine, your tools, your workflows</li>
+<li><strong>Troubleshooting History</strong>: When something breaks, search for past solutions to similar issues</li>
+</ul>
+<p><strong>Example File:</strong> <code>~/.claude/MEMORY/LEARNING/SYSTEM/mkdocs-material-configuration.md</code></p>
+<h3 id="3-research">3. RESEARCH/<a class="headerlink" href="#3-research" title="Permanent link">¶</a></h3>
+<p><strong>Purpose:</strong> Stores research findings, competitive analysis, and external knowledge synthesis.</p>
+<p><strong>Content Types:</strong></p>
+<ul>
+<li>Technology research and evaluations</li>
+<li>Comparative analyses</li>
+<li>Industry trends and patterns</li>
+<li>External documentation summaries</li>
+</ul>
+<p><strong>Why Sync This?</strong> Research represents your curated external knowledge—information you've gathered, evaluated, and found valuable enough to preserve:</p>
+<ul>
+<li><strong>Decision Support</strong>: When choosing tools or approaches, query past research on similar technologies</li>
+<li><strong>Knowledge Synthesis</strong>: The graph connects research findings to your learnings, showing how external knowledge influenced your decisions</li>
+<li><strong>Competitive Intelligence</strong>: Track how your understanding of the landscape evolves</li>
+<li><strong>Reference Library</strong>: Build a searchable archive of evaluated technologies, patterns, and best practices from the broader ecosystem</li>
+</ul>
+<p><strong>Example File:</strong> <code>~/.claude/MEMORY/RESEARCH/graphiti-vs-alternatives.md</code></p>
+<h2 id="configurable-sync">Configurable Sync<a class="headerlink" href="#configurable-sync" title="Permanent link">¶</a></h2>
+<p>The memory sync system is fully configurable through an external JSON configuration file and environment variables.</p>
+<h3 id="configuration-file">Configuration File<a class="headerlink" href="#configuration-file" title="Permanent link">¶</a></h3>
+<p>Sync sources and custom patterns are defined in <code>sync-sources.json</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Context</th>
+<th>Configuration File Location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Installed</strong> (via <code>bun run install:system</code>)</td>
+<td><code>~/.claude/config/sync-sources.json</code></td>
+</tr>
+<tr>
+<td><strong>Development</strong> (running from source)</td>
+<td><code>{project}/config/sync-sources.json</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example configuration:</strong></p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1.0"</span><span class="p">,</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nt">"sources"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="p">{</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"LEARNING_ALGORITHM"</span><span class="p">,</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">      </span><span class="nt">"path"</span><span class="p">:</span><span class="w"> </span><span class="s2">"LEARNING/ALGORITHM"</span><span class="p">,</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">      </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"LEARNING"</span><span class="p">,</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">      </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Task execution learnings"</span><span class="p">,</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">      </span><span class="nt">"defaultEnabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">    </span><span class="p">{</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"LEARNING_SYSTEM"</span><span class="p">,</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">      </span><span class="nt">"path"</span><span class="p">:</span><span class="w"> </span><span class="s2">"LEARNING/SYSTEM"</span><span class="p">,</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">      </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"LEARNING"</span><span class="p">,</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">      </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PAI/tooling learnings"</span><span class="p">,</span>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">      </span><span class="nt">"defaultEnabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="w">    </span><span class="p">{</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"RESEARCH"</span><span class="p">,</span>
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="w">      </span><span class="nt">"path"</span><span class="p">:</span><span class="w"> </span><span class="s2">"RESEARCH"</span><span class="p">,</span>
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="w">      </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"RESEARCH"</span><span class="p">,</span>
+</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="w">      </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Agent research outputs"</span><span class="p">,</span>
+</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a><span class="w">      </span><span class="nt">"defaultEnabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a><span class="w">  </span><span class="p">],</span>
+</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a><span class="w">  </span><span class="nt">"customExcludePatterns"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a><span class="w">    </span><span class="s2">"meeting notes"</span><span class="p">,</span>
+</span><span id="__span-2-28"><a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a><span class="w">    </span><span class="s2">"/^draft-/i"</span>
+</span><span id="__span-2-29"><a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a><span class="w">  </span><span class="p">]</span>
+</span><span id="__span-2-30"><a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a><span class="p">}</span>
+</span></code></pre></div>
+<h3 id="environment-variables">Environment Variables<a class="headerlink" href="#environment-variables" title="Permanent link">¶</a></h3>
+<p>Environment variables override the config file settings:</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MADEINOZ_KNOWLEDGE_SYNC_LEARNING_ALGORITHM</code></td>
+<td><code>true</code></td>
+<td>Enable sync for LEARNING/ALGORITHM files</td>
+</tr>
+<tr>
+<td><code>MADEINOZ_KNOWLEDGE_SYNC_LEARNING_SYSTEM</code></td>
+<td><code>true</code></td>
+<td>Enable sync for LEARNING/SYSTEM files</td>
+</tr>
+<tr>
+<td><code>MADEINOZ_KNOWLEDGE_SYNC_RESEARCH</code></td>
+<td><code>true</code></td>
+<td>Enable sync for RESEARCH files</td>
+</tr>
+<tr>
+<td><code>MADEINOZ_KNOWLEDGE_SYNC_EXCLUDE_PATTERNS</code></td>
+<td>-</td>
+<td>Comma-separated custom exclude patterns (overrides config file)</td>
+</tr>
+<tr>
+<td><code>MADEINOZ_KNOWLEDGE_SYNC_MAX_FILES</code></td>
+<td><code>50</code></td>
+<td>Max files per sync run (1-1000)</td>
+</tr>
+<tr>
+<td><code>MADEINOZ_KNOWLEDGE_SYNC_VERBOSE</code></td>
+<td><code>false</code></td>
+<td>Enable verbose logging</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example: Disable RESEARCH sync:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_KNOWLEDGE_SYNC_RESEARCH</span><span class="o">=</span><span class="nb">false</span>
+</span></code></pre></div>
+<h3 id="anti-loop-detection">Anti-Loop Detection<a class="headerlink" href="#anti-loop-detection" title="Permanent link">¶</a></h3>
+<p>The system automatically excludes knowledge-derived content from being re-synced to prevent feedback loops. This is critical for preventing infinite sync cycles where knowledge query results get synced back to the knowledge graph.</p>
+<p><strong>16 Built-in Anti-Loop Patterns:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Pattern Examples</th>
+<th>What It Detects</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>MCP Tools</strong></td>
+<td><code>mcp__madeinoz-knowledge__</code></td>
+<td>Tool invocation markers</td>
+</tr>
+<tr>
+<td><strong>Query Phrases</strong></td>
+<td><code>what do I know about</code>, <code>search my knowledge</code></td>
+<td>Natural language queries</td>
+</tr>
+<tr>
+<td><strong>Formatted Output</strong></td>
+<td><code>Knowledge Found:</code>, <code>Key Entities:</code></td>
+<td>Structured search results</td>
+</tr>
+<tr>
+<td><strong>Search Results</strong></td>
+<td><code>Related Facts:</code>, <code>Source Episodes:</code></td>
+<td>Query response sections</td>
+</tr>
+</tbody>
+</table>
+<p>When a file matches any anti-loop pattern, it is skipped with a logged reason code.</p>
+<h3 id="custom-exclude-patterns">Custom Exclude Patterns<a class="headerlink" href="#custom-exclude-patterns" title="Permanent link">¶</a></h3>
+<p>You can add your own patterns to exclude specific content from sync. Patterns can be:</p>
+<p><strong>1. Substring patterns</strong> (case-insensitive match anywhere in content):</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nt">"customExcludePatterns"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="s2">"meeting notes"</span><span class="p">,</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="s2">"TODO:"</span><span class="p">,</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="s2">"DRAFT"</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="p">]</span>
+</span></code></pre></div>
+<p><strong>2. Regex patterns</strong> (surrounded by <code>/</code>, optional flags):</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nt">"customExcludePatterns"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="s2">"/^draft-/i"</span><span class="p">,</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="s2">"/\\[WIP\\]/"</span><span class="p">,</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span><span class="s2">"/meeting-\\d{4}-\\d{2}-\\d{2}/"</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="p">]</span>
+</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Pattern Type</th>
+<th>Syntax</th>
+<th>Example</th>
+<th>Matches</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Substring</td>
+<td><code>"text"</code></td>
+<td><code>"meeting notes"</code></td>
+<td>Any file containing "meeting notes"</td>
+</tr>
+<tr>
+<td>Regex (case-insensitive)</td>
+<td><code>"/pattern/i"</code></td>
+<td><code>"/^draft-/i"</code></td>
+<td>Files starting with "draft-"</td>
+</tr>
+<tr>
+<td>Regex (case-sensitive)</td>
+<td><code>"/pattern/"</code></td>
+<td><code>"/TODO:/"</code></td>
+<td>Files containing exactly "TODO:"</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Precedence:</strong></p>
+<ol>
+<li>Environment variable <code>MADEINOZ_KNOWLEDGE_SYNC_EXCLUDE_PATTERNS</code> (if set, overrides config file)</li>
+<li>Config file <code>customExcludePatterns</code> array</li>
+<li>Built-in anti-loop patterns (always active, cannot be disabled)</li>
+</ol>
+<h3 id="cli-commands">CLI Commands<a class="headerlink" href="#cli-commands" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Show current sync status and configuration</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>bun<span class="w"> </span>run<span class="w"> </span>src/hooks/sync-memory-to-knowledge.ts<span class="w"> </span>--status
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># Run sync manually</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>bun<span class="w"> </span>run<span class="w"> </span>src/hooks/sync-memory-to-knowledge.ts
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="c1"># Sync all files (not just recent)</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>bun<span class="w"> </span>run<span class="w"> </span>src/hooks/sync-memory-to-knowledge.ts<span class="w"> </span>--all
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="c1"># Dry run with verbose output</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>bun<span class="w"> </span>run<span class="w"> </span>src/hooks/sync-memory-to-knowledge.ts<span class="w"> </span>--dry-run<span class="w"> </span>--verbose
+</span></code></pre></div>
+<h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">¶</a></h2>
+<h3 id="sessionstart-sync-flow">SessionStart Sync Flow<a class="headerlink" href="#sessionstart-sync-flow" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TD
+    A[Session Starts] --&gt; B[Load Sync State]
+    B --&gt; C{Sync State Exists?}
+    C --&gt;|No| D[Initialize Empty State]
+    C --&gt;|Yes| E[Load Previous Hashes]
+    D --&gt; F[Scan Memory Directories]
+    E --&gt; F
+    F --&gt; G[For Each File]
+    G --&gt; H[Parse YAML Frontmatter]
+    H --&gt; I[Calculate Content Hash]
+    I --&gt; J{Hash Changed?}
+    J --&gt;|No| G
+    J --&gt;|Yes| K[Add to Batch]
+    K --&gt; L{Batch Full?}
+    L --&gt;|Yes| M[Sync Batch to Knowledge Graph]
+    L --&gt;|No| G
+    M --&gt; N[Update Sync State]
+    N --&gt; G
+    G --&gt; O[Process Remaining Files]
+    O --&gt; P[Save Updated Sync State]
+    P --&gt; Q[Session Ready]</code></pre>
+<h3 id="step-by-step-process">Step-by-Step Process<a class="headerlink" href="#step-by-step-process" title="Permanent link">¶</a></h3>
+<ol>
+<li><strong>Trigger Detection</strong> - Hook activates at SessionStart lifecycle point</li>
+<li><strong>Configuration Loading</strong> - Reads <code>sync-sources.json</code> for enabled sources and custom patterns</li>
+<li><strong>State Loading</strong> - Reads <code>~/.claude/.madeinoz-knowledge-sync-state.json</code> for previous sync history</li>
+<li><strong>File Discovery</strong> - Scans enabled memory directories for <code>.md</code> files</li>
+<li><strong>Anti-Loop Check</strong> - Skips files matching built-in or custom exclude patterns</li>
+<li><strong>Content Hashing</strong> - Calculates SHA-256 hash of each file's content</li>
+<li><strong>Change Detection</strong> - Compares current hash against stored state</li>
+<li><strong>Frontmatter Parsing</strong> - Extracts YAML metadata (title, tags, source, etc.)</li>
+<li><strong>Batch Processing</strong> - Groups files into batches (default: 10 files)</li>
+<li><strong>Knowledge Graph Sync</strong> - Calls <code>add_memory</code> tool with content and metadata</li>
+<li><strong>Retry Logic</strong> - Retries failed syncs with exponential backoff (1s, 2s, 4s delays)</li>
+<li><strong>State Persistence</strong> - Updates sync state file with new hashes and timestamps</li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">Anti-Loop Protection</p>
+<p>The hook automatically detects and skips files containing knowledge query results. This prevents infinite sync cycles where searching the knowledge graph produces output that gets synced back to the graph.</p>
+</div>
+<h2 id="deduplication">Deduplication<a class="headerlink" href="#deduplication" title="Permanent link">¶</a></h2>
+<p>The hooks system uses <strong>content-based deduplication</strong> to prevent duplicate entries in your knowledge graph, even if you manually re-sync or run multiple sessions.</p>
+<h3 id="how-content-hashing-works">How Content Hashing Works<a class="headerlink" href="#how-content-hashing-works" title="Permanent link">¶</a></h3>
+<ol>
+<li><strong>Hash Calculation</strong> - SHA-256 hash computed from full file content (including frontmatter)</li>
+<li><strong>State Storage</strong> - Hash stored in <code>~/.claude/.madeinoz-knowledge-sync-state.json</code> with file path</li>
+<li><strong>Change Detection</strong> - On subsequent syncs, current hash compared to stored hash</li>
+<li><strong>Sync Decision</strong> - Only files with changed hashes are synced</li>
+</ol>
+<h3 id="sync-state-file-format">Sync State File Format<a class="headerlink" href="#sync-state-file-format" title="Permanent link">¶</a></h3>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">{</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="nt">"lastSync"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-01-19T10:30:00.000Z"</span><span class="p">,</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="nt">"files"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">    </span><span class="nt">"/Users/seaton/.claude/MEMORY/LEARNING/ALGORITHM/debugging-methodology.md"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">      </span><span class="nt">"hash"</span><span class="p">:</span><span class="w"> </span><span class="s2">"a1b2c3d4e5f6..."</span><span class="p">,</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">      </span><span class="nt">"lastModified"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-01-19T10:25:00.000Z"</span><span class="p">,</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">      </span><span class="nt">"syncedAt"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-01-19T10:30:00.000Z"</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">    </span><span class="nt">"/Users/seaton/.claude/MEMORY/LEARNING/SYSTEM/mkdocs-config.md"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">      </span><span class="nt">"hash"</span><span class="p">:</span><span class="w"> </span><span class="s2">"f6e5d4c3b2a1..."</span><span class="p">,</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">      </span><span class="nt">"lastModified"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-01-18T15:20:00.000Z"</span><span class="p">,</span>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="w">      </span><span class="nt">"syncedAt"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-01-19T10:30:00.000Z"</span>
+</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="p">}</span>
+</span></code></pre></div>
+<h3 id="benefits">Benefits<a class="headerlink" href="#benefits" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>No Duplicate Entries</strong> - Each unique content version synced exactly once</li>
+<li><strong>Efficient Syncing</strong> - Only modified files processed</li>
+<li><strong>Safe Re-runs</strong> - Can manually trigger hooks without fear of duplication</li>
+<li><strong>Edit Tracking</strong> - Content updates create new knowledge graph entries with fresh context</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Hash Stability</p>
+<p>The hash is calculated from the entire file content, including frontmatter. Even minor edits (like fixing typos) will trigger a re-sync. This is intentional - it ensures your knowledge graph always reflects the latest version of your learnings.</p>
+</div>
+<h2 id="mcp-protocol-details">MCP Protocol Details<a class="headerlink" href="#mcp-protocol-details" title="Permanent link">¶</a></h2>
+<p>The hooks use a <strong>dual protocol architecture</strong> that automatically adapts to your database backend type. This ensures compatibility with both Neo4j (default) and FalkorDB backends.</p>
+<h3 id="protocol-selection">Protocol Selection<a class="headerlink" href="#protocol-selection" title="Permanent link">¶</a></h3>
+<p>The <code>MADEINOZ_KNOWLEDGE_DB</code> environment variable determines which MCP protocol the hooks use:</p>
+<table>
+<thead>
+<tr>
+<th>Database Type</th>
+<th>Protocol</th>
+<th>Endpoint</th>
+<th>Session Management</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>neo4j</code> (default)</td>
+<td>HTTP POST + JSON-RPC 2.0</td>
+<td><code>/mcp/</code></td>
+<td><code>Mcp-Session-Id</code> header</td>
+</tr>
+<tr>
+<td><code>falkorodb</code></td>
+<td>SSE GET + session messages</td>
+<td><code>/sse</code></td>
+<td>Session endpoint from SSE handshake</td>
+</tr>
+</tbody>
+</table>
+<h3 id="neo4j-protocol-http-post">Neo4j Protocol (HTTP POST)<a class="headerlink" href="#neo4j-protocol-http-post" title="Permanent link">¶</a></h3>
+<p><strong>Flow:</strong>
+1. Initialize session: POST to <code>/mcp/</code> with <code>initialize</code> method
+2. Extract <code>Mcp-Session-Id</code> from response headers
+3. Call tools: POST to <code>/mcp/</code> with <code>tools/call</code> method, including <code>Mcp-Session-Id</code> header
+4. Parse response body as SSE format (extract <code>data:</code> lines containing JSON)</p>
+<p><strong>Example Request:</strong>
+</p><div class="language-json highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">{</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="nt">"jsonrpc"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2.0"</span><span class="p">,</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">  </span><span class="nt">"method"</span><span class="p">:</span><span class="w"> </span><span class="s2">"tools/call"</span><span class="p">,</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">  </span><span class="nt">"params"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">    </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"add_memory"</span><span class="p">,</span>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">    </span><span class="nt">"arguments"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">      </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"LEARNING: My Learning"</span><span class="p">,</span>
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">      </span><span class="nt">"episode_body"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Content here..."</span><span class="p">,</span>
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">      </span><span class="nt">"group_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"learning"</span>
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="p">}</span>
+</span></code></pre></div><p></p>
+<h3 id="falkordb-protocol-sse-get">FalkorDB Protocol (SSE GET)<a class="headerlink" href="#falkordb-protocol-sse-get" title="Permanent link">¶</a></h3>
+<p><strong>Flow:</strong>
+1. Connect to <code>/sse</code> endpoint
+2. Receive <code>endpoint</code> event with session-specific messages URL
+3. Send initialize request to messages URL
+4. Send tool calls via POST to messages URL
+5. Receive responses via SSE or as JSON</p>
+<h3 id="query-sanitization">Query Sanitization<a class="headerlink" href="#query-sanitization" title="Permanent link">¶</a></h3>
+<p>The hooks automatically apply <strong>conditional query sanitization</strong> based on database type:</p>
+<p><strong>FalkorDB (Lucene/RediSearch):</strong>
+- Special characters are escaped: <code>+ - &amp;&amp; || ! ( ) { } [ ] ^ " ~ * ? : \ /</code>
+- Critical for CTI/OSINT data with hyphenated identifiers (e.g., <code>apt-28</code>, <code>CVE-2024-1234</code>)
+- Applied automatically by the Docker container at runtime</p>
+<p><strong>Neo4j (Cypher):</strong>
+- No escaping needed - native Cypher queries handle special characters naturally
+- Query parameters passed through as-is</p>
+<div class="admonition warning">
+<p class="admonition-title">Protocol Mismatch Prevention</p>
+<p>The hooks automatically detect your database type and use the correct protocol. If you switch backends, simply update the <code>MADEINOZ_KNOWLEDGE_DB</code> environment variable and restart the MCP server.</p>
+</div>
+<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">¶</a></h2>
+<h3 id="environment-variables_1">Environment Variables<a class="headerlink" href="#environment-variables_1" title="Permanent link">¶</a></h3>
+<p>The hooks system respects the same configuration as the main knowledge graph server:</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Purpose</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MADEINOZ_KNOWLEDGE_MCP_URL</code></td>
+<td>Graphiti MCP server base URL</td>
+<td><code>http://localhost:8000</code></td>
+</tr>
+<tr>
+<td><code>MADEINOZ_KNOWLEDGE_DB</code></td>
+<td>Database backend type (determines protocol)</td>
+<td><code>neo4j</code></td>
+</tr>
+<tr>
+<td><code>MADEINOZ_KNOWLEDGE_TIMEOUT</code></td>
+<td>Request timeout in milliseconds</td>
+<td><code>15000</code></td>
+</tr>
+<tr>
+<td><code>MADEINOZ_KNOWLEDGE_RETRIES</code></td>
+<td>Maximum retry attempts for transient failures</td>
+<td><code>3</code></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Database Protocol Selection</p>
+<p>The <code>MADEINOZ_KNOWLEDGE_DB</code> environment variable determines which MCP protocol the hooks use:</p>
+<ul>
+<li><strong>neo4j</strong> (default): HTTP POST to <code>/mcp/</code> endpoint with JSON-RPC 2.0 protocol</li>
+<li><strong>falkorodb</strong>: SSE GET to <code>/sse</code> endpoint with session-based messaging</li>
+</ul>
+<p>This automatic protocol detection ensures the hooks work correctly with both database backends.</p>
+</div>
+<h3 id="hook-specific-settings">Hook-Specific Settings<a class="headerlink" href="#hook-specific-settings" title="Permanent link">¶</a></h3>
+<p>These settings are configured in the hook source files:</p>
+<p><strong>sync-memory-to-knowledge.ts:</strong></p>
+<div class="language-typescript highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1">// Batch size for processing files</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="kd">const</span><span class="w"> </span><span class="nx">BATCH_SIZE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">10</span><span class="p">;</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="c1">// Memory directories to scan</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="kd">const</span><span class="w"> </span><span class="nx">MEMORY_DIRS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">  </span><span class="sb">`</span><span class="si">${</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">HOME</span><span class="si">}</span><span class="sb">/.claude/MEMORY/LEARNING/ALGORITHM`</span><span class="p">,</span>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">  </span><span class="sb">`</span><span class="si">${</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">HOME</span><span class="si">}</span><span class="sb">/.claude/MEMORY/LEARNING/SYSTEM`</span><span class="p">,</span>
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">  </span><span class="sb">`</span><span class="si">${</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">HOME</span><span class="si">}</span><span class="sb">/.claude/MEMORY/RESEARCH`</span><span class="p">,</span>
+</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="p">];</span>
+</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>
+</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="c1">// Retry configuration</span>
+</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="kd">const</span><span class="w"> </span><span class="nx">MAX_RETRIES</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">3</span><span class="p">;</span>
+</span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="kd">const</span><span class="w"> </span><span class="nx">RETRY_DELAYS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">1000</span><span class="p">,</span><span class="w"> </span><span class="mf">2000</span><span class="p">,</span><span class="w"> </span><span class="mf">4000</span><span class="p">];</span><span class="w"> </span><span class="c1">// ms</span>
+</span></code></pre></div>
+<h3 id="customizing-sync-behavior">Customizing Sync Behavior<a class="headerlink" href="#customizing-sync-behavior" title="Permanent link">¶</a></h3>
+<p><strong>Recommended: Use the config file</strong> at <code>~/.claude/config/sync-sources.json</code> (installed) or <code>config/sync-sources.json</code> (development).</p>
+<p>For advanced customization, edit the hook source directly:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># Hook source</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>src/hooks/sync-memory-to-knowledge.ts
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="c1"># Configuration loader</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>src/hooks/lib/sync-config.ts
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="c1"># Anti-loop patterns</span>
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>src/hooks/lib/anti-loop-patterns.ts
+</span></code></pre></div>
+<p>After modifying TypeScript sources, rebuild and reinstall:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>bun<span class="w"> </span>run<span class="w"> </span>build
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>bun<span class="w"> </span>run<span class="w"> </span>install:system
+</span></code></pre></div>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">¶</a></h2>
+<h3 id="hooks-not-running">Hooks Not Running<a class="headerlink" href="#hooks-not-running" title="Permanent link">¶</a></h3>
+<p><strong>Symptom:</strong> PAI Memory files aren't being synced to knowledge graph.</p>
+<p><strong>Diagnosis:</strong></p>
+<ol>
+<li>
+<p>Check if hooks are installed in PAI:
+   </p><div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>ls<span class="w"> </span>~/.claude/hooks/
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="c1"># Should show: sync-memory-to-knowledge.ts and lib/ directory</span>
+</span></code></pre></div><p></p>
+</li>
+<li>
+<p>Check if config file exists:
+   </p><div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>ls<span class="w"> </span>~/.claude/config/sync-sources.json
+</span></code></pre></div><p></p>
+</li>
+<li>
+<p>Verify hook registration in PAI settings:
+   </p><div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>cat<span class="w"> </span>~/.claude/settings.json<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-A<span class="w"> </span><span class="m">5</span><span class="w"> </span>hooks
+</span></code></pre></div><p></p>
+</li>
+<li>
+<p>Check for hook errors in Claude Code output during session start</p>
+</li>
+</ol>
+<p><strong>Solutions:</strong></p>
+<ul>
+<li>Re-run installation: <code>bun run install:system</code></li>
+<li>Check file permissions: <code>chmod +x ~/.claude/hooks/*.js</code></li>
+<li>Verify MCP server is running: <code>bun run server-cli status</code></li>
+</ul>
+<h3 id="duplicate-entries-in-knowledge-graph">Duplicate Entries in Knowledge Graph<a class="headerlink" href="#duplicate-entries-in-knowledge-graph" title="Permanent link">¶</a></h3>
+<p><strong>Symptom:</strong> Same content appears multiple times in search results.</p>
+<p><strong>Diagnosis:</strong></p>
+<p>Check sync state file integrity:
+</p><div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>cat<span class="w"> </span>~/.claude/.madeinoz-knowledge-sync-state.json
+</span></code></pre></div><p></p>
+<p><strong>Solutions:</strong></p>
+<ul>
+<li>Corrupted state file: Delete and let it regenerate:
+  <div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>rm<span class="w"> </span>~/.claude/.madeinoz-knowledge-sync-state.json
+</span></code></pre></div></li>
+<li>Manual clearing: Use <code>clear_graph</code> tool in Claude Code</li>
+<li>Verify content hashing is working by checking state file after sync</li>
+</ul>
+<h3 id="memory-files-not-found">Memory Files Not Found<a class="headerlink" href="#memory-files-not-found" title="Permanent link">¶</a></h3>
+<p><strong>Symptom:</strong> Hook logs show "No files found" or "Directory not found".</p>
+<p><strong>Diagnosis:</strong></p>
+<ol>
+<li>
+<p>Verify PAI Memory directory exists:
+   </p><div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>ls<span class="w"> </span>-la<span class="w"> </span>~/.claude/MEMORY/
+</span></code></pre></div><p></p>
+</li>
+<li>
+<p>Check directory paths in hook configuration match your setup</p>
+</li>
+</ol>
+<p><strong>Solutions:</strong></p>
+<ul>
+<li>Create missing directories:
+  <div class="language-bash highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>~/.claude/MEMORY/LEARNING/ALGORITHM
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>~/.claude/MEMORY/LEARNING/SYSTEM
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>~/.claude/MEMORY/RESEARCH
+</span></code></pre></div></li>
+<li>Customize <code>MEMORY_DIRS</code> in hook source if using non-standard paths</li>
+</ul>
+<h3 id="sync-failures-with-retry-errors">Sync Failures with Retry Errors<a class="headerlink" href="#sync-failures-with-retry-errors" title="Permanent link">¶</a></h3>
+<p><strong>Symptom:</strong> Hook logs show repeated retry attempts that fail.</p>
+<p><strong>Diagnosis:</strong></p>
+<ol>
+<li>
+<p>Check MCP server status:
+   </p><div class="language-bash highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>status
+</span></code></pre></div><p></p>
+</li>
+<li>
+<p>Verify server logs for errors:
+   </p><div class="language-bash highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>logs
+</span></code></pre></div><p></p>
+</li>
+<li>
+<p>Test connection manually:
+   </p><div class="language-bash highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>curl<span class="w"> </span>http://localhost:8000/health
+</span></code></pre></div><p></p>
+</li>
+</ol>
+<p><strong>Solutions:</strong></p>
+<ul>
+<li>Server not running: <code>bun run server-cli start</code></li>
+<li>Port conflict: Change <code>MADEINOZ_KNOWLEDGE_PORT</code> in <code>.env</code></li>
+<li>Increase timeout: Set <code>MADEINOZ_KNOWLEDGE_TIMEOUT=60000</code> in <code>.env</code></li>
+<li>Check firewall/network settings</li>
+</ul>
+<h3 id="frontmatter-parsing-errors">Frontmatter Parsing Errors<a class="headerlink" href="#frontmatter-parsing-errors" title="Permanent link">¶</a></h3>
+<p><strong>Symptom:</strong> Files sync but metadata is missing or incorrect.</p>
+<p><strong>Diagnosis:</strong></p>
+<p>Check YAML frontmatter format in your memory files:
+</p><div class="language-bash highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>head<span class="w"> </span>-n<span class="w"> </span><span class="m">10</span><span class="w"> </span>~/.claude/MEMORY/LEARNING/SYSTEM/example.md
+</span></code></pre></div><p></p>
+<p><strong>Solutions:</strong></p>
+<ul>
+<li>Ensure frontmatter is valid YAML enclosed in <code>---</code> delimiters</li>
+<li>Check for indentation errors (use spaces, not tabs)</li>
+<li>Validate YAML syntax: <a href="http://www.yamllint.com/">yamllint.com</a></li>
+</ul>
+<p>Example correct format:
+</p><div class="language-markdown highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>---
+</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>title: "My Learning"
+</span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>tags: ["tag1", "tag2"]
+</span><span id="__span-23-4"><a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="gu">source: "Session work"</span>
+</span><span id="__span-23-5"><a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="gu">---</span>
+</span><span id="__span-23-6"><a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a>
+</span><span id="__span-23-7"><a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a><span class="gh"># Content here...</span>
+</span></code></pre></div><p></p>
+<h3 id="files-being-skipped-anti-loop">Files Being Skipped (Anti-Loop)<a class="headerlink" href="#files-being-skipped-anti-loop" title="Permanent link">¶</a></h3>
+<p><strong>Symptom:</strong> Files are being skipped with "anti-loop" reason in verbose output.</p>
+<p><strong>Diagnosis:</strong></p>
+<p>This is expected behavior. The hook automatically skips files containing knowledge query results to prevent feedback loops. Use <code>--verbose</code> to see which patterns matched:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>bun<span class="w"> </span>run<span class="w"> </span>src/hooks/sync-memory-to-knowledge.ts<span class="w"> </span>--verbose
+</span></code></pre></div>
+<p><strong>Solutions:</strong></p>
+<ul>
+<li>This is protective behavior - files containing knowledge search results should not be re-synced</li>
+<li>If a file is incorrectly matched, review the built-in patterns in <code>src/hooks/lib/anti-loop-patterns.ts</code></li>
+<li>Use <code>--status</code> to see current configuration including custom exclude patterns</li>
+</ul>
+<div class="admonition info">
+<p class="admonition-title">Need More Help?</p>
+<p>For additional support:</p>
+<ul>
+<li>Check server diagnostics: <code>bun run diagnose</code></li>
+<li>Review server logs: <code>bun run logs</code></li>
+<li>Visit the <a href="https://github.com/yourusername/madeinoz-knowledge-system">GitHub repository</a></li>
+<li>Consult the <a href="../getting-started/overview.html">Getting Started guide</a></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"></path></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer">
+        
+          
+          <a href="knowledge-graph.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Knowledge Graph">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Knowledge Graph
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../troubleshooting/common-issues.html" class="md-footer__link md-footer__link--next" aria-label="Next: Common Issues">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Common Issues
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"></path></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/madeinoz67/madeinoz-knowledge-system" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"></path></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "search.suggest", "search.highlight", "content.code.copy", "content.tabs.link", "content.lightbox"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  
+<script id="init-glightbox">const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});
+document$.subscribe(()=>{ lightbox.reload(); });
+</script></body></html>
