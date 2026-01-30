@@ -3,10 +3,10 @@
 name: Madeinoz Knowledge System
 
 # pack-id: (format) {author}-{pack-name}-{variant}-v{version}
-pack-id: madeinoz67-madeinoz-knowledge-system-core-v1.6.0
+pack-id: madeinoz67-madeinoz-knowledge-system-core-v1.6.1
 
 # version: (format) SemVer major.minor.patch
-version: 1.6.0
+version: 1.6.1
 
 # author: (1 word) GitHub username or organization
 author: madeinoz67
@@ -43,7 +43,7 @@ keywords: [knowledge, graph, memory, semantic search, entity extraction, relatio
 
 ## Changelog
 
-**Latest: v1.6.0** - Memory Decay Scoring & Lifecycle Management with importance/stability classification, weighted search, and automated maintenance.
+**Latest: v1.6.1** - Fix: Changed half-life default to 180 days.
 
 See [CHANGELOG.md](CHANGELOG.md) for full version history.
 
