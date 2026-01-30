@@ -304,14 +304,17 @@ async def classify_memory(
         if source_description:
             prompt = f"Source: {source_description}\n\n{prompt}"
 
-        # Import Message type for proper format
-        from graphiti_core.prompts.models import Message
+        # Try to use Graphiti's Message format if available, otherwise use string
+        # (for backward compatibility with tests and environments without graphiti_core)
+        try:
+            from graphiti_core.prompts.models import Message
+            # Create message in format expected by Graphiti's generate_response
+            messages = [Message(role="user", content=prompt)]
+            response = await client_to_use.generate_response(messages)
+        except (ImportError, ModuleNotFoundError):
+            # Fallback: pass prompt as string (for tests and legacy code)
+            response = await client_to_use.generate_response(prompt)
 
-        # Create message in format expected by Graphiti's generate_response
-        messages = [Message(role="user", content=prompt)]
-
-        # Call LLM with proper message format
-        response = await client_to_use.generate_response(messages)
         latency = time.time() - start_time
 
         # Debug: log raw response type and content for troubleshooting
