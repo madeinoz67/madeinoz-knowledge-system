@@ -353,9 +353,9 @@ With the default 180-day half-life for MODERATE memories:
 
 | Transition | Config (minimum) | Actual timing | Decay at minimum days |
 |------------|------------------|---------------|----------------------|
-| ACTIVE → DORMANT | 30 days + decay ≥ 0.3 | **~95 days** | Day 30: decay ≈ 0.11 |
-| DORMANT → ARCHIVED | 90 days + decay ≥ 0.6 | **~185 days** | Day 90: decay ≈ 0.29 |
-| ARCHIVED → EXPIRED | 180 days + decay ≥ 0.9 | **~545 days** | Day 180: decay ≈ 0.50 |
+| ACTIVE → DORMANT | 30 days + decay ≥ 0.3 | **~93 days** | Day 30: decay ≈ 0.11 |
+| DORMANT → ARCHIVED | 90 days + decay ≥ 0.6 | **~238 days** | Day 90: decay ≈ 0.29 |
+| ARCHIVED → EXPIRED | 180 days + decay ≥ 0.9 | **~598 days** | Day 180: decay ≈ 0.50 |
 
 The days threshold is a **minimum**—actual transitions occur later when decay_score reaches the threshold.
 
