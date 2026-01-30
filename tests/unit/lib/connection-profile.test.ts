@@ -24,7 +24,8 @@ describe('ConnectionProfileManager', () => {
     // Create temporary directory for test fixtures
     tempDir = join(tmpdir(), `connection-profile-test-${Date.now()}`);
     mkdirSync(tempDir, { recursive: true });
-    configPath = join(tempDir, 'knowledge-profiles.yaml');
+    mkdirSync(join(tempDir, 'config'), { recursive: true }); // Create config subdirectory
+    configPath = join(tempDir, 'config', 'knowledge-profiles.yaml');
   });
 
   afterEach(() => {
