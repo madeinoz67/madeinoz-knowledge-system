@@ -102,11 +102,65 @@ The **decay score** represents how "stale" a memory has become:
 
 #### Calculation
 
-- Uses exponential half-life formula adjusted by stability
-- More time since last access = higher decay score
-- Higher importance = slower decay accumulation
-- Higher stability = slower decay accumulation
-- Accessing a memory resets decay to 0.0
+The decay score uses **exponential decay** (not linear), matching how human memory and real-world phenomena work:
+
+```
+decay_score = 1 - exp(-λ × days_since_access)
+where λ = ln(2) / half_life_days
+```
+
+**Why exponential?**
+
+- **Linear decay** would lose value at constant rate (e.g., 3.3% per day), reaching 100% after 30 days
+- **Exponential decay** follows natural patterns:
+  - Radioactive decay
+  - Drug elimination from the body
+  - Human memory forgetting (Ebbinghaus curve)
+  - Information relevance over time
+
+!!! example "Exponential vs Linear Decay (30-day half-life)"
+
+    **Linear decay** (constant 3.3% per day):
+    - Day 0: 0% decay
+    - Day 15: 50% decay
+    - Day 30: 100% decay (completely gone)
+
+    **Exponential decay** (our implementation):
+    - Day 0: 0% decay
+    - Day 30: 50% decay (half-life)
+    - Day 60: 75% decay
+    - Day 90: 87.5% decay
+    - Day 180: 98.4% decay
+    - **Never truly reaches 100%**
+
+![Exponential Decay Curve](../assets/images/decay-exponential-curve.png)
+
+**Decay progression by half-life:**
+
+| Half-Lives | Decay Score | Remaining Value |
+|------------|-------------|-----------------|
+| 0 | 0.00 | 100% (fresh) |
+| 1 | 0.50 | 50% |
+| 2 | 0.75 | 25% |
+| 3 | 0.875 | 12.5% |
+| 4 | 0.9375 | 6.25% |
+| 5 | 0.96875 | 3.125% |
+| 6 | 0.9844 | 1.56% |
+
+**Impact of stability on half-life:**
+
+The stability level adjusts the half-life:
+
+| Stability | Half-Life | Days to 75% Decay | Days to 87.5% Decay |
+|-----------|----------|-------------------|----------------------|
+| 1 (VOLATILE) | 15 days | 30 | 45 |
+| 2 (LOW) | 14 days | 28 | 42 |
+| 3 (MODERATE) | 30 days | 60 | 90 |
+| 4 (HIGH) | 90 days | 180 | 270 |
+| 5 (PERMANENT) | ∞ | Never | Never (λ = 0) |
+
+!!! tip "Key Insight"
+    Exponential decay means memories lose value **quickly at first**, then **decay slows down** over time. This preserves older memories that have proven valuable (high stability) while allowing trivial information to fade rapidly.
 
 ### Lifecycle States
 
