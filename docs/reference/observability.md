@@ -643,7 +643,7 @@ Prompt caching reduces API costs by up to 15-20% by reusing previously processed
 **Note:** Prompt caching is **disabled by default** and must be explicitly enabled via configuration.
 
 !!! info "Developer Documentation"
-    For implementation details including architecture diagrams, code flow, and metrics internals, see the [Cache Architecture Guide](cache-architecture-mermaid.md).
+    For implementation details including architecture diagrams, code flow, and metrics internals, see the [Cache Implementation Guide](cache-implementation.md).
 
 ### How It Works
 
