@@ -636,12 +636,14 @@ This shows per-request metrics in container logs:
 📊 Metrics: prompt=1234, completion=567, cost=$0.000089, input_cost=$0.000062, output_cost=$0.000027
 ```
 
-## Prompt Caching (Gemini)
+## Prompt Caching (Gemini via OpenRouter)
 
-Prompt caching reduces API costs by reusing previously processed prompt content. The system automatically caches system prompts and repeated content, serving subsequent requests from cache at reduced cost.
+Prompt caching reduces API costs by up to 15-20% by reusing previously processed prompt content. The system adds explicit `cache_control` markers to requests when enabled, allowing OpenRouter to serve cached content at reduced cost (0.25x normal price).
+
+**Note:** Prompt caching is **disabled by default** and must be explicitly enabled via configuration.
 
 !!! info "Developer Documentation"
-    For implementation details including architecture, code flow, and metrics internals, see the [Cache Implementation Guide](cache-implementation.md).
+    For implementation details including architecture diagrams, code flow, and metrics internals, see the [Cache Architecture Guide](cache-architecture-mermaid.md).
 
 ### How It Works
 
@@ -666,35 +668,31 @@ Prompt caching reduces API costs by reusing previously processed prompt content.
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### Gemini Caching Modes
+### How Caching Works via OpenRouter
 
-| Model Family | Caching Mode | Minimum Tokens | How It Works |
-|--------------|--------------|----------------|--------------|
-| Gemini 2.5 | **Implicit** | 1,028 | Automatic - no markers needed |
-| Gemini 2.0 | **Explicit** | 4,096 | Requires `cache_control` markers |
+The Madeinoz Knowledge System implements **explicit prompt caching** via OpenRouter using `cache_control` markers (similar to Anthropic's approach):
 
-**Recommendation:** Use **Gemini 2.5 Flash** (`google/gemini-2.5-flash`) for best caching results. It has a lower token threshold (1,028 vs 4,096) and caching is automatic.
+| Aspect | Description |
+|--------|-------------|
+| **Implementation** | Explicit `cache_control` markers added to last message part |
+| **Format** | Multipart messages with content parts array |
+| **Cache lifecycle** | Managed by OpenRouter automatically |
+| **Minimum tokens** | 1,024 tokens for caching to be applied |
+| **Default state** | **Disabled** - must be explicitly enabled |
 
-### Implicit vs Explicit Caching
+**Recommended Model:** `google/gemini-2.0-flash-001` via OpenRouter
 
-**Implicit Caching (Gemini 2.5):**
-
-- Automatic - Gemini decides what to cache
-- No special formatting required
-- Works with standard message format
-- Cache keys based on content hash
-
-**Explicit Caching (Gemini 2.0):**
-
-- Requires `cache_control: {"type": "ephemeral"}` markers
-- Messages must use multipart format
-- Minimum 4,096 tokens required
-- Most Graphiti prompts (~800 tokens) are below this threshold
+This implementation uses the **CachingLLMClient** wrapper which:
+1. Checks if caching is enabled (environment variable)
+2. Verifies the model is Gemini via OpenRouter
+3. Converts messages to multipart format
+4. Adds `cache_control` marker to the last content part
+5. Extracts cache metrics from responses (cache_read_tokens, cache_write_tokens)
 
 ### Configuration
 
 ```bash
-# Enable prompt caching (required)
+# Enable prompt caching (disabled by default)
 MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED=true
 
 # Enable metrics collection for cache statistics (recommended)
@@ -704,7 +702,7 @@ MADEINOZ_KNOWLEDGE_PROMPT_CACHE_METRICS_ENABLED=true
 MADEINOZ_KNOWLEDGE_PROMPT_CACHE_LOG_REQUESTS=true
 
 # Recommended model for caching
-MADEINOZ_KNOWLEDGE_MODEL_NAME=google/gemini-2.5-flash
+MADEINOZ_KNOWLEDGE_MODEL_NAME=google/gemini-2.0-flash-001
 ```
 
 ### Cache Pricing
