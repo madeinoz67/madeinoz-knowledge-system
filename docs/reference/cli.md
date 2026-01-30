@@ -3,11 +3,39 @@ title: "CLI Reference"
 description: "Command-line interface reference for the Madeinoz Knowledge System"
 ---
 
+<!-- AI-FRIENDLY SUMMARY
+System: Madeinoz Knowledge System - CLI Tools
+Purpose: Command-line interface for knowledge graph management, server operations, and remote access
+Key Components: server-cli (container management), knowledge-cli (knowledge operations with remote access support)
+
+Key Tools/Commands:
+- server-cli: start/stop/restart/status/logs for MCP server containers
+- knowledge-cli: add_episode, search_nodes, search_facts, get_episodes, get_status, clear_graph, health, status, list_profiles
+
+Configuration Prefix: MADEINOZ_KNOWLEDGE_
+Default Ports: 8001 (MCP HTTP), 8000 (MCP Server), 7474 (Neo4j Browser), 7687 (Neo4j Bolt)
+
+Remote Access (Feature 010):
+- Connection profiles via YAML config: $PAI_DIR/config/knowledge-profiles.yaml
+- CLI flags: --profile, --host, --port, --protocol
+- Environment variable overrides: MADEINOZ_KNOWLEDGE_HOST, MADEINOZ_KNOWLEDGE_PORT, etc.
+- TLS/SSL support for HTTPS connections
+-->
+
 # CLI Reference
 
 ## Overview
 
 The Madeinoz Knowledge System provides command-line tools for managing the knowledge graph server and performing knowledge operations.
+
+### Quick Reference
+
+| Command | Purpose | Example |
+|---------|---------|---------|
+| `bun run server-cli start` | Start MCP server containers | `bun run server-cli start --dev` |
+| `bun run knowledge-cli.ts status` | Show connection status | `bun run knowledge-cli.ts status --profile production` |
+| `bun run knowledge-cli.ts list_profiles` | List available profiles | `bun run knowledge-cli.ts list_profiles` |
+| `bun run knowledge-cli.ts search_nodes` | Search knowledge graph | `bun run knowledge-cli.ts search_nodes "query" --profile remote` |
 
 ## Server Management Commands
 
@@ -521,6 +549,169 @@ This format is ideal for:
 - Performance monitoring
 - Cost tracking
 - Optimization validation
+
+## Remote Access CLI Options
+
+The Knowledge CLI supports remote MCP access via connection profiles and CLI flags. See [Remote Access Documentation](../remote-access.md) for complete details.
+
+### Connection Profiles
+
+Use predefined connection profiles for different environments:
+
+```bash
+# List all available profiles
+bun run knowledge-cli.ts list_profiles
+
+# Use specific profile
+bun run knowledge-cli.ts search_nodes "query" --profile production
+
+# Show current connection status
+bun run knowledge-cli.ts status
+```
+
+**Profile Configuration Priority:**
+
+1. CLI flags (`--host`, `--port`, `--protocol`)
+2. Individual environment variables (`MADEINOZ_KNOWLEDGE_HOST`)
+3. Selected profile (`--profile` or `MADEINOZ_KNOWLEDGE_PROFILE`)
+4. Default profile in YAML file
+5. Code defaults (localhost:8001, http)
+
+### CLI Flags
+
+All commands support these remote access flags:
+
+| Flag | Description | Example |
+|------|-------------|---------|
+| `--profile <name>` | Use specific connection profile | `--profile production` |
+| `--host <hostname>` | Override profile host | `--host knowledge.example.com` |
+| `--port <port>` | Override profile port | `--port 443` |
+| `--protocol <proto>` | Override protocol (http/https) | `--protocol https` |
+
+### Environment Variable Overrides
+
+Override any profile setting via environment variables:
+
+| Variable | Description | Default | Example |
+|----------|-------------|---------|---------|
+| `MADEINOZ_KNOWLEDGE_PROFILE` | Profile name to use | `default` | `production` |
+| `MADEINOZ_KNOWLEDGE_HOST` | Server hostname or IP | `localhost` | `knowledge.example.com` |
+| `MADEINOZ_KNOWLEDGE_PORT` | Server port | `8001` | `443` |
+| `MADEINOZ_KNOWLEDGE_PROTOCOL` | Connection protocol | `http` | `https` |
+| `MADEINOZ_KNOWLEDGE_TLS_VERIFY` | Verify TLS certificates | `true` | `false` |
+| `MADEINOZ_KNOWLEDGE_TLS_CA` | CA certificate path | - | `/etc/ssl/certs/ca.pem` |
+| `MADEINOZ_KNOWLEDGE_TIMEOUT` | Connection timeout (ms) | `30000` | `60000` |
+
+**Example usage:**
+
+```bash
+# Use environment variables for remote connection
+export MADEINOZ_KNOWLEDGE_HOST=192.168.1.100
+export MADEINOZ_KNOWLEDGE_PORT=8001
+bun run knowledge-cli.ts search_nodes "my query"
+
+# Combine profile with host override
+bun run knowledge-cli.ts get_status --profile production --host backup.example.com
+```
+
+### Profile Configuration File
+
+Connection profiles are stored in:
+
+```bash
+# Priority location
+$PAI_DIR/config/knowledge-profiles.yaml
+
+# Fallback location
+~/.claude/config/knowledge-profiles.yaml
+```
+
+**Example profile configuration:**
+
+```yaml
+version: "1.0"
+default_profile: default
+
+profiles:
+  default:
+    host: localhost
+    port: 8001
+    protocol: http
+
+  production:
+    host: knowledge.example.com
+    port: 443
+    protocol: https
+    tls:
+      verify: true
+      minVersion: TLSv1.3
+
+  development:
+    host: 192.168.1.100
+    port: 8001
+    protocol: http
+```
+
+### New Commands (Feature 010)
+
+#### status
+
+Show connection status and active profile:
+
+```bash
+bun run knowledge-cli.ts status
+```
+
+**Output includes:**
+
+- Active profile name
+- Connection status (connected/disconnected/error)
+- Connected host and port
+- Protocol (http/https)
+- Server version (if available)
+- Last connection time
+
+```bash
+$ bun run knowledge-cli.ts status --profile production
+
+Knowledge CLI Connection Status
+================================
+Profile: production
+Status: connected
+Host: knowledge.example.com
+Port: 443
+Protocol: https
+Server Version: 1.6.1
+Last Connected: 2026-01-30T12:34:56Z
+```
+
+#### list_profiles
+
+List all available connection profiles:
+
+```bash
+bun run knowledge-cli.ts list_profiles
+```
+
+**Output includes:**
+
+- All profile names from configuration
+- Default profile indicator
+- Configuration file path
+
+```bash
+$ bun run knowledge-cli.ts list_profiles
+
+Available Profiles
+==================
+Configuration: ~/.claude/config/knowledge-profiles.yaml
+Default Profile: default
+
+Profiles:
+  - default (localhost:8001, http)
+  - production (knowledge.example.com:443, https)
+  - development (192.168.1.100:8001, http)
+```
 
 ## Interactive Installation
 
