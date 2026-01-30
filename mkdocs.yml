@@ -71,8 +71,7 @@ nav:
 plugins:
   - search
   - offline
-  - glightbox:
-      skip_images: ["logo.png"]
+  - glightbox
 
 markdown_extensions:
   - admonition
