@@ -471,7 +471,6 @@ services:
 
 ## Related Documentation
 
-- [Quickstart Guide](../specs/010-remote-mcp-access/quickstart.md) - Step-by-step setup instructions
+- [Installation Guide](installation/index.md) - Complete installation instructions
 - [Troubleshooting](troubleshooting/common-issues.md) - Common issues and solutions
-- [Installation Guide](installation/) - Complete installation instructions
 - [Configuration Reference](reference/configuration.md) - Full configuration options
