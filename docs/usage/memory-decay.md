@@ -345,6 +345,20 @@ decay:
       max_importance: 3  # Only expire if importance ≤ 3
 ```
 
+**How thresholds work with half-life:**
+
+Transitions require **BOTH** conditions to be met: minimum days inactive AND decay_score threshold.
+
+With the default 180-day half-life for MODERATE memories:
+
+| Transition | Config (minimum) | Actual timing | Decay at minimum days |
+|------------|------------------|---------------|----------------------|
+| ACTIVE → DORMANT | 30 days + decay ≥ 0.3 | **~95 days** | Day 30: decay ≈ 0.11 |
+| DORMANT → ARCHIVED | 90 days + decay ≥ 0.6 | **~185 days** | Day 90: decay ≈ 0.29 |
+| ARCHIVED → EXPIRED | 180 days + decay ≥ 0.9 | **~545 days** | Day 180: decay ≈ 0.50 |
+
+The days threshold is a **minimum**—actual transitions occur later when decay_score reaches the threshold.
+
 #### Maintenance Schedule
 
 ```yaml
