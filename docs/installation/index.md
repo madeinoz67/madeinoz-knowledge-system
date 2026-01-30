@@ -27,9 +27,10 @@ description: "Complete installation guide for Knowledge System with step-by-step
 - **Podman** 3.0+ or Docker (container runtime)
 - **Bun** runtime (for PAI skill execution)
 - **LLM Provider** - One of the following:
-  - **Ollama** (recommended - free, local, private)
-  - OpenAI API key
-  - Anthropic, Google Gemini, or Groq (may require OpenAI for embeddings)
+  - **OpenRouter** (recommended) - Access to multiple models including GPT-4o, Gemini 2.0 Flash, Claude
+  - OpenAI API key - Direct OpenAI access
+  - Anthropic, Google Gemini, or Groq API keys
+  - **Ollama** - For embeddings only (see note below about LLM compatibility)
 - **Claude Code** or compatible PAI-enabled agent system
 - **2GB RAM** minimum for container (4GB+ recommended for Ollama)
 - **1GB disk space** for graph database
@@ -227,9 +228,9 @@ EMBEDDER_MODEL=BAAI/bge-large-en-v1.5
 EMBEDDER_DIMENSIONS=1024
 ```
 
-#### Option 4: Full Ollama (Free but NOT RECOMMENDED)
+#### Option 4: Full Ollama (NOT RECOMMENDED - Free but Unreliable)
 
-**⚠️ Completely free, but Llama/Mistral models FAIL Graphiti validation**
+**⚠️ WARNING: Free option, but open-source LLMs fail Graphiti validation**
 
 | Component | Provider | Model | Cost | Status |
 |-----------|----------|-------|------|--------|

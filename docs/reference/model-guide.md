@@ -22,7 +22,7 @@ For cost savings while maintaining reliability, we recommend a **hybrid setup**:
 
 ```env
 # LLM: gemini-2.0-Flash (reliable JSON output for entity extraction)
-MADEINOZ_KNOWLEDGE_LLM_PROVIDER=openrouter
+MADEINOZ_KNOWLEDGE_LLM_PROVIDER=openai
 MADEINOZ_KNOWLEDGE_MODEL_NAME=google/gemini-2.0-flash-001
 MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL=https://openrouter.ai/api/v1
 MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=your-openrouter-api-key
@@ -36,7 +36,8 @@ MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS=1024
 
 This configuration:
 
-- Uses gemini-2.0-flash-001 via openrouter for LLM (reliable and cost effective)
+- Uses gemini-2.0-flash-001 via OpenRouter for LLM (reliable and cost effective)
+- Note: `LLM_PROVIDER=openai` because OpenRouter is OpenAI-compatible
 - Uses Ollama for embeddings (free, runs locally)
 - Reduces cloud costs while maintaining extraction quality
 

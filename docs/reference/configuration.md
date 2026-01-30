@@ -28,9 +28,8 @@ Default Ports:
 - MCP Server: 8000
 - Neo4j Browser: 7474, Bolt: 7687
 - FalkorDB UI: 3000, Redis: 6379
-- Prometheus: 9090 (prod) / 9092 (dev)
 - Metrics: 9090 (prod) / 9091 (dev)
-- Grafana: 3001/3002 (prod) / 3002/3003 (dev)
+- Grafana: 3001 (prod) / 3002 (dev)
 -->
 
 # Configuration Reference
@@ -462,10 +461,13 @@ Default is `false` (disabled).
 ### Prompt Caching
 
 ```bash
+# Prompt caching is DISABLED by default - set to true to enable
 MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED=true
 ```
 
-Controls prompt caching for Gemini models via OpenRouter. Default is `false` (disabled).
+**Default:** `false` (disabled)
+
+Controls prompt caching for Gemini models via OpenRouter. When enabled, the system uses explicit `cache_control` markers in requests (similar to Anthropic's approach), not implicit caching. The `/chat/completions` endpoint supports multipart format with cache control markers.
 
 !!! success "Now Available for Gemini"
     Prompt caching is now functional for Gemini models on OpenRouter. The system routes Gemini models through the `/chat/completions` endpoint which supports multipart format with cache control markers. Set to `true` to enable caching and reduce costs on repeated prompts.

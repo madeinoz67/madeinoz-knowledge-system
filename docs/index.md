@@ -142,17 +142,19 @@ Two graph database options:
 
 ## Key Features
 
-### Prompt Caching (Gemini)
+### Prompt Caching (Gemini via OpenRouter)
 
-Reduce LLM costs by up to 15-20% (est) with Gemini prompt caching:
+Reduce LLM costs by up to 15-20% (est) with prompt caching for Gemini models via OpenRouter:
 
 ```bash
-# Enable in ~/.claude/.env
+# Enable in ~/.claude/.env (disabled by default)
 MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED=true
-MADEINOZ_KNOWLEDGE_MODEL_NAME=google/gemini-2.5-flash
+MADEINOZ_KNOWLEDGE_MODEL_NAME=google/gemini-2.0-flash-001
+MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=sk-or-v1-your-key
+MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL=https://openrouter.ai/api/v1
 ```
 
-Gemini 2.5 Flash uses **implicit caching** - automatic with no configuration needed beyond enabling it. See [Observability & Metrics](reference/observability.md#prompt-caching-gemini) for details.
+**Note:** Prompt caching is **disabled by default** and must be explicitly enabled. The system uses explicit `cache_control` markers (similar to Anthropic) - not implicit caching. OpenRouter manages the cache lifecycle automatically when enabled. See [Observability & Metrics](reference/observability.md#prompt-caching-gemini) for details.
 
 ### Observability & Metrics
 

@@ -60,14 +60,18 @@ class LifecycleState(str, Enum):
     """
     Memory lifecycle states.
 
-    Transition flow:
-    ACTIVE -> DORMANT (30 days) -> ARCHIVED (90 days) -> EXPIRED (180 days) -> SOFT_DELETED -> (purged after 90 days)
+    Transition flow (actual configured values from config/decay-config.yaml):
+    ACTIVE -> DORMANT (90 days minimum) -> ARCHIVED (180 days minimum) -> EXPIRED (360 days minimum) -> SOFT_DELETED -> (purged after 90 days)
+
+    Note: Code defaults are 30/90/180 days, but config file uses 90/180/360 for more conservative retention.
+    Actual transitions occur when BOTH minimum days AND decay_score thresholds are met.
+    See config/decay-config.yaml for configured values.
 
     Any access event reactivates DORMANT/ARCHIVED memories back to ACTIVE.
     """
     ACTIVE = "ACTIVE"           # Recently accessed, full relevance
-    DORMANT = "DORMANT"         # Not accessed 30+ days
-    ARCHIVED = "ARCHIVED"       # Not accessed 90+ days, low priority
+    DORMANT = "DORMANT"         # Not accessed 90+ days (config) or 30+ days (code default)
+    ARCHIVED = "ARCHIVED"       # Not accessed 180+ days (config) or 90+ days (code default)
     EXPIRED = "EXPIRED"         # Marked for deletion
     SOFT_DELETED = "SOFT_DELETED"  # Deleted, in 90-day recovery window
 
