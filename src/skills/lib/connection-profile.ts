@@ -481,14 +481,32 @@ function parseEnvValue(key: string, value: string): string | number | boolean {
  * Guards against prototype pollution by validating key names
  */
 function setNestedProperty(obj: Record<string, unknown>, path: string, value: unknown): void {
+  // Dangerous properties that could lead to prototype pollution
+  const DANGEROUS_PROPERTIES = new Set([
+    '__proto__',
+    'constructor',
+    'prototype',
+    'toString',
+    'toLocaleString',
+    'valueOf',
+    'hasOwnProperty',
+    'isPrototypeOf',
+    'propertyIsEnumerable',
+  ]);
+
   const keys = path.split('.');
   let current = obj;
 
   for (let i = 0; i < keys.length - 1; i++) {
     const key = keys[i];
 
-    // Guard against prototype pollution: validate key is alphanumeric
-    // Only allow alphanumeric characters and underscores in property names
+    // Guard against prototype pollution: block dangerous properties explicitly
+    if (DANGEROUS_PROPERTIES.has(key)) {
+      throw new Error(`Invalid property name: "${key}". This property is not allowed for security reasons.`);
+    }
+
+    // Additional validation: only allow alphanumeric characters and underscores
+    // First char must be letter or underscore, subsequent can include numbers
     if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(key)) {
       throw new Error(`Invalid property name: "${key}". Property names must be alphanumeric.`);
     }
@@ -500,7 +518,13 @@ function setNestedProperty(obj: Record<string, unknown>, path: string, value: un
   }
 
   const finalKey = keys[keys.length - 1];
-  // Validate final key as well
+
+  // Validate final key against dangerous properties
+  if (DANGEROUS_PROPERTIES.has(finalKey)) {
+    throw new Error(`Invalid property name: "${finalKey}". This property is not allowed for security reasons.`);
+  }
+
+  // Validate final key format
   if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(finalKey)) {
     throw new Error(`Invalid property name: "${finalKey}". Property names must be alphanumeric.`);
   }
