@@ -39,39 +39,41 @@ Configuration:
 
 # Cache Implementation Guide
 
-This document describes how the Gemini prompt caching system works internally. For configuration and usage, see [Observability & Metrics](observability.md#prompt-caching-gemini).
+This document describes how the Gemini prompt caching system works internally. For configuration and usage, see [Observability & Metrics](observability.md#prompt-caching-gemini-via-openrouter).
 
 ## Architecture Overview
 
-### Request Flow
+### Visual Architecture Diagrams
 
-```
-LLM Request
-    ↓
-LLMClientFactory.create()
-    ↓
-[Route Decision]
-├─ Gemini on OpenRouter → OpenAIGenericClient
-├─ Local endpoints (Ollama) → OpenAIGenericClient
-└─ Other providers → OpenAIClient
-    ↓
-wrap_openai_client_for_caching()
-    ↓
-[Preprocessing]
-├─ Format messages with cache_control markers
-├─ Add to last message only
-└─ Convert strings to multipart format
-    ↓
-OpenAI /chat/completions API call
-    ↓
-[Postprocessing]
-├─ Extract cache metrics from response
-├─ Calculate token/cost savings
-├─ Record to session metrics
-└─ Export to Prometheus
-    ↓
-Response with Cache Metadata
-```
+#### Request Flow Diagram
+
+![Cache Request Flow Diagram](../images/cache-request-flow-diagram.png)
+
+*LLM requests flow through the CachingLLMClient wrapper, which checks three conditions before applying cache_control markers and forwarding to OpenRouter.*
+
+#### Component Architecture
+
+![Cache Component Architecture](../images/cache-component-architecture.png)
+
+*Core modules work together: environment configuration controls behavior, core components power the caching wrapper, which wraps the LLM client and exports metrics to Prometheus.*
+
+#### Decision Tree: When is Caching Applied?
+
+![Caching Decision Tree](../images/cache-decision-tree.png)
+
+*Three checks must pass: caching enabled, Gemini model, and sufficient token count. If any check fails, the request bypasses caching.*
+
+#### Metrics Flow
+
+![Cache Metrics Flow](../images/cache-metrics-flow.png)
+
+*OpenRouter responses are parsed for cache metrics, calculated for savings and hit rates, recorded to SessionMetrics, and exported to Prometheus.*
+
+### Complete Request Flow
+
+![Complete Cache Request Flow](../images/cache-complete-request-flow.png)
+
+*The complete flow from LLM request through client routing, caching wrapper, preprocessing, API call, and postprocessing with metrics extraction.*
 
 ### File Architecture
 

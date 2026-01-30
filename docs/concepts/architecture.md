@@ -9,75 +9,9 @@ The Knowledge System solves the problem of amnesiac AI through **automatic knowl
 
 ## Core Architecture
 
-```mermaid
-flowchart TB
-    subgraph Input["📝 User Input"]
-        UC[User Conversation]
-        DOC[Document Text Import]
-    end
+![Knowledge System Core Architecture](../images/architecture-core-system.png)
 
-    subgraph Skill["🎯 Madeinoz Knowledge System Skill"]
-        IR[Intent Routing]
-        IR --> |"remember this"| CAP[Capture Workflow]
-        IR --> |"what do I know"| SEARCH[Search Workflow]
-        IR --> |"how are X and Y"| FACTS[Facts Workflow]
-        IR --> |"recent additions"| RECENT[Recent Workflow]
-    end
-
-    subgraph MCP["⚙️ Graphiti MCP Server"]
-        direction TB
-        LLM["LLM Extraction<br/>LLM Provider"]
-        LLM --> ENT["Entity Extraction<br/>People, Organizations,<br/>Concepts, Locations"]
-        LLM --> REL["Relationship Mapping<br/>Causal, Dependency,<br/>Temporal, Semantic"]
-        LLM --> DEC["Memory Decay<br/>Importance & Stability<br/>Lifecycle Management"]
-        ENT --> VEC["Vector Embeddings<br/>text-embedding-3-small"]
-        REL --> VEC
-        DEC --> VEC
-    end
-
-    subgraph DB["💾 Graph Database Backend"]
-        direction LR
-        subgraph Neo4j["Neo4j (Default)"]
-            N1[Native Graph DB]
-            N2[Cypher Queries]
-            N3[Browser :7474]
-        end
-        subgraph Falkor["FalkorDB (Alternative)"]
-            F1[Redis-based]
-            F2[RediSearch Queries]
-            F3[Web UI :3000]
-        end
-    end
-
-    subgraph Storage["📊 Graph Storage"]
-        NODES[Nodes<br/>Entities with embeddings]
-        EDGES[Edges<br/>Typed relationships]
-        EPISODES[Episodes<br/>Full context + timestamps]
-        INDICES[Indices<br/>Vector + keyword search]
-    end
-
-    UC --> IR
-    DOC --> IR
-    CAP --> MCP
-    SEARCH --> MCP
-    FACTS --> MCP
-    RECENT --> MCP
-    VEC --> DB
-    Neo4j --> Storage
-    Falkor --> Storage
-
-    style Input fill:#e1f5fe,stroke:#01579b
-    style Skill fill:#f3e5f5,stroke:#4a148c
-    style MCP fill:#fff3e0,stroke:#e65100
-    style DB fill:#e8f5e9,stroke:#1b5e20
-    style Storage fill:#fce4ec,stroke:#880e4f
-```
-
-!!! info "Architecture Diagram"
-
-    ![System Architecture Flow](../assets/images/architecture-flow-diagram.png)
-
-    **System Architecture Flow:** User conversation and document text flow through the Knowledge System Skill → Intent Routing → Graphiti MCP Server (with Memory Decay) → Graph Database Backend (Neo4j/FalkorDB) → Graph Storage (Nodes, Edges, Episodes, Indices)
+*User conversation and document text flow through the Knowledge System Skill → Intent Routing → Graphiti MCP Server (with Memory Decay) → Graph Database Backend (Neo4j/FalkorDB) → Graph Storage (Nodes, Edges, Episodes, Indices)*
 
 ## How It Works
 
@@ -122,102 +56,21 @@ Ask "how are FalkorDB and Graphiti connected?" and the system:
 
 ## Multi-Layered Architecture
 
-The system uses progressive abstraction across multiple layers:
+![Multi-Layered Architecture](../images/architecture-multi-layered.png)
 
-```mermaid
-flowchart TB
-    subgraph L1["🗣️ Layer 1: User Intent"]
-        UI["Natural Language Triggers"]
-        UI --> T1["'remember this'"]
-        UI --> T2["'what do I know about X'"]
-        UI --> T3["'how are X and Y related'"]
-    end
+*The system uses progressive abstraction across 6 layers:*
 
-    subgraph L2["🎯 Layer 2: PAI Skill Routing"]
-        SKILL["SKILL.md Frontmatter"]
-        SKILL --> ID["Intent Detection"]
-        ID --> UW["USE WHEN Clauses"]
-        UW --> RT["Route to Workflow"]
-    end
+***Layer 1 - User Intent:** Natural language triggers ("remember this", "what do I know", "how are X and Y")*
 
-    subgraph L3["⚡ Layer 3: Workflow Execution"]
-        direction LR
-        subgraph W1["CaptureEpisode"]
-            CE1[Add Episode]
-            CE2[Extract Entities]
-            CE3[Create Relationships]
-        end
-        subgraph W2["SearchKnowledge"]
-            SK1[Vector Search]
-            SK2[Return Entities]
-            SK3[Summarize]
-        end
-        subgraph W3["SearchFacts"]
-            SF1[Traverse Edges]
-            SF2[Return Connections]
-        end
-        subgraph W4["GetRecent"]
-            GR1[Temporal Query]
-            GR2[Show Progression]
-        end
-    end
+***Layer 2 - PAI Skill Routing:** SKILL.md frontmatter → Intent Detection → Workflow routing*
 
-    subgraph L4["🔌 Layer 4: MCP Server Integration"]
-        SSE["SSE Endpoint<br/>localhost:8000/sse"]
-        SSE --> AM["add_memory"]
-        SSE --> SMN["search_memory_nodes"]
-        SSE --> SMF["search_memory_facts"]
-        SSE --> GE["get_episodes"]
-        SSE --> MGT["delete/clear"]
-    end
+***Layer 3 - Workflow Execution:** CaptureEpisode, SearchKnowledge, SearchFacts, GetRecent*
 
-    subgraph L5["🧠 Layer 5: Graphiti Knowledge Graph"]
-        LLM["LLM Processing<br/>LLM Provider"]
-        LLM --> EXT["Entity Extraction<br/>People, Orgs, Concepts,<br/>Locations, Procedures"]
-        EXT --> REL["Relationship Mapping<br/>Causal, Dependency,<br/>Temporal, Semantic"]
-        LLM --> DEC["Memory Decay<br/>Importance & Stability<br/>Lifecycle States"]
-        REL --> VEC["Vector Embeddings<br/>text-embedding-3-small"]
-        DEC --> VEC
-    end
+***Layer 4 - MCP Server Integration:** SSE Endpoint (localhost:8000/sse) → add_memory, search_memory_nodes, search_memory_facts, get_episodes*
 
-    subgraph L6["💾 Layer 6: Graph Database"]
-        direction LR
-        NODES["Nodes<br/>Entities + Embeddings"]
-        EDGES["Edges<br/>Typed Relationships"]
-        EPISODES["Episodes<br/>Full Context"]
-        INDICES["Indices<br/>Vector + Keyword"]
-    end
+***Layer 5 - Graphiti Knowledge Graph:** LLM Processing → Entity Extraction → Relationship Mapping → Memory Decay → Vector Embeddings*
 
-    L1 --> L2
-    L2 --> L3
-    L3 --> L4
-    L4 --> L5
-    L5 --> L6
-
-    style L1 fill:#e3f2fd,stroke:#1565c0
-    style L2 fill:#f3e5f5,stroke:#7b1fa2
-    style L3 fill:#fff3e0,stroke:#ef6c00
-    style L4 fill:#e8f5e9,stroke:#2e7d32
-    style L5 fill:#fce4ec,stroke:#c2185b
-    style L6 fill:#f5f5f5,stroke:#424242
-```
-
-!!! info "Multi-Layered Architecture"
-
-    The system uses progressive abstraction across 6 layers:
-
-    **Layer 1 - User Intent:** Natural language triggers ("remember this", "what do I know", "how are X and Y")
-
-    **Layer 2 - PAI Skill Routing:** SKILL.md frontmatter → Intent Detection → Workflow routing
-
-    **Layer 3 - Workflow Execution:** CaptureEpisode, SearchKnowledge, SearchFacts, GetRecent
-
-    **Layer 4 - MCP Server Integration:** SSE Endpoint (localhost:8000/sse) → add_memory, search_memory_nodes, search_memory_facts, get_episodes
-
-    **Layer 5 - Graphiti Knowledge Graph:** LLM Processing → Entity Extraction → Relationship Mapping → Memory Decay → Vector Embeddings
-
-    **Layer 6 - Graph Database:** Nodes (Entities + Embeddings), Edges (Typed Relationships), Episodes (Full Context), Indices (Vector + Keyword)
-```
+***Layer 6 - Graph Database:** Nodes (Entities + Embeddings), Edges (Typed Relationships), Episodes (Full Context), Indices (Vector + Keyword)*
 
 ## Architectural Advantages
 
@@ -241,40 +94,13 @@ This is FUNDAMENTALLY DIFFERENT from "just storing notes" because:
 
 ### 2. Bidirectional Knowledge Flow
 
-```mermaid
-flowchart TB
-    subgraph Capture["⬇️ CAPTURE PATH"]
-        direction TB
-        U1["👤 User says<br/>'Remember X'"]
-        U1 --> CE["📝 Capture Episode"]
-        CE --> EE["🔍 Extract Entities"]
-        EE --> CR["🔗 Create Relationships"]
-        CR --> SG["💾 Store in Graph"]
-    end
+![Bidirectional Knowledge Flow](../images/architecture-bidirectional-flow.png)
 
-    subgraph Retrieval["⬆️ RETRIEVAL PATH"]
-        direction TB
-        GQ["📊 Graph Query"]
-        GQ --> SS["🎯 Semantic Similarity"]
-        SS --> VS["🔎 Vector Search"]
-        VS --> SR["📋 Search Results"]
-        SR --> U2["👤 User asks<br/>'What about X'"]
-    end
+*Capture path (green): User says "Remember X" → Capture Episode → Extract Entities → Create Relationships → Store in Graph*
 
-    SG -.->|"Knowledge<br/>compounds<br/>over time"| GQ
+*Retrieval path (blue): Graph Query → Semantic Similarity → Vector Search → Search Results → User asks "What about X"*
 
-    style Capture fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
-    style Retrieval fill:#bbdefb,stroke:#1565c0,stroke-width:2px
-    style U1 fill:#fff9c4,stroke:#f9a825
-    style U2 fill:#fff9c4,stroke:#f9a825
-```
-
-??? note "ASCII Diagram (Text-Only View)"
-    ```
-User → "Remember X" → Capture Episode → Extract Entities → Create Relationships → Store in Graph
-                                                                                  ↓
-    User ← "What about X" ← Search Results ← Vector Search ← Semantic Similarity ← Graph Query
-    ```
+*Center: Knowledge compounds over time (dotted arrow)*
 
 Every knowledge addition improves future retrieval. Every search result can trigger new knowledge capture.
 

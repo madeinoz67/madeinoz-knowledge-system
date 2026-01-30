@@ -30,6 +30,7 @@ theme:
     - search.highlight
     - content.code.copy
     - content.tabs.link
+    - content.lightbox
   logo: assets/logo.png
   favicon: assets/favicon.ico
 
@@ -42,6 +43,7 @@ nav:
     - Guide: installation/index.md
     - Requirements: installation/requirements.md
     - Verification: installation/verification.md
+    - Remote Deployment: installation/remote-deployment.md
   - Usage:
     - Basic Usage: usage/basic-usage.md
     - Advanced: usage/advanced.md
@@ -69,6 +71,7 @@ nav:
 plugins:
   - search
   - offline
+  - glightbox
 
 markdown_extensions:
   - admonition

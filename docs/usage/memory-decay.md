@@ -20,7 +20,7 @@ Grafana Dashboard: Memory Decay (http://localhost:3002/d/memory-decay-dashboard)
 
 Importance Levels: TRIVIAL (1), LOW (2), MODERATE (3), HIGH (4), CORE (5)
 Stability Levels: VOLATILE (1), LOW (2), MODERATE (3), HIGH (4), PERMANENT (5)
-Lifecycle States: ACTIVE, DORMANT (30+ days), ARCHIVED (90+ days), EXPIRED (180+ days), SOFT_DELETED (90-day retention)
+Lifecycle States: ACTIVE, DORMANT (90+ days), ARCHIVED (180+ days), EXPIRED (360+ days), SOFT_DELETED (90-day retention)
 
 Permanent Memory Rule: importance >= 4 AND stability >= 4 = never decays
 
@@ -30,7 +30,7 @@ Maintenance Schedule: Every 24 hours (configurable via schedule_interval_hours)
 Batch Size: 500 memories per maintenance run
 Max Duration: 10 minutes per maintenance run
 
-Decay Thresholds: DORMANT (30 days, score >= 0.3), ARCHIVED (90 days, score >= 0.6), EXPIRED (180 days, score >= 0.9, importance <= 3)
+Decay Thresholds: DORMANT (90 days, score >= 0.3), ARCHIVED (180 days, score >= 0.6), EXPIRED (360 days, score >= 0.9, importance <= 3)
 -->
 
 # Memory Decay & Lifecycle Management
@@ -102,11 +102,66 @@ The **decay score** represents how "stale" a memory has become:
 
 #### Calculation
 
-- Uses exponential half-life formula adjusted by stability
-- More time since last access = higher decay score
-- Higher importance = slower decay accumulation
-- Higher stability = slower decay accumulation
-- Accessing a memory resets decay to 0.0
+The decay score uses **exponential decay** (not linear), matching how human memory and real-world phenomena work:
+
+```
+decay_score = 1 - exp(-λ × days_since_access)
+where λ = ln(2) / half_life_days
+```
+
+**Why exponential?**
+
+- **Linear decay** would lose value at constant rate (e.g., 0.56% per day), reaching 100% after 180 days
+- **Exponential decay** follows natural patterns:
+  - Radioactive decay
+  - Drug elimination from the body
+  - Human memory forgetting (Ebbinghaus curve)
+  - Information relevance over time
+
+!!! example "Exponential vs Linear Decay (180-day half-life)"
+
+    **Linear decay** (constant 0.56% per day):
+    - Day 0: 0% decay
+    - Day 90: 50% decay
+    - Day 180: 100% decay (completely gone)
+
+    **Exponential decay** (our implementation):
+    - Day 0: 0% decay
+    - Day 30: 11% decay
+    - Day 90: 29% decay
+    - Day 180: 50% decay (half-life)
+    - Day 360: 75% decay
+    - Day 540: 87.5% decay
+    - **Never truly reaches 100%**
+
+![Exponential Decay Curve](../assets/images/decay-exponential-curve.png)
+
+**Decay progression by half-life:**
+
+| Half-Lives | Decay Score | Remaining Value |
+|------------|-------------|-----------------|
+| 0 | 0.00 | 100% (fresh) |
+| 1 | 0.50 | 50% |
+| 2 | 0.75 | 25% |
+| 3 | 0.875 | 12.5% |
+| 4 | 0.9375 | 6.25% |
+| 5 | 0.96875 | 3.125% |
+| 6 | 0.9844 | 1.56% |
+
+**Impact of stability on half-life:**
+
+The stability level adjusts the half-life:
+
+| Stability | Half-Life | Days to 75% Decay | Days to 87.5% Decay |
+|-----------|----------|-------------------|----------------------|
+| 1 (VOLATILE) | 60 days | 120 | 180 |
+| 2 (LOW) | 120 days | 240 | 360 |
+| 3 (MODERATE) | 180 days | 360 | 540 |
+| 4 (HIGH) | 240 days | 480 | 720 |
+| 5 (PERMANENT) | ∞ | Never | Never (λ = 0) |
+
+!!! tip "Key Insight"
+    Exponential decay means memories lose value **quickly at first**, then **decay slows down** over time. This preserves older memories that have proven valuable (high stability) while allowing trivial information to fade rapidly.
 
 ### Lifecycle States
 
@@ -117,9 +172,9 @@ Memories transition through **5 lifecycle states** based on decay score and time
 | State | Description | Search Behavior | Recovery |
 |-------|-------------|-----------------|----------|
 | **ACTIVE** | Recently accessed, full relevance | Ranked normally | N/A |
-| **DORMANT** | Not accessed for 30+ days | Lower priority | Auto-reactivates on access |
-| **ARCHIVED** | Not accessed for 90+ days | Much lower priority | Auto-reactivates on access |
-| **EXPIRED** | Marked for deletion | Excluded from search | Manual recovery only |
+| **DORMANT** | Not accessed for 90+ days | Lower priority | Auto-reactivates on access |
+| **ARCHIVED** | Not accessed for 180+ days | Much lower priority | Auto-reactivates on access |
+| **EXPIRED** | Not accessed for 360+ days | Excluded from search | Manual recovery only |
 | **SOFT_DELETED** | Deleted, 90-day recovery window | Hidden from search | Admin recovery within 90 days |
 
 **Permanent memories exempt:** Importance ≥4 AND Stability ≥4 = PERMANENT (never decays)
@@ -184,9 +239,9 @@ Memories automatically transition states based on:
 
 | Transition | Criteria |
 |------------|----------|
-| ACTIVE → DORMANT | 30 days inactive AND decay_score ≥ 0.3 |
-| DORMANT → ARCHIVED | 90 days inactive AND decay_score ≥ 0.6 |
-| ARCHIVED → EXPIRED | 180 days inactive AND decay_score ≥ 0.9 AND importance ≤ 3 |
+| ACTIVE → DORMANT | 90 days inactive AND decay_score ≥ 0.3 |
+| DORMANT → ARCHIVED | 180 days inactive AND decay_score ≥ 0.6 |
+| ARCHIVED → EXPIRED | 360 days inactive AND decay_score ≥ 0.9 AND importance ≤ 3 |
 | EXPIRED → SOFT_DELETED | Maintenance runs (automatic) |
 
 **Reactivation:** Any memory access (search result, explicit retrieval) immediately transitions DORMANT or ARCHIVED memories back to ACTIVE.
@@ -279,16 +334,30 @@ bun run server-cli start --dev
 decay:
   thresholds:
     dormant:
-      days: 30           # Days before ACTIVE → DORMANT
+      days: 90           # Days before ACTIVE → DORMANT
       decay_score: 0.3   # Decay score threshold
     archived:
-      days: 90           # Days before DORMANT → ARCHIVED
+      days: 180          # Days before DORMANT → ARCHIVED
       decay_score: 0.6   # Decay score threshold
     expired:
-      days: 180          # Days before ARCHIVED → EXPIRED
+      days: 360          # Days before ARCHIVED → EXPIRED
       decay_score: 0.9   # Decay score threshold
       max_importance: 3  # Only expire if importance ≤ 3
 ```
+
+**How thresholds work with half-life:**
+
+Transitions require **BOTH** conditions to be met: minimum days inactive AND decay_score threshold.
+
+With the default 180-day half-life for MODERATE memories:
+
+| Transition | Config (minimum) | Actual timing | Decay at minimum days |
+|------------|------------------|---------------|----------------------|
+| ACTIVE → DORMANT | 90 days + decay ≥ 0.3 | **~93 days** | Day 90: decay ≈ 0.29 |
+| DORMANT → ARCHIVED | 180 days + decay ≥ 0.6 | **~238 days** | Day 180: decay ≈ 0.50 |
+| ARCHIVED → EXPIRED | 360 days + decay ≥ 0.9 | **~598 days** | Day 360: decay ≈ 0.75 |
+
+The days threshold is a **minimum**—actual transitions occur when decay_score reaches the threshold.
 
 #### Maintenance Schedule
 
@@ -491,15 +560,15 @@ For specialized use cases, you can implement custom decay logic:
 
 #### Half-life adjustment
 
-- Base half-life: 30 days (configurable)
+- Base half-life: 180 days (configurable)
 - Stability factor: Multiplier based on stability level
 
 **Stability multiplier examples:**
 
 The stability level adjusts the base half-life:
 
-- Stability 1 (VOLATILE): 0.5× half-life (15 days)
-- Stability 3 (MODERATE): 1.0× half-life (30 days)
+- Stability 1 (VOLATILE): 0.33× half-life (60 days)
+- Stability 3 (MODERATE): 1.0× half-life (180 days)
 - Stability 5 (PERMANENT): ∞ half-life (never decays)
 
 **See implementation:** `docker/patches/memory_decay.py` - `calculate_half_life()`
