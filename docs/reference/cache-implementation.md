@@ -39,7 +39,7 @@ Configuration:
 
 # Cache Implementation Guide
 
-This document describes how the Gemini prompt caching system works internally. For configuration and usage, see [Observability & Metrics](observability.md#prompt-caching-gemini).
+This document describes how the Gemini prompt caching system works internally. For configuration and usage, see [Observability & Metrics](observability.md#prompt-caching-gemini-via-openrouter).
 
 ## Architecture Overview
 

@@ -154,7 +154,7 @@ MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=sk-or-v1-your-key
 MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL=https://openrouter.ai/api/v1
 ```
 
-**Note:** Prompt caching is **disabled by default** and must be explicitly enabled. The system uses explicit `cache_control` markers (similar to Anthropic) - not implicit caching. OpenRouter manages the cache lifecycle automatically when enabled. See [Observability & Metrics](reference/observability.md#prompt-caching-gemini) for details.
+**Note:** Prompt caching is **disabled by default** and must be explicitly enabled. The system uses explicit `cache_control` markers (similar to Anthropic) - not implicit caching. OpenRouter manages the cache lifecycle automatically when enabled. See [Observability & Metrics](reference/observability.md#prompt-caching-gemini-via-openrouter) for details.
 
 ### Observability & Metrics
 

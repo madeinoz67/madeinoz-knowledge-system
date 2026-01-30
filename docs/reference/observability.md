@@ -161,8 +161,8 @@ These metrics populate when `MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED=true`:
 | `graphiti_cache_tokens_saved_per_request` | `model` | Distribution of tokens saved per cache hit |
 | `graphiti_cache_cost_saved_per_request` | `model` | Distribution of cost saved per cache hit (USD) |
 
-!!! success "Caching Now Available for Gemini 2.5"
-    **Prompt caching is functional for Gemini 2.5 models on OpenRouter.** Gemini 2.5 Flash uses **implicit caching** (automatic, no markers needed) with a minimum of 1,028 tokens. The system routes Gemini models through the `/chat/completions` endpoint. To enable caching, set `MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED=true`. See [Prompt Caching](#prompt-caching-gemini) for details.
+!!! success "Prompt Caching via OpenRouter"
+    **Prompt caching is available for Gemini models via OpenRouter.** The system uses explicit `cache_control` markers (similar to Anthropic's approach) with a minimum of 1,024 tokens. To enable caching, set `MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED=true`. See [Prompt Caching](#prompt-caching-gemini-via-openrouter) for details.
 
 ### Duration Metrics
 
