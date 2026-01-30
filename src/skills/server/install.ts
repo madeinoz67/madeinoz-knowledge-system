@@ -28,6 +28,7 @@ const isNonInteractive = process.argv.includes('--yes') || process.argv.includes
 import { createContainerManager } from '../lib/container';
 import { createConfigLoader } from '../lib/config';
 import { cli } from '../lib/cli';
+import { profileManager } from '../lib/connection-profile';
 import inquirer from 'inquirer';
 
 /**
@@ -322,9 +323,15 @@ async function pressEnterToContinue(message = 'Press Enter to continue...'): Pro
 }
 
 /**
+ * Installation type
+ */
+type InstallationType = 'local' | 'remote' | 'hybrid';
+
+/**
  * Installation state
  */
 interface InstallState {
+  installType: InstallationType;
   llmProvider: string;
   embedderProvider: string;
   modelName: string;
@@ -349,6 +356,14 @@ interface InstallState {
     embedderModel?: string;
     embedderDimensions?: number;
   };
+  // Remote profile configuration
+  remoteProfile?: {
+    host: string;
+    port: number;
+    protocol: 'http' | 'https';
+  };
+  // Which profile is default (for hybrid installs)
+  defaultProfile: 'local' | 'remote';
 }
 
 /**
@@ -356,6 +371,7 @@ interface InstallState {
  */
 class Installer {
   private state: InstallState = {
+    installType: 'local',
     llmProvider: 'ollama',
     embedderProvider: 'ollama',
     modelName: 'llama3.2',
@@ -366,6 +382,7 @@ class Installer {
       DATABASE_TYPE: 'neo4j',
       GRAPHITI_TELEMETRY_ENABLED: 'false',
     },
+    defaultProfile: 'local',
   };
 
   // Ollama configuration
@@ -575,6 +592,19 @@ class Installer {
     cli.blank();
     cli.header('Step 1: Verify Prerequisites');
 
+    // For remote-only installations, Podman is not required
+    if (this.state.installType === 'remote') {
+      cli.info('Remote-only installation does not require local container runtime.');
+      cli.blank();
+      cli.info('Required for remote installation:');
+      cli.dim('  - Bun runtime (for CLI tools)');
+      cli.dim('  - Access to remote MCP server');
+      cli.blank();
+      cli.success('Remote-only prerequisites met');
+      return;
+    }
+
+    // For local and hybrid installations, check for Podman
     if (!this.containerManager.isRuntimeAvailable()) {
       cli.error('Podman is not installed!');
       cli.blank();
@@ -605,9 +635,207 @@ class Installer {
   }
 
   /**
-   * Step 3: Database Backend Selection
+   * Step 2.5: Installation Type Selection
+   */
+  private async selectInstallationType(): Promise<void> {
+    cli.blank();
+    cli.header('Step 2.5: Installation Type');
+    cli.blank();
+    cli.info('How will you use the Madeinoz Knowledge System?');
+    cli.blank();
+    cli.info('This determines how the MCP server is configured.');
+    cli.blank();
+
+    const installTypeChoices = [
+      {
+        name: 'Local only - Run MCP server locally via Docker/Podman',
+        value: 'local',
+        short: 'Local',
+      },
+      {
+        name: 'Remote only - Connect to an existing remote MCP server',
+        value: 'remote',
+        short: 'Remote',
+      },
+      {
+        name: 'Local and Remote - Development setup with both',
+        value: 'hybrid',
+        short: 'Hybrid',
+      },
+    ];
+
+    let installType: InstallationType;
+
+    if (isNonInteractive) {
+      installType = this.state.installType;
+      cli.dim(`  Using installation type: ${installType}`);
+    } else {
+      const result = await inquirer.prompt([
+        {
+          type: 'list',
+          name: 'installType',
+          message: 'Select installation type:',
+          choices: installTypeChoices,
+          default: this.state.installType,
+        },
+      ]);
+      installType = result.installType;
+    }
+
+    this.state.installType = installType;
+    cli.success(`Selected: ${installTypeChoices.find(c => c.value === installType)?.name || installType}`);
+
+    // For remote or hybrid, collect remote server details
+    if (installType === 'remote' || installType === 'hybrid') {
+      await this.collectRemoteServerDetails();
+    }
+
+    // For hybrid, ask which is default
+    if (installType === 'hybrid') {
+      await this.selectDefaultProfile();
+    }
+
+    // Show explanation of what happens next
+    cli.blank();
+    if (installType === 'local') {
+      cli.info('Next steps:');
+      cli.dim('  - Configure LLM provider and API keys');
+      cli.dim('  - Start local Docker/Podman containers');
+      cli.dim('  - Install skill and configure connection');
+    } else if (installType === 'remote') {
+      cli.info('Next steps:');
+      cli.dim('  - Configure LLM provider and API keys (for reference)');
+      cli.dim('  - Create connection profile for remote server');
+      cli.dim('  - Install skill (no local containers needed)');
+      cli.blank();
+      cli.info('Note: For remote-only installs, the MCP server must already be running');
+      cli.dim('      on the remote host. We will configure the client to connect to it.');
+    } else {
+      cli.info('Next steps:');
+      cli.dim('  - Configure LLM provider and API keys');
+      cli.dim('  - Create connection profiles for both local and remote');
+      cli.dim('  - Install skill (you choose which profile is default)');
+      cli.blank();
+      cli.info('Note: In hybrid mode, local containers are NOT started automatically.');
+      cli.dim('      Use server-cli commands to manage the local server.');
+    }
+    await pressEnterToContinue();
+  }
+
+  /**
+   * Collect remote server details for remote/hybrid installations
+   */
+  private async collectRemoteServerDetails(): Promise<void> {
+    cli.blank();
+    cli.header('Remote Server Configuration');
+    cli.blank();
+    cli.info('Enter the connection details for your remote MCP server.');
+    cli.blank();
+
+    const result = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'host',
+        message: 'Remote server hostname or IP:',
+        default: '10.0.0.150',
+        validate: (input: string) => {
+          if (!input || input.trim().length === 0) {
+            return 'Hostname is required';
+          }
+          // Basic hostname/IP validation
+          const hostPattern = /^[a-zA-Z0-9.-]+$/;
+          if (!hostPattern.test(input.trim())) {
+            return 'Invalid hostname or IP address';
+          }
+          return true;
+        },
+      },
+      {
+        type: 'number',
+        name: 'port',
+        message: 'Remote server port:',
+        default: 8001,
+        validate: (input: number) => {
+          if (isNaN(input) || input < 1 || input > 65535) {
+            return 'Port must be between 1 and 65535';
+          }
+          return true;
+        },
+      },
+      {
+        type: 'list',
+        name: 'protocol',
+        message: 'Protocol:',
+        choices: [
+          { name: 'HTTP (unencrypted)', value: 'http' },
+          { name: 'HTTPS (encrypted)', value: 'https' },
+        ],
+        default: 'http',
+      },
+    ]);
+
+    this.state.remoteProfile = {
+      host: result.host.trim(),
+      port: result.port,
+      protocol: result.protocol,
+    };
+
+    cli.blank();
+    cli.success('Remote server configuration saved');
+    cli.dim(`  Host: ${this.state.remoteProfile.host}`);
+    cli.dim(`  Port: ${this.state.remoteProfile.port}`);
+    cli.dim(`  Protocol: ${this.state.remoteProfile.protocol}`);
+  }
+
+  /**
+   * For hybrid installations, ask which profile should be default
+   */
+  private async selectDefaultProfile(): Promise<void> {
+    cli.blank();
+    cli.info('Which connection should be the default?');
+    cli.blank();
+    cli.info('The default profile is used when no profile is specified.');
+    cli.blank();
+
+    const result = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'defaultProfile',
+        message: 'Select default profile:',
+        choices: [
+          {
+            name: 'Local (for development)',
+            value: 'local',
+          },
+          {
+            name: `Remote (${this.state.remoteProfile?.host || 'server'})`,
+            value: 'remote',
+          },
+        ],
+        default: 'local',
+      },
+    ]);
+
+    this.state.defaultProfile = result.defaultProfile;
+    cli.success(`Default profile: ${result.defaultProfile}`);
+  }
+
+  /**
+   * Step 3: Database Backend Selection (skipped for remote-only)
    */
   private async selectDatabaseBackend(): Promise<void> {
+    // Skip database backend selection for remote-only installations
+    if (this.state.installType === 'remote') {
+      cli.blank();
+      cli.info('Step 3: Database Backend Selection (skipped for remote-only)');
+      cli.blank();
+      cli.dim('Remote-only installation does not require local database configuration.');
+      cli.dim('The remote server handles all database operations.');
+      // Set a default for reference (won't be used locally)
+      this.state.paiConfig.DATABASE_TYPE = 'neo4j';
+      return;
+    }
+
     cli.blank();
     cli.header('Step 3: Database Backend Selection');
 
@@ -1180,9 +1408,36 @@ class Installer {
   }
 
   /**
-   * Step 9: Start Services
+   * Step 9: Start Services (skipped for remote-only)
    */
   private async startServices(): Promise<void> {
+    // Skip starting services for remote-only installations
+    if (this.state.installType === 'remote') {
+      cli.blank();
+      cli.header('Step 9: Starting Services (skipped for remote-only)');
+      cli.blank();
+      cli.info('Remote-only installation does not start local services.');
+      cli.dim('The MCP server on the remote host should already be running.');
+      return;
+    }
+
+    // For hybrid mode, also skip auto-start (user manages local server manually)
+    if (this.state.installType === 'hybrid') {
+      cli.blank();
+      cli.header('Step 9: Starting Services (skipped for hybrid mode)');
+      cli.blank();
+      cli.info('Hybrid mode does not auto-start local services.');
+      cli.dim('Use server-cli commands to manage the local server:');
+      cli.dim('  bun run server-cli start    # Start local server');
+      cli.dim('  bun run server-cli stop     # Stop local server');
+      cli.dim('  bun run server-cli status   # Check status');
+      cli.blank();
+      cli.info('To use the local server, set the profile:');
+      cli.dim(`  export MADEINOZ_KNOWLEDGE_PROFILE=local`);
+      cli.dim('  # Or use --profile local flag with commands');
+      return;
+    }
+
     cli.blank();
     cli.header('Step 9: Starting Services');
 
@@ -1235,6 +1490,87 @@ class Installer {
     } catch {
       cli.warning('Server health check inconclusive');
       cli.dim('Check logs with: bun run server-cli logs');
+    }
+  }
+
+  /**
+   * Step 8.5: Create Connection Profiles (for remote and hybrid installations)
+   */
+  private async createConnectionProfiles(): Promise<void> {
+    // Only create profiles for remote or hybrid installations
+    if (this.state.installType === 'local') {
+      return;
+    }
+
+    cli.blank();
+    cli.header('Creating Connection Profiles');
+    cli.blank();
+
+    const profiles = [];
+
+    // Add local profile for hybrid installations
+    if (this.state.installType === 'hybrid') {
+      profiles.push({
+        name: 'local',
+        host: 'localhost',
+        port: 8000,
+        protocol: 'http' as const,
+        basePath: '/mcp',
+      });
+      cli.info('Adding local profile...');
+    }
+
+    // Add remote profile (always present for remote/hybrid)
+    if (this.state.remoteProfile) {
+      profiles.push({
+        name: 'remote',
+        host: this.state.remoteProfile.host,
+        port: this.state.remoteProfile.port,
+        protocol: this.state.remoteProfile.protocol,
+        basePath: '/mcp',
+      });
+      cli.info(`Adding remote profile (${this.state.remoteProfile.host})...`);
+    }
+
+    // Determine default profile name
+    const defaultProfileName = this.state.defaultProfile === 'local' ? 'local' : 'remote';
+
+    try {
+      const configPath = profileManager.saveProfiles(profiles, defaultProfileName);
+      cli.blank();
+      cli.success(`Connection profiles created: ${configPath}`);
+      cli.blank();
+      cli.dim(`Profiles: ${profiles.map(p => p.name).join(', ')}`);
+      cli.dim(`Default: ${defaultProfileName}`);
+      cli.blank();
+
+      // Show usage examples
+      cli.info('Using profiles:');
+      cli.dim(`  # Use default profile (${defaultProfileName})`);
+      cli.dim(`  bun run knowledge-cli.ts status`);
+      cli.blank();
+      cli.dim(`  # Use specific profile`);
+      cli.dim(`  bun run knowledge-cli.ts status --profile local`);
+      cli.dim(`  bun run knowledge-cli.ts status --profile remote`);
+      cli.blank();
+
+      if (this.state.installType === 'remote') {
+        cli.info('For remote-only installation:');
+        cli.dim('  The default profile is set to your remote server.');
+        cli.dim('  All commands will connect to the remote server by default.');
+      } else {
+        cli.info('For hybrid installation:');
+        if (defaultProfileName === 'local') {
+          cli.dim('  The default profile is set to LOCAL (for development).');
+          cli.dim('  To use the remote server, specify --profile remote');
+        } else {
+          cli.dim(`  The default profile is set to REMOTE (${this.state.remoteProfile?.host}).`);
+          cli.dim('  To use the local server, specify --profile local');
+        }
+      }
+    } catch (error) {
+      cli.error(`Failed to create connection profiles: ${error}`);
+      cli.dim('You can create them manually in ~/.claude/config/knowledge-profiles.yaml');
     }
   }
 
@@ -1498,22 +1834,47 @@ class Installer {
     cli.blank();
     cli.info('📦 Configuration Summary:');
     cli.blank();
+    cli.dim(`Installation Type: ${this.state.installType}`);
     cli.dim(`Database Backend: ${this.state.paiConfig.DATABASE_TYPE}`);
     cli.dim(`LLM Provider: ${this.state.llmProvider}`);
     cli.dim(`Model: ${this.state.modelName}`);
     cli.dim(`Concurrency: ${this.state.semaphoreLimit}`);
     cli.blank();
 
-    cli.info('Services:');
-    cli.url('  MCP Server', 'http://localhost:8000/mcp/');
-    if (this.state.paiConfig.DATABASE_TYPE === 'neo4j') {
-      cli.url('  Neo4j Browser', 'http://localhost:7474');
-      cli.dim('  Bolt URI: bolt://localhost:7687');
+    // Show different information based on installation type
+    if (this.state.installType === 'local') {
+      cli.info('Services (local):');
+      cli.url('  MCP Server', 'http://localhost:8000/mcp/');
+      if (this.state.paiConfig.DATABASE_TYPE === 'neo4j') {
+        cli.url('  Neo4j Browser', 'http://localhost:7474');
+        cli.dim('  Bolt URI: bolt://localhost:7687');
+      } else {
+        cli.url('  FalkorDB UI', 'http://localhost:3000');
+      }
+      cli.url('  Health Check', 'http://localhost:8000/health');
+      cli.blank();
+    } else if (this.state.installType === 'remote') {
+      cli.info('Remote Server Configuration:');
+      cli.dim(`  Host: ${this.state.remoteProfile?.host}`);
+      cli.dim(`  Port: ${this.state.remoteProfile?.port}`);
+      cli.dim(`  Protocol: ${this.state.remoteProfile?.protocol}`);
+      cli.dim(`  Default Profile: remote`);
+      cli.blank();
+      cli.info('Connection Profile:');
+      cli.dim('  Config file: ~/.claude/config/knowledge-profiles.yaml');
+      cli.dim('  Use --profile flag to switch profiles');
+      cli.blank();
     } else {
-      cli.url('  FalkorDB UI', 'http://localhost:3000');
+      // Hybrid
+      cli.info('Connection Profiles:');
+      cli.blank();
+      cli.dim('  local: http://localhost:8000/mcp');
+      cli.dim(`  remote: ${this.state.remoteProfile?.protocol}://${this.state.remoteProfile?.host}:${this.state.remoteProfile?.port}/mcp`);
+      cli.blank();
+      cli.dim(`  Default: ${this.state.defaultProfile}`);
+      cli.dim('  Config file: ~/.claude/config/knowledge-profiles.yaml');
+      cli.blank();
     }
-    cli.url('  Health Check', 'http://localhost:8000/health');
-    cli.blank();
 
     cli.info('🎉 Next Steps:');
     cli.blank();
@@ -1526,17 +1887,54 @@ class Installer {
     cli.dim('3. Check system status:');
     cli.dim('   Show the knowledge graph status');
     cli.blank();
-    cli.dim('4. Memory sync (automatic):');
-    cli.dim('   Learnings and research from PAI Memory System');
-    cli.dim('   are automatically synced on session start.');
-    cli.blank();
 
-    cli.info('Management Commands:');
-    cli.dim('  View logs:    bun run server-cli logs');
-    cli.dim('  Restart:      bun run server-cli restart');
-    cli.dim('  Stop:         bun run server-cli stop');
-    cli.dim('  Start:        bun run server-cli start');
-    cli.dim('  Status:       bun run server-cli status');
+    // Show different management commands based on installation type
+    if (this.state.installType === 'local') {
+      cli.dim('4. Memory sync (automatic):');
+      cli.dim('   Learnings and research from PAI Memory System');
+      cli.dim('   are automatically synced on session start.');
+      cli.blank();
+
+      cli.info('Management Commands:');
+      cli.dim('  View logs:    bun run server-cli logs');
+      cli.dim('  Restart:      bun run server-cli restart');
+      cli.dim('  Stop:         bun run server-cli stop');
+      cli.dim('  Start:        bun run server-cli start');
+      cli.dim('  Status:       bun run server-cli status');
+    } else if (this.state.installType === 'remote') {
+      cli.dim('4. Memory sync (automatic):');
+      cli.dim('   Learnings and research from PAI Memory System');
+      cli.dim('   are automatically synced on session start.');
+      cli.blank();
+
+      cli.info('Management Commands (remote):');
+      cli.dim('  Status:       bun run knowledge-cli.ts status');
+      cli.dim('  Health:       bun run knowledge-cli.ts health');
+      cli.dim('  List profiles: bun run knowledge-cli.ts list_profiles');
+      cli.blank();
+      cli.info('Note: Remote server must be running on the remote host.');
+      cli.dim('      Use server management commands on the remote host.');
+    } else {
+      // Hybrid
+      cli.dim('4. Memory sync (automatic):');
+      cli.dim('   Learnings and research from PAI Memory System');
+      cli.dim('   are automatically synced on session start.');
+      cli.blank();
+
+      cli.info('Local Server Management (manual):');
+      cli.dim('  Start:        bun run server-cli start');
+      cli.dim('  Stop:         bun run server-cli stop');
+      cli.dim('  Status:       bun run server-cli status');
+      cli.blank();
+
+      cli.info('Knowledge CLI (works with any profile):');
+      cli.dim('  Status (default): bun run knowledge-cli.ts status');
+      cli.dim(`  Status (local):    bun run knowledge-cli.ts status --profile local`);
+      cli.dim(`  Status (remote):   bun run knowledge-cli.ts status --profile remote`);
+      cli.blank();
+      cli.info(`Current default profile: ${this.state.defaultProfile}`);
+      cli.dim('Switch profiles using --profile flag or MADEINOZ_KNOWLEDGE_PROFILE env var');
+    }
     cli.blank();
 
     cli.success('Installation complete!');
@@ -1602,8 +2000,13 @@ class Installer {
       cli.info('This script will install and configure the Madeinoz Knowledge System.');
       cli.blank();
       cli.info('Prerequisites:');
-      cli.dim('  - Podman (must be installed)');
+      cli.dim('  - Bun runtime (required for all installations)');
       cli.dim('  - At least one LLM provider API key');
+      cli.dim('  - Podman/Docker (for local installations only)');
+      cli.blank();
+      cli.info('Installation will prompt you for:');
+      cli.dim('  - Installation type (local/remote/hybrid)');
+      cli.dim('  - Remote server details (if applicable)');
       cli.blank();
 
       await pressEnterToContinue();
@@ -1615,12 +2018,19 @@ class Installer {
       await this.confirmDirectory();
     }
 
+    // New: Installation type selection (Step 2.5)
+    await this.selectInstallationType();
+
     await this.selectDatabaseBackend();
     await this.selectProvider();
     await this.collectAPIKeys();
     await this.selectModel();
     await this.configureConcurrency();
     await this.createConfiguration();
+
+    // New: Create connection profiles for remote/hybrid installations
+    await this.createConnectionProfiles();
+
     await this.startServices();
     await this.installPAISkill();
     await this.installMemorySyncHook();

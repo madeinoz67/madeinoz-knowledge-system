@@ -44,6 +44,7 @@ nav:
     - Requirements: installation/requirements.md
     - Verification: installation/verification.md
     - Remote Deployment: installation/remote-deployment.md
+    - Remote Access: remote-access.md
   - Usage:
     - Basic Usage: usage/basic-usage.md
     - Advanced: usage/advanced.md

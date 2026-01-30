@@ -37,13 +37,44 @@ import {
   markAsSynced,
   getSyncStats,
 } from './lib/sync-state';
-import { checkHealth, addEpisode, type AddEpisodeParams } from './lib/knowledge-client';
 import {
   loadSyncConfig,
   getEnabledSources,
 } from './lib/sync-config';
 import { checkAntiLoop } from './lib/anti-loop-patterns';
 import { getSyncStatus, formatSyncStatus } from './lib/sync-status';
+
+/**
+ * Path to knowledge-cli.ts
+ * Uses the CLI which respects connection profiles and saves tokens
+ */
+const KNOWLEDGE_CLI = join(homedir(), '.claude', 'skills', 'Knowledge', 'tools', 'knowledge-cli.ts');
+
+/**
+ * Run knowledge-cli command and return result
+ */
+async function runCliCommand(args: string[]): Promise<{ success: boolean; output?: string; error?: string }> {
+  try {
+    const proc = Bun.spawn(['bun', 'run', KNOWLEDGE_CLI, ...args], {
+      stdout: 'pipe',
+      stderr: 'pipe',
+      env: process.env,
+    });
+
+    const stdout = await new Response(proc.stdout).text();
+    const stderr = await new Response(proc.stderr).text();
+    const exitCode = await proc.exited;
+
+    if (exitCode === 0) {
+      return { success: true, output: stdout.trim() };
+    } else {
+      return { success: false, error: stderr.trim() || `Exit code: ${exitCode}` };
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return { success: false, error: message };
+  }
+}
 
 /**
  * Generate SHA-256 hash of content for deduplication
@@ -111,8 +142,8 @@ function getBackoffDelay(attempt: number, config: RetryConfig): number {
  */
 async function waitForMcpServer(verbose: boolean): Promise<boolean> {
   for (let attempt = 0; attempt < RETRY_CONFIG.maxRetries; attempt++) {
-    const healthy = await checkHealth();
-    if (healthy) {
+    const result = await runCliCommand(['health']);
+    if (result.success) {
       if (verbose && attempt > 0) {
         console.error(`[Sync] MCP server available after ${attempt + 1} attempts`);
       }
@@ -187,13 +218,14 @@ function findMarkdownFiles(sourceDir: string): string[] {
 }
 
 /**
- * Map parsed memory file to knowledge API parameters
+ * Map parsed memory file to CLI arguments for add_episode
+ * Returns [title, body, source_description] for CLI command
  */
-function mapToKnowledgeParams(
+function mapToCliArgs(
   parsed: ReturnType<typeof parseMarkdownFile>,
   filepath: string,
   sourceType: string
-): AddEpisodeParams {
+): [string, string, string] {
   const { frontmatter, title, body } = parsed;
   const cleanedBody = cleanBody(body);
   const filename = basename(filepath);
@@ -213,15 +245,10 @@ function mapToKnowledgeParams(
   sourceDescParts.push(`File: ${filename}`);
 
   const captureType = frontmatter.capture_type || sourceType;
+  const episodeName = `${captureType}: ${title}`.slice(0, 200);
+  const sourceDescription = sourceDescParts.filter(Boolean).join(' | ');
 
-  return {
-    name: `${captureType}: ${title}`.slice(0, 200),
-    episode_body: cleanedBody.slice(0, 5000),
-    source: 'text',
-    source_description: sourceDescParts.filter(Boolean).join(' | '),
-    reference_timestamp: frontmatter.timestamp,
-    group_id: captureType.toLowerCase(),
-  };
+  return [episodeName, cleanedBody.slice(0, 5000), sourceDescription];
 }
 
 /**
@@ -247,6 +274,7 @@ function isRetryableError(error: string | undefined): boolean {
 
 /**
  * Sync a single file to knowledge graph with retry logic
+ * Uses knowledge-cli add_episode command (token-efficient, respects profiles)
  */
 async function syncFile(
   filepath: string,
@@ -257,26 +285,32 @@ async function syncFile(
     const content = readFileSync(filepath, 'utf-8');
     const filename = basename(filepath);
     const parsed = parseMarkdownFile(content, filename);
-    const params = mapToKnowledgeParams(parsed, filepath, sourceType);
+    const [episodeName, episodeBody, sourceDescription] = mapToCliArgs(parsed, filepath, sourceType);
 
     if (options.verbose) {
-      console.error(`[Sync] Processing: ${params.name}`);
+      console.error(`[Sync] Processing: ${episodeName}`);
     }
 
     if (options.dryRun) {
-      console.error(`[DryRun] Would sync: ${params.name}`);
+      console.error(`[DryRun] Would sync: ${episodeName}`);
       return { success: true };
     }
 
     // Retry loop for transient failures
     let lastError: string | undefined;
     for (let attempt = 0; attempt < RETRY_CONFIG.maxRetries; attempt++) {
-      const result = await addEpisode(params);
+      // Use CLI add_episode command (respects profiles, token-efficient)
+      const result = await runCliCommand([
+        'add_episode',
+        episodeName,
+        episodeBody,
+        sourceDescription,
+      ]);
 
       if (result.success) {
         if (options.verbose) {
           console.error(
-            `[Sync] ✓ Synced: ${params.name}${attempt > 0 ? ` (attempt ${attempt + 1})` : ''}`
+            `[Sync] ✓ Synced: ${episodeName}${attempt > 0 ? ` (attempt ${attempt + 1})` : ''}`
           );
         }
         return { success: true };
@@ -292,13 +326,13 @@ async function syncFile(
       if (attempt < RETRY_CONFIG.maxRetries - 1) {
         const delay = getBackoffDelay(attempt, RETRY_CONFIG);
         if (options.verbose) {
-          console.error(`[Sync] Retrying ${params.name} in ${delay}ms (attempt ${attempt + 1})`);
+          console.error(`[Sync] Retrying ${episodeName} in ${delay}ms (attempt ${attempt + 1})`);
         }
         await new Promise((r) => setTimeout(r, delay));
       }
     }
 
-    console.error(`[Sync] ✗ Failed: ${params.name} - ${lastError}`);
+    console.error(`[Sync] ✗ Failed: ${episodeName} - ${lastError}`);
     return { success: false, error: lastError };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';

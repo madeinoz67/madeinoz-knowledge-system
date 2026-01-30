@@ -16,6 +16,8 @@ Auto-generated from all feature plans. Last updated: 2026-01-18
 - Python 3.11+ (server/patches), TypeScript/Bun (CLI/tools) + graphiti_core, Neo4j driver, FastMCP, pydantic (009-memory-decay-scoring)
 - Neo4j graph database (or FalkorDB) via Graphiti (009-memory-decay-scoring)
 - Python 3.11 (MCP server), TypeScript (CLI tools with Bun) + graphiti-core, neo4j, pydantic, prometheus_clien (009-memory-decay-scoring)
+- TypeScript (ES modules, strict mode) with Bun runtime for client; Python 3.11+ for MCP server + @modelcontextprotocol/sdk (MCP client), node:https (TLS), js-yaml (profile parsing), uvicorn (Python server) (010-remote-mcp-access)
+- YAML configuration files for connection profiles; Neo4j or FalkorDB for graph data (010-remote-mcp-access)
 
 - TypeScript (ES modules, strict mode), Bun runtime + @modelcontextprotocol/sdk (existing), mcp-client.ts library (existing) (001-mcp-wrapper)
 
@@ -35,9 +37,9 @@ npm test && npm run lint
 TypeScript (ES modules, strict mode), Bun runtime: Follow standard conventions
 
 ## Recent Changes
+- 010-remote-mcp-access: Added TypeScript (ES modules, strict mode) with Bun runtime for client; Python 3.11+ for MCP server + @modelcontextprotocol/sdk (MCP client), node:https (TLS), js-yaml (profile parsing), uvicorn (Python server)
 - 009-memory-decay-scoring: Added Python 3.11 (MCP server), TypeScript (CLI tools with Bun) + graphiti-core, neo4j, pydantic, prometheus_clien
 - 009-memory-decay-scoring: Added Python 3.11+ (server/patches), TypeScript/Bun (CLI/tools) + graphiti_core, Neo4j driver, FastMCP, pydantic
-- 001-configurable-memory-sync: Added TypeScript (ES modules, strict mode) with Bun runtime + @modelcontextprotocol/sdk, node:fs, node:crypto
 
 
 <!-- MANUAL ADDITIONS START -->

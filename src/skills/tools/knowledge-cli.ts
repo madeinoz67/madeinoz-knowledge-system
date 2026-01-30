@@ -16,9 +16,15 @@
  *   --metrics-file Write metrics to JSONL file
  */
 
-import { createMCPClient } from '../lib/mcp-client';
+import { createMCPClient, type MCPClientConfigExtended, type MCPClient } from '../lib/mcp-client';
 import { cli } from '../lib/cli';
 import { formatOutput, type FormatOptions } from '../lib/output-formatter';
+import {
+  profileManager,
+  loadProfileWithOverrides,
+  getProfileName,
+  type ConnectionState,
+} from '../lib/connection-profile';
 
 /**
  * Command definitions
@@ -41,6 +47,11 @@ interface CLIFlags {
   help: boolean;
   since?: string;
   until?: string;
+  profile?: string;
+  host?: string;
+  port?: string;
+  protocol?: string;
+  tlsNoVerify?: boolean;
 }
 
 /**
@@ -54,6 +65,11 @@ function parseFlags(args: string[]): { flags: CLIFlags; positionalArgs: string[]
     help: false,
     since: undefined,
     until: undefined,
+    profile: undefined,
+    host: undefined,
+    port: undefined,
+    protocol: undefined,
+    tlsNoVerify: undefined,
   };
   const positionalArgs: string[] = [];
 
@@ -72,6 +88,16 @@ function parseFlags(args: string[]): { flags: CLIFlags; positionalArgs: string[]
       flags.since = args[++i];
     } else if (arg === '--until') {
       flags.until = args[++i];
+    } else if (arg === '--profile') {
+      flags.profile = args[++i];
+    } else if (arg === '--host') {
+      flags.host = args[++i];
+    } else if (arg === '--port') {
+      flags.port = args[++i];
+    } else if (arg === '--protocol') {
+      flags.protocol = args[++i];
+    } else if (arg === '--tls-no-verify') {
+      flags.tlsNoVerify = true;
     } else if (!arg.startsWith('--')) {
       positionalArgs.push(arg);
     }
@@ -91,6 +117,49 @@ class MCPWrapper {
     this.commands = new Map();
     this.flags = flags;
     this.registerCommands();
+  }
+
+  /**
+   * Create MCP client with CLI flags applied
+   *
+   * T017 [US1]: Add --host, --port, --protocol CLI flags
+   * T016 [US1]: Add environment variable parsing
+   *
+   * Priority order (highest to lowest):
+   * 1. CLI flags (--host, --port, --protocol, --profile)
+   * 2. Individual environment variables (MADEINOZ_KNOWLEDGE_HOST, etc.)
+   * 3. Profile from MADEINOZ_KNOWLEDGE_PROFILE environment variable
+   * 4. Default profile from YAML file
+   * 5. Code defaults (localhost:8001, http)
+   */
+  private createClient(): MCPClient {
+    // Build config from CLI flags
+    const cliConfig: MCPClientConfigExtended = {};
+
+    // Apply CLI flags if provided
+    if (this.flags.host) {
+      cliConfig.host = this.flags.host;
+    }
+    if (this.flags.port) {
+      cliConfig.port = Number.parseInt(this.flags.port, 10);
+    }
+    if (this.flags.protocol) {
+      cliConfig.protocol = this.flags.protocol as 'http' | 'https';
+    }
+    if (this.flags.profile) {
+      cliConfig.profile = this.flags.profile;
+    }
+    if (this.flags.tlsNoVerify) {
+      cliConfig.tls = { ...cliConfig.tls, verify: false };
+    }
+
+    // If any CLI flags provided, create client with that config
+    if (Object.keys(cliConfig).length > 0) {
+      return createMCPClient(cliConfig);
+    }
+
+    // Otherwise use default (environment variables, profiles, or code defaults)
+    return createMCPClient();
   }
 
   /**
@@ -163,6 +232,19 @@ class MCPWrapper {
       description: 'Recover a soft-deleted memory',
       handler: this.cmdRecoverMemory.bind(this),
     });
+
+    // Feature 010: Connection profile commands
+    this.addCommand({
+      name: 'list_profiles',
+      description: 'List available connection profiles',
+      handler: this.cmdListProfiles.bind(this),
+    });
+
+    this.addCommand({
+      name: 'status',
+      description: 'Show connection status and current profile',
+      handler: this.cmdStatus.bind(this),
+    });
   }
 
   /**
@@ -203,7 +285,7 @@ class MCPWrapper {
     const body = args[1];
     const sourceDescription = args[2];
 
-    const client = createMCPClient();
+    const client = this.createClient();
     const result = await client.addEpisode({
       name: title,
       episode_body: body,
@@ -229,7 +311,7 @@ class MCPWrapper {
     const query = args[0];
     const limit = args.length > 1 ? Number.parseInt(args[1], 10) : 5;
 
-    const client = createMCPClient();
+    const client = this.createClient();
     const result = await client.searchNodes({
       query,
       limit,
@@ -256,7 +338,7 @@ class MCPWrapper {
     const query = args[0];
     const limit = args.length > 1 ? Number.parseInt(args[1], 10) : 5;
 
-    const client = createMCPClient();
+    const client = this.createClient();
     const result = await client.searchFacts({
       query,
       max_facts: limit,
@@ -275,7 +357,7 @@ class MCPWrapper {
   ): Promise<{ success: boolean; data?: unknown; error?: string }> {
     const limit = args.length > 0 ? Number.parseInt(args[0], 10) : 5;
 
-    const client = createMCPClient();
+    const client = this.createClient();
     const result = await client.getEpisodes({ limit });
 
     return result;
@@ -285,7 +367,7 @@ class MCPWrapper {
    * Command: get_status
    */
   private async cmdGetStatus(): Promise<{ success: boolean; data?: unknown; error?: string }> {
-    const client = createMCPClient();
+    const client = this.createClient();
     const result = await client.getStatus();
 
     return result;
@@ -305,7 +387,7 @@ class MCPWrapper {
       };
     }
 
-    const client = createMCPClient();
+    const client = this.createClient();
     const result = await client.clearGraph();
 
     return result;
@@ -315,7 +397,7 @@ class MCPWrapper {
    * Command: health
    */
   private async cmdHealth(): Promise<{ success: boolean; data?: unknown; error?: string }> {
-    const client = createMCPClient();
+    const client = this.createClient();
     const result = await client.testConnection();
 
     return result;
@@ -332,7 +414,7 @@ class MCPWrapper {
       ? args[args.indexOf('--group-id') + 1]
       : undefined;
 
-    const client = createMCPClient();
+    const client = this.createClient();
     const result = await client.getKnowledgeHealth({ group_id: groupId });
 
     return result;
@@ -346,7 +428,7 @@ class MCPWrapper {
   ): Promise<{ success: boolean; data?: unknown; error?: string }> {
     const dryRun = args.includes('--dry-run');
 
-    const client = createMCPClient();
+    const client = this.createClient();
     const result = await client.runDecayMaintenance({ dry_run: dryRun });
 
     return result;
@@ -369,7 +451,7 @@ class MCPWrapper {
     const sourceIdx = args.indexOf('--source');
     const sourceDescription = sourceIdx >= 0 ? args[sourceIdx + 1] : undefined;
 
-    const client = createMCPClient();
+    const client = this.createClient();
     const result = await client.classifyMemory({
       content,
       source_description: sourceDescription,
@@ -393,10 +475,86 @@ class MCPWrapper {
 
     const uuid = args[0];
 
-    const client = createMCPClient();
+    const client = this.createClient();
     const result = await client.recoverSoftDeleted({ uuid });
 
     return result;
+  }
+
+  /**
+   * Feature 010: Command: list_profiles
+   */
+  private async cmdListProfiles(): Promise<{ success: boolean; data?: unknown; error?: string }> {
+    try {
+      const profiles = profileManager.listProfiles();
+      const defaultProfile = profileManager.getDefaultProfile();
+      const currentProfile = this.flags.profile || getProfileName();
+      const configPath = profileManager.getConfigPath();
+
+      const data = {
+        default: defaultProfile,
+        current: currentProfile,
+        profiles: profiles,
+        config_path: configPath,
+        count: profiles.length,
+      };
+
+      return { success: true, data };
+    } catch (error) {
+      if (error instanceof Error) {
+        return { success: false, error: error.message };
+      }
+      return { success: false, error: 'Unknown error' };
+    }
+  }
+
+  /**
+   * Feature 010: Command: status
+   */
+  private async cmdStatus(): Promise<{ success: boolean; data?: unknown; error?: string }> {
+    try {
+      // Get current profile
+      const profileName = this.flags.profile || getProfileName();
+      const profile = loadProfileWithOverrides(profileName);
+
+      // Apply CLI flag overrides (highest priority)
+      const effectiveHost = this.flags.host || profile.host;
+      const effectivePort = this.flags.port ? Number.parseInt(this.flags.port, 10) : profile.port;
+      const effectiveProtocol = (this.flags.protocol as 'http' | 'https' | undefined) || profile.protocol;
+
+      // Test connection with overridden values
+      const client = createMCPClient({
+        protocol: effectiveProtocol,
+        host: effectiveHost,
+        port: effectivePort,
+        basePath: profile.basePath,
+        timeout: profile.timeout,
+      });
+
+      const healthResult = await client.testConnection();
+
+      const connectionState: ConnectionState = {
+        profile: profileName,
+        host: effectiveHost,
+        port: effectivePort,
+        protocol: effectiveProtocol,
+        status: healthResult.success ? 'connected' : 'error',
+        lastError: healthResult.success ? undefined : healthResult.error,
+      };
+
+      if (healthResult.success && healthResult.data) {
+        const healthData = healthResult.data as { status: string; version?: string };
+        connectionState.serverVersion = healthData.version;
+        connectionState.lastConnected = new Date();
+      }
+
+      return { success: true, data: connectionState };
+    } catch (error) {
+      if (error instanceof Error) {
+        return { success: false, error: error.message };
+      }
+      return { success: false, error: 'Unknown error' };
+    }
   }
 
   /**
@@ -431,6 +589,11 @@ class MCPWrapper {
     cli.dim('  --metrics-file <p> Write metrics to JSONL file');
     cli.dim('  --since <date>     Filter results created after this date');
     cli.dim('  --until <date>     Filter results created before this date');
+    cli.dim('  --profile <name>   Use specific connection profile');
+    cli.dim('  --host <hostname>  Override profile host');
+    cli.dim('  --port <port>      Override profile port');
+    cli.dim('  --protocol <proto> Override profile protocol (http/https)');
+    cli.dim('  --tls-no-verify    Disable TLS certificate verification');
     cli.dim('  -h, --help         Show this help message');
     cli.blank();
     cli.info('Date Formats (for --since/--until):');
@@ -448,6 +611,16 @@ class MCPWrapper {
     cli.dim('  MADEINOZ_WRAPPER_LOG_FILE      Path to write transformation error logs');
     cli.dim('  MADEINOZ_WRAPPER_SLOW_THRESHOLD Slow processing threshold in ms (default: 50)');
     cli.dim('  MADEINOZ_WRAPPER_TIMEOUT       Processing timeout in ms (default: 100)');
+    cli.blank();
+    cli.info('TLS/SSL Environment Variables (Feature 010):');
+    cli.blank();
+    cli.dim('  MADEINOZ_KNOWLEDGE_PROTOCOL    http or https (default: http)');
+    cli.dim('  MADEINOZ_KNOWLEDGE_HOST        Hostname or IP address (default: localhost)');
+    cli.dim('  MADEINOZ_KNOWLEDGE_PORT         TCP port (default: 8001)');
+    cli.dim('  MADEINOZ_KNOWLEDGE_TLS_VERIFY  Enable certificate verification (default: true)');
+    cli.dim('  MADEINOZ_KNOWLEDGE_TLS_CA       Path to CA certificate file');
+    cli.dim('  MADEINOZ_KNOWLEDGE_TLS_CERT     Path to client certificate file');
+    cli.dim('  MADEINOZ_KNOWLEDGE_TLS_KEY      Path to client private key file');
     cli.blank();
     cli.info('Examples:');
     cli.blank();
