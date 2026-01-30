@@ -68,6 +68,76 @@ At installation completion, perform Root Cause Analysis:
 3. Document any workarounds applied
 4. Recommend fixes for future releases
 5. Report findings to user for GitHub issue creation if warranted
+
+==============================================================================
+⛔ MANDATORY PRE-FLIGHT CHECKPOINT - AI AGENTS MUST READ THIS FIRST ⛔
+==============================================================================
+
+🚨 STOP! DO NOT PROCEED UNTIL YOU COMPLETE THIS CHECKPOINT 🚨
+
+Before executing ANY installation step, you MUST:
+
+1. **DETECT EXISTING INSTALLATION**
+   ```bash
+   # Check for existing config
+   if grep -q "MADEINOZ_KNOWLEDGE_" ~/.claude/.env 2>/dev/null; then
+       echo "⚠️  EXISTING INSTALLATION DETECTED"
+       grep "^MADEINOZ_KNOWLEDGE_" ~/.claude/.env | head -20
+   fi
+
+   # Check for existing containers
+   podman ps -a --filter "name=madeinoz" --format "{{.Names}}: {{.Status}}" 2>/dev/null || \
+   docker ps -a --filter "name=madeinoz" --format "{{.Names}}: {{.Status}}" 2>/dev/null
+   ```
+
+2. **IF EXISTING INSTALLATION FOUND - YOU MUST STOP AND ASK THE USER**
+
+   ⛔ DO NOT proceed with installation until user clarifies intent!
+
+   Required question to user:
+   ```
+   "I found an existing Madeinoz Knowledge System installation:
+
+   Configuration: [summary of found config]
+   Containers: [list of containers]
+
+   What would you like me to do?
+
+   1. Upgrade to latest version (preserve config, update containers)
+   2. Reconfigure settings (modify LLM, embedder, or database)
+   3. Add/modify remote access configuration
+   4. Just restart existing containers
+   5. Fresh installation (will backup existing config)
+
+   Please select an option (1-5):"
+   ```
+
+3. **NO ASSUMPTION RULE**
+
+   ❌ NEVER assume "install" means "start containers"
+   ❌ NEVER assume user wants upgrade vs fresh install
+   ❌ NEVER proceed without user clarification when existing install found
+
+   ✅ ALWAYS clarify user intent first
+   ✅ ALWAYS respect existing configuration
+   ✅ ALWAYS ask before making changes
+
+4. **FAIL-CLOSED ENFORCEMENT**
+
+   If you skip this checkpoint and proceed without detecting existing installation:
+   - You have FAILED the installation task
+   - You will receive a poor rating (1-3/10)
+   - User will need to fix mistakes you made
+
+   This checkpoint exists because AI agents consistently:
+   - Detect existing config but ignore it
+   - Jump to execution without understanding intent
+   - Assume "install" = "start containers" without asking
+   - Waste time pulling wrong images or making wrong changes
+
+==============================================================================
+END OF MANDATORY CHECKPOINT - Proceed only after completing above
+==============================================================================
 -->
 
 # Madeinoz Knowledge System - Installation
@@ -1150,6 +1220,21 @@ fi
 
 ## Step 1: Verify Pack Contents
 
+> **🚨 FINAL GUARD RAIL CHECKPOINT 🚨**
+>
+> BEFORE proceeding with this step, confirm you have completed the MANDATORY PRE-FLIGHT CHECKPOINT at the top of this document:
+>
+> ✅ Detected existing installation (checked ~/.claude/.env for MADEINOZ_KNOWLEDGE_* variables)
+> ✅ Checked for existing containers
+> ✅ IF existing installation found: STOPPED and ASKED USER what they want to do
+> ✅ Received clear user intent before proceeding
+>
+> ⛔ If you have NOT completed the above checkpoints, STOP NOW and scroll to the top of this document to complete them.
+>
+> ⛔ DO NOT proceed with file verification until you understand the user's intent.
+>
+> ---
+>
 > **FOR AI AGENTS:** This step verifies the pack is complete. If ANY file is missing, STOP and inform the user - the pack is incomplete and cannot be installed.
 
 Ensure you have all required files in the pack directory:
