@@ -8,6 +8,9 @@
  * (falkordb_lucene.py). The TypeScript client passes values directly to the server.
  */
 
+// Import profile loading function for connection profiles
+import { loadProfileWithOverrides } from './connection-profile.js';
+
 /**
  * MCP tool names (Graphiti MCP server)
  *
@@ -205,9 +208,8 @@ export interface MCPClientConfig {
 }
 
 /**
- * Default MCP server URL
+ * Default timeout for requests
  */
-const DEFAULT_BASE_URL = 'http://localhost:8001/mcp';
 const DEFAULT_TIMEOUT = 30000; // 30 seconds
 
 /**
@@ -419,6 +421,20 @@ export class MCPClient {
 
       // Consume the SSE response body
       await response.text();
+
+      // Send initialized notification (required by FastMCP HTTP transport)
+      const notifyRequest = {
+        jsonrpc: '2.0',
+        method: 'notifications/initialized',
+      };
+      await fetch(this.baseURL, {
+        method: 'POST',
+        headers: {
+          ...this.headers,
+          'Mcp-Session-Id': this.sessionId,
+        },
+        body: JSON.stringify(notifyRequest),
+      });
     })();
 
     await this.initializePromise;
@@ -1012,8 +1028,7 @@ export function createMCPClient(config?: MCPClientConfig): MCPClient {
   // If no explicit config and no environment variables, try loading from profile
   if (!config && !process.env.MADEINOZ_KNOWLEDGE_HOST && !process.env.MADEINOZ_KNOWLEDGE_PORT) {
     try {
-      // Dynamic import to avoid circular dependency
-      const { loadProfileWithOverrides } = require('./connection-profile');
+      // Load profile from config file (imported at top of file)
       const profileConfig = loadProfileWithOverrides();
 
       // Convert profile config to MCPClientConfig format
@@ -1027,9 +1042,11 @@ export function createMCPClient(config?: MCPClientConfig): MCPClient {
         profile: profileConfig.name,
       };
 
-      // Environment variables override profile settings
-      return new MCPClient({ ...profileBasedConfig, ...envConfig });
-    } catch (error) {
+      // Profile settings as base, environment variables override (only defined values)
+      // Note: envConfig must come first so undefined values don't override profile values
+      const finalConfig = { ...envConfig, ...profileBasedConfig };
+      return new MCPClient(finalConfig);
+    } catch (_error) {
       // If profile loading fails, fall back to environment config or defaults
       // This ensures backward compatibility
     }

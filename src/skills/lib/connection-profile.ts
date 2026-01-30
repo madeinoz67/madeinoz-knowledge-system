@@ -11,7 +11,7 @@
  * @module connection-profile
  */
 
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import yaml from 'js-yaml';
 
@@ -150,10 +150,9 @@ export class ConnectionProfileManager {
       const content = readFileSync(configPath, 'utf-8');
       this.configFile = yaml.load(content) as ProfileConfigFile;
     } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(`Failed to load profile config from ${configPath}: ${error.message}`);
-      }
-      throw new Error(`Failed to load profile config from ${configPath}: Unknown error`);
+      // Treat malformed YAML as missing config - fall back to defaults
+      this.configFile = null;
+      this.configPath = null;
     }
   }
 
@@ -328,6 +327,126 @@ export class ConnectionProfileManager {
     this.loadConfigFile();
     return this.configPath;
   }
+
+  /**
+   * Save or update a profile in the configuration file
+   * Creates the config file if it doesn't exist
+   * @param profile - Profile to save (name is included in the profile object)
+   * @param makeDefault - Whether to make this the default profile (default: false for new profiles, true when updating default)
+   * @returns The path to the config file that was created/updated
+   */
+  saveProfile(profile: ConnectionProfileData, makeDefault: boolean = false): string {
+    const { name, ...profileData } = profile;
+    const paiDir = process.env.PAI_DIR;
+    const homeDir = process.env.HOME || process.env.USERPROFILE;
+
+    // Determine config directory: $PAI_DIR/config takes priority
+    let configDir: string;
+    if (paiDir) {
+      configDir = resolve(paiDir, 'config');
+    } else {
+      configDir = resolve(homeDir || '', '.claude', 'config');
+    }
+
+    // Ensure config directory exists
+    if (!existsSync(configDir)) {
+      mkdirSync(configDir, { recursive: true });
+    }
+
+    const configPath = resolve(configDir, 'knowledge-profiles.yaml');
+
+    // Load existing config or create new one
+    let configFile: ProfileConfigFile;
+    if (existsSync(configPath)) {
+      try {
+        const content = readFileSync(configPath, 'utf-8');
+        configFile = yaml.load(content) as ProfileConfigFile;
+      } catch (error) {
+        // If parse fails, create new config
+        configFile = {
+          version: '1.0',
+          default_profile: name,
+          profiles: {},
+        };
+      }
+    } else {
+      // Create new config file
+      configFile = {
+        version: '1.0',
+        default_profile: name,
+        profiles: {},
+      };
+    }
+
+    // Update profile data
+    configFile.profiles[name] = profileData;
+
+    // Update default profile if requested
+    if (makeDefault) {
+      configFile.default_profile = name;
+    }
+
+    // Write back to file
+    const yamlContent = yaml.dump(configFile, { indent: 2, lineWidth: 120 });
+    writeFileSync(configPath, yamlContent, 'utf-8');
+
+    // Reload our cached config
+    this.configFile = null;
+    this.configPath = null;
+    this.loadConfigFile();
+
+    return configPath;
+  }
+
+  /**
+   * Create or update multiple profiles at once
+   * Useful for setting up both local and development profiles
+   * @param profiles - Array of profiles to save
+   * @param defaultProfileName - Which profile should be the default
+   * @returns The path to the config file that was created/updated
+   */
+  saveProfiles(profiles: ConnectionProfileData[], defaultProfileName: string): string {
+    const paiDir = process.env.PAI_DIR;
+    const homeDir = process.env.HOME || process.env.USERPROFILE;
+
+    // Determine config directory: $PAI_DIR/config takes priority
+    let configDir: string;
+    if (paiDir) {
+      configDir = resolve(paiDir, 'config');
+    } else {
+      configDir = resolve(homeDir || '', '.claude', 'config');
+    }
+
+    // Ensure config directory exists
+    if (!existsSync(configDir)) {
+      mkdirSync(configDir, { recursive: true });
+    }
+
+    const configPath = resolve(configDir, 'knowledge-profiles.yaml');
+
+    // Create config file with all profiles
+    const configFile: ProfileConfigFile = {
+      version: '1.0',
+      default_profile: defaultProfileName,
+      profiles: {},
+    };
+
+    for (const profile of profiles) {
+      const { name, ...profileData } = profile;
+      configFile.profiles[name] = profileData;
+    }
+
+    // Write to file
+    const yamlContent = yaml.dump(configFile, { indent: 2, lineWidth: 120 });
+    writeFileSync(configPath, yamlContent, 'utf-8');
+
+    // Reload our cached config
+    this.configFile = null;
+    this.configPath = null;
+    this.loadConfigFile();
+
+    return configPath;
+  }
 }
 
 /**
@@ -387,8 +506,26 @@ export function loadProfileWithOverrides(profileName?: string): ConnectionProfil
   const envProfile = process.env.MADEINOZ_KNOWLEDGE_PROFILE;
   const targetProfile = profileName || envProfile || manager.getDefaultProfile();
 
-  // Load the profile
-  const profile = manager.loadProfileOrThrow(targetProfile);
+  // Load the profile, fall back to defaults only for missing/malformed config
+  let profile: ConnectionProfileData;
+  try {
+    profile = manager.loadProfileOrThrow(targetProfile);
+  } catch (error) {
+    // Only fall back to defaults if the error is about missing/malformed config file
+    // Re-throw errors for specific profile not found in valid config
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    if (errorMessage.includes('not found') && !errorMessage.includes('No configuration file found')) {
+      // Profile name not found in valid config - re-throw
+      throw error;
+    }
+    // Missing or malformed config file - fall back to code defaults
+    profile = {
+      name: targetProfile,
+      host: 'localhost',
+      port: 8001,
+      protocol: 'http',
+    };
+  }
 
   // Apply environment variable overrides
   for (const [envKey, profilePath] of Object.entries(ENV_MAPPINGS)) {
@@ -404,10 +541,17 @@ export function loadProfileWithOverrides(profileName?: string): ConnectionProfil
 
 /**
  * Get connection profile name from environment
- * @returns Profile name or default
+ * @returns Profile name from environment, or default profile from config, or 'default' as final fallback
  */
 export function getProfileName(): string {
-  return process.env.MADEINOZ_KNOWLEDGE_PROFILE || 'default';
+  const envProfile = process.env.MADEINOZ_KNOWLEDGE_PROFILE;
+  if (envProfile) {
+    return envProfile;
+  }
+
+  // Read default profile from config file
+  const manager = new ConnectionProfileManager();
+  return manager.getDefaultProfile();
 }
 
 /**

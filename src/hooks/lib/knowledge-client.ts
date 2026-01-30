@@ -9,6 +9,75 @@
  * (falkordb_lucene.py). The client passes group_ids directly without escaping.
  */
 
+import { join } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
+
+/**
+ * Load environment variables from PAI .env file
+ * Priority: $PAI_DIR/.env > ~/.claude/.env
+ *
+ * This must be called before accessing environment variables to ensure
+ * the .env file is loaded into process.env
+ */
+async function loadEnvFile(): Promise<void> {
+  // Check if already loaded (skip if we already have the MCP URL set)
+  if (process.env.MADEINOZ_KNOWLEDGE_MCP_URL) {
+    return;
+  }
+
+  // Determine env file path: $PAI_DIR/.env takes priority
+  const paiDir = process.env.PAI_DIR;
+  const homeDir = process.env.HOME || process.env.USERPROFILE || '';
+  const envFile = paiDir ? join(paiDir, '.env') : join(homeDir, '.claude', '.env');
+
+  // Check if .env file exists
+  if (!existsSync(envFile)) {
+    return;
+  }
+
+  // Read and parse .env file
+  const content = readFileSync(envFile, 'utf-8');
+  const lines = content.split('\n');
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    // Skip empty lines and comments
+    if (!trimmed || trimmed.startsWith('#')) {
+      continue;
+    }
+
+    // Parse KEY=VALUE
+    const eqIndex = trimmed.indexOf('=');
+    if (eqIndex > 0) {
+      const key = trimmed.substring(0, eqIndex).trim();
+      const value = trimmed.substring(eqIndex + 1).trim();
+
+      // Remove quotes if present
+      const unquoted =
+        (value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))
+          ? value.slice(1, -1)
+          : value;
+
+      // Only set if not already in process.env (env vars take precedence)
+      if (process.env[key] === undefined) {
+        process.env[key] = unquoted;
+      }
+    }
+  }
+}
+
+// Load .env file immediately on module import
+let envLoadPromise: Promise<void> | null = null;
+
+function ensureEnvLoaded(): Promise<void> {
+  if (!envLoadPromise) {
+    envLoadPromise = loadEnvFile();
+  }
+  return envLoadPromise;
+}
+
 export interface KnowledgeClientConfig {
   baseURL: string;
   timeout: number;
@@ -35,11 +104,18 @@ export interface AddEpisodeResult {
  */
 type DatabaseType = 'neo4j' | 'falkorodb';
 
-const DEFAULT_CONFIG: KnowledgeClientConfig = {
-  baseURL: process.env.MADEINOZ_KNOWLEDGE_MCP_URL || 'http://localhost:8000',
-  timeout: Number.parseInt(process.env.MADEINOZ_KNOWLEDGE_TIMEOUT || '15000', 10),
-  retries: Number.parseInt(process.env.MADEINOZ_KNOWLEDGE_RETRIES || '3', 10),
-};
+/**
+ * Get default configuration (loads .env file first)
+ */
+function getDefaultConfig(): KnowledgeClientConfig {
+  return {
+    baseURL: process.env.MADEINOZ_KNOWLEDGE_MCP_URL || 'http://localhost:8000',
+    timeout: Number.parseInt(process.env.MADEINOZ_KNOWLEDGE_TIMEOUT || '15000', 10),
+    retries: Number.parseInt(process.env.MADEINOZ_KNOWLEDGE_RETRIES || '3', 10),
+  };
+}
+
+const DEFAULT_CONFIG = getDefaultConfig();
 
 /**
  * Get database type from environment variable with validation
@@ -194,6 +270,20 @@ class Neo4jClient {
 
       // Consume the SSE response body
       await response.text();
+
+      // Send initialized notification (required by FastMCP HTTP transport)
+      const notifyRequest = {
+        jsonrpc: '2.0',
+        method: 'notifications/initialized',
+      };
+      await fetch(this.baseURL, {
+        method: 'POST',
+        headers: {
+          ...this.headers,
+          'Mcp-Session-Id': this.sessionId,
+        },
+        body: JSON.stringify(notifyRequest),
+      });
     })();
 
     await this.initializePromise;
@@ -559,6 +649,11 @@ class FalkorDBClient {
 export async function checkHealth(
   config: KnowledgeClientConfig = DEFAULT_CONFIG
 ): Promise<boolean> {
+  // Ensure .env file is loaded before checking health
+  await ensureEnvLoaded();
+  // Re-read config in case env loading changed values
+  const effectiveConfig = getDefaultConfig();
+
   if (isFalkorDB()) {
     const client = new FalkorDBClient(config);
     return await client.testConnection();
@@ -574,6 +669,8 @@ export async function addEpisode(
   params: AddEpisodeParams,
   config: KnowledgeClientConfig = DEFAULT_CONFIG
 ): Promise<AddEpisodeResult> {
+  // Ensure .env file is loaded before adding episode
+  await ensureEnvLoaded();
   // Server-side sanitization handles Lucene escaping for FalkorDB
   const requestArgs = {
     name: params.name.slice(0, 200),

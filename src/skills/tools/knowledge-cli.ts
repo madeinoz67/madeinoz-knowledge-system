@@ -517,11 +517,16 @@ class MCPWrapper {
       const profileName = this.flags.profile || getProfileName();
       const profile = loadProfileWithOverrides(profileName);
 
-      // Test connection
+      // Apply CLI flag overrides (highest priority)
+      const effectiveHost = this.flags.host || profile.host;
+      const effectivePort = this.flags.port ? Number.parseInt(this.flags.port, 10) : profile.port;
+      const effectiveProtocol = (this.flags.protocol as 'http' | 'https' | undefined) || profile.protocol;
+
+      // Test connection with overridden values
       const client = createMCPClient({
-        protocol: profile.protocol,
-        host: profile.host,
-        port: profile.port,
+        protocol: effectiveProtocol,
+        host: effectiveHost,
+        port: effectivePort,
         basePath: profile.basePath,
         timeout: profile.timeout,
       });
@@ -530,9 +535,9 @@ class MCPWrapper {
 
       const connectionState: ConnectionState = {
         profile: profileName,
-        host: profile.host,
-        port: profile.port,
-        protocol: profile.protocol,
+        host: effectiveHost,
+        port: effectivePort,
+        protocol: effectiveProtocol,
         status: healthResult.success ? 'connected' : 'error',
         lastError: healthResult.success ? undefined : healthResult.error,
       };

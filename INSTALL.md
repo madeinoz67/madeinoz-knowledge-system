@@ -3,6 +3,25 @@ Document: Installation Guide
 Purpose: Step-by-step installation for Madeinoz Knowledge System PAI pack
 Target Audience: AI agents installing into user infrastructure
 
+⚠️ CRITICAL GUARD FOR AI AGENTS ⚠️
+
+**DO NOT RUN install.ts OR install:system**
+- install.ts is an INTERACTIVE installer for HUMANS
+- It prompts for installation type (local/remote/hybrid) and configuration
+- AI agents should follow THIS DOCUMENT (INSTALL.md) step-by-step instead
+- Running install.ts will cause the AI to hang waiting for user input
+
+**What AI Agents Should Do:**
+- Follow the numbered steps in this document sequentially
+- Execute each bash command block exactly as written
+- Verify outputs match expected results
+- Stop and report issues if verification fails
+
+**What Humans Should Do:**
+- Run `bun run src/skills/server/install.ts` for interactive installation
+- The installer will guide you through all configuration choices
+- Or follow this document manually if you prefer step-by-step control
+
 Key Installation Steps:
 1. Pre-installation analysis (existing packs, dependencies)
 2. Configure environment variables in ~/.claude/.env
@@ -31,7 +50,7 @@ Hook: SessionStart → sync-memory-to-knowledge.ts (syncs MEMORY to knowledge gr
 Critical Commands:
 - bun run server-cli start (start containers)
 - bun run server-cli status (verify running)
-- bun run install:system (interactive installer)
+- bun run install:system (interactive installer - HUMANS ONLY, NOT FOR AI AGENTS)
 
 AI AGENT INSTRUCTIONS - Issue Tracking:
 During installation, track ALL issues encountered for post-installation RCA:
@@ -54,6 +73,10 @@ At installation completion, perform Root Cause Analysis:
 # Madeinoz Knowledge System - Installation
 
 **This guide is designed for AI agents installing this pack into a user's infrastructure.**
+
+> **⚠️ FOR AI AGENTS:** DO NOT run `bun run src/skills/server/install.ts` - that is an interactive installer for humans. Follow the steps in this document instead.
+>
+> **⚠️ FOR HUMANS:** Use `bun run src/skills/server/install.ts` for a guided interactive installation experience.
 
 ## Environment Variable Configuration
 
@@ -814,7 +837,314 @@ elif [ "$INSTALL_ACTION" = "skip" ]; then
 fi
 ```
 
-**After completing version check and backup, proceed to Step 1.**
+**After completing version check and backup, proceed to Installation Type Selection.**
+
+---
+
+## Installation Type Selection
+
+> **IMPORTANT:** Before proceeding, determine your installation type. This affects what components are installed and how the system is configured.
+
+### Overview
+
+The Madeinoz Knowledge System supports three installation modes:
+
+| Type | Description | Container Runtime | Connection Profiles | Best For |
+|------|-------------|-------------------|---------------------|----------|
+| **Local** | Run MCP server locally via Docker/Podman | Required (Podman/Docker) | None needed | Single machine, development |
+| **Remote** | Connect to existing remote MCP server | Not required | Creates "remote" profile | Connecting to shared server |
+| **Hybrid** | Development setup with both local and remote | Required (manual management) | Creates "local" + "remote" | Developers working across environments |
+
+### Installation Type Details
+
+#### Local Installation
+- **Full local stack:** MCP server, database, and containers run locally
+- **Requires:** Podman or Docker installed
+- **Prerequisites:** Container runtime (Podman/Docker), LLM provider API key
+- **Container start:** Automatic during installation
+- **Management:** Use `server-cli` commands (start/stop/status/logs)
+- **Profile config:** Not needed (connects to localhost by default)
+
+#### Remote Installation
+- **Client-only:** Only CLI tools and skill are installed locally
+- **Requires:** Access to remote MCP server (already running)
+- **Prerequisites:** Remote server hostname/IP, port, and protocol
+- **Container start:** Skipped (remote server must already be running)
+- **Management:** Remote server managed on its host machine
+- **Profile config:** Creates `~/.claude/config/knowledge-profiles.yaml` with "remote" profile as default (client connects to remote server automatically when no `--profile` parameter is passed)
+
+#### Hybrid Installation
+- **Development setup:** Both local and remote profiles configured
+- **Requires:** Podman/Docker (for local), remote server access (for remote)
+- **Prerequisites:** All local requirements + remote server details
+- **Container start:** Manual (use `server-cli` commands as needed)
+- **Management:** Switch between profiles using `--profile` flag or environment variable
+- **Profile config:** Creates both "local" and "remote" profiles; you choose which is default (the profile automatically used when running commands without `--profile` parameter)
+
+### Interactive Installer
+
+The interactive installer (`bun run src/skills/server/install.ts`) will guide you through:
+
+1. **Step 2.5: Installation Type Selection**
+   - Choose between local, remote, or hybrid installation
+   - For remote/hybrid: enter remote server details (host, port, protocol)
+   - For hybrid: choose which profile is default
+
+2. **For Remote/Hybrid: Profile Configuration**
+   - Creates `~/.claude/config/knowledge-profiles.yaml`
+   - Sets default profile based on your choice
+   - Shows usage examples for switching profiles
+
+### Manual Profile Creation (Advanced)
+
+If you prefer to create profiles manually instead of using the installer:
+
+**Profile Config Location:** `~/.claude/config/knowledge-profiles.yaml`
+
+The `default_profile` setting determines which profile is automatically used when running the knowledge client without the `--profile` parameter or `MADEINOZ_KNOWLEDGE_PROFILE` environment variable.
+
+```yaml
+version: "1.0"
+default_profile: "remote"  # Profile used when running: bun run knowledge-cli.ts search_nodes "test"
+
+profiles:
+  local:
+    host: localhost
+    port: 8000
+    protocol: http
+    basePath: /mcp
+
+  remote:
+    host: 10.0.0.150      # Your remote server
+    port: 8001             # Remote MCP server port
+    protocol: http         # or https
+    basePath: /mcp
+```
+
+### Using Connection Profiles
+
+After installation with profiles configured:
+
+```bash
+# Use default profile (no --profile parameter needed)
+# Reads from default_profile setting in ~/.claude/config/knowledge-profiles.yaml
+bun run src/skills/tools/knowledge-cli.ts status
+
+# Override and use specific profile
+bun run src/skills/tools/knowledge-cli.ts status --profile local
+bun run src/skills/tools/knowledge-cli.ts status --profile remote
+
+# Set default via environment (overrides YAML config)
+export MADEINOZ_KNOWLEDGE_PROFILE=remote
+bun run src/skills/tools/knowledge-cli.ts status
+```
+
+### Prerequisites by Installation Type
+
+| Prerequisite | Local | Remote | Hybrid |
+|--------------|-------|--------|--------|
+| Bun runtime | ✅ Required | ✅ Required | ✅ Required |
+| Podman/Docker | ✅ Required | ❌ Not needed | ✅ Required |
+| LLM API key | ✅ Required | ⚠️ For reference only | ✅ Required |
+| Remote server access | ❌ Not needed | ✅ Required | ✅ Required |
+| Remote server running | ❌ Not needed | ✅ Required | ⚠️ Optional |
+
+**After completing installation type selection, proceed to Existing Installation Check.**
+
+---
+
+## Step 0.5: Existing Installation Check
+
+> **⚠️ CRITICAL FOR AI AGENTS:** This step detects existing installations and asks what to do. **STOP and ASK the user** before proceeding with installation.
+
+### Check Existing Installation State
+
+```bash
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "Existing Installation Check"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
+# Check for existing skill installation
+SKILL_DIR="$HOME/.claude/skills/Knowledge"
+if [ -d "$SKILL_DIR" ]; then
+    EXISTING_SKILL_VERSION=$(grep -E "^version:" "$SKILL_DIR/SKILL.md" 2>/dev/null | head -1 | sed 's/version:[[:space:]]*//')
+    echo "⚠️  Found EXISTING skill installation"
+    echo "   Location: $SKILL_DIR"
+    echo "   Version: ${EXISTING_SKILL_VERSION:-unknown}"
+    echo ""
+else
+    echo "✓ No existing skill installation found (fresh install)"
+    EXISTING_SKILL_VERSION="none"
+fi
+
+# Check for running containers
+if podman ps 2>/dev/null | grep -q "madeinoz-knowledge-graph-mcp"; then
+    echo "⚠️  Madeinoz Knowledge MCP server is RUNNING"
+    podman ps 2>/dev/null | grep "madeinoznowledge-graph-mcp" | head -1
+    echo ""
+else
+    echo "✓ No MCP server is running"
+fi
+
+# Check for existing PAI configuration
+PAI_ENV="$HOME/.claude/.env"
+if [ -f "$PAI_ENV" ] && grep -q "MADEINOZ_KNOWLEDGE_" "$PAI_ENV" 2>/dev/null; then
+    echo "⚠️  Found PAI configuration with MADEINOZ_KNOWLEDGE_* variables"
+    grep -c "MADEINOZ_KNOWLEDGE_" "$PAI_ENV" 2>/dev/null | xargs -I {} echo "   - {} variables found"
+    echo ""
+else
+    echo "✓ No PAI configuration found"
+fi
+
+# Check for existing connection profiles
+PROFILES_FILE="$HOME/.claude/config/knowledge-profiles.yaml"
+if [ -f "$PROFILES_FILE" ]; then
+    echo "⚠️  Found connection profiles:"
+    grep "default_profile:" "$PROFILES_FILE" 2>/dev/null || echo "   No default set"
+    echo "   Location: $PROFILES_FILE"
+    echo ""
+else
+    echo "✓ No connection profiles found"
+fi
+
+# Check Claude MCP configuration
+CLAUDE_CONFIG="$HOME/.claude.json"
+if [ -f "$CLAUDE_CONFIG" ] && jq -e '.mcpServers["madeinoz-knowledge"]' "$CLAUDE_CONFIG" >/dev/null 2>&1; then
+    EXISTING_MCP_URL=$(jq -r '.mcpServers["madeinoz-knowledge"].url' "$CLAUDE_CONFIG" 2>/dev/null)
+    echo "⚠️  Found Claude MCP configuration:"
+    echo "   URL: $EXISTING_MCP_URL"
+    echo ""
+else
+    echo "✓ No Claude MCP configuration found"
+fi
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+```
+
+### Conflict Resolution Options
+
+Based on the detection above, ask the user what to do:
+
+**Scenario A: Fresh Install (no existing installation)**
+- Proceed with Step 1 normally
+
+**Scenario B: Existing Installation Found**
+Choose one of:
+
+| Option | Action | When to Use |
+|--------|--------|-------------|
+| **1) Keep existing** | Skip installation, verify only | Installation already correct |
+| **2) Reinstall** | Backup and replace all components | Want fresh install |
+| **3) Upgrade** | Keep config, update files only | Same version, want refresh |
+| **4) Add remote** | Keep local, add remote profile | Adding remote access to existing local |
+
+### Adding Remote Profile - Additional Questions
+
+When adding a remote profile to an existing local installation, the following questions must be answered:
+
+**Question 1: Keep Local Installation?**
+- **Yes:** Keep local server running, add remote as additional profile
+- **No:** Remove local, use remote only (requires stopping containers)
+
+**Question 2: Which Profile Should Be Default?**
+
+The **default profile** is the one automatically used when running the knowledge client without passing `--profile` parameter or setting `MADEINOZ_KNOWLEDGE_PROFILE` environment variable.
+
+- **Local as default:** Client connects to local server automatically
+  - Run: `bun run knowledge-cli.ts search_nodes "test"` → uses **local** profile
+  - Access remote: `bun run knowledge-cli.ts --profile remote search_nodes "test"`
+  - Set env: `MADEINOZ_KNOWLEDGE_PROFILE=remote bun run knowledge-cli.ts search_nodes "test"`
+
+- **Remote as default:** Client connects to remote server automatically
+  - Run: `bun run knowledge-cli.ts search_nodes "test"` → uses **remote** profile
+  - Access local: `bun run knowledge-cli.ts --profile local search_nodes "test"`
+  - Set env: `MADEINOZ_KNOWLEDGE_PROFILE=local bun run knowledge-cli.ts search_nodes "test"`
+
+**Question 3: Remote Profile Name?**
+- Default: `remote`
+- Custom: User-specified name (e.g., `production`, `staging`, `home-server`)
+- The non-default profile can be named anything (avoid spaces)
+
+### Example Remote Profile Addition Flow
+
+```bash
+# Example: Adding remote server to existing local installation
+
+# 1. User specifies remote server details
+REMOTE_HOST="10.0.0.150"
+REMOTE_PORT="8001"
+REMOTE_PROTO="http"
+
+# 2. Ask: Keep local installation?
+# User: Yes
+
+# 3. Ask: Which should be default?
+# User: Remote (so I can work from anywhere)
+
+# 4. Ask: What to name the local profile?
+# User: development
+
+# 5. Create profiles
+# ~/.claude/config/knowledge-profiles.yaml:
+#   default_profile: remote
+#   profiles:
+#     remote:
+#       host: 10.0.0.150
+#       port: 8001
+#       protocol: http
+#       basePath: /mcp
+#     development:
+#       host: localhost
+#       port: 8000
+#       protocol: http
+#       basePath: /mcp
+```
+
+### Decision Tree for AI Agents
+
+```bash
+# AI AGENT: Use this logic to decide next step
+
+if [ "$EXISTING_SKILL_VERSION" = "none" ]; then
+    # Fresh install - proceed normally
+    echo "→ Fresh install: proceeding with Step 1"
+    INSTALL_ACTION="install"
+elif [ "$EXISTING_SKILL_VERSION" != "none" ]; then
+    echo "→ Existing installation found: v$EXISTING_SKILL_VERSION"
+
+    # FOR AI AGENTS: ASK USER WHAT TO DO
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "Existing Madeinoz Knowledge System installation detected!"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "Options:"
+    echo "  1) Keep existing - Skip installation, verify only"
+    echo "  2) Reinstall - Backup and replace all components"
+    echo "  3) Upgrade - Keep config, update files (same version)"
+    echo "  4) Add remote - Add remote profile to existing local installation"
+    echo ""
+    # STOP HERE - USER MUST DECIDE
+    echo "Please run installation with one of:"
+    echo "  Human: Use 'bun run src/skills/server/install.ts' for interactive mode"
+    echo "  AI: If user chose option 4, collect these inputs:"
+    echo ""
+    echo "  For 'Add remote' option, ASK USER:"
+    echo "    1. Keep local installation? (yes/no)"
+    echo "    2. Which profile should be default? (local/remote)"
+    echo "    3. What should the remote profile be named? (default: 'remote')"
+    echo "    4. Remote server details (host, port, protocol)"
+    echo ""
+    exit 1
+fi
+# After user decision, set variables for installation:
+# $KEEP_LOCAL - "yes" or "no"
+# $DEFAULT_PROFILE - "local" or "remote"
+# $REMOTE_PROFILE_NAME - profile name (default: "remote")
+# $REMOTE_HOST, $REMOTE_PORT, $REMOTE_PROTO - server details
+```
+
+**After resolving existing installation, proceed to Step 1.**
 
 ---
 
@@ -833,8 +1163,8 @@ echo "Checking pack contents..."
 
 REQUIRED_FILES=(
     "README.md"
-    "SKILL.md"
-    "src/skills/server/server-cli.ts"
+    "src/skills/SKILL.md"
+    "src/skills/tools/server-cli.ts"
     "src/skills/server/podman-compose-falkordb.yml"
     "src/skills/server/podman-compose-neo4j.yml"
     "src/skills/server/docker-compose-falkordb.yml"
