@@ -66,7 +66,7 @@ except ImportError:
 try:
     from utils.decay_config import get_decay_config
     from utils.decay_types import LifecycleState, MemoryDecayAttributes
-    from utils.importance_classifier import classify_memory as classify_memory_impl, is_permanent
+    from utils.importance_classifier import classify_memory as classify_memory_impl, classify_unclassified_nodes, is_permanent
     from utils.memory_decay import (
         DecayCalculator,
         calculate_weighted_score,
@@ -607,6 +607,7 @@ class GraphitiService:
         self.semaphore = asyncio.Semaphore(semaphore_limit)
         self.client: Graphiti | None = None
         self.entity_types = None
+        self.llm_client = None
 
     async def initialize(self) -> None:
         """Initialize the Graphiti client with factory-created components."""
@@ -716,6 +717,9 @@ class GraphitiService:
             # Build indices
             await self.client.build_indices_and_constraints()
 
+            # Store llm_client for later use in maintenance service
+            self.llm_client = llm_client
+
             logger.info('Successfully initialized Graphiti client')
             if SEARCH_ALL_GROUPS:
                 logger.info('Madeinoz Patch: Search will query ALL groups when none specified')
@@ -785,7 +789,7 @@ class GraphitiService:
                     try:
                         from utils.maintenance_service import get_maintenance_service
                         global _maintenance_service
-                        maintenance = get_maintenance_service(self.client.driver)
+                        maintenance = get_maintenance_service(self.client.driver, llm_client=self.llm_client)
                         _maintenance_service = maintenance  # Store for shutdown
                         health_metrics = await maintenance.get_health_metrics()
                         total_memories = health_metrics.aggregates.get('total', 0)
@@ -864,6 +868,21 @@ async def add_memory(
             entity_types=graphiti_service.entity_types,
             uuid=uuid or None,
         )
+
+        # Feature 011: Spawn immediate background classification for unclassified nodes
+        try:
+            client = await graphiti_service.get_client()
+            asyncio.create_task(
+                classify_unclassified_nodes(
+                    driver=client.driver,
+                    llm_client=graphiti_service.llm_client,
+                    batch_size=100,
+                    max_nodes=100,
+                )
+            )
+            logger.info(f"Spawned immediate background classification for episode '{name}'")
+        except Exception as classify_err:
+            logger.warning(f"Failed to spawn background classification: {classify_err}")
 
         return SuccessResponse(
             message=f"Episode '{name}' queued for processing in group '{effective_group_id}'"
@@ -1472,7 +1491,7 @@ async def health_decay_check(request) -> JSONResponse:
 
     try:
         client = await graphiti_service.get_client()
-        maintenance = get_maintenance_service(client.driver)
+        maintenance = get_maintenance_service(client.driver, llm_client=graphiti_service.llm_client)
 
         # Get last maintenance result if available
         if maintenance._last_result:
@@ -1529,7 +1548,7 @@ async def run_decay_maintenance(
 
     try:
         client = await graphiti_service.get_client()
-        maintenance = get_maintenance_service(client.driver)
+        maintenance = get_maintenance_service(client.driver, llm_client=graphiti_service.llm_client)
         result = await maintenance.run_maintenance(dry_run=dry_run)
         return result.to_dict()
     except Exception as e:
@@ -1563,7 +1582,7 @@ async def get_knowledge_health(
 
     try:
         client = await graphiti_service.get_client()
-        maintenance = get_maintenance_service(client.driver)
+        maintenance = get_maintenance_service(client.driver, llm_client=graphiti_service.llm_client)
         metrics = await maintenance.get_health_metrics(group_id=group_id)
         return metrics.to_dict()
     except Exception as e:
@@ -1646,9 +1665,8 @@ async def classify_memory(
         return ErrorResponse(error='Graphiti service not initialized')
 
     try:
-        # Get LLM client from graphiti service
-        client = await graphiti_service.get_client()
-        llm_client = client.llm_client if hasattr(client, 'llm_client') else None
+        # Get LLM client from graphiti service (not from Graphiti client)
+        llm_client = graphiti_service.llm_client
 
         importance, stability = await classify_memory_impl(
             content=content,

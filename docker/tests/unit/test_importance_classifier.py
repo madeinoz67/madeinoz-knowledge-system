@@ -313,8 +313,20 @@ class TestClassifyMemory:
         # Verify the prompt was called (content is truncated internally)
         mock_client.generate_response.assert_called_once()
         call_args = mock_client.generate_response.call_args[0][0]
-        # The content in the prompt should be truncated
-        assert len(call_args) < len(long_content) + 500  # Prompt overhead
+
+        # The content in the prompt should be truncated to 2000 chars
+        # Check that the actual content in the prompt is truncated
+        if isinstance(call_args, str):
+            # String format: check that content portion is truncated
+            # The prompt contains the content, so check that the "Memory:" section has ~2000 chars of content
+            memory_section = call_args.split("Memory: ")[1].split("\n")[0]
+            assert len(memory_section) <= 2000
+        else:
+            # Message format: call_args is a list of Message objects
+            # Extract content from first message
+            message_content = call_args[0].content if hasattr(call_args[0], 'content') else str(call_args[0])
+            memory_section = message_content.split("Memory: ")[1].split("\n")[0]
+            assert len(memory_section) <= 2000
 
     @pytest.mark.asyncio
     async def test_source_description_included(self):
