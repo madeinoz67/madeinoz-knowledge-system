@@ -111,26 +111,27 @@ where λ = ln(2) / half_life_days
 
 **Why exponential?**
 
-- **Linear decay** would lose value at constant rate (e.g., 3.3% per day), reaching 100% after 30 days
+- **Linear decay** would lose value at constant rate (e.g., 0.56% per day), reaching 100% after 180 days
 - **Exponential decay** follows natural patterns:
   - Radioactive decay
   - Drug elimination from the body
   - Human memory forgetting (Ebbinghaus curve)
   - Information relevance over time
 
-!!! example "Exponential vs Linear Decay (30-day half-life)"
+!!! example "Exponential vs Linear Decay (180-day half-life)"
 
-    **Linear decay** (constant 3.3% per day):
+    **Linear decay** (constant 0.56% per day):
     - Day 0: 0% decay
-    - Day 15: 50% decay
-    - Day 30: 100% decay (completely gone)
+    - Day 90: 50% decay
+    - Day 180: 100% decay (completely gone)
 
     **Exponential decay** (our implementation):
     - Day 0: 0% decay
-    - Day 30: 50% decay (half-life)
-    - Day 60: 75% decay
-    - Day 90: 87.5% decay
-    - Day 180: 98.4% decay
+    - Day 30: 11% decay
+    - Day 90: 29% decay
+    - Day 180: 50% decay (half-life)
+    - Day 360: 75% decay
+    - Day 540: 87.5% decay
     - **Never truly reaches 100%**
 
 ![Exponential Decay Curve](../assets/images/decay-exponential-curve.png)
@@ -153,10 +154,10 @@ The stability level adjusts the half-life:
 
 | Stability | Half-Life | Days to 75% Decay | Days to 87.5% Decay |
 |-----------|----------|-------------------|----------------------|
-| 1 (VOLATILE) | 15 days | 30 | 45 |
-| 2 (LOW) | 14 days | 28 | 42 |
-| 3 (MODERATE) | 30 days | 60 | 90 |
-| 4 (HIGH) | 90 days | 180 | 270 |
+| 1 (VOLATILE) | 60 days | 120 | 180 |
+| 2 (LOW) | 120 days | 240 | 360 |
+| 3 (MODERATE) | 180 days | 360 | 540 |
+| 4 (HIGH) | 240 days | 480 | 720 |
 | 5 (PERMANENT) | ∞ | Never | Never (λ = 0) |
 
 !!! tip "Key Insight"
@@ -545,15 +546,15 @@ For specialized use cases, you can implement custom decay logic:
 
 #### Half-life adjustment
 
-- Base half-life: 30 days (configurable)
+- Base half-life: 180 days (configurable)
 - Stability factor: Multiplier based on stability level
 
 **Stability multiplier examples:**
 
 The stability level adjusts the base half-life:
 
-- Stability 1 (VOLATILE): 0.5× half-life (15 days)
-- Stability 3 (MODERATE): 1.0× half-life (30 days)
+- Stability 1 (VOLATILE): 0.33× half-life (60 days)
+- Stability 3 (MODERATE): 1.0× half-life (180 days)
 - Stability 5 (PERMANENT): ∞ half-life (never decays)
 
 **See implementation:** `docker/patches/memory_decay.py` - `calculate_half_life()`

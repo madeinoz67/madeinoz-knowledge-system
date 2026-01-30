@@ -595,12 +595,12 @@ Base decay rate (adjusted by stability factor):
 
 ```yaml
 decay:
-  base_half_life_days: 30  # Base half-life in days (1-365)
+  base_half_life_days: 180  # Base half-life in days (1-365)
 ```
 
 **How it works:**
-- Stability 1 (VOLATILE): 0.5× half-life (15 days)
-- Stability 3 (MODERATE): 1.0× half-life (30 days)
+- Stability 1 (VOLATILE): 0.33× half-life (60 days)
+- Stability 3 (MODERATE): 1.0× half-life (180 days)
 - Stability 5 (PERMANENT): ∞ half-life (never decays)
 
 Higher values = slower decay. See [Decay Score](../usage/memory-decay.md#decay-score-00-10) for details.
