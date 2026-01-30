@@ -5,7 +5,9 @@ description: Persistent personal knowledge management system powered by Graphiti
 
 # Madeinoz Knowledge System
 
-<p align="center"><img src="assets/logo.png" alt="Madeinoz Knowledge System" width="200"></p>
+<div style="text-align: center;">
+  <img src="assets/logo.png" alt="Madeinoz Knowledge System" width="200" data-lightbox="false">
+</div>
 
 > Persistent personal knowledge management system powered by Graphiti knowledge graph - automatically extracts entities, relationships, and temporal context from conversations, documents, and ideas.
 
@@ -50,9 +52,9 @@ The Madeinoz Knowledge System transforms your AI conversations into a permanent,
 
 ## System Architecture
 
-<p align="center">
+<div style="text-align: center;">
   <img src="assets/images/knowledge-system-architecture.png" alt="Madeinoz Knowledge System Architecture" width="100%">
-</p>
+</div>
 
 The knowledge graph sits at the center, automatically organizing your conversations, documents, code, and notes into searchable entities, episodes, facts, and relationships. As memories age, they transition through lifecycle states (ACTIVE → DORMANT → ARCHIVED → EXPIRED) based on importance and stability scores, while Prometheus metrics and Grafana dashboards provide real-time observability.
 

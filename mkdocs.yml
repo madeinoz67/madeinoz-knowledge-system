@@ -30,6 +30,7 @@ theme:
     - search.highlight
     - content.code.copy
     - content.tabs.link
+    - content.lightbox
   logo: assets/logo.png
   favicon: assets/favicon.ico
 
@@ -70,6 +71,8 @@ nav:
 plugins:
   - search
   - offline
+  - glightbox:
+      skip_images: ["logo.png"]
 
 markdown_extensions:
   - admonition
