@@ -4,7 +4,9 @@
 
 decay:
   # Base half-life in days (adjusted by stability factor)
-  base_half_life_days: 30
+  # 180 days = MODERATE memories (stability=3) decay 50% after 6 months
+  # Research-backed: Provides better retention for personal knowledge graphs
+  base_half_life_days: 180
 
   # State transition thresholds
   thresholds:
