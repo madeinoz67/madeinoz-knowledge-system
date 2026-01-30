@@ -3,10 +3,10 @@
 name: Madeinoz Knowledge System
 
 # pack-id: (format) {author}-{pack-name}-{variant}-v{version}
-pack-id: madeinoz67-madeinoz-knowledge-system-core-v1.6.1
+pack-id: madeinoz67-madeinoz-knowledge-system-core-v1.7.0
 
 # version: (format) SemVer major.minor.patch
-version: 1.6.1
+version: 1.7.0
 
 # author: (1 word) GitHub username or organization
 author: madeinoz67
@@ -43,7 +43,7 @@ keywords: [knowledge, graph, memory, semantic search, entity extraction, relatio
 
 ## Changelog
 
-**Latest: v1.6.1** - Fix: Changed half-life default to 180 days.
+**Latest: v1.7.0** - Feat: Add remote MCP access with connection profiles, CLI flags, and TLS support.
 
 See [CHANGELOG.md](CHANGELOG.md) for full version history.
 

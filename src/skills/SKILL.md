@@ -1,7 +1,7 @@
 ---
 name: Knowledge
-version: 1.6.1
-description: Personal knowledge management using Graphiti knowledge graph with Neo4j/FalkorDB. USE WHEN 'store this', 'remember this', 'add to knowledge', 'search my knowledge', 'what do I know about', 'find in knowledge base', 'save to memory', 'graphiti', 'knowledge graph', 'entity extraction', 'relationship mapping', 'semantic search', 'episode', 'install knowledge', 'setup knowledge system', 'configure knowledge graph', knowledge capture, retrieval, synthesis, memory decay, decay scoring, lifecycle state, importance classification, stability classification, health metrics, run maintenance, permanent memory, soft-delete.
+version: 1.7.0
+description: Personal knowledge management using Graphiti knowledge graph with Neo4j/FalkorDB, supporting remote MCP access with connection profiles and TLS. USE WHEN 'store this', 'remember this', 'add to knowledge', 'search my knowledge', 'what do I know about', 'find in knowledge base', 'save to memory', 'graphiti', 'knowledge graph', 'entity extraction', 'relationship mapping', 'semantic search', 'episode', 'install knowledge', 'setup knowledge system', 'configure knowledge graph', 'remote knowledge server', 'connect to knowledge', 'knowledge profile', knowledge capture, retrieval, synthesis, memory decay, decay scoring, lifecycle state, importance classification, stability classification, health metrics, run maintenance, permanent memory, soft-delete.
 tools:
   # MCP Wrapper CLI (76%+ token savings vs direct MCP calls)
   - Bash(bun run */knowledge-cli.ts add_episode *)
@@ -16,6 +16,9 @@ tools:
   - Bash(bun run */knowledge-cli.ts run_maintenance *)
   - Bash(bun run */knowledge-cli.ts classify_memory *)
   - Bash(bun run */knowledge-cli.ts recover_memory *)
+  # Feature 010: Remote MCP access
+  - Bash(bun run */knowledge-cli.ts status)
+  - Bash(bun run */knowledge-cli.ts list_profiles)
   # Server management
   - Bash(bun run server-cli *)
 ---

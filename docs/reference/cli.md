@@ -681,7 +681,7 @@ Status: connected
 Host: knowledge.example.com
 Port: 443
 Protocol: https
-Server Version: 1.6.1
+Server Version: 1.7.0
 Last Connected: 2026-01-30T12:34:56Z
 ```
 
