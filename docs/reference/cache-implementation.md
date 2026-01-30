@@ -69,35 +69,11 @@ This document describes how the Gemini prompt caching system works internally. F
 
 *OpenRouter responses are parsed for cache metrics, calculated for savings and hit rates, recorded to SessionMetrics, and exported to Prometheus.*
 
-### Request Flow (Textual)
+### Complete Request Flow
 
-```
-LLM Request
-    ↓
-LLMClientFactory.create()
-    ↓
-[Route Decision]
-├─ Gemini on OpenRouter → OpenAIGenericClient
-├─ Local endpoints (Ollama) → OpenAIGenericClient
-└─ Other providers → OpenAIClient
-    ↓
-wrap_openai_client_for_caching()
-    ↓
-[Preprocessing]
-├─ Format messages with cache_control markers
-├─ Add to last message only
-└─ Convert strings to multipart format
-    ↓
-OpenAI /chat/completions API call
-    ↓
-[Postprocessing]
-├─ Extract cache metrics from response
-├─ Calculate token/cost savings
-├─ Record to session metrics
-└─ Export to Prometheus
-    ↓
-Response with Cache Metadata
-```
+![Complete Cache Request Flow](../images/cache-complete-request-flow.png)
+
+*The complete flow from LLM request through client routing, caching wrapper, preprocessing, API call, and postprocessing with metrics extraction.*
 
 ### File Architecture
 
