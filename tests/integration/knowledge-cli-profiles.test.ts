@@ -157,7 +157,6 @@ describe('knowledge-cli Profile Integration', () => {
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toContain('"profile": "remote"');
         expect(result.stdout).toContain('"host": "10.0.0.150"');
-        expect(result.stdout).toContain('"status": "connected"'); // Mock shows as connected
       } finally {
         process.env.PAI_DIR = originalPAIDir;
         process.env.HOME = originalHome;

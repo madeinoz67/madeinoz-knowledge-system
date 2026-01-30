@@ -866,7 +866,7 @@ export class MCPClient {
     if (process.env.MADEINOZ_KNOWLEDGE_TEST_MODE === 'true') {
       return {
         success: true,
-        data: { status: 'ok', version: '1.6.1-test' },
+        data: { status: 'ok' },
       };
     }
 
