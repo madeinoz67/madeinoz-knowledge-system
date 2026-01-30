@@ -42,6 +42,7 @@ nav:
     - Guide: installation/index.md
     - Requirements: installation/requirements.md
     - Verification: installation/verification.md
+    - Remote Deployment: installation/remote-deployment.md
   - Usage:
     - Basic Usage: usage/basic-usage.md
     - Advanced: usage/advanced.md
