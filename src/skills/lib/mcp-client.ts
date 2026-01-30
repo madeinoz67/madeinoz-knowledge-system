@@ -861,6 +861,15 @@ export class MCPClient {
    * Test the connection to the MCP server
    */
   async testConnection(): Promise<MCPClientResponse<{ status: string }>> {
+    // Test mode: return mock response without connecting
+    // Used by integration tests to avoid network calls
+    if (process.env.MADEINOZ_KNOWLEDGE_TEST_MODE === 'true') {
+      return {
+        success: true,
+        data: { status: 'ok', version: '1.6.1-test' },
+      };
+    }
+
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout for health check

@@ -40,11 +40,24 @@ function runCLI(args: string[], env: Record<string, string> = {}): Promise<CLIRe
       stderr += data.toString();
     });
 
+    // Set a timeout to prevent hanging on connection attempts
+    // CI may not have MCP server running, so we need to fail fast
+    const timeout = setTimeout(() => {
+      proc.kill('SIGTERM');
+      resolve({
+        exitCode: null,
+        stdout,
+        stderr: 'Process timed out after 10 seconds (likely no MCP server available)'
+      });
+    }, 10000);
+
     proc.on('close', (code) => {
+      clearTimeout(timeout);
       resolve({ exitCode: code, stdout, stderr });
     });
 
     proc.on('error', (error) => {
+      clearTimeout(timeout);
       resolve({ exitCode: -1, stdout, stderr: error.message });
     });
   });
@@ -134,16 +147,19 @@ describe('knowledge-cli Profile Integration', () => {
       process.env.HOME = tempDir;
 
       try {
-        // Test status with --profile flag
-        const result = await runCLI(['status', '--profile', 'remote']);
+        // Test status with --profile flag using test mode (mock connection)
+        // Test mode prevents actual network calls and returns mock responses
+        const result = await runCLI(['status', '--profile', 'remote'], {
+          MADEINOZ_KNOWLEDGE_TEST_MODE: 'true',
+        });
 
         // Should show remote profile connection info
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toContain('"profile": "remote"');
         expect(result.stdout).toContain('"host": "10.0.0.150"');
+        expect(result.stdout).toContain('"status": "connected"'); // Mock shows as connected
       } finally {
         process.env.PAI_DIR = originalPAIDir;
-        process.env.HOME = originalHome;
         process.env.HOME = originalHome;
       }
     });
@@ -206,7 +222,9 @@ describe('knowledge-cli Profile Integration', () => {
       process.env.HOME = tempDir;
 
       try {
-        const result = await runCLI(['status']);
+        const result = await runCLI(['status'], {
+          MADEINOZ_KNOWLEDGE_TEST_MODE: 'true',
+        });
 
         // Should use remote (default) profile
         expect(result.stdout).toContain('"profile": "remote"');
@@ -401,7 +419,9 @@ describe('knowledge-cli Profile Integration', () => {
       process.env.HOME = tempDir;
 
       try {
-        const result = await runCLI(['status', '--host', 'override.example.com']);
+        const result = await runCLI(['status', '--host', 'override.example.com'], {
+          MADEINOZ_KNOWLEDGE_TEST_MODE: 'true',
+        });
 
         // Should show overridden host
         expect(result.stdout).toContain('"host": "override.example.com"');
@@ -431,7 +451,9 @@ describe('knowledge-cli Profile Integration', () => {
       process.env.HOME = tempDir;
 
       try {
-        const result = await runCLI(['status', '--port', '9999']);
+        const result = await runCLI(['status', '--port', '9999'], {
+          MADEINOZ_KNOWLEDGE_TEST_MODE: 'true',
+        });
 
         // Should show overridden port
         expect(result.stdout).toContain('"port": 9999');
@@ -493,7 +515,9 @@ describe('knowledge-cli Profile Integration', () => {
       process.env.HOME = tempDir;
 
       try {
-        const result = await runCLI(['status', '--raw']);
+        const result = await runCLI(['status', '--raw'], {
+          MADEINOZ_KNOWLEDGE_TEST_MODE: 'true',
+        });
 
         // Should be valid JSON
         expect(() => JSON.parse(result.stdout)).not.toThrow();
