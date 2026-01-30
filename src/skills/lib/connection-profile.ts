@@ -494,8 +494,24 @@ function setNestedProperty(obj: Record<string, unknown>, path: string, value: un
     'propertyIsEnumerable',
   ]);
 
+  // Ensure we only ever traverse and mutate plain objects
+  const isPlainObject = (candidate: unknown): candidate is Record<string, unknown> => {
+    if (candidate === null || typeof candidate !== 'object') {
+      return false;
+    }
+    if (Object.prototype.toString.call(candidate) !== '[object Object]') {
+      return false;
+    }
+    const proto = Object.getPrototypeOf(candidate);
+    return proto === Object.prototype || proto === null;
+  };
+
+  if (!isPlainObject(obj)) {
+    throw new Error('setNestedProperty can only be used with plain object targets.');
+  }
+
   const keys = path.split('.');
-  let current = obj;
+  let current: Record<string, unknown> = obj;
 
   for (let i = 0; i < keys.length - 1; i++) {
     const key = keys[i];
@@ -511,10 +527,21 @@ function setNestedProperty(obj: Record<string, unknown>, path: string, value: un
       throw new Error(`Invalid property name: "${key}". Property names must be alphanumeric.`);
     }
 
+    if (!isPlainObject(current)) {
+      throw new Error('Encountered non-plain object while setting nested property.');
+    }
+
     if (!(key in current)) {
       current[key] = {};
     }
-    current = current[key] as Record<string, unknown>;
+
+    const next = current[key];
+    if (!isPlainObject(next)) {
+      // Prevent overwriting non-plain objects or mutating unexpected prototypes
+      throw new Error(`Cannot create nested property "${key}" on non-plain object.`);
+    }
+
+    current = next;
   }
 
   const finalKey = keys[keys.length - 1];
@@ -527,6 +554,10 @@ function setNestedProperty(obj: Record<string, unknown>, path: string, value: un
   // Validate final key format
   if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(finalKey)) {
     throw new Error(`Invalid property name: "${finalKey}". Property names must be alphanumeric.`);
+  }
+
+  if (!isPlainObject(current)) {
+    throw new Error('Encountered non-plain object while setting final nested property.');
   }
 
   current[finalKey] = value;
