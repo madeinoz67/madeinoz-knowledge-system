@@ -415,7 +415,7 @@ async def batch_update_decay_scores(driver, base_half_life: float = 30.0) -> int
                         RETURN n.`attributes.decay_score` AS score
                     """)
 
-                    scores = await fetch_result.list()
+                    scores = [score async for score in fetch_result]
                     for score_record in scores:
                         decay_metrics.record_decay_score(score_record["score"])
 
