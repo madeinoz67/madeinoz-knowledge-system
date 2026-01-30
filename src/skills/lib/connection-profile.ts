@@ -12,7 +12,7 @@
  */
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
-import { resolve, dirname } from 'node:path';
+import { resolve } from 'node:path';
 import yaml from 'js-yaml';
 
 /**
@@ -149,7 +149,7 @@ export class ConnectionProfileManager {
     try {
       const content = readFileSync(configPath, 'utf-8');
       this.configFile = yaml.load(content) as ProfileConfigFile;
-    } catch (error) {
+    } catch (_error) {
       // Treat malformed YAML as missing config - fall back to defaults
       this.configFile = null;
       this.configPath = null;
@@ -217,7 +217,6 @@ export class ConnectionProfileManager {
     this.loadConfigFile();
 
     if (!this.configFile) {
-      const available = this.listProfiles();
       throw new Error(
         `Profile '${profileName}' not found. No configuration file found.\n\n` +
           `Expected one of:\n` +
@@ -361,7 +360,7 @@ export class ConnectionProfileManager {
       try {
         const content = readFileSync(configPath, 'utf-8');
         configFile = yaml.load(content) as ProfileConfigFile;
-      } catch (error) {
+      } catch (_error) {
         // If parse fails, create new config
         configFile = {
           version: '1.0',

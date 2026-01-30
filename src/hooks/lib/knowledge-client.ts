@@ -651,14 +651,15 @@ export async function checkHealth(
 ): Promise<boolean> {
   // Ensure .env file is loaded before checking health
   await ensureEnvLoaded();
-  // Re-read config in case env loading changed values
-  const effectiveConfig = getDefaultConfig();
+  // Use provided config, or re-read defaults if using default config
+  const effectiveConfig =
+    config === DEFAULT_CONFIG ? getDefaultConfig() : config;
 
   if (isFalkorDB()) {
-    const client = new FalkorDBClient(config);
+    const client = new FalkorDBClient(effectiveConfig);
     return await client.testConnection();
   }
-  const client = new Neo4jClient(config);
+  const client = new Neo4jClient(effectiveConfig);
   return await client.testConnection();
 }
 
