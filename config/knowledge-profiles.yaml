@@ -1,0 +1,54 @@
+# Knowledge MCP Connection Profiles
+#
+# This file defines connection profiles for remote MCP server access.
+# Profiles are selected via the MADEINOZ_KNOWLEDGE_PROFILE environment variable.
+#
+# Environment Variable Overrides (take precedence over profile settings):
+#   - MADEINOZ_KNOWLEDGE_HOST: Override host
+#   - MADEINOZ_KNOWLEDGE_PORT: Override port
+#   - MADEINOZ_KNOWLEDGE_PROTOCOL: Override protocol (http/https)
+#   - MADEINOZ_KNOWLEDGE_BASE_PATH: Override base path
+#   - MADEINOZ_KNOWLEDGE_TLS_VERIFY: Override TLS verification
+#   - MADEINOZ_KNOWLEDGE_TLS_CA: Override CA certificate path
+#
+# Priority Order (highest to lowest):
+#   1. Individual environment variables (MADEINOZ_KNOWLEDGE_HOST, etc.)
+#   2. Selected profile from MADEINOZ_KNOWLEDGE_PROFILE
+#   3. Default profile (specified below)
+#   4. Code defaults (localhost:8001, http)
+
+version: "1.0"
+default_profile: default
+
+profiles:
+  # Default profile - connects to local MCP server
+  default:
+    host: localhost
+    port: 8001
+    protocol: http
+    basePath: /mcp
+    timeout: 30000
+
+  # Production profile - connects to remote production server with TLS
+  # Usage: MADEINOZ_KNOWLEDGE_PROFILE=production bun run src/skills/tools/knowledge-cli.ts search_nodes "test"
+  production:
+    host: knowledge.example.com
+    port: 443
+    protocol: https
+    basePath: /mcp
+    timeout: 10000
+    tls:
+      verify: true
+      ca: /etc/ssl/certs/ca.pem
+      minVersion: TLSv1.3
+
+  # Development profile - connects to development server with self-signed certificate
+  # Usage: MADEINOZ_KNOWLEDGE_PROFILE=development bun run src/skills/tools/knowledge-cli.ts search_nodes "test"
+  development:
+    host: 192.168.1.100
+    port: 8000
+    protocol: https
+    basePath: /mcp
+    timeout: 30000
+    tls:
+      verify: false  # For self-signed certificates (WARNING: security risk)

@@ -49,6 +49,7 @@
   "devDependencies": {
     "@eslint/js": "^9.0.0",
     "@types/bun": "latest",
+    "@types/js-yaml": "^4.0.9",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
     "eslint": "^9.0.0",
@@ -57,6 +58,7 @@
   },
   "dependencies": {
     "chalk": "^5.6.2",
-    "inquirer": "^13.2.1"
+    "inquirer": "^13.2.1",
+    "js-yaml": "^4.1.0"
   }
 }
