@@ -37,7 +37,8 @@ footer = ""
 # parse the commits based on https://www.conventionalcommits.org
 conventional_commits = true
 # filter out the commits that are not conventional
-filter_unconventional = true
+# Set to false to include GitHub PR merge commits (Fix: #123 vs fix: #123)
+filter_unconventional = false
 # process each line of a commit as an individual commit
 split_commits = false
 # regex for preprocessing the commit messages
