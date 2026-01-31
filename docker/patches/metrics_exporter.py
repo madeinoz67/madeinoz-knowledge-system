@@ -1067,7 +1067,8 @@ class DecayMetricsExporter:
         WARNING: Only use for bounded, finite label sets. Do NOT add
         high-cardinality labels (model, group_id, user_id) here.
         
-        Total: 25 time series (bounded cardinality, finite set)
+        Total: 25 time series (5 importance + 6 lifecycle + 2 maintenance + 
+                                3 classification + 2 reactivation + 7 transitions)
         """
         if not self._counters:
             return
