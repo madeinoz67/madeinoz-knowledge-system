@@ -43,8 +43,9 @@ filter_unconventional = false
 split_commits = false
 # regex for preprocessing the commit messages
 commit_preprocessors = [
-    # Strip commit body (everything after first blank line) for cleaner changelog
-    { pattern = '(\n\n.*)*', replace = "" },
+    # Strip commit body (everything after first newline) for cleaner changelog
+    # GitHub PR bodies often have wrapped lines, so we keep only first line
+    { pattern = '\n.*', replace = "" },
     # Parenthesized issue refs: (#123)
     { pattern = '\((\w+\s)?#([0-9]+)\)', replace = "([#${2}](https://github.com/madeinoz67/madeinoz-knowledge-system/issues/${2}))" },
     # GitHub keywords in bodies: Closes #123, Fixes #456, Resolves #789
