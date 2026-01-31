@@ -2,6 +2,11 @@
 """
 Validation script for CI workflow configuration changes.
 Tests that concurrency control is properly configured.
+
+Requirements:
+    pip install pyyaml
+    
+Or if running in CI environment, PyYAML is typically pre-installed.
 """
 import sys
 import yaml
