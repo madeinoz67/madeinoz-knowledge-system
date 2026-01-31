@@ -13,6 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add access pattern metrics and resolve gaps ([#34](https://github.com/madeinoz67/madeinoz-knowledge-system/issues/34))
 
+
+### Fixed
+
+
+- Include GitHub PR merges in changelog
+
 ## [1.7.1] - 2026-01-30
 
 
