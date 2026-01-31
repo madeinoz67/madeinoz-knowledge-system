@@ -562,6 +562,7 @@ The system includes multiple pre-configured Grafana dashboards:
 |-----------|-----|---------|
 | **Graph Health** | `graph-health-dashboard` | Entity states, episodes, operation rates, error tracking |
 | **Memory Decay** | `memory-decay-dashboard` | Lifecycle transitions, maintenance operations, classification metrics |
+| **Memory Access Patterns** | `memory-access-dashboard` | Access distribution by importance/state, reactivation tracking, decay correlation |
 | **Knowledge System** | `madeinoz-knowledge` | Token usage, cost tracking, request duration, cache performance |
 | **Prompt Cache Effectiveness** | `prompt-cache-effectiveness` | Cache ROI, hit/miss patterns, write overhead, per-model comparison |
 
@@ -597,6 +598,39 @@ The system includes multiple pre-configured Grafana dashboards:
 2. **Gaps in charts**: Check for service restarts - time-over-time functions should smooth gaps
 3. **Zero hit rate**: Normal for new deployments; requires repeated similar prompts to build cache
 
+### Memory Access Patterns Dashboard
+
+**Purpose**: Validate decay scoring effectiveness by visualizing memory access patterns across importance levels, lifecycle states, and time periods
+
+**Access**: `http://localhost:3002/d/memory-access-dashboard` (dev)
+
+**Panels**:
+
+| Panel | Metric | Description |
+|-------|--------|-------------|
+| **Total Access Count** | `knowledge_memory_access_total` | Cumulative memory accesses (uses max_over_time for restart resilience) |
+| **Access Rate** | `rate(...[5m])` | Current memory accesses per second |
+| **Reactivations (Dormant)** | `knowledge_reactivations_total{from_state="DORMANT"}` | Memories revived from dormant state (thresholds: green=0, yellow=5, red=20) |
+| **Reactivations (Archived)** | `knowledge_reactivations_total{from_state="ARCHIVED"}` | Memories revived from archived state (thresholds: green=0, yellow=3, red=10) |
+| **Access by Importance** | `knowledge_access_by_importance_total` | Pie chart showing access distribution by CRITICAL/HIGH/MEDIUM/LOW |
+| **Access by State** | `knowledge_access_by_state_total` | Pie chart showing access distribution by ACTIVE/STABLE/DORMANT/ARCHIVED |
+| **Access Rate Over Time** | `rate(knowledge_memory_access_total[5m])` | Time series trend of access velocity |
+| **Age Distribution** | `knowledge_days_since_last_access_bucket` | Heatmap showing when memories were last accessed |
+| **Access vs Decay Correlation** | Dual-axis | Compares access rate (left) with average decay score (right) |
+
+**Key Features**:
+
+- Time-over-time queries (`max_over_time()[1h]`) handle service restarts without data gaps
+- Dual-axis correlation panel for validating decay effectiveness
+- Color-coded reactivation thresholds for quick anomaly detection
+- 30-second auto-refresh with 24-hour default time range
+
+**Common Tasks**:
+
+1. **Validate Decay Scoring**: Check if CRITICAL/HIGH importance memories have proportionally more accesses
+2. **Tune Decay Parameters**: Use age distribution heatmap to identify if 180-day half-life is appropriate
+3. **Investigate Reactivations**: High reactivation counts suggest decay is too aggressive
+
 ### Customizing Dashboards
 
 Dashboard configurations are stored at:
@@ -604,6 +638,7 @@ Dashboard configurations are stored at:
 ```
 config/monitoring/grafana/dashboards/
 ├── graph-health-dashboard.json
+├── memory-access-dashboard.json
 ├── memory-decay-dashboard.json
 ├── madeinoz-knowledge.json
 └── prompt-cache-effectiveness.json
