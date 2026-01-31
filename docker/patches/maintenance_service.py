@@ -112,12 +112,14 @@ class HealthMetrics:
         "orphan_entities": 0,
     })
 
-    # Age distribution
+    # Age distribution (aligned with lifecycle thresholds: 30/90/180/365 days)
     age_distribution: dict = field(default_factory=lambda: {
         "under_7_days": 0,
         "days_7_to_30": 0,
         "days_30_to_90": 0,
-        "over_90_days": 0,
+        "days_90_to_180": 0,
+        "days_180_to_365": 0,
+        "over_365_days": 0,
     })
 
     # Importance distribution
@@ -127,6 +129,15 @@ class HealthMetrics:
         "moderate": 0,    # Importance level 3
         "high": 0,        # Importance level 4
         "core": 0,        # Importance level 5
+    })
+
+    # Stability distribution
+    stability_distribution: dict = field(default_factory=lambda: {
+        "volatile": 0,    # Stability level 1
+        "low": 0,         # Stability level 2
+        "moderate": 0,    # Stability level 3
+        "high": 0,        # Stability level 4
+        "permanent": 0,   # Stability level 5
     })
 
     # Last maintenance info
@@ -146,6 +157,7 @@ class HealthMetrics:
             "aggregates": self.aggregates,
             "age_distribution": self.age_distribution,
             "importance_distribution": self.importance_distribution,
+            "stability_distribution": self.stability_distribution,
             "maintenance": self.maintenance,
             "generated_at": self.generated_at,
         }
@@ -189,6 +201,21 @@ RETURN
     sum(CASE WHEN importance = 5 THEN 1 ELSE 0 END) AS core
 """
 
+HEALTH_STABILITY_DISTRIBUTION_QUERY = """
+MATCH (n:Entity)
+WHERE n.`attributes.lifecycle_state` IS NOT NULL
+  AND n.`attributes.lifecycle_state` <> 'SOFT_DELETED'
+
+WITH coalesce(n.`attributes.stability`, 3) AS stability
+
+RETURN
+    sum(CASE WHEN stability = 1 THEN 1 ELSE 0 END) AS volatile,
+    sum(CASE WHEN stability = 2 THEN 1 ELSE 0 END) AS low,
+    sum(CASE WHEN stability = 3 THEN 1 ELSE 0 END) AS moderate,
+    sum(CASE WHEN stability = 4 THEN 1 ELSE 0 END) AS high,
+    sum(CASE WHEN stability = 5 THEN 1 ELSE 0 END) AS permanent
+"""
+
 HEALTH_AGGREGATES_QUERY = """
 MATCH (n:Entity)
 WHERE n.`attributes.lifecycle_state` IS NOT NULL
@@ -202,17 +229,22 @@ RETURN
 
 HEALTH_AGE_DISTRIBUTION_QUERY = """
 MATCH (n:Entity)
-WHERE n.created_at IS NOT NULL
-  AND n.`attributes.lifecycle_state` IS NOT NULL
+WHERE n.`attributes.lifecycle_state` IS NOT NULL
   AND n.`attributes.lifecycle_state` <> 'SOFT_DELETED'
 
-WITH duration.between(n.created_at, datetime()).days AS age
+WITH CASE
+         WHEN n.created_at IS NOT NULL
+             THEN duration.between(datetime(n.created_at), datetime()).days
+         ELSE 0
+     END AS age
 
 RETURN
     sum(CASE WHEN age < 7 THEN 1 ELSE 0 END) AS under_7_days,
     sum(CASE WHEN age >= 7 AND age < 30 THEN 1 ELSE 0 END) AS days_7_to_30,
     sum(CASE WHEN age >= 30 AND age < 90 THEN 1 ELSE 0 END) AS days_30_to_90,
-    sum(CASE WHEN age >= 90 THEN 1 ELSE 0 END) AS over_90_days
+    sum(CASE WHEN age >= 90 AND age < 180 THEN 1 ELSE 0 END) AS days_90_to_180,
+    sum(CASE WHEN age >= 180 AND age < 365 THEN 1 ELSE 0 END) AS days_180_to_365,
+    sum(CASE WHEN age >= 365 THEN 1 ELSE 0 END) AS over_365_days
 """
 
 COUNT_MEMORIES_QUERY = """
@@ -371,6 +403,14 @@ class MaintenanceService:
             # Record metrics
             self._record_metrics(result)
 
+            # Refresh gauge metrics with current averages
+            try:
+                await self.get_health_metrics()  # Internally calls _update_gauge_metrics
+                logger.debug("Gauge metrics refreshed after maintenance")
+            except Exception as e:
+                logger.warning(f"Failed to refresh gauge metrics: {e}")
+                # Don't fail maintenance - graceful degradation per FR-007
+
             logger.info(
                 f"Maintenance completed in {result.duration_seconds:.2f}s: "
                 f"{result.nodes_classified.classified} classified, "
@@ -450,7 +490,9 @@ class MaintenanceService:
                         "under_7_days": record["under_7_days"],
                         "days_7_to_30": record["days_7_to_30"],
                         "days_30_to_90": record["days_30_to_90"],
-                        "over_90_days": record["over_90_days"],
+                        "days_90_to_180": record["days_90_to_180"],
+                        "days_180_to_365": record["days_180_to_365"],
+                        "over_365_days": record["over_365_days"],
                     }
 
                 # Get importance distribution
@@ -463,6 +505,18 @@ class MaintenanceService:
                         "moderate": record["moderate"],
                         "high": record["high"],
                         "core": record["core"],
+                    }
+
+                # Get stability distribution
+                result = await session.run(HEALTH_STABILITY_DISTRIBUTION_QUERY)
+                record = await result.single()
+                if record:
+                    metrics.stability_distribution = {
+                        "volatile": record["volatile"],
+                        "low": record["low"],
+                        "moderate": record["moderate"],
+                        "high": record["high"],
+                        "permanent": record["permanent"],
                     }
 
                 # Add last maintenance info
@@ -507,6 +561,15 @@ class MaintenanceService:
             "CORE": metrics.importance_distribution.get("core", 0),
         })
 
+        # Update stability distribution
+        decay_metrics.update_stability_counts({
+            "VOLATILE": metrics.stability_distribution.get("volatile", 0),
+            "LOW": metrics.stability_distribution.get("low", 0),
+            "MODERATE": metrics.stability_distribution.get("moderate", 0),
+            "HIGH": metrics.stability_distribution.get("high", 0),
+            "PERMANENT": metrics.stability_distribution.get("permanent", 0),
+        })
+
         # Update averages
         decay_metrics.update_averages(
             decay=metrics.aggregates.get("average_decay", 0.0),
@@ -517,6 +580,9 @@ class MaintenanceService:
 
         # Update orphan entities gauge
         decay_metrics.update_orphan_count(metrics.aggregates.get("orphan_entities", 0))
+
+        # Update age distribution gauge
+        decay_metrics.update_age_distribution(metrics.age_distribution)
 
     async def _count_memories(self) -> int:
         """Count total memories to process."""

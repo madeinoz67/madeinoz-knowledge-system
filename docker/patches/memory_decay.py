@@ -279,6 +279,9 @@ def apply_weighted_scoring(
     Returns:
         List of WeightedSearchResult, sorted by weighted_score descending
     """
+    import time
+    start_time = time.perf_counter()
+
     weights = get_weights()
     now = datetime.now(timezone.utc)
     results = []
@@ -339,6 +342,17 @@ def apply_weighted_scoring(
 
     # Sort by weighted score descending
     results.sort(key=lambda r: r.weighted_score, reverse=True)
+
+    # Record weighted search latency metric
+    latency = time.perf_counter() - start_time
+    try:
+        from utils.metrics_exporter import get_decay_metrics_exporter
+        decay_metrics = get_decay_metrics_exporter()
+        if decay_metrics:
+            decay_metrics.record_weighted_search(latency)
+    except Exception as e:
+        logger.debug(f"Failed to record weighted search metric: {e}")
+
     return results
 
 
@@ -353,10 +367,13 @@ WHERE n.`attributes.lifecycle_state` IS NOT NULL
   AND NOT (n.`attributes.importance` >= 4 AND n.`attributes.stability` >= 4)
 
 WITH n,
-     duration.between(
-         datetime(coalesce(n.`attributes.last_accessed_at`, toString(n.created_at))),
-         datetime()
-     ).days AS daysSinceAccess,
+     CASE
+         WHEN n.`attributes.last_accessed_at` IS NOT NULL
+             THEN duration.between(datetime(n.`attributes.last_accessed_at`), datetime()).days
+         WHEN n.created_at IS NOT NULL
+             THEN duration.between(n.created_at, datetime()).days
+         ELSE 0
+     END AS daysSinceAccess,
      coalesce(n.`attributes.stability`, 3) AS stability,
      coalesce(n.`attributes.importance`, 3) AS importance
 
@@ -401,26 +418,35 @@ async def batch_update_decay_scores(driver, base_half_life: float = 30.0) -> int
         record = await result.single()
         updated_count = record["updated"] if record else 0
 
-        # Record decay scores to histogram for distribution tracking
+        # Record decay, importance, and stability scores to histograms
         if updated_count > 0:
             decay_metrics = get_decay_metrics_exporter()
             if decay_metrics and decay_metrics._histograms:
-                # Fetch all decay scores and record to histogram
+                # Fetch all scores and record to histograms
                 try:
                     fetch_result = await session.run("""
                         MATCH (n:Entity)
                         WHERE n.`attributes.decay_score` IS NOT NULL
                           AND n.`attributes.lifecycle_state` IS NOT NULL
                           AND n.`attributes.lifecycle_state` <> 'SOFT_DELETED'
-                        RETURN n.`attributes.decay_score` AS score
+                        RETURN n.`attributes.decay_score` AS decay_score,
+                               coalesce(n.`attributes.importance`, 3) AS importance,
+                               coalesce(n.`attributes.stability`, 3) AS stability
                     """)
 
+                    # Use async iteration (Neo4j async driver doesn't have .list())
+                    count = 0
+                    async for record in fetch_result:
+                        decay_metrics.record_decay_score(record["decay_score"])
+                        decay_metrics.record_importance_score(record["importance"])
+                        decay_metrics.record_stability_score(record["stability"])
+                        count += 1
                     scores = [score async for score in fetch_result]
                     for score_record in scores:
                         decay_metrics.record_decay_score(score_record["score"])
 
-                    logger.debug(f"Recorded {len(scores)} decay scores to histogram")
+                    logger.debug(f"Recorded {count} scores to histograms (decay/importance/stability)")
                 except Exception as e:
-                    logger.error(f"Failed to record decay scores to histogram: {e}")
+                    logger.error(f"Failed to record scores to histogram: {e}")
 
         return updated_count

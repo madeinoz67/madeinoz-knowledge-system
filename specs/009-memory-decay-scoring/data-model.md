@@ -186,7 +186,8 @@ class DecayConfig:
     """Configuration for decay calculation"""
 
     # Base half-life in days (adjusted by stability)
-    base_half_life_days: float = 30.0
+    # 180 days provides better retention for personal knowledge graphs
+    base_half_life_days: float = 180.0
 
     # State transition thresholds (days since last access)
     dormant_threshold_days: int = 30
@@ -214,19 +215,20 @@ class DecayConfig:
 
 ```yaml
 decay:
-  base_half_life_days: 30
+  # 180-day half-life: memories reach 50% decay after 6 months
+  base_half_life_days: 180
 
   thresholds:
     dormant:
-      days: 30
+      days: 90            # Min days + decay >= 0.3 (~93 days actual)
       decay_score: 0.3
     archived:
-      days: 90
+      days: 180           # Min days + decay >= 0.6 (~238 days actual)
       decay_score: 0.6
     expired:
-      days: 180
+      days: 360           # Min days + decay >= 0.9 (~598 days actual)
       decay_score: 0.9
-      max_importance: 3
+      max_importance: 3   # Only expire if importance <= 3
 
   retention:
     soft_delete_days: 90
@@ -234,6 +236,7 @@ decay:
   maintenance:
     batch_size: 500
     max_duration_minutes: 10
+    schedule_interval_hours: 24  # Run daily
 
   weights:
     semantic: 0.60
@@ -266,11 +269,13 @@ class KnowledgeHealthMetrics:
     average_importance: float
     average_stability: float
 
-    # Age distribution
+    # Age distribution (aligned with lifecycle thresholds: 30/90/180/365 days)
     memories_under_7_days: int
     memories_7_to_30_days: int
     memories_30_to_90_days: int
-    memories_over_90_days: int
+    memories_90_to_180_days: int
+    memories_180_to_365_days: int
+    memories_over_365_days: int
 
     # Maintenance info
     last_maintenance_at: str  # ISO timestamp
@@ -304,7 +309,9 @@ class KnowledgeHealthMetrics:
     "under_7_days": 89,
     "7_to_30_days": 412,
     "30_to_90_days": 651,
-    "over_90_days": 700
+    "90_to_180_days": 420,
+    "180_to_365_days": 180,
+    "over_365_days": 100
   },
   "maintenance": {
     "last_run": "2026-01-29T03:00:00Z",
@@ -389,9 +396,15 @@ class PrometheusMetricsConfig:
 | `knowledge_decay_maintenance_runs_total` | Counter | status | Total maintenance runs |
 | `knowledge_decay_scores_updated_total` | Counter | - | Cumulative decay scores recalculated |
 | `knowledge_lifecycle_transitions_total` | Counter | from_state, to_state | State transition counts |
+| `knowledge_reactivations_total` | Counter | from_state | Memories reactivated (DORMANT/ARCHIVED → ACTIVE) |
 | `knowledge_memories_purged_total` | Counter | - | Soft-deleted permanently removed |
 | `knowledge_classification_requests_total` | Counter | status | LLM classification attempts |
+| `knowledge_access_by_importance_total` | Counter | level | Memory accesses by importance level |
+| `knowledge_access_by_state_total` | Counter | state | Memory accesses by lifecycle state at access time |
 | `knowledge_memories_by_state` | Gauge | state | Current count per lifecycle state |
+| `knowledge_memories_by_importance` | Gauge | level | Current count per importance level |
+| `knowledge_memories_by_stability` | Gauge | level | Current count per stability level |
+| `knowledge_memories_by_age` | Gauge | bucket | Current count by age bucket |
 | `knowledge_decay_score_avg` | Gauge | - | Average decay score |
 | `knowledge_importance_avg` | Gauge | - | Average importance score |
 | `knowledge_stability_avg` | Gauge | - | Average stability score |
@@ -399,6 +412,7 @@ class PrometheusMetricsConfig:
 | `knowledge_maintenance_duration_seconds` | Histogram | - | Maintenance run duration |
 | `knowledge_classification_latency_seconds` | Histogram | - | LLM classification response time |
 | `knowledge_search_weighted_latency_seconds` | Histogram | - | Weighted search scoring overhead |
+| `knowledge_days_since_last_access` | Histogram | - | Days since last access on memory retrieval |
 
 ### Label Values
 
@@ -407,13 +421,28 @@ class PrometheusMetricsConfig:
 - `failure` - Operation failed with error
 - `fallback` - Operation used fallback behavior (e.g., default classification)
 
-**state** (Gauge labels):
+**state** (Gauge/Counter labels):
 - `ACTIVE` - Recently accessed memories
 - `DORMANT` - Not accessed 30+ days
 - `ARCHIVED` - Not accessed 90+ days
 - `EXPIRED` - Marked for deletion
 - `SOFT_DELETED` - In 90-day recovery window
 - `PERMANENT` - Exempt from decay (importance >= 4 AND stability >= 4)
+
+**level** (Importance/Stability labels):
+- `TRIVIAL` - Level 1 (importance: ephemeral; stability: volatile)
+- `LOW` - Level 2
+- `MODERATE` - Level 3 (default)
+- `HIGH` - Level 4
+- `CORE` / `PERMANENT` - Level 5 (importance: fundamental; stability: never changes)
+
+**bucket** (Age distribution labels):
+- `UNDER_7_DAYS` - Fresh memories (<7 days old)
+- `DAYS_7_TO_30` - Recent (7-30 days)
+- `DAYS_30_TO_90` - Approaching DORMANT threshold
+- `DAYS_90_TO_180` - In DORMANT range
+- `DAYS_180_TO_365` - In ARCHIVED range
+- `OVER_365_DAYS` - Long-term retention
 
 **from_state / to_state** (Transition labels):
 - Same values as state labels

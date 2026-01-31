@@ -29,6 +29,9 @@ case "$DATABASE_TYPE" in
     ;;
 esac
 
+# Copy decay configuration file
+cp /tmp/decay-config.yaml /app/mcp/config/decay-config.yaml || true
+
 # Debug: Log key configuration
 echo "ENTRYPOINT: LLM_PROVIDER=${LLM_PROVIDER:-unset}, MODEL_NAME=${MODEL_NAME:-unset}" >&2
 echo "ENTRYPOINT: EMBEDDER_PROVIDER=${EMBEDDER_PROVIDER:-unset}, GRAPHITI_GROUP_ID=${GRAPHITI_GROUP_ID:-unset}" >&2

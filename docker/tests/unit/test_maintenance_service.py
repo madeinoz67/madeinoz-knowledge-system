@@ -307,13 +307,15 @@ class TestGetHealthMetrics:
         orphan_result = AsyncMock()
         orphan_result.single = AsyncMock(return_value={"orphan_count": 2})
 
-        # Age distribution
+        # Age distribution (aligned with lifecycle thresholds: 30/90/180/365 days)
         age_result = AsyncMock()
         age_result.single = AsyncMock(return_value={
             "under_7_days": 40,
             "days_7_to_30": 60,
             "days_30_to_90": 80,
-            "over_90_days": 40
+            "days_90_to_180": 50,
+            "days_180_to_365": 30,
+            "over_365_days": 20
         })
 
         # Importance distribution

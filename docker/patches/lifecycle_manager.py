@@ -179,28 +179,44 @@ class LifecycleManager:
 # Cypher Queries for Batch Operations
 # ==============================================================================
 
-# Reactivation on access (atomic update)
+# Reactivation on access (atomic update) - returns metadata for metrics
 REACTIVATE_ON_ACCESS_QUERY = """
 CALL {
     WITH $nodeUuid AS uuid
     MATCH (n:Entity {uuid: uuid})
     WHERE n.`attributes.lifecycle_state` IN ['DORMANT', 'ARCHIVED']
+    WITH n,
+         n.`attributes.lifecycle_state` AS prevState,
+         coalesce(n.`attributes.importance`, 3) AS importance,
+         CASE
+             WHEN n.`attributes.last_accessed_at` IS NOT NULL
+                 THEN duration.between(datetime(n.`attributes.last_accessed_at`), datetime()).days
+             ELSE 0
+         END AS daysSinceAccess
     SET n.`attributes.lifecycle_state` = 'ACTIVE',
         n.`attributes.last_accessed_at` = toString(datetime()),
         n.`attributes.access_count` = coalesce(n.`attributes.access_count`, 0) + 1,
         n.`attributes.decay_score` = 0.0
-    RETURN n.uuid AS updated
+    RETURN n.uuid AS updated, prevState, importance, daysSinceAccess
 }
-RETURN updated
+RETURN updated, prevState, importance, daysSinceAccess
 """
 
-# Update access timestamp without state change
+# Update access timestamp without state change - returns metadata for metrics
 UPDATE_ACCESS_QUERY = """
 MATCH (n:Entity {uuid: $nodeUuid})
+WITH n,
+     n.`attributes.lifecycle_state` AS currentState,
+     coalesce(n.`attributes.importance`, 3) AS importance,
+     CASE
+         WHEN n.`attributes.last_accessed_at` IS NOT NULL
+             THEN duration.between(datetime(n.`attributes.last_accessed_at`), datetime()).days
+         ELSE 0
+     END AS daysSinceAccess
 SET n.`attributes.last_accessed_at` = toString(datetime()),
     n.`attributes.access_count` = coalesce(n.`attributes.access_count`, 0) + 1,
     n.`attributes.decay_score` = 0.0
-RETURN n.uuid AS updated
+RETURN n.uuid AS updated, currentState, importance, daysSinceAccess
 """
 
 # Batch state transitions
@@ -211,10 +227,13 @@ WHERE n.`attributes.lifecycle_state` IS NOT NULL
   AND NOT (coalesce(n.`attributes.importance`, 3) >= 4 AND coalesce(n.`attributes.stability`, 3) >= 4)
 
 WITH n,
-     duration.between(
-         datetime(coalesce(n.`attributes.last_accessed_at`, toString(n.created_at))),
-         datetime()
-     ).days AS daysInactive,
+     CASE
+         WHEN n.`attributes.last_accessed_at` IS NOT NULL
+             THEN duration.between(datetime(n.`attributes.last_accessed_at`), datetime()).days
+         WHEN n.created_at IS NOT NULL
+             THEN duration.between(datetime(n.created_at), datetime()).days
+         ELSE 0
+     END AS daysInactive,
      coalesce(n.`attributes.decay_score`, 0.0) AS decayScore,
      coalesce(n.`attributes.importance`, 3) AS importance,
      n.`attributes.lifecycle_state` AS currentState
@@ -301,6 +320,7 @@ async def update_access_on_retrieval(driver, node_uuid: str, previous_state: Opt
     Update access tracking when a node is retrieved.
 
     This reactivates DORMANT/ARCHIVED memories and resets decay score.
+    Also records access pattern metrics for observability.
 
     Args:
         driver: Neo4j driver instance
@@ -319,9 +339,21 @@ async def update_access_on_retrieval(driver, node_uuid: str, previous_state: Opt
         if record and record["updated"]:
             logger.debug(f"Reactivated node {node_uuid}")
 
-            # Record reactivation metric if we know previous state
-            if decay_metrics and previous_state in ("DORMANT", "ARCHIVED"):
-                decay_metrics.record_lifecycle_transition(previous_state, "ACTIVE")
+            # Extract metrics data from query result
+            prev_state = record.get("prevState", previous_state or "DORMANT")
+            importance = record.get("importance", 3)
+            days_since_access = record.get("daysSinceAccess", 0)
+
+            if decay_metrics:
+                # Record lifecycle transition and reactivation
+                decay_metrics.record_lifecycle_transition(prev_state, "ACTIVE")
+                decay_metrics.record_reactivation(prev_state)
+                # Record access pattern metrics
+                decay_metrics.record_access_pattern(
+                    importance=importance,
+                    lifecycle_state=prev_state,
+                    days_since_last_access=float(days_since_access) if days_since_access else None
+                )
 
             return True
 
@@ -330,6 +362,20 @@ async def update_access_on_retrieval(driver, node_uuid: str, previous_state: Opt
         record = await result.single()
         if record and record["updated"]:
             logger.debug(f"Updated access for node {node_uuid}")
+
+            # Extract metrics data from query result
+            current_state = record.get("currentState", "ACTIVE")
+            importance = record.get("importance", 3)
+            days_since_access = record.get("daysSinceAccess", 0)
+
+            # Record access pattern metrics for regular access
+            if decay_metrics:
+                decay_metrics.record_access_pattern(
+                    importance=importance,
+                    lifecycle_state=current_state,
+                    days_since_last_access=float(days_since_access) if days_since_access else None
+                )
+
             return True
 
         return False
