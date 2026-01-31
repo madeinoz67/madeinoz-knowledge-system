@@ -799,6 +799,7 @@ class DecayMetricsExporter:
             self._create_counters()
             self._create_gauges()
             self._create_histograms()
+            self._preinitialize_known_labels()
 
     def _create_counters(self) -> None:
         """Create counter metrics for decay operations."""
@@ -1054,6 +1055,65 @@ class DecayMetricsExporter:
                 unit="1"
             ),
         }
+
+    def _preinitialize_known_labels(self) -> None:
+        """
+        Pre-initialize counters with known label values to 0.
+        
+        This ensures counter time series appear in /metrics from startup,
+        following Prometheus best practices to avoid missing metrics.
+        See: https://prometheus.io/docs/practices/instrumentation/#avoid-missing-metrics
+        
+        WARNING: Only use for bounded, finite label sets. Do NOT add
+        high-cardinality labels (model, group_id, user_id) here.
+        
+        Total: 25 time series (bounded cardinality, finite set)
+        """
+        if not self._counters:
+            return
+        
+        try:
+            # Importance levels (5 series)
+            importance_levels = ["TRIVIAL", "LOW", "MODERATE", "HIGH", "CORE"]
+            for level in importance_levels:
+                self._counters["access_by_importance"].add(0, {"level": level})
+            
+            # Lifecycle states (6 series)
+            lifecycle_states = ["ACTIVE", "DORMANT", "ARCHIVED", "EXPIRED", "SOFT_DELETED", "PERMANENT"]
+            for state in lifecycle_states:
+                self._counters["access_by_state"].add(0, {"state": state})
+            
+            # Maintenance status (2 series)
+            for status in ["success", "failure"]:
+                self._counters["maintenance_runs"].add(0, {"status": status})
+            
+            # Classification status (3 series)
+            for status in ["success", "failure", "fallback"]:
+                self._counters["classification_requests"].add(0, {"status": status})
+            
+            # Reactivation sources (2 series)
+            for from_state in ["DORMANT", "ARCHIVED"]:
+                self._counters["reactivations"].add(0, {"from_state": from_state})
+            
+            # Valid lifecycle transitions only (7 series)
+            valid_transitions = [
+                ("ACTIVE", "DORMANT"),
+                ("DORMANT", "ARCHIVED"),
+                ("DORMANT", "ACTIVE"),
+                ("ARCHIVED", "EXPIRED"),
+                ("ARCHIVED", "ACTIVE"),
+                ("EXPIRED", "SOFT_DELETED"),
+                ("SOFT_DELETED", "ARCHIVED"),
+            ]
+            for from_state, to_state in valid_transitions:
+                self._counters["lifecycle_transitions"].add(0, {
+                    "from_state": from_state,
+                    "to_state": to_state
+                })
+            
+            logger.info("Pre-initialized decay metrics with known label values")
+        except Exception as e:
+            logger.error(f"Failed to pre-initialize counter labels: {e}")
 
     # === Recording Methods ===
 
