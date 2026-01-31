@@ -50,23 +50,26 @@ commit_preprocessors = [
 ]
 # regex for parsing and grouping commits
 # Only include user-facing changes: features, fixes, performance, security
+# Case-insensitive patterns to capture GitHub PR merges (Fix/fix/Feat/feat/etc)
 commit_parsers = [
     # Breaking changes FIRST (highest priority) - must come before skip rules
-    { message = "^[a-z]+!:", group = "⚠ BREAKING CHANGES" },
-    { footer = "^BREAKING CHANGE:", group = "⚠ BREAKING CHANGES" },
-    { footer = "^BREAKING-CHANGE:", group = "⚠ BREAKING CHANGES" },
-    # User-facing changes
-    { message = "^feat", group = "Added" },
-    { message = "^fix", group = "Fixed" },
-    { message = "^perf", group = "Performance" },
-    { body = ".*security", group = "Security" },
-    # Skip internal/housekeeping commits
-    { message = "^chore", skip = true },
-    { message = "^ci", skip = true },
-    { message = "^docs", skip = true },
-    { message = "^test", skip = true },
-    { message = "^style", skip = true },
-    { message = "^refactor", skip = true },
+    { message = "(?i)^[a-z]+!:", group = "⚠ BREAKING CHANGES" },
+    { footer = "(?i)^BREAKING CHANGE:", group = "⚠ BREAKING CHANGES" },
+    { footer = "(?i)^BREAKING-CHANGE:", group = "⚠ BREAKING CHANGES" },
+    # User-facing changes (case-insensitive for GitHub PR titles)
+    { message = "(?i)^feat", group = "Added" },
+    { message = "(?i)^fix", group = "Fixed" },
+    { message = "(?i)^perf", group = "Performance" },
+    { body = "(?i).*security", group = "Security" },
+    # Skip internal/housekeeping commits (case-insensitive)
+    { message = "(?i)^chore", skip = true },
+    { message = "(?i)^ci", skip = true },
+    { message = "(?i)^docs", skip = true },
+    { message = "(?i)^test", skip = true },
+    { message = "(?i)^style", skip = true },
+    { message = "(?i)^refactor", skip = true },
+    { message = "(?i)^chore\\b.*sync version", skip = true },
+    { message = "(?i)^chore\\b.*bump version", skip = true },
 ]
 # protect breaking changes from being skipped due to matching a skipping commit_parser
 protect_breaking_commits = true
