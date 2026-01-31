@@ -1061,9 +1061,29 @@ async def search_nodes(
                             result_count=len(node_results),
                             is_zero_result=is_zero_result
                         )
-                        # Record memory access for retrieved nodes
-                        for node in nodes:
-                            decay_metrics.record_memory_access()
+                        # Record memory access patterns for retrieved nodes
+                        for wr in weighted_results:
+                            try:
+                                # Calculate days since last access
+                                days_since_access = None
+                                if wr.last_accessed_at:
+                                    try:
+                                        last_accessed = datetime.fromisoformat(wr.last_accessed_at.replace('Z', '+00:00'))
+                                        days_since_access = (datetime.now(timezone.utc) - last_accessed).days
+                                    except Exception:
+                                        days_since_access = None
+
+                                # Record access pattern with node attributes
+                                decay_metrics.record_access_pattern(
+                                    importance=wr.importance,
+                                    lifecycle_state=wr.lifecycle_state,
+                                    days_since_last_access=days_since_access
+                                )
+                            except Exception as attr_err:
+                                logger.debug(f'Failed to record access pattern for {wr.uuid}: {attr_err}')
+
+                        # Also record generic access count for compatibility
+                        decay_metrics.record_memory_access(len(weighted_results))
                 except Exception as metrics_err:
                     logger.debug(f'Failed to record search metrics: {metrics_err}')
 
@@ -1105,9 +1125,39 @@ async def search_nodes(
                         result_count=len(node_results),
                         is_zero_result=is_zero_result
                     )
-                    # Record memory access for retrieved nodes
+                    # Record memory access patterns for retrieved nodes
                     for node in nodes:
-                        decay_metrics.record_memory_access()
+                        try:
+                            # Extract attributes from node
+                            attrs = node.attributes if hasattr(node, 'attributes') else {}
+                            importance = attrs.get('importance', 3)
+                            lifecycle_state = attrs.get('lifecycle_state', 'ACTIVE')
+
+                            # Calculate days since last access
+                            days_since_access = None
+                            last_accessed_at = attrs.get('last_accessed_at')
+                            if last_accessed_at:
+                                try:
+                                    # Try parsing as ISO format
+                                    if isinstance(last_accessed_at, str):
+                                        last_accessed = datetime.fromisoformat(last_accessed_at.replace('Z', '+00:00'))
+                                    else:
+                                        last_accessed = last_accessed_at
+                                    days_since_access = (datetime.now(timezone.utc) - last_accessed).days
+                                except Exception:
+                                    days_since_access = None
+
+                            # Record access pattern with node attributes
+                            decay_metrics.record_access_pattern(
+                                importance=importance,
+                                lifecycle_state=lifecycle_state,
+                                days_since_last_access=days_since_access
+                            )
+                        except Exception as attr_err:
+                            logger.debug(f'Failed to record access pattern for {node.uuid}: {attr_err}')
+
+                    # Also record generic access count for compatibility
+                    decay_metrics.record_memory_access(len(nodes))
             except Exception as metrics_err:
                 logger.debug(f'Failed to record search metrics: {metrics_err}')
 

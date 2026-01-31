@@ -322,6 +322,66 @@ Track weighted search operations that boost by relevance.
 | `knowledge_weighted_searches_total` | - | Weighted search operations |
 | `knowledge_search_weighted_latency_seconds` | - | Scoring overhead (histogram) |
 
+### Memory Access Pattern Metrics (Feature 015)
+
+Track memory access patterns during search operations to validate decay scoring effectiveness.
+
+| Metric | Labels | Description |
+|--------|--------|-------------|
+| `knowledge_access_by_importance_total` | `level` | Cumulative accesses by importance level (LOW/MEDIUM/HIGH/CRITICAL) |
+| `knowledge_access_by_state_total` | `state` | Cumulative accesses by lifecycle state (ACTIVE/DORMANT/ARCHIVED/PERMANENT) |
+| `knowledge_days_since_last_access` | - | Histogram of days since memory was last accessed |
+| `knowledge_reactivations_total` | `from_state` | Memories reactivated from DORMANT/ARCHIVED to ACTIVE |
+
+**Importance level mapping:**
+
+| Score | Label | Description |
+|-------|-------|-------------|
+| 1-2 | LOW | Lower priority memories |
+| 3 | MEDIUM | Standard importance (default) |
+| 4 | HIGH | Important memories |
+| 5 | CRITICAL | Core/foundational memories |
+
+**Days histogram bucket boundaries:**
+
+```
+1, 7, 30, 90, 180, 365, 730, 1095
+```
+
+| Bucket | Description |
+|--------|-------------|
+| 1 | 1 day ago |
+| 7 | 1 week ago |
+| 30 | 1 month ago |
+| 90 | 3 months ago |
+| 180 | 6 months (half-life threshold) |
+| 365 | 1 year ago |
+| 730 | 2 years ago |
+| 1095 | 3+ years ago |
+
+!!! note "Metric Recording Behavior"
+    Access pattern metrics are recorded during `search_memory_nodes` and `search_memory_facts` operations. The histogram only records when nodes have a `last_accessed_at` attribute set.
+
+**Access Pattern PromQL Queries:**
+
+```promql
+# Access rate by importance (per second)
+sum(rate(knowledge_access_by_importance_total[5m])) by (level)
+
+# Access distribution by state
+max_over_time(knowledge_access_by_state_total[1h])
+
+# Reactivation rate (last hour)
+increase(knowledge_reactivations_total[1h])
+
+# Age distribution heatmap
+sum(rate(knowledge_days_since_last_access_bucket[5m])) by (le)
+
+# Access vs decay correlation (dual-axis)
+# Left axis: rate(knowledge_access_by_importance_total[5m])
+# Right axis: knowledge_decay_score_avg
+```
+
 ### Example PromQL Queries
 
 **Maintenance success rate (last 24 hours):**

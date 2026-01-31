@@ -1074,8 +1074,8 @@ class DecayMetricsExporter:
             return
         
         try:
-            # Importance levels (5 series)
-            importance_levels = ["TRIVIAL", "LOW", "MODERATE", "HIGH", "CORE"]
+            # Importance levels (4 series - matching dashboard expectations)
+            importance_levels = ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
             for level in importance_levels:
                 self._counters["access_by_importance"].add(0, {"level": level})
             
@@ -1434,15 +1434,15 @@ class DecayMetricsExporter:
             return
 
         try:
-            # Map importance level to label
+            # Map importance level to label (matching dashboard expectations)
             importance_labels = {
-                1: "TRIVIAL",
+                1: "LOW",
                 2: "LOW",
-                3: "MODERATE",
+                3: "MEDIUM",
                 4: "HIGH",
-                5: "CORE",
+                5: "CRITICAL",
             }
-            importance_label = importance_labels.get(importance, "MODERATE")
+            importance_label = importance_labels.get(importance, "MEDIUM")
 
             # Record access by importance level
             self._counters["access_by_importance"].add(1, {"level": importance_label})

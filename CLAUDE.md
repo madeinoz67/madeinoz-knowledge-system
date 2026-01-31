@@ -144,6 +144,8 @@ git push origin :refs/tags/v1.x.x
 ## Active Technologies
 - JSON (Grafana dashboard configuration) + Grafana (provisioned), Prometheus (data source), existing metrics from PR #34 (013-prompt-cache-dashboard)
 - N/A (dashboard configuration only) (013-prompt-cache-dashboard)
+- Python 3.11+ + OpenTelemetry Prometheus exporter, Graphiti MCP server (015-memory-access-metrics)
+- Neo4j / FalkorDB (existing graph database) (015-memory-access-metrics)
 
 ## Recent Changes
 - 013-prompt-cache-dashboard: Added JSON (Grafana dashboard configuration) + Grafana (provisioned), Prometheus (data source), existing metrics from PR #34
