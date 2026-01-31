@@ -42,11 +42,19 @@ filter_unconventional = true
 split_commits = false
 # regex for preprocessing the commit messages
 commit_preprocessors = [
+    # Parenthesized issue refs: (#123)
     { pattern = '\((\w+\s)?#([0-9]+)\)', replace = "([#${2}](https://github.com/madeinoz67/madeinoz-knowledge-system/issues/${2}))" },
+    # GitHub keywords in bodies: Closes #123, Fixes #456, Resolves #789
+    { pattern = '(?i)(closes|fixes|resolves)\s+#([0-9]+)', replace = "${1} [#${2}](https://github.com/madeinoz67/madeinoz-knowledge-system/issues/${2})" },
 ]
 # regex for parsing and grouping commits
 # Only include user-facing changes: features, fixes, performance, security
 commit_parsers = [
+    # Breaking changes FIRST (highest priority) - must come before skip rules
+    { message = "^[a-z]+!:", group = "⚠ BREAKING CHANGES" },
+    { footer = "^BREAKING CHANGE:", group = "⚠ BREAKING CHANGES" },
+    { footer = "^BREAKING-CHANGE:", group = "⚠ BREAKING CHANGES" },
+    # User-facing changes
     { message = "^feat", group = "Added" },
     { message = "^fix", group = "Fixed" },
     { message = "^perf", group = "Performance" },
@@ -60,7 +68,7 @@ commit_parsers = [
     { message = "^refactor", skip = true },
 ]
 # protect breaking changes from being skipped due to matching a skipping commit_parser
-protect_breaking_commits = false
+protect_breaking_commits = true
 # filter out the commits that are not matched by commit parsers
 filter_commits = false
 # glob pattern for matching git tags
@@ -73,3 +81,8 @@ ignore_tags = ""
 topo_order = false
 # sort the commits inside sections by oldest/newest order
 sort_commits = "oldest"
+
+[remote.github]
+owner = "madeinoz67"
+repo = "madeinoz-knowledge-system"
+# token automatically provided by GITHUB_TOKEN in CI
