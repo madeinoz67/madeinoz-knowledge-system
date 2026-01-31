@@ -385,7 +385,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "max_over_time(rate(graphiti_api_cost_total[5m]) * 3600)[1h]",
+          "expr": "rate(graphiti_api_cost_total[5m]) * 3600",
           "legendFormat": "{{model}}",
           "refId": "A"
         }
@@ -689,7 +689,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "max_over_time(rate(graphiti_cache_cost_saved_all_models_total[5m]) * 3600)[1h]",
+          "expr": "rate(graphiti_cache_cost_saved_all_models_total[5m]) * 3600",
           "legendFormat": "Cost Savings ($/hr)",
           "refId": "A"
         }

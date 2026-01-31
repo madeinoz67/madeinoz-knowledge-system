@@ -170,7 +170,7 @@
         "tooltip": {"mode": "multi", "sort": "desc"}
       },
       "pluginVersion": "10.0.0",
-      "targets": [{"expr": "max_over_time(rate(graphiti_cache_cost_saved_all_models_total[5m]) * 3600)[1h]", "legendFormat": "Savings/hour", "refId": "A"}],
+      "targets": [{"expr": "rate(graphiti_cache_cost_saved_all_models_total[5m]) * 3600", "legendFormat": "Savings/hour", "refId": "A"}],
       "title": "Savings Rate",
       "type": "timeseries"
     },
