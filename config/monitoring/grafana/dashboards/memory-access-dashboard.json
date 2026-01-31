@@ -238,7 +238,7 @@
         "yAxis": {"axisPlacement": "left", "reverse": false, "unit": "short"}
       },
       "pluginVersion": "10.0.0",
-      "targets": [{"expr": "sum(rate(knowledge_days_since_last_access_bucket[5m])) by (le)", "format": "heatmap", "legendFormat": "{{le}}", "refId": "A"}],
+      "targets": [{"expr": "knowledge_days_since_last_access_days_bucket", "format": "heatmap", "legendFormat": "{{le}}", "refId": "A"}],
       "title": "Age Distribution",
       "type": "heatmap"
     },
