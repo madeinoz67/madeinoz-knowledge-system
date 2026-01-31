@@ -53,7 +53,7 @@
         "textMode": "value"
       },
       "pluginVersion": "10.0.0",
-      "targets": [{"expr": "sum(rate(knowledge_access_by_importance_total[5m]))", "refId": "A"}],
+      "targets": [{"expr": "sum(max_over_time(rate(knowledge_access_by_importance_total[5m]))[1h])", "refId": "A"}],
       "title": "Access Rate",
       "type": "stat"
     },
@@ -199,7 +199,7 @@
         "tooltip": {"mode": "multi", "sort": "desc"}
       },
       "pluginVersion": "10.0.0",
-      "targets": [{"expr": "sum(rate(knowledge_access_by_importance_total[5m]))", "legendFormat": "Access Rate", "refId": "A"}],
+      "targets": [{"expr": "sum(max_over_time(rate(knowledge_access_by_importance_total[5m]))[1h])", "legendFormat": "Access Rate", "refId": "A"}],
       "title": "Access Rate Over Time",
       "type": "timeseries"
     },
