@@ -27,7 +27,7 @@ groups:
           runbook_url: "https://github.com/madeinoz/knowledge-system/docs/runbooks/maintenance-timeout.md"
 
       - alert: MaintenanceFailed
-        expr: increase(knowledge_maintenance_total{status="failure"}[1h]) > 0
+        expr: increase(knowledge_decay_maintenance_runs_total{status="failure"}[1h]) > 0
         for: 0m
         labels:
           severity: critical
@@ -46,9 +46,9 @@ groups:
       - alert: ClassificationDegraded
         expr: >-
           (
-            sum(rate(knowledge_classification_total{status="fallback"}[5m]))
+            sum(rate(knowledge_classification_requests_total{status="fallback"}[5m]))
             /
-            sum(rate(knowledge_classification_total[5m]))
+            sum(rate(knowledge_classification_requests_total[5m]))
           ) > 0.2
         for: 5m
         labels:
@@ -99,7 +99,7 @@ groups:
           runbook_url: "https://github.com/madeinoz/knowledge-system/docs/runbooks/excessive-expiration.md"
 
       - alert: SoftDeleteBacklog
-        expr: knowledge_state_count{state="SOFT_DELETED"} > 1000
+        expr: knowledge_memories_by_state{state="SOFT_DELETED"} > 1000
         for: 1h
         labels:
           severity: warning
@@ -119,8 +119,8 @@ groups:
       - alert: DecayScoreDrift
         expr: >-
           abs(
-            avg(knowledge_decay_score_average)
-            - avg(knowledge_decay_score_average offset 1d)
+            avg(knowledge_decay_score_avg)
+            - avg(knowledge_decay_score_avg offset 1d)
           ) > 0.3
         for: 1h
         labels:
@@ -137,9 +137,9 @@ groups:
       - alert: PermanentMemoryRatioLow
         expr: >-
           (
-            knowledge_state_count{state="PERMANENT"}
+            knowledge_memories_by_state{state="PERMANENT"}
             /
-            sum(knowledge_state_count)
+            sum(knowledge_memories_by_state)
           ) < 0.05
         for: 24h
         labels:
