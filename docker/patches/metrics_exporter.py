@@ -423,7 +423,7 @@ class CacheMetricsExporter:
             "cache_hit_rate": self._meter.create_observable_gauge(
                 name="graphiti_cache_hit_rate",
                 description="Current cache hit rate as a percentage (0-100)",
-                unit="%",
+                unit="1",
                 callbacks=[get_cache_hit_rate]
             ),
             "cache_enabled": self._meter.create_observable_gauge(
