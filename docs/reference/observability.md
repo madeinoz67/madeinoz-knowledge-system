@@ -365,11 +365,11 @@ Track memory access patterns during search operations to validate decay scoring 
 **Access Pattern PromQL Queries:**
 
 ```promql
-# Access rate by importance (per second, restart-resilient)
-sum(max_over_time(rate(knowledge_access_by_importance_total[5m]))[1h]) by (level)
+# Access rate by importance (per second)
+sum(rate(knowledge_access_by_importance_total[5m])) by (level)
 
-# Access distribution by state (1-hour window)
-max_over_time(knowledge_access_by_state_total[1h])
+# Access distribution by state (current values)
+knowledge_access_by_state_total
 
 # Reactivation rate (last hour)
 increase(knowledge_reactivations_total[1h])
@@ -378,13 +378,11 @@ increase(knowledge_reactivations_total[1h])
 sum(rate(knowledge_days_since_last_access_bucket[5m])) by (le)
 
 # Access vs decay correlation (dual-axis)
-# Left axis: max_over_time(rate(knowledge_access_by_importance_total[5m]))[1h]
+# Left axis: rate(knowledge_access_by_importance_total[5m])
 # Right axis: knowledge_decay_score_avg
 ```
 
-### Example PromQL Queries (with Time-Over-Time Wrappers)
-
-**Note:** These queries use `max_over_time()[1h]` wrappers to maintain continuity across service restarts.
+### Example PromQL Queries
 
 **Maintenance success rate (last 24 hours):**
 
@@ -417,7 +415,7 @@ sum by (from_state, to_state) (increase(knowledge_lifecycle_transitions_total[1h
 **P95 classification latency:**
 
 ```promql
-histogram_quantile(0.95, max_over_time(rate(knowledge_classification_latency_seconds_bucket[5m]))[1h])
+histogram_quantile(0.95, rate(knowledge_classification_latency_seconds_bucket[5m]))
 ```
 
 ### Alert Rules
@@ -464,39 +462,15 @@ Instead of embedding units in metric names, Grafana dashboards use the `unit` fi
 
 ### Handling Service Restarts
 
-Counter metrics reset to zero when the service restarts, causing visible gaps in time series graphs. To maintain continuous visualization during restarts, dashboards use **time-over-time functions**:
+Counter metrics reset to zero when the service restarts, which causes `rate()` calculations to show brief gaps or spikes in visualizations. This is expected Prometheus behavior for counter resets.
 
-**Pattern for counter queries:**
+**Current dashboard behavior:**
 
-```promql
-# Basic rate query (shows gaps after restart)
-rate(graphiti_total_tokens_total[5m])
+- `rate()` queries will briefly show gaps during counter resets
+- Grafana automatically interpolates across short gaps
+- For longer gaps, consider increasing the scrape interval
 
-# Time-over-time wrapped (continuous across restarts)
-max_over_time(rate(graphiti_total_tokens_total[5m]))[1h]
-```
-
-**Why this works:**
-
-1. `rate(graphiti_total_tokens_total[5m])` - Calculates per-second rate over 5-minute window
-2. `max_over_time(...)[1h]` - Takes maximum value seen over the past hour
-3. When counter resets, the rate briefly spikes, then the max_over_time smooths the transition
-
-**Histogram quantile pattern:**
-
-```promql
-# Basic histogram quantile (shows gaps)
-histogram_quantile(0.95, rate(graphiti_llm_request_duration_seconds_bucket[5m]))
-
-# Time-over-time wrapped (continuous)
-histogram_quantile(0.95, max_over_time(rate(graphiti_llm_request_duration_seconds_bucket[5m]))[1h])
-```
-
-**Queries that don't need wrapping:**
-
-- Gauge metrics (e.g., `graphiti_cache_enabled`, `graphiti_cache_hit_rate`)
-- `increase()` with `$__range` (uses dashboard's selected time range)
-- Absolute counter values (not rate calculations)
+**Note:** Time-over-time functions like `max_over_time()` cannot wrap `rate()` results in PromQL. They must wrap range vector selectors directly (e.g., `max_over_time(metric[1h])`). For rate-based metrics, accepting brief gaps during restarts is the standard approach.
 
 ### Scrape Configuration
 
@@ -779,25 +753,25 @@ To customize:
 
 ### Manual Panel Examples
 
-If building a custom dashboard, use these PromQL queries with time-over-time wrappers for restart resilience:
+If building a custom dashboard, use these PromQL queries:
 
 **Usage & Cost:**
 
-1. **Token Usage Rate** - `max_over_time(rate(graphiti_total_tokens_all_models_total[5m]))[1h]`
-2. **Cost Rate ($/hour)** - `max_over_time(rate(graphiti_api_cost_all_models_total[5m]) * 3600)[1h]`
+1. **Token Usage Rate** - `rate(graphiti_total_tokens_all_models_total[5m])`
+2. **Cost Rate ($/hour)** - `rate(graphiti_api_cost_all_models_total[5m]) * 3600`
 3. **Request Cost Distribution** - Histogram panel with `graphiti_api_cost_per_request_bucket`
-4. **Token Usage by Model** - `sum by (model) (max_over_time(rate(graphiti_total_tokens_total[5m]))[1h])`
+4. **Token Usage by Model** - `sum by (model) (rate(graphiti_total_tokens_total[5m]))`
 
 **Performance:**
 
-5. **Request Duration P95** - `histogram_quantile(0.95, max_over_time(rate(graphiti_llm_request_duration_seconds_bucket[5m]))[1h])`
+5. **Request Duration P95** - `histogram_quantile(0.95, rate(graphiti_llm_request_duration_seconds_bucket[5m]))`
 6. **Request Duration Heatmap** - Heatmap panel with `graphiti_llm_request_duration_seconds_bucket`
-7. **Error Rate** - `sum(max_over_time(rate(graphiti_llm_errors_total[5m]))[1h])`
+7. **Error Rate** - `sum(rate(graphiti_llm_errors_total[5m]))`
 
 **Caching (when enabled):**
 
-8. **Cache Hit Rate** - `graphiti_cache_hit_rate` (gauge, no wrapper needed)
-9. **Cost Savings Rate** - `max_over_time(rate(graphiti_cache_cost_saved_all_models_total[5m]) * 3600)[1h]`
+8. **Cache Hit Rate** - `graphiti_cache_hit_rate` (gauge metric)
+9. **Cost Savings Rate** - `rate(graphiti_cache_cost_saved_all_models_total[5m]) * 3600`
 10. **Tokens Saved** - `increase(graphiti_cache_tokens_saved_all_models_total[1h])`
 
 ## Troubleshooting
