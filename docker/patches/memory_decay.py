@@ -288,12 +288,14 @@ def apply_weighted_scoring(
 
     for node, semantic in zip(nodes, semantic_scores):
         # Extract decay attributes from node
+        # Note: node.attributes from Graphiti search returns Neo4j properties
+        # with dot notation keys (e.g., 'attributes.importance', not 'importance')
         attrs = node.attributes if hasattr(node, "attributes") else {}
-        importance = attrs.get("importance", 3)
-        stability = attrs.get("stability", 3)
-        decay_score = attrs.get("decay_score", 0.0)
-        lifecycle_state = attrs.get("lifecycle_state", "ACTIVE")
-        last_accessed_str = attrs.get("last_accessed_at")
+        importance = attrs.get("attributes.importance", 3)
+        stability = attrs.get("attributes.stability", 3)
+        decay_score = attrs.get("attributes.decay_score", 0.0)
+        lifecycle_state = attrs.get("attributes.lifecycle_state", "ACTIVE")
+        last_accessed_str = attrs.get("attributes.last_accessed_at")
 
         # Calculate days since access
         if last_accessed_str:

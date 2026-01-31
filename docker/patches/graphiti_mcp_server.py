@@ -964,8 +964,8 @@ async def search_nodes(
             exclude_states = set(s.upper() for s in exclude_lifecycle_states)
             filtered_nodes = []
             for node in nodes:
-                attrs = node.attributes if hasattr(node, 'attributes') else {}
-                state = attrs.get('lifecycle_state', 'ACTIVE')
+                attrs = node.attributes if hasattr(node, "attributes") else {}
+                state = attrs.get('attributes.lifecycle_state', 'ACTIVE')
                 if state.upper() not in exclude_states:
                     filtered_nodes.append(node)
             nodes = filtered_nodes
@@ -1128,21 +1128,22 @@ async def search_nodes(
                     # Record memory access patterns for retrieved nodes
                     for node in nodes:
                         try:
-                            # Extract attributes from node
-                            attrs = node.attributes if hasattr(node, 'attributes') else {}
-                            importance = attrs.get('importance', 3)
-                            lifecycle_state = attrs.get('lifecycle_state', 'ACTIVE')
+                            # Extract decay attributes from node
+                            # Note: node.attributes from Graphiti search returns Neo4j properties
+                            # with dot notation keys (e.g., 'attributes.importance', not 'importance')
+                            attrs = node.attributes if hasattr(node, "attributes") else {}
+                            importance = attrs.get("attributes.importance", 3)
+                            lifecycle_state = attrs.get("attributes.lifecycle_state", "ACTIVE")
+                            last_accessed_str = attrs.get("attributes.last_accessed_at")
 
                             # Calculate days since last access
                             days_since_access = None
-                            last_accessed_at = attrs.get('last_accessed_at')
-                            if last_accessed_at:
+                            if last_accessed_str:
                                 try:
-                                    # Try parsing as ISO format
-                                    if isinstance(last_accessed_at, str):
-                                        last_accessed = datetime.fromisoformat(last_accessed_at.replace('Z', '+00:00'))
+                                    if isinstance(last_accessed_str, str):
+                                        last_accessed = datetime.fromisoformat(last_accessed_str.replace('Z', '+00:00'))
                                     else:
-                                        last_accessed = last_accessed_at
+                                        last_accessed = last_accessed_str
                                     days_since_access = (datetime.now(timezone.utc) - last_accessed).days
                                 except Exception:
                                     days_since_access = None
@@ -1154,7 +1155,7 @@ async def search_nodes(
                                 days_since_last_access=days_since_access
                             )
                         except Exception as attr_err:
-                            logger.debug(f'Failed to record access pattern for {node.uuid}: {attr_err}')
+                            logger.warning(f'Failed to record access pattern for {getattr(node, "uuid", "unknown")}: {attr_err}')
 
                     # Also record generic access count for compatibility
                     decay_metrics.record_memory_access(len(nodes))
