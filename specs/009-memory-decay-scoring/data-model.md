@@ -186,7 +186,8 @@ class DecayConfig:
     """Configuration for decay calculation"""
 
     # Base half-life in days (adjusted by stability)
-    base_half_life_days: float = 30.0
+    # 180 days provides better retention for personal knowledge graphs
+    base_half_life_days: float = 180.0
 
     # State transition thresholds (days since last access)
     dormant_threshold_days: int = 30
@@ -214,19 +215,20 @@ class DecayConfig:
 
 ```yaml
 decay:
-  base_half_life_days: 30
+  # 180-day half-life: memories reach 50% decay after 6 months
+  base_half_life_days: 180
 
   thresholds:
     dormant:
-      days: 30
+      days: 90            # Min days + decay >= 0.3 (~93 days actual)
       decay_score: 0.3
     archived:
-      days: 90
+      days: 180           # Min days + decay >= 0.6 (~238 days actual)
       decay_score: 0.6
     expired:
-      days: 180
+      days: 360           # Min days + decay >= 0.9 (~598 days actual)
       decay_score: 0.9
-      max_importance: 3
+      max_importance: 3   # Only expire if importance <= 3
 
   retention:
     soft_delete_days: 90
@@ -234,6 +236,7 @@ decay:
   maintenance:
     batch_size: 500
     max_duration_minutes: 10
+    schedule_interval_hours: 24  # Run daily
 
   weights:
     semantic: 0.60
@@ -266,11 +269,13 @@ class KnowledgeHealthMetrics:
     average_importance: float
     average_stability: float
 
-    # Age distribution
+    # Age distribution (aligned with lifecycle thresholds: 30/90/180/365 days)
     memories_under_7_days: int
     memories_7_to_30_days: int
     memories_30_to_90_days: int
-    memories_over_90_days: int
+    memories_90_to_180_days: int
+    memories_180_to_365_days: int
+    memories_over_365_days: int
 
     # Maintenance info
     last_maintenance_at: str  # ISO timestamp
@@ -304,7 +309,9 @@ class KnowledgeHealthMetrics:
     "under_7_days": 89,
     "7_to_30_days": 412,
     "30_to_90_days": 651,
-    "over_90_days": 700
+    "90_to_180_days": 420,
+    "180_to_365_days": 180,
+    "over_365_days": 100
   },
   "maintenance": {
     "last_run": "2026-01-29T03:00:00Z",

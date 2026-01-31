@@ -211,10 +211,13 @@ WHERE n.`attributes.lifecycle_state` IS NOT NULL
   AND NOT (coalesce(n.`attributes.importance`, 3) >= 4 AND coalesce(n.`attributes.stability`, 3) >= 4)
 
 WITH n,
-     duration.between(
-         datetime(coalesce(n.`attributes.last_accessed_at`, toString(n.created_at))),
-         datetime()
-     ).days AS daysInactive,
+     CASE
+         WHEN n.`attributes.last_accessed_at` IS NOT NULL
+             THEN duration.between(datetime(n.`attributes.last_accessed_at`), datetime()).days
+         WHEN n.created_at IS NOT NULL
+             THEN duration.between(datetime(n.created_at), datetime()).days
+         ELSE 0
+     END AS daysInactive,
      coalesce(n.`attributes.decay_score`, 0.0) AS decayScore,
      coalesce(n.`attributes.importance`, 3) AS importance,
      n.`attributes.lifecycle_state` AS currentState
@@ -322,6 +325,7 @@ async def update_access_on_retrieval(driver, node_uuid: str, previous_state: Opt
             # Record reactivation metric if we know previous state
             if decay_metrics and previous_state in ("DORMANT", "ARCHIVED"):
                 decay_metrics.record_lifecycle_transition(previous_state, "ACTIVE")
+                decay_metrics.record_reactivation(previous_state)
 
             return True
 

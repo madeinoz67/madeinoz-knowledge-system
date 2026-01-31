@@ -174,6 +174,20 @@ class CacheMetricsExporter:
                         boundaries=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
                     )
                 ),
+                # Importance score distribution: 1-5 integer scale
+                View(
+                    instrument_name="knowledge_importance_score",
+                    aggregation=ExplicitBucketHistogramAggregation(
+                        boundaries=[1, 2, 3, 4, 5]
+                    )
+                ),
+                # Stability score distribution: 1-5 integer scale
+                View(
+                    instrument_name="knowledge_stability_score",
+                    aggregation=ExplicitBucketHistogramAggregation(
+                        boundaries=[1, 2, 3, 4, 5]
+                    )
+                ),
                 # === Additional Observability Metrics ===
                 # Search query latency: sub-second to multi-second
                 View(
@@ -758,6 +772,13 @@ class DecayMetricsExporter:
             "HIGH": 0,       # Importance level 4
             "CORE": 0,       # Importance level 5
         }
+        self._stability_counts: Dict[str, int] = {
+            "VOLATILE": 0,   # Stability level 1
+            "LOW": 0,        # Stability level 2
+            "MODERATE": 0,   # Stability level 3
+            "HIGH": 0,       # Stability level 4
+            "PERMANENT": 0,  # Stability level 5
+        }
         self._averages: Dict[str, float] = {
             "decay_score": 0.0,
             "importance": 3.0,
@@ -765,6 +786,14 @@ class DecayMetricsExporter:
         }
         self._total_memories: int = 0
         self._orphan_entities: int = 0  # Track entities with no relationships
+        self._age_distribution: Dict[str, int] = {
+            "UNDER_7_DAYS": 0,
+            "DAYS_7_TO_30": 0,
+            "DAYS_30_TO_90": 0,
+            "DAYS_90_TO_180": 0,
+            "DAYS_180_TO_365": 0,
+            "OVER_365_DAYS": 0,
+        }
 
         if self._meter:
             self._create_counters()
@@ -797,6 +826,11 @@ class DecayMetricsExporter:
             "lifecycle_transitions": self._meter.create_counter(
                 name="knowledge_lifecycle_transitions_total",
                 description="State transitions by from/to state",
+                unit="1"
+            ),
+            "reactivations": self._meter.create_counter(
+                name="knowledge_reactivations_total",
+                description="Memories reactivated from DORMANT/ARCHIVED to ACTIVE",
                 unit="1"
             ),
             # Classification metrics
@@ -846,6 +880,12 @@ class DecayMetricsExporter:
                 return [metrics.Observation(self._importance_counts.get(level, 0), {"level": level})]
             return callback
 
+        def get_stability_count(level: str):
+            """Factory for stability level count callbacks."""
+            def callback(_options):
+                return [metrics.Observation(self._stability_counts.get(level, 0), {"level": level})]
+            return callback
+
         def get_decay_avg(_options):
             return [metrics.Observation(self._averages["decay_score"])]
 
@@ -860,6 +900,12 @@ class DecayMetricsExporter:
 
         def get_orphan_count(_options):
             return [metrics.Observation(self._orphan_entities)]
+
+        def get_age_count(bucket: str):
+            """Factory for age bucket count callbacks."""
+            def callback(_options):
+                return [metrics.Observation(self._age_distribution.get(bucket, 0), {"bucket": bucket})]
+            return callback
 
         self._gauges = {
             "memories_by_state": self._meter.create_observable_gauge(
@@ -885,6 +931,18 @@ class DecayMetricsExporter:
                     get_importance_count("MODERATE"),
                     get_importance_count("HIGH"),
                     get_importance_count("CORE"),
+                ]
+            ),
+            "memories_by_stability": self._meter.create_observable_gauge(
+                name="knowledge_memories_by_stability",
+                description="Current memory count per stability level",
+                unit="1",
+                callbacks=[
+                    get_stability_count("VOLATILE"),
+                    get_stability_count("LOW"),
+                    get_stability_count("MODERATE"),
+                    get_stability_count("HIGH"),
+                    get_stability_count("PERMANENT"),
                 ]
             ),
             "decay_score_avg": self._meter.create_observable_gauge(
@@ -917,6 +975,19 @@ class DecayMetricsExporter:
                 unit="1",
                 callbacks=[get_orphan_count]
             ),
+            "memories_by_age": self._meter.create_observable_gauge(
+                name="knowledge_memories_by_age",
+                description="Memory count by age bucket (aligned with lifecycle thresholds)",
+                unit="1",
+                callbacks=[
+                    get_age_count("UNDER_7_DAYS"),
+                    get_age_count("DAYS_7_TO_30"),
+                    get_age_count("DAYS_30_TO_90"),
+                    get_age_count("DAYS_90_TO_180"),
+                    get_age_count("DAYS_180_TO_365"),
+                    get_age_count("OVER_365_DAYS"),
+                ]
+            ),
         }
 
     def _create_histograms(self) -> None:
@@ -943,6 +1014,16 @@ class DecayMetricsExporter:
             "decay_score": self._meter.create_histogram(
                 name="knowledge_decay_score",
                 description="Decay score distribution (0=healthy, 1=expired)",
+                unit="1"
+            ),
+            "importance_score": self._meter.create_histogram(
+                name="knowledge_importance_score",
+                description="Importance score distribution (1=trivial, 5=core)",
+                unit="1"
+            ),
+            "stability_score": self._meter.create_histogram(
+                name="knowledge_stability_score",
+                description="Stability score distribution (1=volatile, 5=permanent)",
                 unit="1"
             ),
             # === Additional Observability Histograms ===
@@ -1007,6 +1088,23 @@ class DecayMetricsExporter:
             logger.debug(f"Recorded transitions: {from_state} → {to_state} x{count}")
         except Exception as e:
             logger.error(f"Failed to record lifecycle transition: {e}")
+
+    def record_reactivation(self, from_state: str, count: int = 1) -> None:
+        """
+        Record memory reactivation (DORMANT/ARCHIVED → ACTIVE).
+
+        Args:
+            from_state: Source state ('DORMANT' or 'ARCHIVED')
+            count: Number of reactivations (default 1)
+        """
+        if not self._counters:
+            return
+
+        try:
+            self._counters["reactivations"].add(count, {"from_state": from_state})
+            logger.debug(f"Recorded reactivation: {from_state} → ACTIVE x{count}")
+        except Exception as e:
+            logger.error(f"Failed to record reactivation: {e}")
 
     def record_classification(self, status: str, latency_seconds: float = 0.0) -> None:
         """
@@ -1083,6 +1181,17 @@ class DecayMetricsExporter:
             if level in self._importance_counts:
                 self._importance_counts[level] = count
 
+    def update_stability_counts(self, counts: Dict[str, int]) -> None:
+        """
+        Update stability level counts from health check.
+
+        Args:
+            counts: Dict mapping stability level names to counts (VOLATILE/LOW/MODERATE/HIGH/PERMANENT)
+        """
+        for level, count in counts.items():
+            if level in self._stability_counts:
+                self._stability_counts[level] = count
+
     def update_averages(self, decay: float, importance: float, stability: float, total: int) -> None:
         """
         Update average metrics from health check.
@@ -1112,6 +1221,34 @@ class DecayMetricsExporter:
             logger.debug(f"Recorded decay score: {score:.3f}")
         except Exception as e:
             logger.error(f"Failed to record decay score: {e}")
+
+    def record_importance_score(self, score: int) -> None:
+        """
+        Record an importance score for distribution tracking.
+
+        Args:
+            score: Importance score value (1-5 range)
+        """
+        if not self._histograms:
+            return
+        try:
+            self._histograms["importance_score"].record(score)
+        except Exception as e:
+            logger.error(f"Failed to record importance score: {e}")
+
+    def record_stability_score(self, score: int) -> None:
+        """
+        Record a stability score for distribution tracking.
+
+        Args:
+            score: Stability score value (1-5 range)
+        """
+        if not self._histograms:
+            return
+        try:
+            self._histograms["stability_score"].record(score)
+        except Exception as e:
+            logger.error(f"Failed to record stability score: {e}")
 
     def record_memory_access(self) -> None:
         """Record a memory access operation."""
@@ -1183,6 +1320,26 @@ class DecayMetricsExporter:
             count: Number of orphan entities (no relationships)
         """
         self._orphan_entities = count
+
+    def update_age_distribution(self, distribution: Dict[str, int]) -> None:
+        """
+        Update memory age distribution gauges.
+
+        Args:
+            distribution: Dict with keys aligned to lifecycle thresholds (30/90/180/365 days)
+        """
+        # Map from health metrics keys to internal keys
+        key_mapping = {
+            "under_7_days": "UNDER_7_DAYS",
+            "days_7_to_30": "DAYS_7_TO_30",
+            "days_30_to_90": "DAYS_30_TO_90",
+            "days_90_to_180": "DAYS_90_TO_180",
+            "days_180_to_365": "DAYS_180_TO_365",
+            "over_365_days": "OVER_365_DAYS",
+        }
+        for src_key, dest_key in key_mapping.items():
+            if src_key in distribution:
+                self._age_distribution[dest_key] = distribution[src_key]
 
 
 # =============================================================================
