@@ -1072,15 +1072,16 @@ class DecayMetricsExporter:
         """
         if not self._counters:
             return
-        
+
         try:
-            # Importance levels (5 series)
+            # Importance levels (5 series - matching ImportanceLevel enum)
+            # TRIVIAL=1, LOW=2, MODERATE=3, HIGH=4, CORE=5
             importance_levels = ["TRIVIAL", "LOW", "MODERATE", "HIGH", "CORE"]
             for level in importance_levels:
                 self._counters["access_by_importance"].add(0, {"level": level})
-            
-            # Lifecycle states (6 series)
-            lifecycle_states = ["ACTIVE", "DORMANT", "ARCHIVED", "EXPIRED", "SOFT_DELETED", "PERMANENT"]
+
+            # Lifecycle states (5 series - matching LifecycleState enum)
+            lifecycle_states = ["ACTIVE", "DORMANT", "ARCHIVED", "EXPIRED", "SOFT_DELETED"]
             for state in lifecycle_states:
                 self._counters["access_by_state"].add(0, {"state": state})
             
@@ -1434,7 +1435,8 @@ class DecayMetricsExporter:
             return
 
         try:
-            # Map importance level to label
+            # Map importance level to label (matching system's ImportanceLevel enum)
+            # TRIVIAL=1, LOW=2, MODERATE=3, HIGH=4, CORE=5
             importance_labels = {
                 1: "TRIVIAL",
                 2: "LOW",

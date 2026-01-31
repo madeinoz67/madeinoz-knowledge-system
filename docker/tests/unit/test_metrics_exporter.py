@@ -98,7 +98,6 @@ class TestDecayMetricsExporterStateTracking:
             "ARCHIVED": 25,
             "EXPIRED": 10,
             "SOFT_DELETED": 5,
-            "PERMANENT": 30,
         })
 
         assert exporter._state_counts["ACTIVE"] == 100
@@ -106,7 +105,6 @@ class TestDecayMetricsExporterStateTracking:
         assert exporter._state_counts["ARCHIVED"] == 25
         assert exporter._state_counts["EXPIRED"] == 10
         assert exporter._state_counts["SOFT_DELETED"] == 5
-        assert exporter._state_counts["PERMANENT"] == 30
 
     def test_update_state_counts_partial(self):
         """Partial state count updates should only affect specified states."""
@@ -159,7 +157,7 @@ class TestDecayMetricsExporterStateTracking:
 
         exporter = DecayMetricsExporter(meter=None)
 
-        for state in ["ACTIVE", "DORMANT", "ARCHIVED", "EXPIRED", "SOFT_DELETED", "PERMANENT"]:
+        for state in ["ACTIVE", "DORMANT", "ARCHIVED", "EXPIRED", "SOFT_DELETED"]:
             assert exporter._state_counts[state] == 0
 
     def test_initial_averages(self):
@@ -320,8 +318,8 @@ class TestDecayMetricsExporterWithMockedMeter:
         for level in importance_levels:
             exporter._counters["access_by_importance"].add.assert_any_call(0, {"level": level})
 
-        # Verify lifecycle states were pre-initialized (6 series)
-        lifecycle_states = ["ACTIVE", "DORMANT", "ARCHIVED", "EXPIRED", "SOFT_DELETED", "PERMANENT"]
+        # Verify lifecycle states were pre-initialized (5 series)
+        lifecycle_states = ["ACTIVE", "DORMANT", "ARCHIVED", "EXPIRED", "SOFT_DELETED"]
         for state in lifecycle_states:
             exporter._counters["access_by_state"].add.assert_any_call(0, {"state": state})
 
