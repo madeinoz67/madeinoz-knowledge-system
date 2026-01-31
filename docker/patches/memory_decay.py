@@ -441,6 +441,9 @@ async def batch_update_decay_scores(driver, base_half_life: float = 30.0) -> int
                         decay_metrics.record_importance_score(record["importance"])
                         decay_metrics.record_stability_score(record["stability"])
                         count += 1
+                    scores = [score async for score in fetch_result]
+                    for score_record in scores:
+                        decay_metrics.record_decay_score(score_record["score"])
 
                     logger.debug(f"Recorded {count} scores to histograms (decay/importance/stability)")
                 except Exception as e:
