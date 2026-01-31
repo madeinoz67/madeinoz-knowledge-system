@@ -554,12 +554,59 @@ The pre-configured dashboard includes these sections:
 | Production | Grafana | 3002 | FalkorDB backend |
 | Production | Prometheus UI | 9092 | Query interface |
 
-### Customizing the Dashboard
+### Available Dashboards
 
-The dashboard configuration is stored at:
+The system includes multiple pre-configured Grafana dashboards:
+
+| Dashboard | UID | Purpose |
+|-----------|-----|---------|
+| **Graph Health** | `graph-health-dashboard` | Entity states, episodes, operation rates, error tracking |
+| **Memory Decay** | `memory-decay-dashboard` | Lifecycle transitions, maintenance operations, classification metrics |
+| **Knowledge System** | `madeinoz-knowledge` | Token usage, cost tracking, request duration, cache performance |
+| **Prompt Cache Effectiveness** | `prompt-cache-effectiveness` | Cache ROI, hit/miss patterns, write overhead, per-model comparison |
+
+### Prompt Cache Effectiveness Dashboard
+
+**Purpose**: Dedicated monitoring for Gemini prompt caching performance and ROI
+
+**Access**: `http://localhost:3002/d/prompt-cache-effectiveness` (dev)
+
+**Panels**:
+
+| Panel | Metric | Description |
+|-------|--------|-------------|
+| **Total Cost Savings** | `graphiti_cache_cost_saved_all_models_total` | USD saved from caching (uses time-over-time for restart resilience) |
+| **Hit Rate** | `graphiti_cache_hit_rate` | Current cache hit percentage (gauge: >50% green, 20-50% yellow, <20% red) |
+| **Tokens Saved** | `graphiti_cache_tokens_saved_all_models_total` | Total tokens saved from caching |
+| **Tokens Written** | `graphiti_cache_write_tokens_all_models_total` | Tokens consumed to create cache entries (overhead) |
+| **Savings Rate** | `rate(...[1h]) * 3600` | Cost savings per hour trend |
+| **Hit Rate Trend** | `graphiti_cache_hit_rate` | Hit rate over time for anomaly detection |
+| **Hits vs Misses** | Dual time series | Comparison of cache hits vs misses rate |
+| **Tokens Saved Distribution** | `graphiti_cache_tokens_saved_per_request_bucket` | Heatmap showing cache hit size distribution |
+| **Per-Model Performance** | Table | Side-by-side comparison of caching by LLM model |
+
+**Key Features**:
+- Time-over-time queries (`max_over_time()[1h]`) handle service restarts without data gaps
+- Color-coded thresholds for quick health assessment
+- 30-second auto-refresh (user-configurable)
+- Single 1080p screen layout (no scrolling required)
+
+**Troubleshooting Dashboard**:
+
+1. **No data showing**: Verify cache is enabled (`curl http://localhost:9091/metrics | grep cache_enabled`)
+2. **Gaps in charts**: Check for service restarts - time-over-time functions should smooth gaps
+3. **Zero hit rate**: Normal for new deployments; requires repeated similar prompts to build cache
+
+### Customizing Dashboards
+
+Dashboard configurations are stored at:
 
 ```
-config/monitoring/grafana/provisioning/dashboards/madeinoz-knowledge.json
+config/monitoring/grafana/dashboards/
+├── graph-health-dashboard.json
+├── memory-decay-dashboard.json
+├── madeinoz-knowledge.json
+└── prompt-cache-effectiveness.json
 ```
 
 To customize:
