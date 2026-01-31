@@ -83,3 +83,67 @@ bun run ~/.claude/skills/Knowledge/tools/knowledge-cli.ts health
 | `development` | `--dev` containers | Testing |
 
 **Rules**: Never reconfigure profiles. Always pass `--profile development` for dev work.
+
+## Releases (CRITICAL)
+
+**⚠️ NEVER use `gh release create` directly** - it creates the tag via GitHub API without triggering the CI workflow. The release job will never run, leaving you with a broken release (no Docker image pushed, no docs deployed).
+
+**Release checklist - follow these steps exactly:**
+
+```bash
+# === PRE-RELEASE CHECKS ===
+# 1. Check you're on main branch
+git branch --show-current  # Should output: main
+
+# 2. Pull latest changes
+git pull origin main
+
+# 3. Verify working tree is clean (no uncommitted changes)
+git status  # Should show: "nothing to commit, working tree clean"
+
+# 4. Verify latest CI passed
+gh run list --limit 1  # Check status is "completed success"
+
+# === CREATE RELEASE ===
+# 5. Create annotated tag with release description
+git tag -a v1.x.x -m "Release v1.x.x" -m "Description of what's in this release"
+# Or for multi-line descriptions, omit -m to open your editor:
+git tag -a v1.x.x
+# Then write your description in the editor (same format as commit messages)
+
+# 6. Push tag to trigger CI workflow
+git push origin v1.x.x
+
+# === VERIFY RELEASE ===
+# 7. Watch workflow run
+gh run watch
+
+# 8. Confirm release created
+gh release view v1.x.x
+```
+
+**What the CI workflow does automatically:**
+- Generates changelog from git-cliff using conventional commits
+- Updates CHANGELOG.md on main branch
+- Builds and pushes multi-arch Docker image to GHCR
+- Creates GitHub Release with formatted release notes
+- Deploys documentation to GitHub Pages
+
+**Recovering from a bad release:**
+
+```bash
+# If you accidentally used gh release create or created via web UI:
+gh release delete v1.x.x --yes
+git tag -d v1.x.x
+git push origin :refs/tags/v1.x.x
+# Then follow the correct process above
+```
+
+**Why this matters:** The release job (`.github/workflows/ci.yml:195`) only triggers on `push` events for tags matching `v*`. Tags created via GitHub web UI or `gh release create` generate a `ReleaseEvent`, not a `push` event, so the workflow never runs.
+
+## Active Technologies
+- JSON (Grafana dashboard configuration) + Grafana (provisioned), Prometheus (data source), existing metrics from PR #34 (013-prompt-cache-dashboard)
+- N/A (dashboard configuration only) (013-prompt-cache-dashboard)
+
+## Recent Changes
+- 013-prompt-cache-dashboard: Added JSON (Grafana dashboard configuration) + Grafana (provisioned), Prometheus (data source), existing metrics from PR #34

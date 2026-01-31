@@ -1,7 +1,7 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version Change: 1.2.0 → 1.3.0 (MINOR - New principle added)
+Version Change: 1.3.0 → 1.4.0 (MINOR - New principle added)
 
 Modified Principles:
 - [UNCHANGED] I. Container-First Architecture
@@ -11,22 +11,24 @@ Modified Principles:
 - [UNCHANGED] V. Graceful Degradation
 - [UNCHANGED] VI. Codanna-First Development
 - [UNCHANGED] VII. Language Separation
+- [UNCHANGED] VIII. Dual-Audience Documentation
 
 Added Sections:
-- [NEW] VIII. Dual-Audience Documentation - Establishes requirements for documentation that serves both human readers and AI consumers through hidden metadata, structured formatting, and machine-parseable elements
+- [NEW] IX. Observability & Metrics - Establishes requirements for metrics documentation, dashboard coverage, and restart gap handling using time-over-time functions
 
 Removed Sections:
 - None
 
 Templates Requiring Updates:
-- .specify/templates/plan-template.md ✅ (no changes needed - Constitution Check is generic)
-- .specify/templates/spec-template.md ✅ (no changes needed - requirements structure compatible)
-- .specify/templates/tasks-template.md ✅ (no changes needed - documentation task category exists)
-- .specify/templates/checklist-template.md ✅ (no changes needed - generic structure)
-- .specify/templates/agent-file-template.md ✅ (no changes needed - generic structure)
+- .specify/templates/plan-template.md ⚠ (add metrics/dashboard check to Constitution Check)
+- .specify/templates/spec-template.md ⚠ (add metrics/dashboard requirements for features exposing new metrics)
+- .specify/templates/tasks-template.md ✅ (observability task category exists)
+- .specify/templates/checklist-template.md ✅ (generic structure)
+- .specify/templates/agent-file-template.md ✅ (generic structure)
 
 Follow-up TODOs:
-- None - new principle codifies existing documentation patterns from docs/index.md and docs/reference/observability.md
+- Update plan-template.md Constitution Check to include metrics/dashboard coverage validation
+- Update spec-template.md to require metrics documentation for features exposing new data
 -->
 
 # Madeinoz Knowledge System Constitution
@@ -242,6 +244,56 @@ docs/
 
 **Rationale:** Modern AI assistants consume documentation to help users. Documentation that only serves human readers forces AI to guess, hallucinate, or ask clarifying questions. Hidden metadata enables AI to quickly load context without cluttering the human reading experience. Structured tables enable both humans to scan and AI to parse accurately. This principle emerged from feature 006 documentation updates where AI-friendly summaries and limits tables significantly improved assistant comprehension.
 
+### IX. Observability & Metrics
+
+All metrics MUST be documented and visualized in dashboards. Dashboard queries MUST handle service restart gaps to prevent data discontinuity.
+
+**Non-Negotiable Rules:**
+- ALL new metrics MUST be documented in `docs/reference/observability.md`
+- ALL new metrics MUST have a corresponding dashboard panel or visualization
+- Cumulative counter metrics MUST use time-over-time functions (`max_over_time()`, `min_over_time()`) to survive service restarts
+- Dashboard queries MUST NOT break when counters reset to zero after restart
+- Metrics MUST follow naming conventions: `<domain>_<metric>_<unit>_total` for counters, `<domain>_<metric>` for gauges
+
+**Metric Documentation Requirements:**
+When adding a new metric, update `docs/reference/observability.md` with:
+| Field | Description |
+|-------|-------------|
+| Metric Name | Full metric name as exposed to Prometheus |
+| Type | Counter, Gauge, Histogram |
+| Labels | Label names and possible values |
+| Description | What the metric measures and why it matters |
+| Dashboard | Which dashboard panel visualizes this metric |
+
+**Dashboard Query Requirements:**
+For cumulative metrics that reset on restart, wrap with time-over-time functions:
+
+```promql
+# WRONG - shows gap on restart
+graphiti_cache_hits_all_models_total
+
+# CORRECT - shows last value during restart gap
+max_over_time(graphiti_cache_hits_all_models_total[1h])
+```
+
+**Time-over-Time Function Selection:**
+| Use Case | Function | Window |
+|----------|--------|--------|
+| Cumulative counters (preserve last value) | `max_over_time()` | 1h-24h |
+| Rate calculations (survive restart) | `max_over_time(rate()[5m])[1h])` | 1h |
+| Gauges (show minimum during gap) | `min_over_time()` | 5m-15m |
+| Availability (any data in window) | `present_over_time()` | 5m |
+
+**Dashboard Coverage Requirements:**
+When adding new metrics, verify:
+- [ ] Metric documented in `docs/reference/observability.md`
+- [ ] Dashboard panel created or updated
+- [ ] Query uses time-over-time functions if metric is cumulative
+- [ ] Panel handles zero-values gracefully (displays "0" or "No data", not errors)
+- [ ] Panel title and description explain what the metric means
+
+**Rationale:** Metrics without documentation or dashboards are "dark matter" - they exist but provide no value. Service restarts cause cumulative counters to reset, creating visual "cliffs" in dashboards. Time-over-time functions preserve the last known value during restart gaps, maintaining data continuity for observability. This principle emerged from issue #39 and the RedTeam analysis that identified 43% of collected metrics had no dashboard coverage.
+
 ## Technical Constraints
 
 **Runtime Environment:**
@@ -272,7 +324,8 @@ docs/
 4. Run `bun run typecheck` - MUST pass with no errors
 5. Run `bun test` (TypeScript) and/or `pytest docker/tests` (Python) - all tests MUST pass
 6. Update documentation if user-facing behavior changes (following Principle VIII)
-7. Create PR with clear description of changes
+7. If adding metrics, update observability docs and dashboards (following Principle IX)
+8. Create PR with clear description of changes
 
 **Container Changes:**
 1. Test locally with `bun run server-cli start` / `bun run server-cli stop`
@@ -285,6 +338,7 @@ docs/
 - INSTALL.md: Step-by-step installation guide
 - VERIFY.md: Post-installation verification steps
 - docs/: Detailed usage and troubleshooting
+- docs/reference/observability.md: Metrics documentation when adding new metrics
 - Use `codanna mcp search_documents` to find related documentation before making changes
 - Follow Principle VIII: Include AI-friendly summaries, use tables for structured data, add quick reference sections
 
@@ -306,5 +360,6 @@ This Constitution supersedes all other practices in the Madeinoz Knowledge Syste
 - All PRs MUST verify compliance with Constitution principles
 - Constitution Check in plan-template.md MUST be evaluated for each feature
 - Complexity additions MUST be justified in Complexity Tracking table
+- Metrics additions MUST verify observability docs and dashboard coverage (Principle IX)
 
-**Version**: 1.3.0 | **Ratified**: 2026-01-18 | **Last Amended**: 2026-01-27
+**Version**: 1.4.0 | **Ratified**: 2026-01-18 | **Last Amended**: 2026-01-31
