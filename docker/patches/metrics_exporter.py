@@ -1072,15 +1072,16 @@ class DecayMetricsExporter:
         """
         if not self._counters:
             return
-        
+
         try:
-            # Importance levels (4 series - matching dashboard expectations)
-            importance_levels = ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
+            # Importance levels (5 series - matching ImportanceLevel enum)
+            # TRIVIAL=1, LOW=2, MODERATE=3, HIGH=4, CORE=5
+            importance_levels = ["TRIVIAL", "LOW", "MODERATE", "HIGH", "CORE"]
             for level in importance_levels:
                 self._counters["access_by_importance"].add(0, {"level": level})
-            
-            # Lifecycle states (6 series)
-            lifecycle_states = ["ACTIVE", "DORMANT", "ARCHIVED", "EXPIRED", "SOFT_DELETED", "PERMANENT"]
+
+            # Lifecycle states (5 series - matching LifecycleState enum)
+            lifecycle_states = ["ACTIVE", "DORMANT", "ARCHIVED", "EXPIRED", "SOFT_DELETED"]
             for state in lifecycle_states:
                 self._counters["access_by_state"].add(0, {"state": state})
             
@@ -1434,15 +1435,16 @@ class DecayMetricsExporter:
             return
 
         try:
-            # Map importance level to label (matching dashboard expectations)
+            # Map importance level to label (matching system's ImportanceLevel enum)
+            # TRIVIAL=1, LOW=2, MODERATE=3, HIGH=4, CORE=5
             importance_labels = {
-                1: "LOW",
+                1: "TRIVIAL",
                 2: "LOW",
-                3: "MEDIUM",
+                3: "MODERATE",
                 4: "HIGH",
-                5: "CRITICAL",
+                5: "CORE",
             }
-            importance_label = importance_labels.get(importance, "MEDIUM")
+            importance_label = importance_labels.get(importance, "MODERATE")
 
             # Record access by importance level
             self._counters["access_by_importance"].add(1, {"level": importance_label})
