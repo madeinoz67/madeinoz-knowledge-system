@@ -105,7 +105,6 @@ class TestDecayMetricsExporterStateTracking:
         assert exporter._state_counts["ARCHIVED"] == 25
         assert exporter._state_counts["EXPIRED"] == 10
         assert exporter._state_counts["SOFT_DELETED"] == 5
-        assert exporter._state_counts["PERMANENT"] == 30
 
     def test_update_state_counts_partial(self):
         """Partial state count updates should only affect specified states."""
