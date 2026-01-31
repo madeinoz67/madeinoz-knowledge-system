@@ -861,6 +861,17 @@ class DecayMetricsExporter:
                 description="Searches returning zero results",
                 unit="1"
             ),
+            # === Access Pattern Counters (P3) ===
+            "access_by_importance": self._meter.create_counter(
+                name="knowledge_access_by_importance_total",
+                description="Memory accesses by importance level",
+                unit="1"
+            ),
+            "access_by_state": self._meter.create_counter(
+                name="knowledge_access_by_state_total",
+                description="Memory accesses by lifecycle state at access time",
+                unit="1"
+            ),
         }
 
     def _create_gauges(self) -> None:
@@ -1340,6 +1351,54 @@ class DecayMetricsExporter:
         for src_key, dest_key in key_mapping.items():
             if src_key in distribution:
                 self._age_distribution[dest_key] = distribution[src_key]
+
+    def record_access_pattern(
+        self,
+        importance: int,
+        lifecycle_state: str,
+        days_since_last_access: Optional[float] = None
+    ) -> None:
+        """
+        Record access pattern metrics when a memory is accessed.
+
+        Tracks what kinds of memories are being accessed (by importance and state)
+        and how long since they were last accessed.
+
+        Args:
+            importance: Importance level of the accessed memory (1-5)
+            lifecycle_state: Lifecycle state at time of access (ACTIVE, DORMANT, etc.)
+            days_since_last_access: Days since memory was last accessed (optional)
+        """
+        if not self._counters:
+            return
+
+        try:
+            # Map importance level to label
+            importance_labels = {
+                1: "TRIVIAL",
+                2: "LOW",
+                3: "MODERATE",
+                4: "HIGH",
+                5: "CORE",
+            }
+            importance_label = importance_labels.get(importance, "MODERATE")
+
+            # Record access by importance level
+            self._counters["access_by_importance"].add(1, {"level": importance_label})
+
+            # Record access by lifecycle state
+            self._counters["access_by_state"].add(1, {"state": lifecycle_state})
+
+            # Record days since last access histogram if provided
+            if days_since_last_access is not None and self._histograms:
+                self._histograms["days_since_last_access"].record(days_since_last_access)
+
+            logger.debug(
+                f"Recorded access pattern: importance={importance_label}, "
+                f"state={lifecycle_state}, days_since={days_since_last_access}"
+            )
+        except Exception as e:
+            logger.error(f"Failed to record access pattern: {e}")
 
 
 # =============================================================================
