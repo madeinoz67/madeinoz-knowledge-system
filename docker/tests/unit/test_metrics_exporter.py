@@ -308,6 +308,51 @@ class TestDecayMetricsExporterWithMockedMeter:
         exporter._counters["weighted_searches"].add.assert_called_with(1)
         exporter._histograms["weighted_search_latency"].record.assert_called_with(0.05)
 
+    def test_counters_preinitialized_with_known_labels(self):
+        """Counters should be pre-initialized with known label values at startup."""
+        from metrics_exporter import DecayMetricsExporter
+
+        meter = self.create_mock_meter()
+        exporter = DecayMetricsExporter(meter=meter)
+
+        # Verify importance levels were pre-initialized (5 series)
+        importance_levels = ["TRIVIAL", "LOW", "MODERATE", "HIGH", "CORE"]
+        for level in importance_levels:
+            exporter._counters["access_by_importance"].add.assert_any_call(0, {"level": level})
+
+        # Verify lifecycle states were pre-initialized (6 series)
+        lifecycle_states = ["ACTIVE", "DORMANT", "ARCHIVED", "EXPIRED", "SOFT_DELETED", "PERMANENT"]
+        for state in lifecycle_states:
+            exporter._counters["access_by_state"].add.assert_any_call(0, {"state": state})
+
+        # Verify maintenance status pre-initialized (2 series)
+        for status in ["success", "failure"]:
+            exporter._counters["maintenance_runs"].add.assert_any_call(0, {"status": status})
+
+        # Verify classification status pre-initialized (3 series)
+        for status in ["success", "failure", "fallback"]:
+            exporter._counters["classification_requests"].add.assert_any_call(0, {"status": status})
+
+        # Verify reactivation sources pre-initialized (2 series)
+        for from_state in ["DORMANT", "ARCHIVED"]:
+            exporter._counters["reactivations"].add.assert_any_call(0, {"from_state": from_state})
+
+        # Verify valid lifecycle transitions pre-initialized (7 series)
+        valid_transitions = [
+            ("ACTIVE", "DORMANT"),
+            ("DORMANT", "ARCHIVED"),
+            ("DORMANT", "ACTIVE"),
+            ("ARCHIVED", "EXPIRED"),
+            ("ARCHIVED", "ACTIVE"),
+            ("EXPIRED", "SOFT_DELETED"),
+            ("SOFT_DELETED", "ARCHIVED"),
+        ]
+        for from_state, to_state in valid_transitions:
+            exporter._counters["lifecycle_transitions"].add.assert_any_call(
+                0,
+                {"from_state": from_state, "to_state": to_state}
+            )
+
 
 class TestGlobalAccessorFunctions:
     """Test global accessor functions for metrics exporters."""
