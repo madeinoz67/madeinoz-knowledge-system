@@ -28,7 +28,7 @@
         "textMode": "value"
       },
       "pluginVersion": "10.0.0",
-      "targets": [{"expr": "max_over_time(sum(knowledge_memory_access_total)[1h])", "refId": "A"}],
+      "targets": [{"expr": "sum(max_over_time(knowledge_memory_access_total[1h]))", "refId": "A"}],
       "title": "Total Access Count",
       "type": "stat"
     },
