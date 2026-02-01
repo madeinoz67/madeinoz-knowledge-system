@@ -149,8 +149,8 @@ services:
     volumes:
       - grafana-data:/var/lib/grafana
       - ../../../config/monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
-      - ../../../config/monitoring/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
-      - ../../../config/monitoring/grafana/provisioning/dashboards:/var/lib/grafana/dashboards:ro
+      - ../../../config/monitoring/grafana/knowledge-system/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ../../../config/monitoring/grafana/knowledge-system/dashboards:/var/lib/grafana/dashboards:ro
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}

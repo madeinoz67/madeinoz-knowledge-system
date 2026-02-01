@@ -368,8 +368,8 @@ Track memory access patterns during search operations to validate decay scoring 
 # Access rate by importance (per second)
 sum(rate(knowledge_access_by_importance_total[5m])) by (level)
 
-# Access distribution by state
-max_over_time(knowledge_access_by_state_total[1h])
+# Access distribution by state (current values)
+knowledge_access_by_state_total
 
 # Reactivation rate (last hour)
 increase(knowledge_reactivations_total[1h])
@@ -431,6 +431,46 @@ Alert rules are defined in `config/monitoring/prometheus/alerts/knowledge.yml`:
 | `SoftDeleteBacklog` | > 1000 awaiting purge | warning |
 
 ## Prometheus Integration
+
+### Metrics Naming Conventions
+
+The system follows **OpenTelemetry Semantic Conventions** for metric naming:
+
+| Convention | Implementation |
+|------------|----------------|
+| **Units in metadata** | Units specified via `unit` field in Grafana, not in metric names |
+| **No unit suffixes** | Metrics use `_total` for counters, not `_cost_total_usd` or `_tokens_total_count` |
+| **Descriptive base** | Metric names describe what is measured (e.g., `api_cost`, `total_tokens`) |
+| **Counter suffix** | All cumulative counters use `_total` suffix per OpenTelemetry convention |
+
+**Examples of correct naming:**
+
+| Metric | Correct | Incorrect |
+|--------|---------|-----------|
+| API cost | `graphiti_api_cost_total` | `graphiti_api_cost_USD_total` |
+| Cache hit rate | `graphiti_cache_hit_rate` | `graphiti_cache_hit_rate_percent` |
+| Tokens saved | `graphiti_cache_tokens_saved_total` | `graphiti_cache_tokens_saved_count` |
+
+**Dashboard unit configuration:**
+
+Instead of embedding units in metric names, Grafana dashboards use the `unit` field to display appropriate units:
+- `currencyUSD` - Cost metrics display in USD
+- `short` - Count metrics display as plain numbers
+- `percent` - Rate metrics display as percentages
+- `seconds` - Duration metrics display in seconds
+- `locale` - Token count display with locale formatting
+
+### Handling Service Restarts
+
+Counter metrics reset to zero when the service restarts, which causes `rate()` calculations to show brief gaps or spikes in visualizations. This is expected Prometheus behavior for counter resets.
+
+**Current dashboard behavior:**
+
+- `rate()` queries will briefly show gaps during counter resets
+- Grafana automatically interpolates across short gaps
+- For longer gaps, consider increasing the scrape interval
+
+**Note:** Time-over-time functions like `max_over_time()` cannot wrap `rate()` results in PromQL. They must wrap range vector selectors directly (e.g., `max_over_time(metric[1h])`). For rate-based metrics, accepting brief gaps during restarts is the standard approach.
 
 ### Scrape Configuration
 
@@ -718,7 +758,7 @@ If building a custom dashboard, use these PromQL queries:
 **Usage & Cost:**
 
 1. **Token Usage Rate** - `rate(graphiti_total_tokens_all_models_total[5m])`
-2. **Cost Rate ($/hour)** - `rate(graphiti_api_cost_all_models_total[1h]) * 3600`
+2. **Cost Rate ($/hour)** - `rate(graphiti_api_cost_all_models_total[5m]) * 3600`
 3. **Request Cost Distribution** - Histogram panel with `graphiti_api_cost_per_request_bucket`
 4. **Token Usage by Model** - `sum by (model) (rate(graphiti_total_tokens_total[5m]))`
 
@@ -730,8 +770,8 @@ If building a custom dashboard, use these PromQL queries:
 
 **Caching (when enabled):**
 
-8. **Cache Hit Rate** - `graphiti_cache_hit_rate`
-9. **Cost Savings Rate** - `rate(graphiti_cache_cost_saved_all_models_total[1h]) * 3600`
+8. **Cache Hit Rate** - `graphiti_cache_hit_rate` (gauge metric)
+9. **Cost Savings Rate** - `rate(graphiti_cache_cost_saved_all_models_total[5m]) * 3600`
 10. **Tokens Saved** - `increase(graphiti_cache_tokens_saved_all_models_total[1h])`
 
 ## Troubleshooting

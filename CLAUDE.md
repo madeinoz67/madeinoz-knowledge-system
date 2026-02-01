@@ -146,6 +146,8 @@ git push origin :refs/tags/v1.x.x
 - N/A (dashboard configuration only) (013-prompt-cache-dashboard)
 - Python 3.11+ + OpenTelemetry Prometheus exporter, Graphiti MCP server (015-memory-access-metrics)
 - Neo4j / FalkorDB (existing graph database) (015-memory-access-metrics)
+- PromQL (Prometheus Query Language), JSON (Grafana dashboard format) + Grafana 10.x, Prometheus (scraping OpenTelemetry metrics) (016-prometheus-dashboard-fixes)
+- N/A (dashboard configuration files only) (016-prometheus-dashboard-fixes)
 
 ## Recent Changes
 - 013-prompt-cache-dashboard: Added JSON (Grafana dashboard configuration) + Grafana (provisioned), Prometheus (data source), existing metrics from PR #34
