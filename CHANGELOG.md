@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add Memory Access Patterns dashboard ([#42](https://github.com/madeinoz67/madeinoz-knowledge-system/issues/42))
 - Add memory access pattern instrumentation ([#41](https://github.com/madeinoz67/madeinoz-knowledge-system/issues/41)) ([#43](https://github.com/madeinoz67/madeinoz-knowledge-system/issues/43))
 
+
+### Fixed
+
+
+- Prometheus dashboard queries and observability improvements ([#44](https://github.com/madeinoz67/madeinoz-knowledge-system/issues/44))
+
 ## [1.7.2] - 2026-01-31
 
 
