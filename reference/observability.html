@@ -1534,6 +1534,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#memory-access-pattern-metrics-feature-015" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory Access Pattern Metrics (Feature 015)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#example-promql-queries" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1571,6 +1582,28 @@
   
     <nav class="md-nav" aria-label="Prometheus Integration">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#metrics-naming-conventions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Metrics Naming Conventions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handling-service-restarts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Handling Service Restarts
+      
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#scrape-configuration" class="md-nav__link">
@@ -1667,10 +1700,43 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#customizing-the-dashboard" class="md-nav__link">
+  <a href="#available-dashboards" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Customizing the Dashboard
+        Available Dashboards
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prompt-cache-effectiveness-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prompt Cache Effectiveness Dashboard
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#memory-access-patterns-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory Access Patterns Dashboard
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#customizing-dashboards" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Customizing Dashboards
       
     </span>
   </a>
@@ -2391,6 +2457,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#memory-access-pattern-metrics-feature-015" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory Access Pattern Metrics (Feature 015)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#example-promql-queries" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2428,6 +2505,28 @@
   
     <nav class="md-nav" aria-label="Prometheus Integration">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#metrics-naming-conventions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Metrics Naming Conventions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handling-service-restarts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Handling Service Restarts
+      
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#scrape-configuration" class="md-nav__link">
@@ -2524,10 +2623,43 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#customizing-the-dashboard" class="md-nav__link">
+  <a href="#available-dashboards" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Customizing the Dashboard
+        Available Dashboards
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prompt-cache-effectiveness-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prompt Cache Effectiveness Dashboard
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#memory-access-patterns-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory Access Patterns Dashboard
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#customizing-dashboards" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Customizing Dashboards
       
     </span>
   </a>
@@ -3413,25 +3545,156 @@
 </tr>
 </tbody>
 </table>
+<h3 id="memory-access-pattern-metrics-feature-015">Memory Access Pattern Metrics (Feature 015)<a class="headerlink" href="#memory-access-pattern-metrics-feature-015" title="Permanent link">¶</a></h3>
+<p>Track memory access patterns during search operations to validate decay scoring effectiveness.</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Labels</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>knowledge_access_by_importance_total</code></td>
+<td><code>level</code></td>
+<td>Cumulative accesses by importance level (LOW/MEDIUM/HIGH/CRITICAL)</td>
+</tr>
+<tr>
+<td><code>knowledge_access_by_state_total</code></td>
+<td><code>state</code></td>
+<td>Cumulative accesses by lifecycle state (ACTIVE/DORMANT/ARCHIVED/PERMANENT)</td>
+</tr>
+<tr>
+<td><code>knowledge_days_since_last_access</code></td>
+<td>-</td>
+<td>Histogram of days since memory was last accessed</td>
+</tr>
+<tr>
+<td><code>knowledge_reactivations_total</code></td>
+<td><code>from_state</code></td>
+<td>Memories reactivated from DORMANT/ARCHIVED to ACTIVE</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Importance level mapping:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Score</th>
+<th>Label</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1-2</td>
+<td>LOW</td>
+<td>Lower priority memories</td>
+</tr>
+<tr>
+<td>3</td>
+<td>MEDIUM</td>
+<td>Standard importance (default)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>HIGH</td>
+<td>Important memories</td>
+</tr>
+<tr>
+<td>5</td>
+<td>CRITICAL</td>
+<td>Core/foundational memories</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Days histogram bucket boundaries:</strong></p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>1, 7, 30, 90, 180, 365, 730, 1095
+</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Bucket</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>1 day ago</td>
+</tr>
+<tr>
+<td>7</td>
+<td>1 week ago</td>
+</tr>
+<tr>
+<td>30</td>
+<td>1 month ago</td>
+</tr>
+<tr>
+<td>90</td>
+<td>3 months ago</td>
+</tr>
+<tr>
+<td>180</td>
+<td>6 months (half-life threshold)</td>
+</tr>
+<tr>
+<td>365</td>
+<td>1 year ago</td>
+</tr>
+<tr>
+<td>730</td>
+<td>2 years ago</td>
+</tr>
+<tr>
+<td>1095</td>
+<td>3+ years ago</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Metric Recording Behavior</p>
+<p>Access pattern metrics are recorded during <code>search_memory_nodes</code> and <code>search_memory_facts</code> operations. The histogram only records when nodes have a <code>last_accessed_at</code> attribute set.</p>
+</div>
+<p><strong>Access Pattern PromQL Queries:</strong></p>
+<div class="language-promql highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1"># Access rate by importance (per second)</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="k">sum</span><span class="o">(</span><span class="kr">rate</span><span class="o">(</span><span class="nv">knowledge_access_by_importance_total</span><span class="p">[</span><span class="s">5m</span><span class="p">]</span><span class="o">))</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="o">(</span><span class="nv">level</span><span class="o">)</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="c1"># Access distribution by state (current values)</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="nv">knowledge_access_by_state_total</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="c1"># Reactivation rate (last hour)</span>
+</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="kr">increase</span><span class="o">(</span><span class="nv">knowledge_reactivations_total</span><span class="p">[</span><span class="s">1h</span><span class="p">]</span><span class="o">)</span>
+</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>
+</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="c1"># Age distribution heatmap</span>
+</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="k">sum</span><span class="o">(</span><span class="kr">rate</span><span class="o">(</span><span class="nv">knowledge_days_since_last_access_bucket</span><span class="p">[</span><span class="s">5m</span><span class="p">]</span><span class="o">))</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="o">(</span><span class="nv">le</span><span class="o">)</span>
+</span><span id="__span-11-12"><a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>
+</span><span id="__span-11-13"><a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a><span class="c1"># Access vs decay correlation (dual-axis)</span>
+</span><span id="__span-11-14"><a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a><span class="c1"># Left axis: rate(knowledge_access_by_importance_total[5m])</span>
+</span><span id="__span-11-15"><a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a><span class="c1"># Right axis: knowledge_decay_score_avg</span>
+</span></code></pre></div>
 <h3 id="example-promql-queries">Example PromQL Queries<a class="headerlink" href="#example-promql-queries" title="Permanent link">¶</a></h3>
 <p><strong>Maintenance success rate (last 24 hours):</strong></p>
-<div class="language-promql highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">sum</span><span class="o">(</span><span class="kr">increase</span><span class="o">(</span><span class="nv">knowledge_decay_maintenance_runs_total</span><span class="p">{</span><span class="nl">status</span><span class="o">=</span><span class="p">"</span><span class="s">success</span><span class="p">"}[</span><span class="s">24h</span><span class="p">]</span><span class="o">))</span>
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="o">/</span>
-</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="k">sum</span><span class="o">(</span><span class="kr">increase</span><span class="o">(</span><span class="nv">knowledge_decay_maintenance_runs_total</span><span class="p">[</span><span class="s">24h</span><span class="p">]</span><span class="o">))</span>
+<div class="language-promql highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="k">sum</span><span class="o">(</span><span class="kr">increase</span><span class="o">(</span><span class="nv">knowledge_decay_maintenance_runs_total</span><span class="p">{</span><span class="nl">status</span><span class="o">=</span><span class="p">"</span><span class="s">success</span><span class="p">"}[</span><span class="s">24h</span><span class="p">]</span><span class="o">))</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="o">/</span>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="k">sum</span><span class="o">(</span><span class="kr">increase</span><span class="o">(</span><span class="nv">knowledge_decay_maintenance_runs_total</span><span class="p">[</span><span class="s">24h</span><span class="p">]</span><span class="o">))</span>
 </span></code></pre></div>
 <p><strong>State distribution:</strong></p>
-<div class="language-promql highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nv">knowledge_memories_by_state</span>
+<div class="language-promql highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nv">knowledge_memories_by_state</span>
 </span></code></pre></div>
 <p><strong>Classification fallback rate:</strong></p>
-<div class="language-promql highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="k">sum</span><span class="o">(</span><span class="kr">rate</span><span class="o">(</span><span class="nv">knowledge_classification_requests_total</span><span class="p">{</span><span class="nl">status</span><span class="o">=</span><span class="p">"</span><span class="s">fallback</span><span class="p">"}[</span><span class="s">5m</span><span class="p">]</span><span class="o">))</span>
-</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="o">/</span>
-</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="k">sum</span><span class="o">(</span><span class="kr">rate</span><span class="o">(</span><span class="nv">knowledge_classification_requests_total</span><span class="p">[</span><span class="s">5m</span><span class="p">]</span><span class="o">))</span>
+<div class="language-promql highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="k">sum</span><span class="o">(</span><span class="kr">rate</span><span class="o">(</span><span class="nv">knowledge_classification_requests_total</span><span class="p">{</span><span class="nl">status</span><span class="o">=</span><span class="p">"</span><span class="s">fallback</span><span class="p">"}[</span><span class="s">5m</span><span class="p">]</span><span class="o">))</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="o">/</span>
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="k">sum</span><span class="o">(</span><span class="kr">rate</span><span class="o">(</span><span class="nv">knowledge_classification_requests_total</span><span class="p">[</span><span class="s">5m</span><span class="p">]</span><span class="o">))</span>
 </span></code></pre></div>
 <p><strong>Lifecycle transitions per hour:</strong></p>
-<div class="language-promql highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="k">sum</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="o">(</span><span class="nv">from_state</span><span class="p">,</span><span class="w"> </span><span class="nv">to_state</span><span class="o">)</span><span class="w"> </span><span class="o">(</span><span class="kr">increase</span><span class="o">(</span><span class="nv">knowledge_lifecycle_transitions_total</span><span class="p">[</span><span class="s">1h</span><span class="p">]</span><span class="o">))</span>
+<div class="language-promql highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="k">sum</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="o">(</span><span class="nv">from_state</span><span class="p">,</span><span class="w"> </span><span class="nv">to_state</span><span class="o">)</span><span class="w"> </span><span class="o">(</span><span class="kr">increase</span><span class="o">(</span><span class="nv">knowledge_lifecycle_transitions_total</span><span class="p">[</span><span class="s">1h</span><span class="p">]</span><span class="o">))</span>
 </span></code></pre></div>
 <p><strong>P95 classification latency:</strong></p>
-<div class="language-promql highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="kr">histogram_quantile</span><span class="o">(</span><span class="mf">0.95</span><span class="p">,</span><span class="w"> </span><span class="kr">rate</span><span class="o">(</span><span class="nv">knowledge_classification_latency_seconds_bucket</span><span class="p">[</span><span class="s">5m</span><span class="p">]</span><span class="o">))</span>
+<div class="language-promql highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="kr">histogram_quantile</span><span class="o">(</span><span class="mf">0.95</span><span class="p">,</span><span class="w"> </span><span class="kr">rate</span><span class="o">(</span><span class="nv">knowledge_classification_latency_seconds_bucket</span><span class="p">[</span><span class="s">5m</span><span class="p">]</span><span class="o">))</span>
 </span></code></pre></div>
 <h3 id="alert-rules">Alert Rules<a class="headerlink" href="#alert-rules" title="Permanent link">¶</a></h3>
 <p>Alert rules are defined in <code>config/monitoring/prometheus/alerts/knowledge.yml</code>:</p>
@@ -3472,51 +3735,122 @@
 </tbody>
 </table>
 <h2 id="prometheus-integration">Prometheus Integration<a class="headerlink" href="#prometheus-integration" title="Permanent link">¶</a></h2>
+<h3 id="metrics-naming-conventions">Metrics Naming Conventions<a class="headerlink" href="#metrics-naming-conventions" title="Permanent link">¶</a></h3>
+<p>The system follows <strong>OpenTelemetry Semantic Conventions</strong> for metric naming:</p>
+<table>
+<thead>
+<tr>
+<th>Convention</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Units in metadata</strong></td>
+<td>Units specified via <code>unit</code> field in Grafana, not in metric names</td>
+</tr>
+<tr>
+<td><strong>No unit suffixes</strong></td>
+<td>Metrics use <code>_total</code> for counters, not <code>_cost_total_usd</code> or <code>_tokens_total_count</code></td>
+</tr>
+<tr>
+<td><strong>Descriptive base</strong></td>
+<td>Metric names describe what is measured (e.g., <code>api_cost</code>, <code>total_tokens</code>)</td>
+</tr>
+<tr>
+<td><strong>Counter suffix</strong></td>
+<td>All cumulative counters use <code>_total</code> suffix per OpenTelemetry convention</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Examples of correct naming:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Correct</th>
+<th>Incorrect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API cost</td>
+<td><code>graphiti_api_cost_total</code></td>
+<td><code>graphiti_api_cost_USD_total</code></td>
+</tr>
+<tr>
+<td>Cache hit rate</td>
+<td><code>graphiti_cache_hit_rate</code></td>
+<td><code>graphiti_cache_hit_rate_percent</code></td>
+</tr>
+<tr>
+<td>Tokens saved</td>
+<td><code>graphiti_cache_tokens_saved_total</code></td>
+<td><code>graphiti_cache_tokens_saved_count</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Dashboard unit configuration:</strong></p>
+<p>Instead of embedding units in metric names, Grafana dashboards use the <code>unit</code> field to display appropriate units:
+- <code>currencyUSD</code> - Cost metrics display in USD
+- <code>short</code> - Count metrics display as plain numbers
+- <code>percent</code> - Rate metrics display as percentages
+- <code>seconds</code> - Duration metrics display in seconds
+- <code>locale</code> - Token count display with locale formatting</p>
+<h3 id="handling-service-restarts">Handling Service Restarts<a class="headerlink" href="#handling-service-restarts" title="Permanent link">¶</a></h3>
+<p>Counter metrics reset to zero when the service restarts, which causes <code>rate()</code> calculations to show brief gaps or spikes in visualizations. This is expected Prometheus behavior for counter resets.</p>
+<p><strong>Current dashboard behavior:</strong></p>
+<ul>
+<li><code>rate()</code> queries will briefly show gaps during counter resets</li>
+<li>Grafana automatically interpolates across short gaps</li>
+<li>For longer gaps, consider increasing the scrape interval</li>
+</ul>
+<p><strong>Note:</strong> Time-over-time functions like <code>max_over_time()</code> cannot wrap <code>rate()</code> results in PromQL. They must wrap range vector selectors directly (e.g., <code>max_over_time(metric[1h])</code>). For rate-based metrics, accepting brief gaps during restarts is the standard approach.</p>
 <h3 id="scrape-configuration">Scrape Configuration<a class="headerlink" href="#scrape-configuration" title="Permanent link">¶</a></h3>
 <p>Add to your <code>prometheus.yml</code>:</p>
-<div class="language-yaml highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="nt">scrape_configs</span><span class="p">:</span>
-</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">job_name</span><span class="p">:</span><span class="w"> </span><span class="s">'madeinoz-knowledge'</span>
-</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="w">    </span><span class="nt">static_configs</span><span class="p">:</span>
-</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">'localhost:9091'</span><span class="p p-Indicator">]</span><span class="w">  </span><span class="c1"># dev port</span>
-</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="w">    </span><span class="nt">scrape_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">15s</span>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="nt">scrape_configs</span><span class="p">:</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">job_name</span><span class="p">:</span><span class="w"> </span><span class="s">'madeinoz-knowledge'</span>
+</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="w">    </span><span class="nt">static_configs</span><span class="p">:</span>
+</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">'localhost:9091'</span><span class="p p-Indicator">]</span><span class="w">  </span><span class="c1"># dev port</span>
+</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="w">    </span><span class="nt">scrape_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">15s</span>
 </span></code></pre></div>
 <h3 id="example-promql-queries_1">Example PromQL Queries<a class="headerlink" href="#example-promql-queries_1" title="Permanent link">¶</a></h3>
 <p><strong>Token usage in last hour:</strong></p>
-<div class="language-promql highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="kr">increase</span><span class="o">(</span><span class="nv">graphiti_total_tokens_all_models_total</span><span class="p">[</span><span class="s">1h</span><span class="p">]</span><span class="o">)</span>
+<div class="language-promql highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="kr">increase</span><span class="o">(</span><span class="nv">graphiti_total_tokens_all_models_total</span><span class="p">[</span><span class="s">1h</span><span class="p">]</span><span class="o">)</span>
 </span></code></pre></div>
 <p><strong>Tokens per model:</strong></p>
-<div class="language-promql highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="k">sum</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="o">(</span><span class="nv">model</span><span class="o">)</span><span class="w"> </span><span class="o">(</span><span class="kr">increase</span><span class="o">(</span><span class="nv">graphiti_total_tokens_total</span><span class="p">[</span><span class="s">1h</span><span class="p">]</span><span class="o">))</span>
+<div class="language-promql highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="k">sum</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="o">(</span><span class="nv">model</span><span class="o">)</span><span class="w"> </span><span class="o">(</span><span class="kr">increase</span><span class="o">(</span><span class="nv">graphiti_total_tokens_total</span><span class="p">[</span><span class="s">1h</span><span class="p">]</span><span class="o">))</span>
 </span></code></pre></div>
 <p><strong>Total cost in last 24 hours:</strong></p>
-<div class="language-promql highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="kr">increase</span><span class="o">(</span><span class="nv">graphiti_api_cost_all_models_total</span><span class="p">[</span><span class="s">24h</span><span class="p">]</span><span class="o">)</span>
+<div class="language-promql highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="kr">increase</span><span class="o">(</span><span class="nv">graphiti_api_cost_all_models_total</span><span class="p">[</span><span class="s">24h</span><span class="p">]</span><span class="o">)</span>
 </span></code></pre></div>
 <p><strong>Cost per model:</strong></p>
-<div class="language-promql highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="k">sum</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="o">(</span><span class="nv">model</span><span class="o">)</span><span class="w"> </span><span class="o">(</span><span class="kr">increase</span><span class="o">(</span><span class="nv">graphiti_api_cost_total</span><span class="p">[</span><span class="s">24h</span><span class="p">]</span><span class="o">))</span>
+<div class="language-promql highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="k">sum</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="o">(</span><span class="nv">model</span><span class="o">)</span><span class="w"> </span><span class="o">(</span><span class="kr">increase</span><span class="o">(</span><span class="nv">graphiti_api_cost_total</span><span class="p">[</span><span class="s">24h</span><span class="p">]</span><span class="o">))</span>
 </span></code></pre></div>
 <p><strong>P95 cost per request:</strong></p>
-<div class="language-promql highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="kr">histogram_quantile</span><span class="o">(</span><span class="mf">0.95</span><span class="p">,</span><span class="w"> </span><span class="kr">rate</span><span class="o">(</span><span class="nv">graphiti_api_cost_per_request_bucket</span><span class="p">[</span><span class="s">5m</span><span class="p">]</span><span class="o">))</span>
+<div class="language-promql highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="kr">histogram_quantile</span><span class="o">(</span><span class="mf">0.95</span><span class="p">,</span><span class="w"> </span><span class="kr">rate</span><span class="o">(</span><span class="nv">graphiti_api_cost_per_request_bucket</span><span class="p">[</span><span class="s">5m</span><span class="p">]</span><span class="o">))</span>
 </span></code></pre></div>
 <p><strong>P99 tokens per request:</strong></p>
-<div class="language-promql highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="kr">histogram_quantile</span><span class="o">(</span><span class="mf">0.99</span><span class="p">,</span><span class="w"> </span><span class="kr">rate</span><span class="o">(</span><span class="nv">graphiti_total_tokens_per_request_bucket</span><span class="p">[</span><span class="s">5m</span><span class="p">]</span><span class="o">))</span>
+<div class="language-promql highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="kr">histogram_quantile</span><span class="o">(</span><span class="mf">0.99</span><span class="p">,</span><span class="w"> </span><span class="kr">rate</span><span class="o">(</span><span class="nv">graphiti_total_tokens_per_request_bucket</span><span class="p">[</span><span class="s">5m</span><span class="p">]</span><span class="o">))</span>
 </span></code></pre></div>
 <p><strong>Median (P50) cost per request:</strong></p>
-<div class="language-promql highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="kr">histogram_quantile</span><span class="o">(</span><span class="mf">0.50</span><span class="p">,</span><span class="w"> </span><span class="kr">rate</span><span class="o">(</span><span class="nv">graphiti_api_cost_per_request_bucket</span><span class="p">[</span><span class="s">5m</span><span class="p">]</span><span class="o">))</span>
+<div class="language-promql highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="kr">histogram_quantile</span><span class="o">(</span><span class="mf">0.50</span><span class="p">,</span><span class="w"> </span><span class="kr">rate</span><span class="o">(</span><span class="nv">graphiti_api_cost_per_request_bucket</span><span class="p">[</span><span class="s">5m</span><span class="p">]</span><span class="o">))</span>
 </span></code></pre></div>
 <p><strong>P95 request duration:</strong></p>
-<div class="language-promql highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="kr">histogram_quantile</span><span class="o">(</span><span class="mf">0.95</span><span class="p">,</span><span class="w"> </span><span class="kr">rate</span><span class="o">(</span><span class="nv">graphiti_llm_request_duration_seconds_bucket</span><span class="p">[</span><span class="s">5m</span><span class="p">]</span><span class="o">))</span>
+<div class="language-promql highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="kr">histogram_quantile</span><span class="o">(</span><span class="mf">0.95</span><span class="p">,</span><span class="w"> </span><span class="kr">rate</span><span class="o">(</span><span class="nv">graphiti_llm_request_duration_seconds_bucket</span><span class="p">[</span><span class="s">5m</span><span class="p">]</span><span class="o">))</span>
 </span></code></pre></div>
 <p><strong>Average request duration:</strong></p>
-<div class="language-promql highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="kr">rate</span><span class="o">(</span><span class="nv">graphiti_llm_request_duration_seconds_sum</span><span class="p">[</span><span class="s">5m</span><span class="p">]</span><span class="o">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="kr">rate</span><span class="o">(</span><span class="nv">graphiti_llm_request_duration_seconds_count</span><span class="p">[</span><span class="s">5m</span><span class="p">]</span><span class="o">)</span>
+<div class="language-promql highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="kr">rate</span><span class="o">(</span><span class="nv">graphiti_llm_request_duration_seconds_sum</span><span class="p">[</span><span class="s">5m</span><span class="p">]</span><span class="o">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="kr">rate</span><span class="o">(</span><span class="nv">graphiti_llm_request_duration_seconds_count</span><span class="p">[</span><span class="s">5m</span><span class="p">]</span><span class="o">)</span>
 </span></code></pre></div>
 <p><strong>Error rate by model:</strong></p>
-<div class="language-promql highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="k">sum</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="o">(</span><span class="nv">model</span><span class="o">)</span><span class="w"> </span><span class="o">(</span><span class="kr">rate</span><span class="o">(</span><span class="nv">graphiti_llm_errors_total</span><span class="p">[</span><span class="s">5m</span><span class="p">]</span><span class="o">))</span>
+<div class="language-promql highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="k">sum</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="o">(</span><span class="nv">model</span><span class="o">)</span><span class="w"> </span><span class="o">(</span><span class="kr">rate</span><span class="o">(</span><span class="nv">graphiti_llm_errors_total</span><span class="p">[</span><span class="s">5m</span><span class="p">]</span><span class="o">))</span>
 </span></code></pre></div>
 <h2 id="understanding-histogram-buckets">Understanding Histogram Buckets<a class="headerlink" href="#understanding-histogram-buckets" title="Permanent link">¶</a></h2>
 <p>Prometheus histograms are <strong>cumulative</strong>. Each bucket shows the count of observations <strong>less than or equal to</strong> that boundary.</p>
 <p><strong>Example output:</strong></p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>graphiti_api_cost_per_request_USD_bucket{le="0.0001"} 2.0
-</span><span id="__span-26-2"><a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>graphiti_api_cost_per_request_USD_bucket{le="0.00025"} 5.0
-</span><span id="__span-26-3"><a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>graphiti_api_cost_per_request_USD_bucket{le="0.0005"} 5.0
+<div class="language-text highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>graphiti_api_cost_per_request_USD_bucket{le="0.0001"} 2.0
+</span><span id="__span-28-2"><a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>graphiti_api_cost_per_request_USD_bucket{le="0.00025"} 5.0
+</span><span id="__span-28-3"><a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a>graphiti_api_cost_per_request_USD_bucket{le="0.0005"} 5.0
 </span></code></pre></div>
 <p><strong>Interpretation:</strong></p>
 <ul>
@@ -3528,30 +3862,30 @@
 <p>The system includes a pre-configured Grafana dashboard with comprehensive monitoring panels.</p>
 <h3 id="quick-start-development">Quick Start (Development)<a class="headerlink" href="#quick-start-development" title="Permanent link">¶</a></h3>
 <p>The development environment includes Prometheus and Grafana by default:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="c1"># Start dev environment with monitoring</span>
-</span><span id="__span-27-2"><a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>src/skills/server/docker-compose-neo4j-dev.yml<span class="w"> </span>up<span class="w"> </span>-d
-</span><span id="__span-27-3"><a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a>
-</span><span id="__span-27-4"><a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a><span class="c1"># Access points:</span>
-</span><span id="__span-27-5"><a id="__codelineno-27-5" name="__codelineno-27-5" href="#__codelineno-27-5"></a><span class="c1"># - Grafana: http://localhost:3002 (login: admin/admin)</span>
-</span><span id="__span-27-6"><a id="__codelineno-27-6" name="__codelineno-27-6" href="#__codelineno-27-6"></a><span class="c1"># - Prometheus UI: http://localhost:9092</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="c1"># Start dev environment with monitoring</span>
+</span><span id="__span-29-2"><a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>src/skills/server/docker-compose-neo4j-dev.yml<span class="w"> </span>up<span class="w"> </span>-d
+</span><span id="__span-29-3"><a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a>
+</span><span id="__span-29-4"><a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a><span class="c1"># Access points:</span>
+</span><span id="__span-29-5"><a id="__codelineno-29-5" name="__codelineno-29-5" href="#__codelineno-29-5"></a><span class="c1"># - Grafana: http://localhost:3002 (login: admin/admin)</span>
+</span><span id="__span-29-6"><a id="__codelineno-29-6" name="__codelineno-29-6" href="#__codelineno-29-6"></a><span class="c1"># - Prometheus UI: http://localhost:9092</span>
 </span></code></pre></div>
 <h3 id="production-setup-optional">Production Setup (Optional)<a class="headerlink" href="#production-setup-optional" title="Permanent link">¶</a></h3>
 <p>Production monitoring uses Docker Compose profiles and is disabled by default:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="c1"># Start with monitoring enabled</span>
-</span><span id="__span-28-2"><a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>src/skills/server/docker-compose-neo4j.yml<span class="w"> </span>--profile<span class="w"> </span>monitoring<span class="w"> </span>up<span class="w"> </span>-d
-</span><span id="__span-28-3"><a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a>
-</span><span id="__span-28-4"><a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a><span class="c1"># Start without monitoring (default)</span>
-</span><span id="__span-28-5"><a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>src/skills/server/docker-compose-neo4j.yml<span class="w"> </span>up<span class="w"> </span>-d
-</span><span id="__span-28-6"><a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a>
-</span><span id="__span-28-7"><a id="__codelineno-28-7" name="__codelineno-28-7" href="#__codelineno-28-7"></a><span class="c1"># Access points (when enabled):</span>
-</span><span id="__span-28-8"><a id="__codelineno-28-8" name="__codelineno-28-8" href="#__codelineno-28-8"></a><span class="c1"># - Grafana: http://localhost:3001 (login: admin/admin or custom password)</span>
-</span><span id="__span-28-9"><a id="__codelineno-28-9" name="__codelineno-28-9" href="#__codelineno-28-9"></a><span class="c1"># - Prometheus UI: http://localhost:9092</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="c1"># Start with monitoring enabled</span>
+</span><span id="__span-30-2"><a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>src/skills/server/docker-compose-neo4j.yml<span class="w"> </span>--profile<span class="w"> </span>monitoring<span class="w"> </span>up<span class="w"> </span>-d
+</span><span id="__span-30-3"><a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a>
+</span><span id="__span-30-4"><a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a><span class="c1"># Start without monitoring (default)</span>
+</span><span id="__span-30-5"><a id="__codelineno-30-5" name="__codelineno-30-5" href="#__codelineno-30-5"></a>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>src/skills/server/docker-compose-neo4j.yml<span class="w"> </span>up<span class="w"> </span>-d
+</span><span id="__span-30-6"><a id="__codelineno-30-6" name="__codelineno-30-6" href="#__codelineno-30-6"></a>
+</span><span id="__span-30-7"><a id="__codelineno-30-7" name="__codelineno-30-7" href="#__codelineno-30-7"></a><span class="c1"># Access points (when enabled):</span>
+</span><span id="__span-30-8"><a id="__codelineno-30-8" name="__codelineno-30-8" href="#__codelineno-30-8"></a><span class="c1"># - Grafana: http://localhost:3001 (login: admin/admin or custom password)</span>
+</span><span id="__span-30-9"><a id="__codelineno-30-9" name="__codelineno-30-9" href="#__codelineno-30-9"></a><span class="c1"># - Prometheus UI: http://localhost:9092</span>
 </span></code></pre></div>
 <div class="admonition tip">
 <p class="admonition-title">Custom Grafana Password</p>
 <p>Set <code>GRAFANA_ADMIN_PASSWORD</code> environment variable for a secure password:
-</p><div class="language-bash highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">GRAFANA_ADMIN_PASSWORD</span><span class="o">=</span>your-secure-password
-</span><span id="__span-29-2"><a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>src/skills/server/docker-compose-neo4j.yml<span class="w"> </span>--profile<span class="w"> </span>monitoring<span class="w"> </span>up<span class="w"> </span>-d
+</p><div class="language-bash highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">GRAFANA_ADMIN_PASSWORD</span><span class="o">=</span>your-secure-password
+</span><span id="__span-31-2"><a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>src/skills/server/docker-compose-neo4j.yml<span class="w"> </span>--profile<span class="w"> </span>monitoring<span class="w"> </span>up<span class="w"> </span>-d
 </span></code></pre></div><p></p>
 </div>
 <h3 id="dashboard-panels">Dashboard Panels<a class="headerlink" href="#dashboard-panels" title="Permanent link">¶</a></h3>
@@ -3640,9 +3974,196 @@
 </tr>
 </tbody>
 </table>
-<h3 id="customizing-the-dashboard">Customizing the Dashboard<a class="headerlink" href="#customizing-the-dashboard" title="Permanent link">¶</a></h3>
-<p>The dashboard configuration is stored at:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>config/monitoring/grafana/provisioning/dashboards/madeinoz-knowledge.json
+<h3 id="available-dashboards">Available Dashboards<a class="headerlink" href="#available-dashboards" title="Permanent link">¶</a></h3>
+<p>The system includes multiple pre-configured Grafana dashboards:</p>
+<table>
+<thead>
+<tr>
+<th>Dashboard</th>
+<th>UID</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Graph Health</strong></td>
+<td><code>graph-health-dashboard</code></td>
+<td>Entity states, episodes, operation rates, error tracking</td>
+</tr>
+<tr>
+<td><strong>Memory Decay</strong></td>
+<td><code>memory-decay-dashboard</code></td>
+<td>Lifecycle transitions, maintenance operations, classification metrics</td>
+</tr>
+<tr>
+<td><strong>Memory Access Patterns</strong></td>
+<td><code>memory-access-dashboard</code></td>
+<td>Access distribution by importance/state, reactivation tracking, decay correlation</td>
+</tr>
+<tr>
+<td><strong>Knowledge System</strong></td>
+<td><code>madeinoz-knowledge</code></td>
+<td>Token usage, cost tracking, request duration, cache performance</td>
+</tr>
+<tr>
+<td><strong>Prompt Cache Effectiveness</strong></td>
+<td><code>prompt-cache-effectiveness</code></td>
+<td>Cache ROI, hit/miss patterns, write overhead, per-model comparison</td>
+</tr>
+</tbody>
+</table>
+<h3 id="prompt-cache-effectiveness-dashboard">Prompt Cache Effectiveness Dashboard<a class="headerlink" href="#prompt-cache-effectiveness-dashboard" title="Permanent link">¶</a></h3>
+<p><strong>Purpose</strong>: Dedicated monitoring for Gemini prompt caching performance and ROI</p>
+<p><strong>Access</strong>: <code>http://localhost:3002/d/prompt-cache-effectiveness</code> (dev)</p>
+<p><strong>Panels</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Panel</th>
+<th>Metric</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Total Cost Savings</strong></td>
+<td><code>graphiti_cache_cost_saved_all_models_total</code></td>
+<td>USD saved from caching (uses time-over-time for restart resilience)</td>
+</tr>
+<tr>
+<td><strong>Hit Rate</strong></td>
+<td><code>graphiti_cache_hit_rate</code></td>
+<td>Current cache hit percentage (gauge: &gt;50% green, 20-50% yellow, &lt;20% red)</td>
+</tr>
+<tr>
+<td><strong>Tokens Saved</strong></td>
+<td><code>graphiti_cache_tokens_saved_all_models_total</code></td>
+<td>Total tokens saved from caching</td>
+</tr>
+<tr>
+<td><strong>Tokens Written</strong></td>
+<td><code>graphiti_cache_write_tokens_all_models_total</code></td>
+<td>Tokens consumed to create cache entries (overhead)</td>
+</tr>
+<tr>
+<td><strong>Savings Rate</strong></td>
+<td><code>rate(...[1h]) * 3600</code></td>
+<td>Cost savings per hour trend</td>
+</tr>
+<tr>
+<td><strong>Hit Rate Trend</strong></td>
+<td><code>graphiti_cache_hit_rate</code></td>
+<td>Hit rate over time for anomaly detection</td>
+</tr>
+<tr>
+<td><strong>Hits vs Misses</strong></td>
+<td>Dual time series</td>
+<td>Comparison of cache hits vs misses rate</td>
+</tr>
+<tr>
+<td><strong>Tokens Saved Distribution</strong></td>
+<td><code>graphiti_cache_tokens_saved_per_request_bucket</code></td>
+<td>Heatmap showing cache hit size distribution</td>
+</tr>
+<tr>
+<td><strong>Per-Model Performance</strong></td>
+<td>Table</td>
+<td>Side-by-side comparison of caching by LLM model</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key Features</strong>:
+- Time-over-time queries (<code>max_over_time()[1h]</code>) handle service restarts without data gaps
+- Color-coded thresholds for quick health assessment
+- 30-second auto-refresh (user-configurable)
+- Single 1080p screen layout (no scrolling required)</p>
+<p><strong>Troubleshooting Dashboard</strong>:</p>
+<ol>
+<li><strong>No data showing</strong>: Verify cache is enabled (<code>curl http://localhost:9091/metrics | grep cache_enabled</code>)</li>
+<li><strong>Gaps in charts</strong>: Check for service restarts - time-over-time functions should smooth gaps</li>
+<li><strong>Zero hit rate</strong>: Normal for new deployments; requires repeated similar prompts to build cache</li>
+</ol>
+<h3 id="memory-access-patterns-dashboard">Memory Access Patterns Dashboard<a class="headerlink" href="#memory-access-patterns-dashboard" title="Permanent link">¶</a></h3>
+<p><strong>Purpose</strong>: Validate decay scoring effectiveness by visualizing memory access patterns across importance levels, lifecycle states, and time periods</p>
+<p><strong>Access</strong>: <code>http://localhost:3002/d/memory-access-dashboard</code> (dev)</p>
+<p><strong>Panels</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Panel</th>
+<th>Metric</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Total Access Count</strong></td>
+<td><code>knowledge_memory_access_total</code></td>
+<td>Cumulative memory accesses (uses max_over_time for restart resilience)</td>
+</tr>
+<tr>
+<td><strong>Access Rate</strong></td>
+<td><code>rate(...[5m])</code></td>
+<td>Current memory accesses per second</td>
+</tr>
+<tr>
+<td><strong>Reactivations (Dormant)</strong></td>
+<td><code>knowledge_reactivations_total{from_state="DORMANT"}</code></td>
+<td>Memories revived from dormant state (thresholds: green=0, yellow=5, red=20)</td>
+</tr>
+<tr>
+<td><strong>Reactivations (Archived)</strong></td>
+<td><code>knowledge_reactivations_total{from_state="ARCHIVED"}</code></td>
+<td>Memories revived from archived state (thresholds: green=0, yellow=3, red=10)</td>
+</tr>
+<tr>
+<td><strong>Access by Importance</strong></td>
+<td><code>knowledge_access_by_importance_total</code></td>
+<td>Pie chart showing access distribution by CRITICAL/HIGH/MEDIUM/LOW</td>
+</tr>
+<tr>
+<td><strong>Access by State</strong></td>
+<td><code>knowledge_access_by_state_total</code></td>
+<td>Pie chart showing access distribution by ACTIVE/STABLE/DORMANT/ARCHIVED</td>
+</tr>
+<tr>
+<td><strong>Access Rate Over Time</strong></td>
+<td><code>rate(knowledge_memory_access_total[5m])</code></td>
+<td>Time series trend of access velocity</td>
+</tr>
+<tr>
+<td><strong>Age Distribution</strong></td>
+<td><code>knowledge_days_since_last_access_bucket</code></td>
+<td>Heatmap showing when memories were last accessed</td>
+</tr>
+<tr>
+<td><strong>Access vs Decay Correlation</strong></td>
+<td>Dual-axis</td>
+<td>Compares access rate (left) with average decay score (right)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key Features</strong>:</p>
+<ul>
+<li>Time-over-time queries (<code>max_over_time()[1h]</code>) handle service restarts without data gaps</li>
+<li>Dual-axis correlation panel for validating decay effectiveness</li>
+<li>Color-coded reactivation thresholds for quick anomaly detection</li>
+<li>30-second auto-refresh with 24-hour default time range</li>
+</ul>
+<p><strong>Common Tasks</strong>:</p>
+<ol>
+<li><strong>Validate Decay Scoring</strong>: Check if CRITICAL/HIGH importance memories have proportionally more accesses</li>
+<li><strong>Tune Decay Parameters</strong>: Use age distribution heatmap to identify if 180-day half-life is appropriate</li>
+<li><strong>Investigate Reactivations</strong>: High reactivation counts suggest decay is too aggressive</li>
+</ol>
+<h3 id="customizing-dashboards">Customizing Dashboards<a class="headerlink" href="#customizing-dashboards" title="Permanent link">¶</a></h3>
+<p>Dashboard configurations are stored at:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>config/monitoring/grafana/dashboards/
+</span><span id="__span-32-2"><a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a>├── graph-health-dashboard.json
+</span><span id="__span-32-3"><a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a>├── memory-access-dashboard.json
+</span><span id="__span-32-4"><a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a>├── memory-decay-dashboard.json
+</span><span id="__span-32-5"><a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a>├── madeinoz-knowledge.json
+</span><span id="__span-32-6"><a id="__codelineno-32-6" name="__codelineno-32-6" href="#__codelineno-32-6"></a>└── prompt-cache-effectiveness.json
 </span></code></pre></div>
 <p>To customize:</p>
 <ol>
@@ -3656,7 +4177,7 @@
 <p><strong>Usage &amp; Cost:</strong></p>
 <ol>
 <li><strong>Token Usage Rate</strong> - <code>rate(graphiti_total_tokens_all_models_total[5m])</code></li>
-<li><strong>Cost Rate ($/hour)</strong> - <code>rate(graphiti_api_cost_all_models_total[1h]) * 3600</code></li>
+<li><strong>Cost Rate ($/hour)</strong> - <code>rate(graphiti_api_cost_all_models_total[5m]) * 3600</code></li>
 <li><strong>Request Cost Distribution</strong> - Histogram panel with <code>graphiti_api_cost_per_request_bucket</code></li>
 <li><strong>Token Usage by Model</strong> - <code>sum by (model) (rate(graphiti_total_tokens_total[5m]))</code></li>
 </ol>
@@ -3668,8 +4189,8 @@
 </ol>
 <p><strong>Caching (when enabled):</strong></p>
 <ol>
-<li><strong>Cache Hit Rate</strong> - <code>graphiti_cache_hit_rate</code></li>
-<li><strong>Cost Savings Rate</strong> - <code>rate(graphiti_cache_cost_saved_all_models_total[1h]) * 3600</code></li>
+<li><strong>Cache Hit Rate</strong> - <code>graphiti_cache_hit_rate</code> (gauge metric)</li>
+<li><strong>Cost Savings Rate</strong> - <code>rate(graphiti_cache_cost_saved_all_models_total[5m]) * 3600</code></li>
 <li><strong>Tokens Saved</strong> - <code>increase(graphiti_cache_tokens_saved_all_models_total[1h])</code></li>
 </ol>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">¶</a></h2>
@@ -3677,17 +4198,17 @@
 <ol>
 <li>
 <p><strong>Check metrics are enabled:</strong>
-   </p><div class="language-bash highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>grep<span class="w"> </span>MADEINOZ_KNOWLEDGE_PROMPT_CACHE_METRICS_ENABLED<span class="w"> </span>~/.claude/.env
+   </p><div class="language-bash highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>grep<span class="w"> </span>MADEINOZ_KNOWLEDGE_PROMPT_CACHE_METRICS_ENABLED<span class="w"> </span>~/.claude/.env
 </span></code></pre></div><p></p>
 </li>
 <li>
 <p><strong>Verify endpoint is accessible:</strong>
-   </p><div class="language-bash highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>curl<span class="w"> </span>http://localhost:9091/metrics
+   </p><div class="language-bash highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>curl<span class="w"> </span>http://localhost:9091/metrics
 </span></code></pre></div><p></p>
 </li>
 <li>
 <p><strong>Check container logs:</strong>
-   </p><div class="language-bash highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>docker<span class="w"> </span>logs<span class="w"> </span>madeinoz-knowledge-graph-mcp-dev<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span>metric
+   </p><div class="language-bash highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>docker<span class="w"> </span>logs<span class="w"> </span>madeinoz-knowledge-graph-mcp-dev<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span>metric
 </span></code></pre></div><p></p>
 </li>
 </ol>
@@ -3700,12 +4221,12 @@
 <p>Search operations (<code>search_memory_facts</code>, <code>search_memory_nodes</code>) use embeddings only and do not increment LLM metrics.</p>
 <h3 id="debug-logging">Debug Logging<a class="headerlink" href="#debug-logging" title="Permanent link">¶</a></h3>
 <p>Enable detailed per-request logging:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="c1"># In ~/.claude/.env</span>
-</span><span id="__span-34-2"><a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a><span class="nv">MADEINOZ_KNOWLEDGE_PROMPT_CACHE_LOG_REQUESTS</span><span class="o">=</span><span class="nb">true</span>
-</span><span id="__span-34-3"><a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a><span class="nv">LOG_LEVEL</span><span class="o">=</span>DEBUG
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-36-1"><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="c1"># In ~/.claude/.env</span>
+</span><span id="__span-36-2"><a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a><span class="nv">MADEINOZ_KNOWLEDGE_PROMPT_CACHE_LOG_REQUESTS</span><span class="o">=</span><span class="nb">true</span>
+</span><span id="__span-36-3"><a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a><span class="nv">LOG_LEVEL</span><span class="o">=</span>DEBUG
 </span></code></pre></div>
 <p>This shows per-request metrics in container logs:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>📊 Metrics: prompt=1234, completion=567, cost=$0.000089, input_cost=$0.000062, output_cost=$0.000027
+<div class="language-text highlight"><pre><span></span><code><span id="__span-37-1"><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>📊 Metrics: prompt=1234, completion=567, cost=$0.000089, input_cost=$0.000062, output_cost=$0.000027
 </span></code></pre></div>
 <h2 id="prompt-caching-gemini-via-openrouter">Prompt Caching (Gemini via OpenRouter)<a class="headerlink" href="#prompt-caching-gemini-via-openrouter" title="Permanent link">¶</a></h2>
 <p>Prompt caching reduces API costs by up to 15-20% by reusing previously processed prompt content. The system adds explicit <code>cache_control</code> markers to requests when enabled, allowing OpenRouter to serve cached content at reduced cost (0.25x normal price).</p>
@@ -3715,24 +4236,24 @@
 <p>For implementation details including architecture diagrams, code flow, and metrics internals, see the <a href="cache-implementation.html">Cache Implementation Guide</a>.</p>
 </div>
 <h3 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">¶</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-36-1"><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a>┌─────────────────────────────────────────────────────────────────┐
-</span><span id="__span-36-2"><a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a>│                    First Request (Cache Miss)                    │
-</span><span id="__span-36-3"><a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a>├─────────────────────────────────────────────────────────────────┤
-</span><span id="__span-36-4"><a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a>│  System Prompt (800 tokens) ──► LLM processes ──► Cache stored  │
-</span><span id="__span-36-5"><a id="__codelineno-36-5" name="__codelineno-36-5" href="#__codelineno-36-5"></a>│  User Message (200 tokens)  ──► LLM processes ──► Response      │
-</span><span id="__span-36-6"><a id="__codelineno-36-6" name="__codelineno-36-6" href="#__codelineno-36-6"></a>│                                                                  │
-</span><span id="__span-36-7"><a id="__codelineno-36-7" name="__codelineno-36-7" href="#__codelineno-36-7"></a>│  Cost: Full price for 1000 tokens                               │
-</span><span id="__span-36-8"><a id="__codelineno-36-8" name="__codelineno-36-8" href="#__codelineno-36-8"></a>└─────────────────────────────────────────────────────────────────┘
-</span><span id="__span-36-9"><a id="__codelineno-36-9" name="__codelineno-36-9" href="#__codelineno-36-9"></a>                              │
-</span><span id="__span-36-10"><a id="__codelineno-36-10" name="__codelineno-36-10" href="#__codelineno-36-10"></a>                              ▼
-</span><span id="__span-36-11"><a id="__codelineno-36-11" name="__codelineno-36-11" href="#__codelineno-36-11"></a>┌─────────────────────────────────────────────────────────────────┐
-</span><span id="__span-36-12"><a id="__codelineno-36-12" name="__codelineno-36-12" href="#__codelineno-36-12"></a>│                   Second Request (Cache Hit)                     │
-</span><span id="__span-36-13"><a id="__codelineno-36-13" name="__codelineno-36-13" href="#__codelineno-36-13"></a>├─────────────────────────────────────────────────────────────────┤
-</span><span id="__span-36-14"><a id="__codelineno-36-14" name="__codelineno-36-14" href="#__codelineno-36-14"></a>│  System Prompt (800 tokens) ──► Retrieved from cache (0.25x)    │
-</span><span id="__span-36-15"><a id="__codelineno-36-15" name="__codelineno-36-15" href="#__codelineno-36-15"></a>│  User Message (200 tokens)  ──► LLM processes ──► Response      │
-</span><span id="__span-36-16"><a id="__codelineno-36-16" name="__codelineno-36-16" href="#__codelineno-36-16"></a>│                                                                  │
-</span><span id="__span-36-17"><a id="__codelineno-36-17" name="__codelineno-36-17" href="#__codelineno-36-17"></a>│  Cost: 0.25x for cached 800 + full for 200 = 75% savings        │
-</span><span id="__span-36-18"><a id="__codelineno-36-18" name="__codelineno-36-18" href="#__codelineno-36-18"></a>└─────────────────────────────────────────────────────────────────┘
+<div class="language-text highlight"><pre><span></span><code><span id="__span-38-1"><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a>┌─────────────────────────────────────────────────────────────────┐
+</span><span id="__span-38-2"><a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a>│                    First Request (Cache Miss)                    │
+</span><span id="__span-38-3"><a id="__codelineno-38-3" name="__codelineno-38-3" href="#__codelineno-38-3"></a>├─────────────────────────────────────────────────────────────────┤
+</span><span id="__span-38-4"><a id="__codelineno-38-4" name="__codelineno-38-4" href="#__codelineno-38-4"></a>│  System Prompt (800 tokens) ──► LLM processes ──► Cache stored  │
+</span><span id="__span-38-5"><a id="__codelineno-38-5" name="__codelineno-38-5" href="#__codelineno-38-5"></a>│  User Message (200 tokens)  ──► LLM processes ──► Response      │
+</span><span id="__span-38-6"><a id="__codelineno-38-6" name="__codelineno-38-6" href="#__codelineno-38-6"></a>│                                                                  │
+</span><span id="__span-38-7"><a id="__codelineno-38-7" name="__codelineno-38-7" href="#__codelineno-38-7"></a>│  Cost: Full price for 1000 tokens                               │
+</span><span id="__span-38-8"><a id="__codelineno-38-8" name="__codelineno-38-8" href="#__codelineno-38-8"></a>└─────────────────────────────────────────────────────────────────┘
+</span><span id="__span-38-9"><a id="__codelineno-38-9" name="__codelineno-38-9" href="#__codelineno-38-9"></a>                              │
+</span><span id="__span-38-10"><a id="__codelineno-38-10" name="__codelineno-38-10" href="#__codelineno-38-10"></a>                              ▼
+</span><span id="__span-38-11"><a id="__codelineno-38-11" name="__codelineno-38-11" href="#__codelineno-38-11"></a>┌─────────────────────────────────────────────────────────────────┐
+</span><span id="__span-38-12"><a id="__codelineno-38-12" name="__codelineno-38-12" href="#__codelineno-38-12"></a>│                   Second Request (Cache Hit)                     │
+</span><span id="__span-38-13"><a id="__codelineno-38-13" name="__codelineno-38-13" href="#__codelineno-38-13"></a>├─────────────────────────────────────────────────────────────────┤
+</span><span id="__span-38-14"><a id="__codelineno-38-14" name="__codelineno-38-14" href="#__codelineno-38-14"></a>│  System Prompt (800 tokens) ──► Retrieved from cache (0.25x)    │
+</span><span id="__span-38-15"><a id="__codelineno-38-15" name="__codelineno-38-15" href="#__codelineno-38-15"></a>│  User Message (200 tokens)  ──► LLM processes ──► Response      │
+</span><span id="__span-38-16"><a id="__codelineno-38-16" name="__codelineno-38-16" href="#__codelineno-38-16"></a>│                                                                  │
+</span><span id="__span-38-17"><a id="__codelineno-38-17" name="__codelineno-38-17" href="#__codelineno-38-17"></a>│  Cost: 0.25x for cached 800 + full for 200 = 75% savings        │
+</span><span id="__span-38-18"><a id="__codelineno-38-18" name="__codelineno-38-18" href="#__codelineno-38-18"></a>└─────────────────────────────────────────────────────────────────┘
 </span></code></pre></div>
 <h3 id="how-caching-works-via-openrouter">How Caching Works via OpenRouter<a class="headerlink" href="#how-caching-works-via-openrouter" title="Permanent link">¶</a></h3>
 <p>The Madeinoz Knowledge System implements <strong>explicit prompt caching</strong> via OpenRouter using <code>cache_control</code> markers (similar to Anthropic's approach):</p>
@@ -3774,17 +4295,17 @@
 4. Adds <code>cache_control</code> marker to the last content part
 5. Extracts cache metrics from responses (cache_read_tokens, cache_write_tokens)</p>
 <h3 id="configuration_1">Configuration<a class="headerlink" href="#configuration_1" title="Permanent link">¶</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-37-1"><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a><span class="c1"># Enable prompt caching (disabled by default)</span>
-</span><span id="__span-37-2"><a id="__codelineno-37-2" name="__codelineno-37-2" href="#__codelineno-37-2"></a><span class="nv">MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED</span><span class="o">=</span><span class="nb">true</span>
-</span><span id="__span-37-3"><a id="__codelineno-37-3" name="__codelineno-37-3" href="#__codelineno-37-3"></a>
-</span><span id="__span-37-4"><a id="__codelineno-37-4" name="__codelineno-37-4" href="#__codelineno-37-4"></a><span class="c1"># Enable metrics collection for cache statistics (recommended)</span>
-</span><span id="__span-37-5"><a id="__codelineno-37-5" name="__codelineno-37-5" href="#__codelineno-37-5"></a><span class="nv">MADEINOZ_KNOWLEDGE_PROMPT_CACHE_METRICS_ENABLED</span><span class="o">=</span><span class="nb">true</span>
-</span><span id="__span-37-6"><a id="__codelineno-37-6" name="__codelineno-37-6" href="#__codelineno-37-6"></a>
-</span><span id="__span-37-7"><a id="__codelineno-37-7" name="__codelineno-37-7" href="#__codelineno-37-7"></a><span class="c1"># Enable verbose caching logs for debugging (optional)</span>
-</span><span id="__span-37-8"><a id="__codelineno-37-8" name="__codelineno-37-8" href="#__codelineno-37-8"></a><span class="nv">MADEINOZ_KNOWLEDGE_PROMPT_CACHE_LOG_REQUESTS</span><span class="o">=</span><span class="nb">true</span>
-</span><span id="__span-37-9"><a id="__codelineno-37-9" name="__codelineno-37-9" href="#__codelineno-37-9"></a>
-</span><span id="__span-37-10"><a id="__codelineno-37-10" name="__codelineno-37-10" href="#__codelineno-37-10"></a><span class="c1"># Recommended model for caching</span>
-</span><span id="__span-37-11"><a id="__codelineno-37-11" name="__codelineno-37-11" href="#__codelineno-37-11"></a><span class="nv">MADEINOZ_KNOWLEDGE_MODEL_NAME</span><span class="o">=</span>google/gemini-2.0-flash-001
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-39-1"><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a><span class="c1"># Enable prompt caching (disabled by default)</span>
+</span><span id="__span-39-2"><a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a><span class="nv">MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED</span><span class="o">=</span><span class="nb">true</span>
+</span><span id="__span-39-3"><a id="__codelineno-39-3" name="__codelineno-39-3" href="#__codelineno-39-3"></a>
+</span><span id="__span-39-4"><a id="__codelineno-39-4" name="__codelineno-39-4" href="#__codelineno-39-4"></a><span class="c1"># Enable metrics collection for cache statistics (recommended)</span>
+</span><span id="__span-39-5"><a id="__codelineno-39-5" name="__codelineno-39-5" href="#__codelineno-39-5"></a><span class="nv">MADEINOZ_KNOWLEDGE_PROMPT_CACHE_METRICS_ENABLED</span><span class="o">=</span><span class="nb">true</span>
+</span><span id="__span-39-6"><a id="__codelineno-39-6" name="__codelineno-39-6" href="#__codelineno-39-6"></a>
+</span><span id="__span-39-7"><a id="__codelineno-39-7" name="__codelineno-39-7" href="#__codelineno-39-7"></a><span class="c1"># Enable verbose caching logs for debugging (optional)</span>
+</span><span id="__span-39-8"><a id="__codelineno-39-8" name="__codelineno-39-8" href="#__codelineno-39-8"></a><span class="nv">MADEINOZ_KNOWLEDGE_PROMPT_CACHE_LOG_REQUESTS</span><span class="o">=</span><span class="nb">true</span>
+</span><span id="__span-39-9"><a id="__codelineno-39-9" name="__codelineno-39-9" href="#__codelineno-39-9"></a>
+</span><span id="__span-39-10"><a id="__codelineno-39-10" name="__codelineno-39-10" href="#__codelineno-39-10"></a><span class="c1"># Recommended model for caching</span>
+</span><span id="__span-39-11"><a id="__codelineno-39-11" name="__codelineno-39-11" href="#__codelineno-39-11"></a><span class="nv">MADEINOZ_KNOWLEDGE_MODEL_NAME</span><span class="o">=</span>google/gemini-2.0-flash-001
 </span></code></pre></div>
 <h3 id="cache-pricing">Cache Pricing<a class="headerlink" href="#cache-pricing" title="Permanent link">¶</a></h3>
 <p>Cached tokens are billed at <strong>0.25x</strong> the normal input token price:</p>
@@ -3847,16 +4368,16 @@
 </table>
 <h3 id="example-promql-queries_2">Example PromQL Queries<a class="headerlink" href="#example-promql-queries_2" title="Permanent link">¶</a></h3>
 <p><strong>Cache hit rate over time:</strong></p>
-<div class="language-promql highlight"><pre><span></span><code><span id="__span-38-1"><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a><span class="nv">graphiti_cache_hit_rate</span>
+<div class="language-promql highlight"><pre><span></span><code><span id="__span-40-1"><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a><span class="nv">graphiti_cache_hit_rate</span>
 </span></code></pre></div>
 <p><strong>Cost savings rate ($/hour):</strong></p>
-<div class="language-promql highlight"><pre><span></span><code><span id="__span-39-1"><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a><span class="kr">rate</span><span class="o">(</span><span class="nv">graphiti_cache_cost_saved_all_models_total</span><span class="p">[</span><span class="s">1h</span><span class="p">]</span><span class="o">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">3600</span>
+<div class="language-promql highlight"><pre><span></span><code><span id="__span-41-1"><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a><span class="kr">rate</span><span class="o">(</span><span class="nv">graphiti_cache_cost_saved_all_models_total</span><span class="p">[</span><span class="s">1h</span><span class="p">]</span><span class="o">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">3600</span>
 </span></code></pre></div>
 <p><strong>Tokens saved in last hour:</strong></p>
-<div class="language-promql highlight"><pre><span></span><code><span id="__span-40-1"><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a><span class="kr">increase</span><span class="o">(</span><span class="nv">graphiti_cache_tokens_saved_all_models_total</span><span class="p">[</span><span class="s">1h</span><span class="p">]</span><span class="o">)</span>
+<div class="language-promql highlight"><pre><span></span><code><span id="__span-42-1"><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a><span class="kr">increase</span><span class="o">(</span><span class="nv">graphiti_cache_tokens_saved_all_models_total</span><span class="p">[</span><span class="s">1h</span><span class="p">]</span><span class="o">)</span>
 </span></code></pre></div>
 <p><strong>Cache effectiveness by model:</strong></p>
-<div class="language-promql highlight"><pre><span></span><code><span id="__span-41-1"><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a><span class="k">sum</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="o">(</span><span class="nv">model</span><span class="o">)</span><span class="w"> </span><span class="o">(</span><span class="nv">graphiti_cache_hits_total</span><span class="o">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="k">sum</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="o">(</span><span class="nv">model</span><span class="o">)</span><span class="w"> </span><span class="o">(</span><span class="nv">graphiti_cache_requests_total</span><span class="o">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span>
+<div class="language-promql highlight"><pre><span></span><code><span id="__span-43-1"><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a><span class="k">sum</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="o">(</span><span class="nv">model</span><span class="o">)</span><span class="w"> </span><span class="o">(</span><span class="nv">graphiti_cache_hits_total</span><span class="o">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="k">sum</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="o">(</span><span class="nv">model</span><span class="o">)</span><span class="w"> </span><span class="o">(</span><span class="nv">graphiti_cache_requests_total</span><span class="o">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span>
 </span></code></pre></div>
 <h3 id="troubleshooting-caching">Troubleshooting Caching<a class="headerlink" href="#troubleshooting-caching" title="Permanent link">¶</a></h3>
 <h4 id="cache-hits-are-zero">Cache Hits Are Zero<a class="headerlink" href="#cache-hits-are-zero" title="Permanent link">¶</a></h4>
@@ -3868,14 +4389,14 @@
 <li><strong>Different prompts</strong> - Cache keys are content-based; slight variations = cache miss</li>
 </ol>
 <p><strong>Debug steps:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-42-1"><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a><span class="c1"># Check caching is enabled</span>
-</span><span id="__span-42-2"><a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a>curl<span class="w"> </span>-s<span class="w"> </span>http://localhost:9091/metrics<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>graphiti_cache_enabled
-</span><span id="__span-42-3"><a id="__codelineno-42-3" name="__codelineno-42-3" href="#__codelineno-42-3"></a>
-</span><span id="__span-42-4"><a id="__codelineno-42-4" name="__codelineno-42-4" href="#__codelineno-42-4"></a><span class="c1"># Check for any cache activity</span>
-</span><span id="__span-42-5"><a id="__codelineno-42-5" name="__codelineno-42-5" href="#__codelineno-42-5"></a>curl<span class="w"> </span>-s<span class="w"> </span>http://localhost:9091/metrics<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>graphiti_cache
-</span><span id="__span-42-6"><a id="__codelineno-42-6" name="__codelineno-42-6" href="#__codelineno-42-6"></a>
-</span><span id="__span-42-7"><a id="__codelineno-42-7" name="__codelineno-42-7" href="#__codelineno-42-7"></a><span class="c1"># Enable verbose logging</span>
-</span><span id="__span-42-8"><a id="__codelineno-42-8" name="__codelineno-42-8" href="#__codelineno-42-8"></a><span class="nv">MADEINOZ_KNOWLEDGE_PROMPT_CACHE_LOG_REQUESTS</span><span class="o">=</span><span class="nb">true</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-44-1"><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a><span class="c1"># Check caching is enabled</span>
+</span><span id="__span-44-2"><a id="__codelineno-44-2" name="__codelineno-44-2" href="#__codelineno-44-2"></a>curl<span class="w"> </span>-s<span class="w"> </span>http://localhost:9091/metrics<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>graphiti_cache_enabled
+</span><span id="__span-44-3"><a id="__codelineno-44-3" name="__codelineno-44-3" href="#__codelineno-44-3"></a>
+</span><span id="__span-44-4"><a id="__codelineno-44-4" name="__codelineno-44-4" href="#__codelineno-44-4"></a><span class="c1"># Check for any cache activity</span>
+</span><span id="__span-44-5"><a id="__codelineno-44-5" name="__codelineno-44-5" href="#__codelineno-44-5"></a>curl<span class="w"> </span>-s<span class="w"> </span>http://localhost:9091/metrics<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>graphiti_cache
+</span><span id="__span-44-6"><a id="__codelineno-44-6" name="__codelineno-44-6" href="#__codelineno-44-6"></a>
+</span><span id="__span-44-7"><a id="__codelineno-44-7" name="__codelineno-44-7" href="#__codelineno-44-7"></a><span class="c1"># Enable verbose logging</span>
+</span><span id="__span-44-8"><a id="__codelineno-44-8" name="__codelineno-44-8" href="#__codelineno-44-8"></a><span class="nv">MADEINOZ_KNOWLEDGE_PROMPT_CACHE_LOG_REQUESTS</span><span class="o">=</span><span class="nb">true</span>
 </span></code></pre></div>
 <h4 id="low-cache-hit-rate">Low Cache Hit Rate<a class="headerlink" href="#low-cache-hit-rate" title="Permanent link">¶</a></h4>
 <p><strong>Expected behavior:</strong></p>
@@ -3931,48 +4452,48 @@
 <li>Gauges for current state</li>
 </ol>
 <p><strong>Files modified (in <code>docker/patches/</code>):</strong></p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-43-1"><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a>docker/patches/
-</span><span id="__span-43-2"><a id="__codelineno-43-2" name="__codelineno-43-2" href="#__codelineno-43-2"></a>├── caching_wrapper.py      # Client wrapper with timing/error tracking
-</span><span id="__span-43-3"><a id="__codelineno-43-3" name="__codelineno-43-3" href="#__codelineno-43-3"></a>├── caching_llm_client.py   # LLM client routing
-</span><span id="__span-43-4"><a id="__codelineno-43-4" name="__codelineno-43-4" href="#__codelineno-43-4"></a>├── message_formatter.py    # Cache marker formatting
-</span><span id="__span-43-5"><a id="__codelineno-43-5" name="__codelineno-43-5" href="#__codelineno-43-5"></a>├── cache_metrics.py        # Metrics calculation
-</span><span id="__span-43-6"><a id="__codelineno-43-6" name="__codelineno-43-6" href="#__codelineno-43-6"></a>├── session_metrics.py      # Session-level aggregation
-</span><span id="__span-43-7"><a id="__codelineno-43-7" name="__codelineno-43-7" href="#__codelineno-43-7"></a>└── metrics_exporter.py     # Prometheus export
+<div class="language-text highlight"><pre><span></span><code><span id="__span-45-1"><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a>docker/patches/
+</span><span id="__span-45-2"><a id="__codelineno-45-2" name="__codelineno-45-2" href="#__codelineno-45-2"></a>├── caching_wrapper.py      # Client wrapper with timing/error tracking
+</span><span id="__span-45-3"><a id="__codelineno-45-3" name="__codelineno-45-3" href="#__codelineno-45-3"></a>├── caching_llm_client.py   # LLM client routing
+</span><span id="__span-45-4"><a id="__codelineno-45-4" name="__codelineno-45-4" href="#__codelineno-45-4"></a>├── message_formatter.py    # Cache marker formatting
+</span><span id="__span-45-5"><a id="__codelineno-45-5" name="__codelineno-45-5" href="#__codelineno-45-5"></a>├── cache_metrics.py        # Metrics calculation
+</span><span id="__span-45-6"><a id="__codelineno-45-6" name="__codelineno-45-6" href="#__codelineno-45-6"></a>├── session_metrics.py      # Session-level aggregation
+</span><span id="__span-45-7"><a id="__codelineno-45-7" name="__codelineno-45-7" href="#__codelineno-45-7"></a>└── metrics_exporter.py     # Prometheus export
 </span></code></pre></div>
 <h2 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">¶</a></h2>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-44-1"><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a>┌─────────────────────────────────────────────────────────────────┐
-</span><span id="__span-44-2"><a id="__codelineno-44-2" name="__codelineno-44-2" href="#__codelineno-44-2"></a>│                     OpenRouter API                               │
-</span><span id="__span-44-3"><a id="__codelineno-44-3" name="__codelineno-44-3" href="#__codelineno-44-3"></a>│  (returns: usage, cost, cost_details, prompt_tokens_details)    │
-</span><span id="__span-44-4"><a id="__codelineno-44-4" name="__codelineno-44-4" href="#__codelineno-44-4"></a>│  (Gemini: cached_tokens in prompt_tokens_details)               │
-</span><span id="__span-44-5"><a id="__codelineno-44-5" name="__codelineno-44-5" href="#__codelineno-44-5"></a>└─────────────────────────────────────────────────────────────────┘
-</span><span id="__span-44-6"><a id="__codelineno-44-6" name="__codelineno-44-6" href="#__codelineno-44-6"></a>                              ▲
-</span><span id="__span-44-7"><a id="__codelineno-44-7" name="__codelineno-44-7" href="#__codelineno-44-7"></a>                              │
-</span><span id="__span-44-8"><a id="__codelineno-44-8" name="__codelineno-44-8" href="#__codelineno-44-8"></a>┌─────────────────────────────────────────────────────────────────┐
-</span><span id="__span-44-9"><a id="__codelineno-44-9" name="__codelineno-44-9" href="#__codelineno-44-9"></a>│                   caching_wrapper.py                             │
-</span><span id="__span-44-10"><a id="__codelineno-44-10" name="__codelineno-44-10" href="#__codelineno-44-10"></a>│  - Wraps responses.parse() and chat.completions.create()        │
-</span><span id="__span-44-11"><a id="__codelineno-44-11" name="__codelineno-44-11" href="#__codelineno-44-11"></a>│  - Adds timing (record_request_duration)                         │
-</span><span id="__span-44-12"><a id="__codelineno-44-12" name="__codelineno-44-12" href="#__codelineno-44-12"></a>│  - Catches errors (record_error)                                 │
-</span><span id="__span-44-13"><a id="__codelineno-44-13" name="__codelineno-44-13" href="#__codelineno-44-13"></a>│  - Extracts cache metrics from response                          │
-</span><span id="__span-44-14"><a id="__codelineno-44-14" name="__codelineno-44-14" href="#__codelineno-44-14"></a>│  - Records cache hits/misses and savings                         │
-</span><span id="__span-44-15"><a id="__codelineno-44-15" name="__codelineno-44-15" href="#__codelineno-44-15"></a>└─────────────────────────────────────────────────────────────────┘
-</span><span id="__span-44-16"><a id="__codelineno-44-16" name="__codelineno-44-16" href="#__codelineno-44-16"></a>                              │
-</span><span id="__span-44-17"><a id="__codelineno-44-17" name="__codelineno-44-17" href="#__codelineno-44-17"></a>                              ▼
-</span><span id="__span-44-18"><a id="__codelineno-44-18" name="__codelineno-44-18" href="#__codelineno-44-18"></a>┌─────────────────────────────────────────────────────────────────┐
-</span><span id="__span-44-19"><a id="__codelineno-44-19" name="__codelineno-44-19" href="#__codelineno-44-19"></a>│                   metrics_exporter.py                            │
-</span><span id="__span-44-20"><a id="__codelineno-44-20" name="__codelineno-44-20" href="#__codelineno-44-20"></a>│  - OpenTelemetry MeterProvider with custom Views                │
-</span><span id="__span-44-21"><a id="__codelineno-44-21" name="__codelineno-44-21" href="#__codelineno-44-21"></a>│  - Prometheus exporter on port 9090/9091                        │
-</span><span id="__span-44-22"><a id="__codelineno-44-22" name="__codelineno-44-22" href="#__codelineno-44-22"></a>│  - Counters: tokens, cost, cache hits/misses, errors            │
-</span><span id="__span-44-23"><a id="__codelineno-44-23" name="__codelineno-44-23" href="#__codelineno-44-23"></a>│  - Histograms: tokens/request, cost/request, duration           │
-</span><span id="__span-44-24"><a id="__codelineno-44-24" name="__codelineno-44-24" href="#__codelineno-44-24"></a>│  - Gauges: cache_enabled, cache_hit_rate                        │
-</span><span id="__span-44-25"><a id="__codelineno-44-25" name="__codelineno-44-25" href="#__codelineno-44-25"></a>└─────────────────────────────────────────────────────────────────┘
-</span><span id="__span-44-26"><a id="__codelineno-44-26" name="__codelineno-44-26" href="#__codelineno-44-26"></a>                              │
-</span><span id="__span-44-27"><a id="__codelineno-44-27" name="__codelineno-44-27" href="#__codelineno-44-27"></a>                              ▼
-</span><span id="__span-44-28"><a id="__codelineno-44-28" name="__codelineno-44-28" href="#__codelineno-44-28"></a>┌─────────────────────────────────────────────────────────────────┐
-</span><span id="__span-44-29"><a id="__codelineno-44-29" name="__codelineno-44-29" href="#__codelineno-44-29"></a>│              Prometheus / Grafana                                │
-</span><span id="__span-44-30"><a id="__codelineno-44-30" name="__codelineno-44-30" href="#__codelineno-44-30"></a>│  - Scrape /metrics endpoint                                      │
-</span><span id="__span-44-31"><a id="__codelineno-44-31" name="__codelineno-44-31" href="#__codelineno-44-31"></a>│  - Visualize with dashboards                                     │
-</span><span id="__span-44-32"><a id="__codelineno-44-32" name="__codelineno-44-32" href="#__codelineno-44-32"></a>│  - Alert on thresholds (cost, errors, latency)                  │
-</span><span id="__span-44-33"><a id="__codelineno-44-33" name="__codelineno-44-33" href="#__codelineno-44-33"></a>└─────────────────────────────────────────────────────────────────┘
+<div class="language-text highlight"><pre><span></span><code><span id="__span-46-1"><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a>┌─────────────────────────────────────────────────────────────────┐
+</span><span id="__span-46-2"><a id="__codelineno-46-2" name="__codelineno-46-2" href="#__codelineno-46-2"></a>│                     OpenRouter API                               │
+</span><span id="__span-46-3"><a id="__codelineno-46-3" name="__codelineno-46-3" href="#__codelineno-46-3"></a>│  (returns: usage, cost, cost_details, prompt_tokens_details)    │
+</span><span id="__span-46-4"><a id="__codelineno-46-4" name="__codelineno-46-4" href="#__codelineno-46-4"></a>│  (Gemini: cached_tokens in prompt_tokens_details)               │
+</span><span id="__span-46-5"><a id="__codelineno-46-5" name="__codelineno-46-5" href="#__codelineno-46-5"></a>└─────────────────────────────────────────────────────────────────┘
+</span><span id="__span-46-6"><a id="__codelineno-46-6" name="__codelineno-46-6" href="#__codelineno-46-6"></a>                              ▲
+</span><span id="__span-46-7"><a id="__codelineno-46-7" name="__codelineno-46-7" href="#__codelineno-46-7"></a>                              │
+</span><span id="__span-46-8"><a id="__codelineno-46-8" name="__codelineno-46-8" href="#__codelineno-46-8"></a>┌─────────────────────────────────────────────────────────────────┐
+</span><span id="__span-46-9"><a id="__codelineno-46-9" name="__codelineno-46-9" href="#__codelineno-46-9"></a>│                   caching_wrapper.py                             │
+</span><span id="__span-46-10"><a id="__codelineno-46-10" name="__codelineno-46-10" href="#__codelineno-46-10"></a>│  - Wraps responses.parse() and chat.completions.create()        │
+</span><span id="__span-46-11"><a id="__codelineno-46-11" name="__codelineno-46-11" href="#__codelineno-46-11"></a>│  - Adds timing (record_request_duration)                         │
+</span><span id="__span-46-12"><a id="__codelineno-46-12" name="__codelineno-46-12" href="#__codelineno-46-12"></a>│  - Catches errors (record_error)                                 │
+</span><span id="__span-46-13"><a id="__codelineno-46-13" name="__codelineno-46-13" href="#__codelineno-46-13"></a>│  - Extracts cache metrics from response                          │
+</span><span id="__span-46-14"><a id="__codelineno-46-14" name="__codelineno-46-14" href="#__codelineno-46-14"></a>│  - Records cache hits/misses and savings                         │
+</span><span id="__span-46-15"><a id="__codelineno-46-15" name="__codelineno-46-15" href="#__codelineno-46-15"></a>└─────────────────────────────────────────────────────────────────┘
+</span><span id="__span-46-16"><a id="__codelineno-46-16" name="__codelineno-46-16" href="#__codelineno-46-16"></a>                              │
+</span><span id="__span-46-17"><a id="__codelineno-46-17" name="__codelineno-46-17" href="#__codelineno-46-17"></a>                              ▼
+</span><span id="__span-46-18"><a id="__codelineno-46-18" name="__codelineno-46-18" href="#__codelineno-46-18"></a>┌─────────────────────────────────────────────────────────────────┐
+</span><span id="__span-46-19"><a id="__codelineno-46-19" name="__codelineno-46-19" href="#__codelineno-46-19"></a>│                   metrics_exporter.py                            │
+</span><span id="__span-46-20"><a id="__codelineno-46-20" name="__codelineno-46-20" href="#__codelineno-46-20"></a>│  - OpenTelemetry MeterProvider with custom Views                │
+</span><span id="__span-46-21"><a id="__codelineno-46-21" name="__codelineno-46-21" href="#__codelineno-46-21"></a>│  - Prometheus exporter on port 9090/9091                        │
+</span><span id="__span-46-22"><a id="__codelineno-46-22" name="__codelineno-46-22" href="#__codelineno-46-22"></a>│  - Counters: tokens, cost, cache hits/misses, errors            │
+</span><span id="__span-46-23"><a id="__codelineno-46-23" name="__codelineno-46-23" href="#__codelineno-46-23"></a>│  - Histograms: tokens/request, cost/request, duration           │
+</span><span id="__span-46-24"><a id="__codelineno-46-24" name="__codelineno-46-24" href="#__codelineno-46-24"></a>│  - Gauges: cache_enabled, cache_hit_rate                        │
+</span><span id="__span-46-25"><a id="__codelineno-46-25" name="__codelineno-46-25" href="#__codelineno-46-25"></a>└─────────────────────────────────────────────────────────────────┘
+</span><span id="__span-46-26"><a id="__codelineno-46-26" name="__codelineno-46-26" href="#__codelineno-46-26"></a>                              │
+</span><span id="__span-46-27"><a id="__codelineno-46-27" name="__codelineno-46-27" href="#__codelineno-46-27"></a>                              ▼
+</span><span id="__span-46-28"><a id="__codelineno-46-28" name="__codelineno-46-28" href="#__codelineno-46-28"></a>┌─────────────────────────────────────────────────────────────────┐
+</span><span id="__span-46-29"><a id="__codelineno-46-29" name="__codelineno-46-29" href="#__codelineno-46-29"></a>│              Prometheus / Grafana                                │
+</span><span id="__span-46-30"><a id="__codelineno-46-30" name="__codelineno-46-30" href="#__codelineno-46-30"></a>│  - Scrape /metrics endpoint                                      │
+</span><span id="__span-46-31"><a id="__codelineno-46-31" name="__codelineno-46-31" href="#__codelineno-46-31"></a>│  - Visualize with dashboards                                     │
+</span><span id="__span-46-32"><a id="__codelineno-46-32" name="__codelineno-46-32" href="#__codelineno-46-32"></a>│  - Alert on thresholds (cost, errors, latency)                  │
+</span><span id="__span-46-33"><a id="__codelineno-46-33" name="__codelineno-46-33" href="#__codelineno-46-33"></a>└─────────────────────────────────────────────────────────────────┘
 </span></code></pre></div>
 <h2 id="related-documentation">Related Documentation<a class="headerlink" href="#related-documentation" title="Permanent link">¶</a></h2>
 <ul>
