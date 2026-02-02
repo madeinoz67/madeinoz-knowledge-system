@@ -13,13 +13,32 @@
       "fieldConfig": {
         "defaults": {
           "color": {"mode": "thresholds"},
-          "mappings": [],
+          "mappings": [
+            {
+              "options": {
+                "from": 0,
+                "result": {"text": "0"},
+                "to": 0
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "null": {
+                  "color": "blue",
+                  "text": "0"
+                }
+              },
+              "type": "value"
+            }
+          ],
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"color": "red", "value": null},
-              {"color": "yellow", "value": 0.01},
-              {"color": "green", "value": 1}
+              {"color": "blue", "value": null},
+              {"color": "red", "value": 0.01},
+              {"color": "yellow", "value": 1},
+              {"color": "green", "value": 10}
             ]
           },
           "unit": "currencyUSD"
@@ -80,10 +99,32 @@
       "fieldConfig": {
         "defaults": {
           "color": {"mode": "thresholds"},
-          "mappings": [],
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "text": "0"
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "null": {
+                  "color": "blue",
+                  "text": "0"
+                }
+              },
+              "type": "value"
+            }
+          ],
           "thresholds": {
             "mode": "absolute",
-            "steps": [{"color": "blue", "value": null}]
+            "steps": [
+              {"color": "orange", "value": null},
+              {"color": "blue", "value": 1},
+              {"color": "green", "value": 1000}
+            ]
           },
           "unit": "short"
         }
