@@ -1,5 +1,17 @@
 {
-  "annotations": {"list": [{"builtIn": 1, "datasource": "-- Grafana --", "enable": true, "hide": true, "iconColor": "rgba(0, 211, 255, 1)", "name": "Annotations & Alerts", "type": "dashboard"}]},
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
@@ -12,32 +24,62 @@
       "description": "Total USD saved from prompt caching since system start.",
       "fieldConfig": {
         "defaults": {
-          "color": {"mode": "thresholds"},
+          "color": {
+            "mode": "thresholds"
+          },
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"color": "blue", "value": null},
-              {"color": "red", "value": 0.01},
-              {"color": "yellow", "value": 1},
-              {"color": "green", "value": 10}
+              {
+                "color": "blue",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0.01
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "green",
+                "value": 10
+              }
             ]
           },
           "unit": "currencyUSD"
         }
       },
-      "gridPos": {"h": 6, "w": 6, "x": 0, "y": 0},
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
       "id": 1,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
-        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "textMode": "auto"
       },
       "pluginVersion": "10.0.0",
-      "targets": [{"expr": "graphiti_cache_cost_saved_all_models_USD_total", "refId": "A"}],
+      "targets": [
+        {
+          "expr": "graphiti_cache_cost_saved_all_models_USD_total",
+          "refId": "A"
+        }
+      ],
       "title": "Total Cost Savings",
       "type": "stat"
     },
@@ -46,32 +88,59 @@
       "description": "Current cache hit rate percentage. Higher is better - indicates effective caching.",
       "fieldConfig": {
         "defaults": {
-          "color": {"mode": "thresholds"},
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "max": 100,
           "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"color": "red", "value": null},
-              {"color": "yellow", "value": 20},
-              {"color": "green", "value": 50}
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 20
+              },
+              {
+                "color": "green",
+                "value": 50
+              }
             ]
           },
           "unit": "percent"
         }
       },
-      "gridPos": {"h": 6, "w": 6, "x": 6, "y": 0},
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
       "id": 2,
       "options": {
         "orientation": "auto",
-        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "showThresholdLabels": false,
         "showThresholdMarkers": true,
         "text": {}
       },
       "pluginVersion": "10.0.0",
-      "targets": [{"expr": "graphiti_cache_hit_rate", "refId": "A"}],
+      "targets": [
+        {
+          "expr": "graphiti_cache_hit_rate",
+          "refId": "A"
+        }
+      ],
       "title": "Hit Rate",
       "type": "gauge"
     },
@@ -80,31 +149,58 @@
       "description": "Total tokens saved from prompt caching since system start.",
       "fieldConfig": {
         "defaults": {
-          "color": {"mode": "thresholds"},
+          "color": {
+            "mode": "thresholds"
+          },
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"color": "orange", "value": null},
-              {"color": "blue", "value": 1},
-              {"color": "green", "value": 1000}
+              {
+                "color": "orange",
+                "value": null
+              },
+              {
+                "color": "blue",
+                "value": 1
+              },
+              {
+                "color": "green",
+                "value": 1000
+              }
             ]
           },
           "unit": "short"
         }
       },
-      "gridPos": {"h": 6, "w": 6, "x": 12, "y": 0},
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
       "id": 3,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
-        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "textMode": "auto"
       },
       "pluginVersion": "10.0.0",
-      "targets": [{"expr": "graphiti_cache_tokens_saved_all_models_total", "refId": "A"}],
+      "targets": [
+        {
+          "expr": "graphiti_cache_tokens_saved_all_models_total",
+          "refId": "A"
+        }
+      ],
       "title": "Tokens Saved",
       "type": "stat"
     },
@@ -113,27 +209,50 @@
       "description": "Tokens consumed to create cache entries. Compare with tokens saved to assess cache efficiency.",
       "fieldConfig": {
         "defaults": {
-          "color": {"mode": "thresholds"},
+          "color": {
+            "mode": "thresholds"
+          },
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
-            "steps": [{"color": "orange", "value": null}]
+            "steps": [
+              {
+                "color": "orange",
+                "value": null
+              }
+            ]
           },
           "unit": "short"
         }
       },
-      "gridPos": {"h": 6, "w": 6, "x": 18, "y": 0},
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
       "id": 4,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
-        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "textMode": "auto"
       },
       "pluginVersion": "10.0.0",
-      "targets": [{"expr": "graphiti_cache_write_tokens_all_models_total", "refId": "A"}],
+      "targets": [
+        {
+          "expr": "graphiti_cache_write_tokens_all_models_total",
+          "refId": "A"
+        }
+      ],
       "title": "Tokens Written",
       "type": "stat"
     },
@@ -142,7 +261,9 @@
       "description": "Cost savings rate per hour over time.",
       "fieldConfig": {
         "defaults": {
-          "color": {"mode": "palette-classic"},
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
             "axisCenteredZero": false,
             "axisColorMode": "text",
@@ -152,30 +273,64 @@
             "drawStyle": "line",
             "fillOpacity": 20,
             "gradientMode": "none",
-            "hideFrom": {"legend": false, "tooltip": false, "viz": false},
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
             "lineInterpolation": "smooth",
             "lineWidth": 2,
             "pointSize": 5,
-            "scaleDistribution": {"type": "linear"},
+            "scaleDistribution": {
+              "type": "linear"
+            },
             "showPoints": "auto",
             "spanNulls": true
           },
           "mappings": [],
+          "noValue": "0",
           "thresholds": {
             "mode": "absolute",
-            "steps": [{"color": "green", "value": null}]
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
           },
           "unit": "currencyUSD"
         }
       },
-      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 6},
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 6
+      },
       "id": 5,
       "options": {
-        "legend": {"calcs": ["lastNotNull", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true},
-        "tooltip": {"mode": "multi", "sort": "desc"}
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "mean"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       },
       "pluginVersion": "10.0.0",
-      "targets": [{"expr": "rate(graphiti_cache_cost_saved_all_models_USD_total[5m]) * 3600", "legendFormat": "Savings/hour", "refId": "A"}],
+      "targets": [
+        {
+          "expr": "rate(graphiti_cache_cost_saved_all_models_USD_total[5m]) * 3600",
+          "legendFormat": "Savings/hour",
+          "refId": "A"
+        }
+      ],
       "title": "Savings Rate",
       "type": "timeseries"
     },
@@ -184,7 +339,9 @@
       "description": "Cache hit rate trend over time. Watch for sudden drops that may indicate issues.",
       "fieldConfig": {
         "defaults": {
-          "color": {"mode": "palette-classic"},
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
             "axisCenteredZero": false,
             "axisColorMode": "text",
@@ -194,32 +351,67 @@
             "drawStyle": "line",
             "fillOpacity": 20,
             "gradientMode": "none",
-            "hideFrom": {"legend": false, "tooltip": false, "viz": false},
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
             "lineInterpolation": "smooth",
             "lineWidth": 2,
             "pointSize": 5,
-            "scaleDistribution": {"type": "linear"},
+            "scaleDistribution": {
+              "type": "linear"
+            },
             "showPoints": "auto",
             "spanNulls": true
           },
           "mappings": [],
           "max": 100,
           "min": 0,
+          "noValue": "0",
           "thresholds": {
             "mode": "absolute",
-            "steps": [{"color": "green", "value": null}]
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
           },
           "unit": "percent"
         }
       },
-      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 6},
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 6
+      },
       "id": 6,
       "options": {
-        "legend": {"calcs": ["lastNotNull", "mean", "min"], "displayMode": "table", "placement": "bottom", "showLegend": true},
-        "tooltip": {"mode": "multi", "sort": "desc"}
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "mean",
+            "min"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       },
       "pluginVersion": "10.0.0",
-      "targets": [{"expr": "graphiti_cache_hit_rate", "legendFormat": "Hit Rate", "refId": "A"}],
+      "targets": [
+        {
+          "expr": "graphiti_cache_hit_rate",
+          "legendFormat": "Hit Rate",
+          "refId": "A"
+        }
+      ],
       "title": "Hit Rate Trend",
       "type": "timeseries"
     },
@@ -228,7 +420,10 @@
       "description": "Comparison of cache hits vs misses over time.",
       "fieldConfig": {
         "defaults": {
-          "color": {"mode": "palette-classic"},
+          "noValue": "0",
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
             "axisCenteredZero": false,
             "axisColorMode": "text",
@@ -238,58 +433,153 @@
             "drawStyle": "line",
             "fillOpacity": 20,
             "gradientMode": "none",
-            "hideFrom": {"legend": false, "tooltip": false, "viz": false},
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
             "lineInterpolation": "smooth",
             "lineWidth": 2,
             "pointSize": 5,
-            "scaleDistribution": {"type": "linear"},
+            "scaleDistribution": {
+              "type": "linear"
+            },
             "showPoints": "auto",
             "spanNulls": true,
-            "stacking": {"group": "A", "mode": "none"}
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            }
           },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
-            "steps": [{"color": "green", "value": null}]
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
           },
           "unit": "short"
         }
       },
-      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 6},
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 6
+      },
       "id": 7,
       "options": {
-        "legend": {"calcs": ["lastNotNull", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true},
-        "tooltip": {"mode": "multi", "sort": "desc"}
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "mean"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       },
       "pluginVersion": "10.0.0",
       "targets": [
-        {"expr": "rate(graphiti_cache_hits_all_models_total[5m])", "legendFormat": "Hits", "refId": "A"},
-        {"expr": "rate(graphiti_cache_misses_all_models_total[5m])", "legendFormat": "Misses", "refId": "B"}
+        {
+          "expr": "rate(graphiti_cache_hits_all_models_total[5m])",
+          "legendFormat": "Hits",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(graphiti_cache_misses_all_models_total[5m])",
+          "legendFormat": "Misses",
+          "refId": "B"
+        }
       ],
       "title": "Hits vs Misses",
       "type": "timeseries"
     },
     {
-      "datasource": {"type": "prometheus", "uid": "PBFA97CFB590B2093"},
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
       "description": "Distribution of cache hit sizes (tokens saved per request). Heatmap shows frequency of different hit amounts.",
-      "fieldConfig": {"defaults": {"custom": {"hideFrom": {"legend": false, "tooltip": false, "viz": false}, "scaleDistribution": {"type": "linear"}}}, "overrides": []},
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 14},
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "0",
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 14
+      },
       "id": 8,
       "options": {
         "calculate": false,
         "cellGap": 1,
         "cellRadius": 0,
         "cellValues": {},
-        "color": {"exponent": 0.5, "fill": "dark-blue", "mode": "scheme", "reverse": false, "scale": "exponential", "scheme": "Blues", "steps": 64},
-        "exemplars": {"color": "rgba(255,0,255,0.7)"},
-        "filterValues": {"le": 1e-9},
-        "legend": {"show": true},
-        "rowsFrame": {"layout": "auto"},
-        "tooltip": {"show": true, "yHistogram": true},
-        "yAxis": {"axisPlacement": "left", "reverse": false, "unit": "short"}
+        "color": {
+          "exponent": 0.5,
+          "fill": "dark-blue",
+          "mode": "scheme",
+          "reverse": false,
+          "scale": "exponential",
+          "scheme": "Blues",
+          "steps": 64
+        },
+        "exemplars": {
+          "color": "rgba(255,0,255,0.7)"
+        },
+        "filterValues": {
+          "le": 1e-09
+        },
+        "legend": {
+          "show": true
+        },
+        "rowsFrame": {
+          "layout": "auto"
+        },
+        "tooltip": {
+          "show": true,
+          "yHistogram": true
+        },
+        "yAxis": {
+          "axisPlacement": "left",
+          "reverse": false,
+          "unit": "short"
+        }
       },
       "pluginVersion": "10.0.0",
-      "targets": [{"datasource": {"type": "prometheus", "uid": "PBFA97CFB590B2093"}, "expr": "sum(increase(graphiti_cache_tokens_saved_per_request_bucket[$__rate_interval])) by (le)", "format": "heatmap", "legendFormat": "{{le}}", "refId": "A"}],
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "sum(increase(graphiti_cache_tokens_saved_per_request_bucket[$__rate_interval])) by (le)",
+          "format": "heatmap",
+          "legendFormat": "{{le}}",
+          "refId": "A"
+        }
+      ],
       "title": "Tokens Saved Distribution",
       "type": "heatmap"
     },
@@ -298,13 +588,23 @@
       "description": "Compare caching effectiveness across different LLM models.",
       "fieldConfig": {
         "defaults": {
-          "color": {"mode": "thresholds"},
-          "custom": {"align": "auto", "cellOptions": {"type": "auto"}},
+          "noValue": "0",
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            }
+          },
           "mappings": [
             {
               "options": {
                 "from": 0,
-                "result": {"text": "Hits"},
+                "result": {
+                  "text": "Hits"
+                },
                 "to": 0
               },
               "type": "range"
@@ -312,27 +612,79 @@
           ],
           "thresholds": {
             "mode": "absolute",
-            "steps": [{"color": "green", "value": null}]
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
           }
         },
         "overrides": []
       },
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 14},
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 14
+      },
       "id": 9,
       "options": {
         "cellHeight": "sm",
-        "footer": {"countRows": false, "fields": "", "reducer": ["sum"], "show": false},
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
         "showHeader": true,
-        "sortBy": [{"desc": true, "displayName": "Cost Saved (USD)"}]
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Cost Saved (USD)"
+          }
+        ]
       },
       "pluginVersion": "10.0.0",
       "targets": [
-        {"expr": "graphiti_cache_hits_total", "format": "table", "instant": true, "refId": "A"},
-        {"expr": "graphiti_cache_misses_total", "format": "table", "instant": true, "refId": "B"},
-        {"expr": "graphiti_cache_hits_total / (graphiti_cache_hits_total + graphiti_cache_misses_total) * 100", "format": "table", "instant": true, "refId": "F"},
-        {"expr": "graphiti_cache_tokens_saved_total", "format": "table", "instant": true, "refId": "C"},
-        {"expr": "graphiti_cache_cost_saved_USD_total", "format": "table", "instant": true, "refId": "D"},
-        {"expr": "graphiti_api_cost_USD_total", "format": "table", "instant": true, "refId": "E"}
+        {
+          "expr": "graphiti_cache_hits_total",
+          "format": "table",
+          "instant": true,
+          "refId": "A"
+        },
+        {
+          "expr": "graphiti_cache_misses_total",
+          "format": "table",
+          "instant": true,
+          "refId": "B"
+        },
+        {
+          "expr": "graphiti_cache_hits_total / (graphiti_cache_hits_total + graphiti_cache_misses_total) * 100",
+          "format": "table",
+          "instant": true,
+          "refId": "F"
+        },
+        {
+          "expr": "graphiti_cache_tokens_saved_total",
+          "format": "table",
+          "instant": true,
+          "refId": "C"
+        },
+        {
+          "expr": "graphiti_cache_cost_saved_USD_total",
+          "format": "table",
+          "instant": true,
+          "refId": "D"
+        },
+        {
+          "expr": "graphiti_api_cost_USD_total",
+          "format": "table",
+          "instant": true,
+          "refId": "E"
+        }
       ],
       "title": "Per-Model Cache Performance",
       "transformations": [
@@ -410,7 +762,13 @@
   "refresh": "30s",
   "schemaVersion": 36,
   "style": "dark",
-  "tags": ["cache", "monitoring", "cost", "gemini", "prompt-caching"],
+  "tags": [
+    "cache",
+    "monitoring",
+    "cost",
+    "gemini",
+    "prompt-caching"
+  ],
   "title": "Prompt Cache Effectiveness",
   "uid": "prompt-cache-effectiveness",
   "version": 0,
