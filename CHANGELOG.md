@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 - Clean Python bytecode cache in Docker build ([#55](https://github.com/madeinoz67/madeinoz-knowledge-system/issues/55))
+- Update Grafana dashboards to query OpenTelemetry metric names with unit infixes ([#57](https://github.com/madeinoz67/madeinoz-knowledge-system/issues/57))
 
 ## [1.8.3] - 2026-02-02
 
