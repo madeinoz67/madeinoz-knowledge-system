@@ -4,8 +4,13 @@
 
 FROM zepai/knowledge-graph-mcp:standalone
 
+# Build-time arguments for version tracking (passed during CI build)
+ARG BUILD_VERSION
+ARG BUILD_COMMIT
+ARG BUILD_DATE
+
 LABEL description="Madeinoz Knowledge System - Graphiti MCP with Ollama/OpenRouter support, Neo4j + FalkorDB, Lucene sanitization, Prompt Caching, Memory Decay Scoring"
-LABEL version="1.8.2"
+LABEL version="${BUILD_VERSION:-1.8.2}"
 
 # Apply patches by replacing original files
 # factories.py - Adds Ollama/OpenRouter support (fixes GitHub #1116)
@@ -49,8 +54,12 @@ COPY src/skills/server/config-neo4j.yaml /tmp/config-neo4j.yaml
 COPY src/skills/server/config-falkordb.yaml /tmp/config-falkordb.yaml
 
 # Copy version info for metrics (madeinoz version)
-COPY package.json /tmp/package.json
-RUN grep -oP '"version":\s*"\K[^"]+' /tmp/package.json > /app/.madeinoz-version
+# If BUILD_VERSION arg is provided, use it; otherwise extract from package.json
+RUN if [ -n "${BUILD_VERSION}" ]; then \
+      echo "${BUILD_VERSION}" > /app/.madeinoz-version; \
+    else \
+      grep -oP '"version":\s*"\K[^"]+' /tmp/package.json > /app/.madeinoz-version; \
+    fi
 
 # Copy Feature 009 memory decay configuration
 COPY config/decay-config.yaml /tmp/decay-config.yaml
@@ -66,7 +75,10 @@ ENV GRAPHITI_GROUP_ID=main \
     SEMAPHORE_LIMIT=10 \
     GRAPHITI_TELEMETRY_ENABLED=false \
     GRAPHITI_SEARCH_ALL_GROUPS=true \
-    DATABASE_TYPE=neo4j
+    DATABASE_TYPE=neo4j \
+    BUILD_VERSION="${BUILD_VERSION}" \
+    BUILD_COMMIT="${BUILD_COMMIT}" \
+    BUILD_DATE="${BUILD_DATE}"
 
 # Expose ports
 EXPOSE 8000 9090
