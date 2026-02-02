@@ -442,8 +442,8 @@ export class ConfigLoader {
       FALKORDB_HOST: config.FALKORDB_HOST || config.FALKORDB_CONTAINER,
       FALKORDB_PORT: config.FALKORDB_PORT || '6379',
       FALKORDB_PASSWORD: config.FALKORDB_PASSWORD || '',
-      // For containers, use container hostname 'neo4j' not 'localhost'
-      NEO4J_URI: config.NEO4J_URI || 'bolt://neo4j:7687',
+      // For containers, always use container hostname 'neo4j' not 'localhost'
+      NEO4J_URI: 'bolt://neo4j:7687',
       NEO4J_USER: config.NEO4J_USER || 'neo4j',
       NEO4J_PASSWORD: config.NEO4J_PASSWORD || 'demodemo',
       SEMAPHORE_LIMIT: config.SEMAPHORE_LIMIT,
