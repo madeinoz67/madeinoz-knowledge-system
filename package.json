@@ -1,6 +1,6 @@
 {
   "name": "madeinoz-knowledge-system",
-  "version": "1.8.0",
+  "version": "1.8.2",
   "description": "Persistent personal knowledge management system powered by Graphiti knowledge graph with FalkorDB or Neo4j backend - automatic entity extraction, relationship mapping, and semantic search for AI conversations and documents",
   "author": {
     "name": "Stephen Eaton",

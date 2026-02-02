@@ -4,8 +4,13 @@
 
 FROM zepai/knowledge-graph-mcp:standalone
 
+# Build-time arguments for version tracking (passed during CI build)
+ARG BUILD_VERSION
+ARG BUILD_COMMIT
+ARG BUILD_DATE
+
 LABEL description="Madeinoz Knowledge System - Graphiti MCP with Ollama/OpenRouter support, Neo4j + FalkorDB, Lucene sanitization, Prompt Caching, Memory Decay Scoring"
-LABEL version="1.8.0"
+LABEL version="${BUILD_VERSION:-1.8.2}"
 
 # Apply patches by replacing original files
 # factories.py - Adds Ollama/OpenRouter support (fixes GitHub #1116)
@@ -28,7 +33,7 @@ COPY docker/patches/session_metrics.py /app/mcp/src/utils/session_metrics.py
 COPY docker/patches/message_formatter.py /app/mcp/src/utils/message_formatter.py
 COPY docker/patches/caching_wrapper.py /app/mcp/src/utils/caching_wrapper.py
 COPY docker/patches/caching_llm_client.py /app/mcp/src/utils/caching_llm_client.py
-# Cache bust: 2026-01-29-13-30
+# Cache bust: 2026-02-02-v1.8.1-fix
 COPY docker/patches/metrics_exporter.py /app/mcp/src/utils/metrics_exporter.py
 COPY docker/patches/diagnostic_wrapper.py /app/mcp/src/utils/diagnostic_wrapper.py
 
@@ -41,12 +46,16 @@ COPY docker/patches/importance_classifier.py /app/mcp/src/utils/importance_class
 COPY docker/patches/lifecycle_manager.py /app/mcp/src/utils/lifecycle_manager.py
 COPY docker/patches/maintenance_service.py /app/mcp/src/utils/maintenance_service.py
 COPY docker/patches/memory_decay.py /app/mcp/src/utils/memory_decay.py
-# Cache bust: 2026-01-29-13-30
+# Cache bust: 2026-02-02-v1.8.1-fix
 COPY docker/patches/metrics_exporter.py /app/mcp/src/utils/metrics_exporter.py
 
 # Copy both Neo4j and FalkorDB configs
 COPY src/skills/server/config-neo4j.yaml /tmp/config-neo4j.yaml
 COPY src/skills/server/config-falkordb.yaml /tmp/config-falkordb.yaml
+
+# Set version info for metrics (madeinoz version)
+# Use BUILD_VERSION from build arg, or default to 'unknown'
+RUN echo "${BUILD_VERSION:-unknown}" > /app/.madeinoz-version
 
 # Copy Feature 009 memory decay configuration
 COPY config/decay-config.yaml /tmp/decay-config.yaml
@@ -62,7 +71,10 @@ ENV GRAPHITI_GROUP_ID=main \
     SEMAPHORE_LIMIT=10 \
     GRAPHITI_TELEMETRY_ENABLED=false \
     GRAPHITI_SEARCH_ALL_GROUPS=true \
-    DATABASE_TYPE=neo4j
+    DATABASE_TYPE=neo4j \
+    BUILD_VERSION="${BUILD_VERSION}" \
+    BUILD_COMMIT="${BUILD_COMMIT}" \
+    BUILD_DATE="${BUILD_DATE}"
 
 # Expose ports
 EXPOSE 8000 9090

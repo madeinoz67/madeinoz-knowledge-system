@@ -15,9 +15,11 @@ Performance target: Complete within 10 minutes.
 
 import asyncio
 import logging
+import os
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Optional, Any
 
 from utils.decay_config import get_decay_config
@@ -28,6 +30,33 @@ from utils.lifecycle_manager import (
     purge_expired_soft_deletes,
     StateTransitionResult,
 )
+
+
+def _get_build_info() -> dict:
+    """
+    Get build information from environment or version file.
+
+    Returns:
+        Dictionary with version, commit, and build_date.
+    """
+    version = os.getenv("BUILD_VERSION", "unknown")
+    commit = os.getenv("BUILD_COMMIT", "unknown")
+    build_date = os.getenv("BUILD_DATE", "unknown")
+
+    # Fallback to version file if BUILD_VERSION not set
+    if version == "unknown":
+        try:
+            version_file = Path('/app/.madeinoz-version')
+            if version_file.exists():
+                version = version_file.read_text().strip()
+        except Exception:
+            pass
+
+    return {
+        "version": version,
+        "commit": commit[:8] if commit and commit != "unknown" else commit,
+        "build_date": build_date,
+    }
 from utils.memory_decay import batch_update_decay_scores
 from utils.metrics_exporter import get_decay_metrics_exporter
 
@@ -329,7 +358,11 @@ class MaintenanceService:
         result = MaintenanceResult()
 
         try:
-            logger.info(f"Starting maintenance (dry_run={dry_run})")
+            build_info = _get_build_info()
+            logger.info(
+                f"Starting maintenance (dry_run={dry_run}) "
+                f"[version: {build_info['version']}, commit: {build_info['commit']}, built: {build_info['build_date']}]"
+            )
 
             # Count total memories to process
             result.memories_processed = await self._count_memories()
@@ -643,7 +676,11 @@ class MaintenanceService:
                 while not self._shutdown_event.is_set():
                     # Run maintenance
                     try:
-                        logger.info("Running scheduled maintenance cycle")
+                        build_info = _get_build_info()
+                        logger.info(
+                            f"Running scheduled maintenance cycle "
+                            f"[version: {build_info['version']}, commit: {build_info['commit']}]"
+                        )
                         result = await self.run_maintenance(dry_run=False)
                         if result.success:
                             logger.info(

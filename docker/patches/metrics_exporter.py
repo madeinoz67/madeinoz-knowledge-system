@@ -419,6 +419,22 @@ class CacheMetricsExporter:
             cache_enabled = os.getenv("PROMPT_CACHE_ENABLED", "false").lower() == "true"
             return [metrics.Observation(1 if cache_enabled else 0)]
 
+    def _get_knowledge_mcp_version(self) -> str:
+        """
+        Get the Madeinoz Knowledge System version from the version file.
+
+        Returns:
+            Version string (e.g., "1.8.2") or "unknown" if file doesn't exist.
+        """
+        try:
+            from pathlib import Path
+            version_file = Path('/app/.madeinoz-version')
+            if version_file.exists():
+                return version_file.read_text().strip()
+            return "unknown"
+        except Exception:
+            return "unknown"
+
         self._gauges = {
             "cache_hit_rate": self._meter.create_observable_gauge(
                 name="graphiti_cache_hit_rate",
@@ -431,6 +447,20 @@ class CacheMetricsExporter:
                 description="Whether caching is currently enabled (1=enabled, 0=disabled)",
                 unit="1",
                 callbacks=[get_cache_enabled]
+            ),
+            "version_info": self._meter.create_observable_gauge(
+                name="knowledge_build_info",
+                description="Build information for the deployed Docker image",
+                unit="1",
+                callbacks=[
+                    lambda options: [
+                        metrics.Observation(1, {
+                            "version": os.getenv("BUILD_VERSION", self._get_knowledge_mcp_version()),
+                            "commit": os.getenv("BUILD_COMMIT", "unknown"),
+                            "build_date": os.getenv("BUILD_DATE", "unknown"),
+                        })
+                    ]
+                ]
             )
         }
 

@@ -3,7 +3,7 @@
 name: Madeinoz Knowledge System
 
 # pack-id: (format) {author}-{pack-name}-{variant}-v{version}
-pack-id: madeinoz67-madeinoz-knowledge-system-core-v1.8.0
+pack-id: madeinoz67-madeinoz-knowledge-system-core-v1.8.2
 
 # version: (format) SemVer major.minor.patch
 version: 1.8.0
