@@ -214,7 +214,7 @@
         "tooltip": {"mode": "multi", "sort": "desc"}
       },
       "pluginVersion": "10.0.0",
-      "targets": [{"expr": "graphiti_cache_hit_rate_percent", "legendFormat": "Hit Rate", "refId": "A"}],
+      "targets": [{"expr": "graphiti_cache_hit_rate", "legendFormat": "Hit Rate", "refId": "A"}],
       "title": "Hit Rate Trend",
       "type": "timeseries"
     },
