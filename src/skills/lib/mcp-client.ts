@@ -70,6 +70,8 @@ export interface SearchNodesParams {
   since?: string;
   /** Return nodes created before this date (ISO 8601 or relative) */
   until?: string;
+  /** Apply weighted scoring (60% semantic + 25% recency + 15% importance) */
+  include_weighted_scores?: boolean;
 }
 
 export interface SearchFactsParams {
@@ -670,6 +672,10 @@ export class MCPClient {
     }
     if (params.until) {
       serverParams.created_before = params.until;
+    }
+    // Weighted scoring (Feature 009)
+    if (params.include_weighted_scores !== undefined) {
+      serverParams.include_weighted_scores = params.include_weighted_scores;
     }
 
     // Check cache first
