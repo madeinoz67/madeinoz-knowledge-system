@@ -48,6 +48,10 @@ COPY docker/patches/metrics_exporter.py /app/mcp/src/utils/metrics_exporter.py
 COPY src/skills/server/config-neo4j.yaml /tmp/config-neo4j.yaml
 COPY src/skills/server/config-falkordb.yaml /tmp/config-falkordb.yaml
 
+# Copy version info for metrics (madeinoz version)
+COPY package.json /tmp/package.json
+RUN grep -oP '"version":\s*"\K[^"]+' /tmp/package.json > /app/.madeinoz-version
+
 # Copy Feature 009 memory decay configuration
 COPY config/decay-config.yaml /tmp/decay-config.yaml
 
