@@ -419,22 +419,6 @@ class CacheMetricsExporter:
             cache_enabled = os.getenv("PROMPT_CACHE_ENABLED", "false").lower() == "true"
             return [metrics.Observation(1 if cache_enabled else 0)]
 
-    def _get_knowledge_mcp_version(self) -> str:
-        """
-        Get the Madeinoz Knowledge System version from the version file.
-
-        Returns:
-            Version string (e.g., "1.8.2") or "unknown" if file doesn't exist.
-        """
-        try:
-            from pathlib import Path
-            version_file = Path('/app/.madeinoz-version')
-            if version_file.exists():
-                return version_file.read_text().strip()
-            return "unknown"
-        except Exception:
-            return "unknown"
-
         self._gauges = {
             "cache_hit_rate": self._meter.create_observable_gauge(
                 name="graphiti_cache_hit_rate",
@@ -463,6 +447,22 @@ class CacheMetricsExporter:
                 ]
             )
         }
+
+    def _get_knowledge_mcp_version(self) -> str:
+        """
+        Get the Madeinoz Knowledge System version from the version file.
+
+        Returns:
+            Version string (e.g., "1.8.2") or "unknown" if file doesn't exist.
+        """
+        try:
+            from pathlib import Path
+            version_file = Path('/app/.madeinoz-version')
+            if version_file.exists():
+                return version_file.read_text().strip()
+            return "unknown"
+        except Exception:
+            return "unknown"
 
     def _create_histograms(self) -> None:
         """
