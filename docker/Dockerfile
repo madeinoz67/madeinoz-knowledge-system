@@ -58,7 +58,7 @@ COPY src/skills/server/config-falkordb.yaml /tmp/config-falkordb.yaml
 RUN if [ -n "${BUILD_VERSION}" ]; then \
       echo "${BUILD_VERSION}" > /app/.madeinoz-version; \
     else \
-      grep -oP '"version":\s*"\K[^"]+' /tmp/package.json > /app/.madeinoz-version; \
+      python3 -c "import json; print(json.load(open('/tmp/package.json'))['version'])" > /app/.madeinoz-version; \
     fi
 
 # Copy Feature 009 memory decay configuration
