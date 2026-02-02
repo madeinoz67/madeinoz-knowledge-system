@@ -53,13 +53,9 @@ COPY docker/patches/metrics_exporter.py /app/mcp/src/utils/metrics_exporter.py
 COPY src/skills/server/config-neo4j.yaml /tmp/config-neo4j.yaml
 COPY src/skills/server/config-falkordb.yaml /tmp/config-falkordb.yaml
 
-# Copy version info for metrics (madeinoz version)
-# If BUILD_VERSION arg is provided, use it; otherwise extract from package.json
-RUN if [ -n "${BUILD_VERSION}" ]; then \
-      echo "${BUILD_VERSION}" > /app/.madeinoz-version; \
-    else \
-      python3 -c "import json; print(json.load(open('/tmp/package.json'))['version'])" > /app/.madeinoz-version; \
-    fi
+# Set version info for metrics (madeinoz version)
+# Use BUILD_VERSION from build arg, or default to 'unknown'
+RUN echo "${BUILD_VERSION:-unknown}" > /app/.madeinoz-version
 
 # Copy Feature 009 memory decay configuration
 COPY config/decay-config.yaml /tmp/decay-config.yaml
