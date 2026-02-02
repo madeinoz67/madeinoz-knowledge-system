@@ -49,7 +49,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "max_over_time(graphiti_api_cost_all_models_total[1h])",
+          "expr": "max_over_time(graphiti_api_cost_all_models_USD_total[1h])",
           "legendFormat": "Total Cost",
           "refId": "A"
         }
@@ -385,7 +385,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "rate(graphiti_api_cost_total[5m]) * 3600",
+          "expr": "rate(graphiti_api_cost_USD_total[5m]) * 3600",
           "legendFormat": "{{model}}",
           "refId": "A"
         }
@@ -419,7 +419,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "graphiti_api_cost_total",
+          "expr": "graphiti_api_cost_USD_total",
           "legendFormat": "{{model}}",
           "refId": "A"
         }
@@ -451,13 +451,13 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "max_over_time(graphiti_api_cost_all_models_total[1h])",
+          "expr": "max_over_time(graphiti_api_cost_all_models_USD_total[1h])",
           "legendFormat": "Total Spent",
           "refId": "A"
         },
         {
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "graphiti_cache_cost_saved_all_models_total",
+          "expr": "graphiti_cache_cost_saved_all_models_USD_total",
           "legendFormat": "Cache Savings",
           "refId": "B"
         }
@@ -689,7 +689,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "rate(graphiti_cache_cost_saved_all_models_total[5m]) * 3600",
+          "expr": "rate(graphiti_cache_cost_saved_all_models_USD_total[5m]) * 3600",
           "legendFormat": "Cost Savings ($/hr)",
           "refId": "A"
         }
@@ -984,7 +984,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "sum(increase(graphiti_api_cost_per_request_bucket[$__rate_interval])) by (le)",
+          "expr": "sum(increase(graphiti_api_cost_per_request_USD_bucket[$__rate_interval])) by (le)",
           "format": "heatmap",
           "legendFormat": "{{le}}",
           "refId": "A"
