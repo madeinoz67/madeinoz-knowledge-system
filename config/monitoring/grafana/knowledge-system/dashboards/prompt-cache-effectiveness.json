@@ -13,25 +13,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {"mode": "thresholds"},
-          "mappings": [
-            {
-              "options": {
-                "from": 0,
-                "result": {"text": "0"},
-                "to": 0
-              },
-              "type": "range"
-            },
-            {
-              "options": {
-                "null": {
-                  "color": "blue",
-                  "text": "0"
-                }
-              },
-              "type": "value"
-            }
-          ],
+          "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -99,25 +81,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {"mode": "thresholds"},
-          "mappings": [
-            {
-              "options": {
-                "0": {
-                  "text": "0"
-                }
-              },
-              "type": "value"
-            },
-            {
-              "options": {
-                "null": {
-                  "color": "blue",
-                  "text": "0"
-                }
-              },
-              "type": "value"
-            }
-          ],
+          "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -150,7 +114,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {"mode": "thresholds"},
-          "mappings": [],
+          "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [{"color": "orange", "value": null}]

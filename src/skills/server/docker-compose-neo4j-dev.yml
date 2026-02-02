@@ -94,6 +94,9 @@ services:
       - NEO4J_PASSWORD=devpassword
       # Logging: DEBUG for development (verbose output)
       - LOG_LEVEL=DEBUG
+      # Enable prompt caching for development/testing
+      - PROMPT_CACHE_ENABLED=true
+      - PROMPT_CACHE_METRICS_ENABLED=true
     depends_on:
       neo4j:
         condition: service_healthy
