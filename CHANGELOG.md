@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+### Fixed
+
+
+- Fix Docker cache issue and add build info metric (issues #45, #51) ([#52](https://github.com/madeinoz67/madeinoz-knowledge-system/issues/52))
+
 ## [1.8.0] - 2026-02-01
 
 
