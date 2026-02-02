@@ -66,6 +66,11 @@ COPY config/decay-config.yaml /tmp/decay-config.yaml
 COPY src/skills/server/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
+# Clean up Python bytecode cache after all COPY operations
+# Prevents stale .pyc files from causing inconsistent behavior
+RUN find /app/mcp -type f -name "*.pyc" -delete && \
+    find /app/mcp -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+
 # Set default environment variables (can be overridden at runtime)
 ENV GRAPHITI_GROUP_ID=main \
     SEMAPHORE_LIMIT=10 \
