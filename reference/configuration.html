@@ -756,6 +756,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../weighted-search.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Weighted Search
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../usage/monitoring.html" class="md-nav__link">
         
   
@@ -3101,11 +3129,26 @@ Default Ports:
 </span></code></pre></div>
 <p><strong>Recommended models:</strong></p>
 <ul>
+<li><code>arcee-ai/trinity-large-preview:free</code> (OpenRouter) - <strong>FREE model that passes all tests</strong></li>
+<li><code>arcee-ai/trinity-mini:free</code> (OpenRouter) - <strong>FREE alternative that passes all tests</strong></li>
 <li><code>gpt-4o-mini</code> (OpenAI) - Best balance of cost and quality</li>
-<li><code>google/gemini-2.0-flash-001</code> (OpenRouter) - Cheapest working model</li>
+<li><code>google/gemini-2.0-flash-001</code> (OpenRouter) - Fast, reliable, NOT being retired</li>
 <li><code>openai/gpt-4o</code> (OpenRouter) - Fastest extraction</li>
 <li><code>meta-llama/llama-3.1-8b-instruct</code> (OpenRouter) - Lowest cost (may have validation issues)</li>
 </ul>
+<div class="admonition warning">
+<p class="admonition-title">Gemini Retirement Notice</p>
+<p><code>google/gemini-2.0-flash-001</code> <strong>will be retired in March 2026</strong>. Switch to either Trinity model as free alternatives:
+- <code>arcee-ai/trinity-large-preview:free</code> (recommended)
+- <code>arcee-ai/trinity-mini:free</code> (faster)</p>
+</div>
+<div class="admonition success">
+<p class="admonition-title">Free Trinity Models</p>
+<p>Both Trinity models are <strong>free</strong> via OpenRouter and successfully pass all Graphiti entity extraction tests:
+- <code>arcee-ai/trinity-large-preview:free</code> - Larger model, more detailed extraction
+- <code>arcee-ai/trinity-mini:free</code> - Smaller model, faster processing (~16s)</p>
+<p>These are excellent options for cost-conscious users, especially with Gemini retiring in March 2026.</p>
+</div>
 <h3 id="api-keys">API Keys<a class="headerlink" href="#api-keys" title="Permanent link">¶</a></h3>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nv">MADEINOZ_KNOWLEDGE_OPENAI_API_KEY</span><span class="o">=</span>sk-your-openai-key-here
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nv">MADEINOZ_KNOWLEDGE_ANTHROPIC_API_KEY</span><span class="o">=</span>sk-ant-your-anthropic-key-here

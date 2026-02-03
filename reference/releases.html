@@ -756,6 +756,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../weighted-search.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Weighted Search
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../usage/monitoring.html" class="md-nav__link">
         
   
@@ -1829,6 +1857,34 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#release-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Release Notes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Release Notes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#feature-017-queue-processing-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Feature 017: Queue Processing Metrics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2337,6 +2393,34 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#release-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Release Notes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Release Notes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#feature-017-queue-processing-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Feature 017: Queue Processing Metrics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2623,6 +2707,107 @@
 - <a href="developer-notes.html">Developer Notes</a> - Custom image rationale
 - <a href="configuration.html">Configuration Reference</a> - Environment variables
 - <a href="../installation/index.html">Installation Guide</a> - Setup instructions</p>
+<hr>
+<h2 id="release-notes">Release Notes<a class="headerlink" href="#release-notes" title="Permanent link">¶</a></h2>
+<h3 id="feature-017-queue-processing-metrics">Feature 017: Queue Processing Metrics<a class="headerlink" href="#feature-017-queue-processing-metrics" title="Permanent link">¶</a></h3>
+<p><strong>Summary:</strong> Queue observability for monitoring depth, latency, consumer health, and failure patterns.</p>
+<p><strong>Description:</strong> Adds comprehensive metrics for message queue processing operations, enabling monitoring of queue depth, processing latency (wait time, processing duration, end-to-end latency), consumer health (active count, saturation, lag), throughput, and error categorization.</p>
+<p><strong>Key Metrics (10 total):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>messaging_queue_depth</code></td>
+<td>Gauge</td>
+<td>Current number of messages waiting</td>
+</tr>
+<tr>
+<td><code>messaging_active_consumers</code></td>
+<td>Gauge</td>
+<td>Number of active consumers</td>
+</tr>
+<tr>
+<td><code>messaging_consumer_saturation</code></td>
+<td>Gauge</td>
+<td>Consumer utilization (0-1)</td>
+</tr>
+<tr>
+<td><code>messaging_consumer_lag_seconds</code></td>
+<td>Gauge</td>
+<td>Time to catch up (seconds)</td>
+</tr>
+<tr>
+<td><code>messaging_messages_processed_total</code></td>
+<td>Counter</td>
+<td>Messages processed by status</td>
+</tr>
+<tr>
+<td><code>messaging_messages_failed_total</code></td>
+<td>Counter</td>
+<td>Failures by error category</td>
+</tr>
+<tr>
+<td><code>messaging_retries_total</code></td>
+<td>Counter</td>
+<td>Retry attempts</td>
+</tr>
+<tr>
+<td><code>messaging_processing_duration_seconds</code></td>
+<td>Histogram</td>
+<td>Processing time distribution</td>
+</tr>
+<tr>
+<td><code>messaging_wait_time_seconds</code></td>
+<td>Histogram</td>
+<td>Queue wait time distribution</td>
+</tr>
+<tr>
+<td><code>messaging_end_to_end_latency_seconds</code></td>
+<td>Histogram</td>
+<td>Total latency from enqueue to complete</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Dashboard:</strong> 12-panel Grafana dashboard (<code>queue-metrics</code>) providing:
+- Overview row: Queue depth, consumer saturation, consumer lag, active consumers
+- Time series: Queue depth trend, processing latency (P50/P95/P99), wait time, end-to-end latency
+- Throughput and errors: Success/failure rate, error percentage, failures by type, retry rate</p>
+<p><strong>Error Categorization:</strong> Coarse-grained error categories prevent high cardinality:
+- <code>ConnectionError</code> - Database/network connection issues
+- <code>ValidationError</code> - Data validation failures
+- <code>TimeoutError</code> - Request timeouts
+- <code>RateLimitError</code> - API rate limit exceeded
+- <code>UnknownError</code> - Uncategorized errors</p>
+<p><strong>Implementation:</strong>
+- File: <code>docker/patches/metrics_exporter.py</code>
+- Class: <code>QueueMetricsExporter</code>
+- Thread-safe: All state modifications use locks
+- Graceful degradation: No-ops when metrics disabled</p>
+<p><strong>Testing:</strong> Comprehensive unit tests covering:
+- Metric initialization and recording
+- Error categorization
+- Thread safety (concurrent operations)
+- Performance (&lt; 1ms overhead per recording)
+- Graceful degradation without OpenTelemetry</p>
+<p><strong>Documentation:</strong>
+- Updated: <code>docs/reference/observability.md</code> with Queue Metrics section
+- Includes: PromQL query examples, troubleshooting guide</p>
+<p><strong>GitHub Issues:</strong>
+- Issue: #61</p>
+<p><strong>Pull Requests:</strong>
+- PR: #62</p>
+<p><strong>Feature Flag:</strong> None - always available when metrics are enabled</p>
+<p><strong>Dependencies:</strong>
+- Requires: OpenTelemetry SDK (same as existing metrics)
+- Compatible: Feature 009 (memory decay metrics), Feature 006 (cache metrics)</p>
+<p><strong>Migration:</strong> No migration required - metrics are additive only</p>
+<p><strong>Performance Impact:</strong> Negligible (&lt; 1ms per metric recording operation)</p>
 
 
 
