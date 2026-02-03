@@ -4,11 +4,15 @@ Metrics Exporter - OpenTelemetry/Prometheus Integration
 Features:
 - 006-gemini-prompt-caching: Cache statistics via Prometheus metrics endpoint
 - 009-memory-decay-scoring: Decay, lifecycle, and maintenance metrics
+- 017-queue-metrics: Queue processing metrics (depth, latency, consumer health, failures)
 """
 
 import os
 import logging
+import threading
+import time
 from typing import Optional, Dict, Any
+from contextlib import contextmanager
 
 logger = logging.getLogger(__name__)
 
@@ -208,6 +212,28 @@ class CacheMetricsExporter:
                     instrument_name="knowledge_search_result_count",
                     aggregation=ExplicitBucketHistogramAggregation(
                         boundaries=[0, 1, 5, 10, 25, 50, 100, 200]
+                    )
+                ),
+                # === Queue Metrics Views (Feature 017) ===
+                # Processing duration: 5ms to 10 seconds
+                View(
+                    instrument_name="messaging_processing_duration_seconds",
+                    aggregation=ExplicitBucketHistogramAggregation(
+                        boundaries=[0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1, 2.5, 5, 7.5, 10]
+                    )
+                ),
+                # Wait time: time spent in queue before processing
+                View(
+                    instrument_name="messaging_wait_time_seconds",
+                    aggregation=ExplicitBucketHistogramAggregation(
+                        boundaries=[0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1, 2.5, 5, 7.5, 10]
+                    )
+                ),
+                # End-to-end latency: from enqueue to completion
+                View(
+                    instrument_name="messaging_end_to_end_latency_seconds",
+                    aggregation=ExplicitBucketHistogramAggregation(
+                        boundaries=[0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1, 2.5, 5, 7.5, 10]
                     )
                 ),
             ]
@@ -1495,6 +1521,426 @@ class DecayMetricsExporter:
 
 
 # =============================================================================
+# Queue Metrics Exporter (Feature 017-queue-metrics)
+# =============================================================================
+
+
+class QueueMetricsExporter:
+    """
+    Manages OpenTelemetry/Prometheus metrics for queue processing.
+
+    Provides counters, gauges, and histograms for tracking:
+    - Message throughput (processed, failed, retries)
+    - Queue depth and backlog trends
+    - Processing latency (duration, wait time, end-to-end)
+    - Consumer health (lag, saturation, active count)
+
+    Thread-safe: All public methods use locks for internal state.
+    Graceful degradation: Methods do nothing if metrics are disabled.
+    """
+
+    # Coarse error type categories to avoid high cardinality
+    ERROR_CATEGORIES = {
+        "ConnectionError": ["ConnectionError", "ConnectionRefusedError", "OperationalError"],
+        "ValidationError": ["ValidationError", "ValueError", "PydanticException"],
+        "TimeoutError": ["TimeoutError", "AsyncTimeoutError"],
+        "RateLimitError": ["RateLimitError", "RateLimitExceededError"],
+    }
+    UNKNOWN_ERROR = "UnknownError"
+
+    def __init__(self, meter: Optional[Any] = None):
+        """
+        Initialize queue metrics exporter.
+
+        Args:
+            meter: OpenTelemetry meter to use (shares with CacheMetricsExporter).
+        """
+        self._meter = meter
+        self._counters: Dict[str, Any] = {}
+        self._gauges: Dict[str, Any] = {}
+        self._histograms: Dict[str, Any] = {}
+
+        # Internal state tracking (thread-safe)
+        self._state_lock = threading.Lock()
+        self._enqueued_total: Dict[str, int] = {}  # queue_name -> count
+        self._processed_total: Dict[str, int] = {}  # queue_name -> count
+        self._failed_total: Dict[str, int] = {}  # queue_name -> count
+        self._enqueue_times: Dict[str, float] = {}  # queue_name -> timestamp
+        self._processing_start_times: Dict[str, float] = {}  # queue_name -> start timestamp
+        self._processing_start_time: float = time.time()  # For rate calculation
+        self._last_processed_count: int = 0  # For rate calculation
+        self._queue_depth: Dict[str, int] = {}  # queue_name -> current depth
+
+        # Consumer metrics state
+        self._consumer_saturation: float = 0.0  # 0.0 to 1.0
+        self._consumer_lag_seconds: float = 0.0  # Time to catch up
+        self._active_consumers: int = 1  # Default single consumer
+
+        if self._meter:
+            self._create_counters()
+            self._create_gauges()
+            self._create_histograms()
+
+    def _create_counters(self) -> None:
+        """
+        Create counter metrics for queue operations.
+
+        Counters track cumulative counts since server start.
+        """
+        if not self._meter:
+            return
+
+        self._counters = {
+            "messages_processed": self._meter.create_counter(
+                name="messaging_messages_processed_total",
+                description="Total messages processed (per queue, status)",
+                unit="1"
+            ),
+            "messages_failed": self._meter.create_counter(
+                name="messaging_messages_failed_total",
+                description="Total message processing failures (per queue, error_type)",
+                unit="1"
+            ),
+            "retries": self._meter.create_counter(
+                name="messaging_retries_total",
+                description="Total message retry attempts (per queue)",
+                unit="1"
+            ),
+        }
+
+    def _create_gauges(self) -> None:
+        """
+        Create gauge metrics for current state values.
+
+        Gauges track values that can go up or down over time.
+        """
+        if not self._meter:
+            return
+
+        def get_queue_depth(_options):
+            """Return current queue depth by queue and priority."""
+            with self._state_lock:
+                if not self._queue_depth:
+                    return [metrics.Observation(0, {"queue_name": "default", "priority": "normal"})]
+                observations = []
+                for queue_name, depth in self._queue_depth.items():
+                    observations.append(metrics.Observation(depth, {
+                        "queue_name": queue_name,
+                        "priority": "normal"  # Default priority
+                    }))
+                return observations
+
+        def get_consumer_lag(_options):
+            """Return consumer lag in seconds."""
+            return [metrics.Observation(self._consumer_lag_seconds, {"queue_name": "default"})]
+
+        def get_saturation(_options):
+            """Return consumer saturation ratio."""
+            return [metrics.Observation(self._consumer_saturation, {"queue_name": "default"})]
+
+        def get_active_consumers(_options):
+            """Return number of active consumers."""
+            return [metrics.Observation(self._active_consumers, {"queue_name": "default"})]
+
+        self._gauges = {
+            "queue_depth": self._meter.create_observable_gauge(
+                name="messaging_queue_depth",
+                description="Current number of messages waiting in queue",
+                unit="1",
+                callbacks=[get_queue_depth]
+            ),
+            "consumer_lag": self._meter.create_observable_gauge(
+                name="messaging_consumer_lag_seconds",
+                description="Consumer lag expressed as time to catch up (seconds)",
+                unit="s",
+                callbacks=[get_consumer_lag]
+            ),
+            "consumer_saturation": self._meter.create_observable_gauge(
+                name="messaging_consumer_saturation",
+                description="Consumer utilization ratio (0-1, 1=fully saturated)",
+                unit="1",
+                callbacks=[get_saturation]
+            ),
+            "active_consumers": self._meter.create_observable_gauge(
+                name="messaging_active_consumers",
+                description="Number of active consumers processing messages",
+                unit="1",
+                callbacks=[get_active_consumers]
+            ),
+        }
+
+    def _create_histograms(self) -> None:
+        """
+        Create histogram metrics for duration distributions.
+
+        Histograms track the distribution of values for percentile calculations.
+        """
+        if not self._meter:
+            return
+
+        self._histograms = {
+            "processing_duration": self._meter.create_histogram(
+                name="messaging_processing_duration_seconds",
+                description="Message processing duration in seconds",
+                unit="s"
+            ),
+            "wait_time": self._meter.create_histogram(
+                name="messaging_wait_time_seconds",
+                description="Time message spent waiting in queue before processing",
+                unit="s"
+            ),
+            "end_to_end_latency": self._meter.create_histogram(
+                name="messaging_end_to_end_latency_seconds",
+                description="End-to-end latency from enqueue to completion",
+                unit="s"
+            ),
+        }
+
+    def _categorize_error(self, error_type: str) -> str:
+        """
+        Map exception type to coarse error category.
+
+        Prevents high-cardinality labels by grouping similar errors.
+
+        Args:
+            error_type: Exception class name (e.g., "ConnectionError")
+
+        Returns:
+            Coarse error category label
+        """
+        if not error_type:
+            return self.UNKNOWN_ERROR
+
+        # Check if error type matches any known category
+        for category, error_types in self.ERROR_CATEGORIES.items():
+            if any(err in error_type for err in error_types):
+                return category
+
+        return self.UNKNOWN_ERROR
+
+    # ========================================================================
+    # Recording Methods
+    # ========================================================================
+
+    @contextmanager
+    def record_processing_start(self, queue_name: str = "default"):
+        """
+        Context manager for timing message processing.
+
+        Records start timestamp and yields None. Use with the processing
+        operation to automatically calculate duration on exit.
+
+        Args:
+            queue_name: Name of the queue
+
+        Yields:
+            None
+
+        Example:
+            with queue_metrics.record_processing_start("default"):
+                result = await process_message()
+                # Duration automatically recorded on exit
+        """
+        start_time = time.time()
+        self._processing_start_times[queue_name] = start_time
+        try:
+            yield
+        finally:
+            # Duration is calculated by caller and passed to record_processing_complete
+            pass
+
+    def record_enqueue(self, queue_name: str = "default", priority: str = "normal") -> None:
+        """
+        Record a message being enqueued for processing.
+
+        Increments internal counters and updates queue depth gauge.
+        Records timestamp for wait time calculation.
+
+        Args:
+            queue_name: Name of the queue (default: "default")
+            priority: Priority level ("low", "normal", "high")
+        """
+        if not self._counters or not self._gauges:
+            return
+
+        try:
+            with self._state_lock:
+                # Increment enqueued counter
+                self._enqueued_total[queue_name] = self._enqueued_total.get(queue_name, 0) + 1
+
+                # Update queue depth
+                self._queue_depth[queue_name] = self._queue_depth.get(queue_name, 0) + 1
+
+                # Record enqueue timestamp for wait time calculation
+                self._enqueue_times[queue_name] = time.time()
+
+            logger.debug(f"Recorded enqueue: queue={queue_name}, priority={priority}")
+        except Exception as e:
+            logger.error(f"Failed to record enqueue: {e}")
+
+    def record_dequeue(self, queue_name: str = "default") -> None:
+        """
+        Record a message being dequeued (before processing starts).
+
+        Decrements queue depth gauge.
+
+        Args:
+            queue_name: Name of the queue
+        """
+        if not self._gauges:
+            return
+
+        try:
+            with self._state_lock:
+                current_depth = self._queue_depth.get(queue_name, 0)
+                if current_depth > 0:
+                    self._queue_depth[queue_name] = current_depth - 1
+                else:
+                    self._queue_depth[queue_name] = 0
+
+            logger.debug(f"Recorded dequeue: queue={queue_name}")
+        except Exception as e:
+            logger.error(f"Failed to record dequeue: {e}")
+
+    def record_processing_complete(
+        self,
+        queue_name: str = "default",
+        duration: float = 0.0,
+        success: bool = True,
+        error_type: Optional[str] = None
+    ) -> None:
+        """
+        Record completion of message processing.
+
+        Updates processed/failed counters, records duration histogram,
+        decrements queue depth, and updates processing rate.
+
+        Args:
+            queue_name: Name of the queue
+            duration: Processing duration in seconds
+            success: True if successful, False if failed
+            error_type: Type of error if success=False
+        """
+        if not self._counters or not self._histograms:
+            return
+
+        try:
+            # Record processing duration histogram
+            if duration > 0:
+                self._histograms["processing_duration"].record(duration, {"queue_name": queue_name})
+
+            # Record processed counter with status label
+            status = "success" if success else "failure"
+            self._counters["messages_processed"].add(1, {
+                "queue_name": queue_name,
+                "status": status
+            })
+
+            # Record failure counter with error type
+            if not success:
+                error_category = self._categorize_error(error_type)
+                self._counters["messages_failed"].add(1, {
+                    "queue_name": queue_name,
+                    "error_type": error_category
+                })
+
+            # Update internal counters for rate calculation
+            with self._state_lock:
+                self._processed_total[queue_name] = self._processed_total.get(queue_name, 0) + 1
+
+            # Calculate and record wait time if we have enqueue timestamp
+            enqueue_time = self._enqueue_times.get(queue_name)
+            if enqueue_time and self._histograms:
+                wait_time = time.time() - enqueue_time
+                self._histograms["wait_time"].record(wait_time, {"queue_name": queue_name})
+
+                # Record end-to-end latency (wait + processing)
+                e2e_latency = wait_time + duration
+                self._histograms["end_to_end_latency"].record(e2e_latency, {"queue_name": queue_name})
+
+            logger.debug(
+                f"Recorded processing complete: queue={queue_name}, "
+                f"duration={duration:.3f}s, success={success}"
+            )
+        except Exception as e:
+            logger.error(f"Failed to record processing complete: {e}")
+
+    def record_retry(self, queue_name: str = "default") -> None:
+        """
+        Record a retry attempt for a failed message.
+
+        Args:
+            queue_name: Name of the queue
+        """
+        if not self._counters:
+            return
+
+        try:
+            self._counters["retries"].add(1, {"queue_name": queue_name})
+            logger.debug(f"Recorded retry: queue={queue_name}")
+        except Exception as e:
+            logger.error(f"Failed to record retry: {e}")
+
+    def update_queue_depth(self, queue_name: str = "default", depth: int = 0, priority: str = "normal") -> None:
+        """
+        Manually set the queue depth gauge (for external synchronization).
+
+        Use when queue depth is known from external source.
+
+        Args:
+            queue_name: Name of the queue
+            depth: Current queue depth (must be >= 0)
+            priority: Priority level
+        """
+        if not self._gauges:
+            return
+
+        try:
+            with self._state_lock:
+                self._queue_depth[queue_name] = max(0, depth)
+
+            logger.debug(f"Updated queue depth: queue={queue_name}, depth={depth}")
+        except Exception as e:
+            logger.error(f"Failed to update queue depth: {e}")
+
+    def update_consumer_metrics(
+        self,
+        queue_name: str = "default",
+        consumer_group: str = "workers",
+        active: int = 1,
+        saturation: float = 0.0,
+        lag_seconds: float = 0.0
+    ) -> None:
+        """
+        Update consumer health metrics (saturation, lag, active count).
+
+        Called periodically (e.g., every 30 seconds) to update consumer health.
+
+        Args:
+            queue_name: Name of the queue
+            consumer_group: Consumer group identifier
+            active: Number of active consumers (>= 0)
+            saturation: Utilization ratio 0.0 to 1.0
+            lag_seconds: Time to catch up, in seconds (>= 0)
+        """
+        if not self._gauges:
+            return
+
+        try:
+            with self._state_lock:
+                self._active_consumers = max(0, active)
+                self._consumer_saturation = max(0.0, min(1.0, saturation))
+                self._consumer_lag_seconds = max(0.0, lag_seconds)
+
+            logger.debug(
+                f"Updated consumer metrics: queue={queue_name}, "
+                f"active={active}, saturation={saturation:.2f}, lag={lag_seconds:.1f}s"
+            )
+        except Exception as e:
+            logger.error(f"Failed to update consumer metrics: {e}")
+
+
+# =============================================================================
 # Global Instances
 # =============================================================================
 
@@ -1503,6 +1949,9 @@ _metrics_exporter: Optional[CacheMetricsExporter] = None
 
 # Global decay metrics exporter instance
 _decay_metrics_exporter: Optional[DecayMetricsExporter] = None
+
+# Global queue metrics exporter instance
+_queue_metrics_exporter: Optional[QueueMetricsExporter] = None
 
 
 def initialize_metrics_exporter(enabled: bool = True, port: int = 9090) -> CacheMetricsExporter:
@@ -1567,3 +2016,37 @@ def get_decay_metrics_exporter() -> Optional[DecayMetricsExporter]:
         DecayMetricsExporter if initialized, None otherwise
     """
     return _decay_metrics_exporter
+
+
+def initialize_queue_metrics_exporter() -> Optional[QueueMetricsExporter]:
+    """
+    Initialize the global queue metrics exporter instance.
+
+    Must be called after initialize_metrics_exporter() to share the meter.
+
+    Returns:
+        QueueMetricsExporter instance, or None if metrics not available
+    """
+    global _queue_metrics_exporter
+
+    if _queue_metrics_exporter is not None:
+        return _queue_metrics_exporter
+
+    cache_exporter = get_metrics_exporter()
+    if cache_exporter is None or cache_exporter._meter is None:
+        logger.warning("Cannot initialize queue metrics - cache exporter not initialized")
+        return None
+
+    _queue_metrics_exporter = QueueMetricsExporter(meter=cache_exporter._meter)
+    logger.info("Queue metrics exporter initialized")
+    return _queue_metrics_exporter
+
+
+def get_queue_metrics_exporter() -> Optional[QueueMetricsExporter]:
+    """
+    Get the global queue metrics exporter instance.
+
+    Returns:
+        QueueMetricsExporter if initialized, None otherwise
+    """
+    return _queue_metrics_exporter
