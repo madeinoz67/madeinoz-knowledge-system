@@ -339,3 +339,73 @@ docker pull ghcr.io/madeinoz67/madeinoz-knowledge-system:1.0.2
 - [Developer Notes](developer-notes.md) - Custom image rationale
 - [Configuration Reference](configuration.md) - Environment variables
 - [Installation Guide](../installation/index.md) - Setup instructions
+
+---
+
+## Release Notes
+
+### Feature 017: Queue Processing Metrics
+
+**Summary:** Queue observability for monitoring depth, latency, consumer health, and failure patterns.
+
+**Description:** Adds comprehensive metrics for message queue processing operations, enabling monitoring of queue depth, processing latency (wait time, processing duration, end-to-end latency), consumer health (active count, saturation, lag), throughput, and error categorization.
+
+**Key Metrics (10 total):**
+
+| Metric | Type | Description |
+|--------|------|-------------|
+| `messaging_queue_depth` | Gauge | Current number of messages waiting |
+| `messaging_active_consumers` | Gauge | Number of active consumers |
+| `messaging_consumer_saturation` | Gauge | Consumer utilization (0-1) |
+| `messaging_consumer_lag_seconds` | Gauge | Time to catch up (seconds) |
+| `messaging_messages_processed_total` | Counter | Messages processed by status |
+| `messaging_messages_failed_total` | Counter | Failures by error category |
+| `messaging_retries_total` | Counter | Retry attempts |
+| `messaging_processing_duration_seconds` | Histogram | Processing time distribution |
+| `messaging_wait_time_seconds` | Histogram | Queue wait time distribution |
+| `messaging_end_to_end_latency_seconds` | Histogram | Total latency from enqueue to complete |
+
+**Dashboard:** 12-panel Grafana dashboard (`queue-metrics`) providing:
+- Overview row: Queue depth, consumer saturation, consumer lag, active consumers
+- Time series: Queue depth trend, processing latency (P50/P95/P99), wait time, end-to-end latency
+- Throughput and errors: Success/failure rate, error percentage, failures by type, retry rate
+
+**Error Categorization:** Coarse-grained error categories prevent high cardinality:
+- `ConnectionError` - Database/network connection issues
+- `ValidationError` - Data validation failures
+- `TimeoutError` - Request timeouts
+- `RateLimitError` - API rate limit exceeded
+- `UnknownError` - Uncategorized errors
+
+**Implementation:**
+- File: `docker/patches/metrics_exporter.py`
+- Class: `QueueMetricsExporter`
+- Thread-safe: All state modifications use locks
+- Graceful degradation: No-ops when metrics disabled
+
+**Testing:** Comprehensive unit tests covering:
+- Metric initialization and recording
+- Error categorization
+- Thread safety (concurrent operations)
+- Performance (< 1ms overhead per recording)
+- Graceful degradation without OpenTelemetry
+
+**Documentation:**
+- Updated: `docs/reference/observability.md` with Queue Metrics section
+- Includes: PromQL query examples, troubleshooting guide
+
+**GitHub Issues:**
+- Issue: #61
+
+**Pull Requests:**
+- PR: #62
+
+**Feature Flag:** None - always available when metrics are enabled
+
+**Dependencies:**
+- Requires: OpenTelemetry SDK (same as existing metrics)
+- Compatible: Feature 009 (memory decay metrics), Feature 006 (cache metrics)
+
+**Migration:** No migration required - metrics are additive only
+
+**Performance Impact:** Negligible (< 1ms per metric recording operation)

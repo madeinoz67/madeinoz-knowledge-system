@@ -665,6 +665,7 @@ The system includes multiple pre-configured Grafana dashboards:
 | **Memory Access Patterns** | `memory-access-dashboard` | Access distribution by importance/state, reactivation tracking, decay correlation |
 | **Knowledge System** | `madeinoz-knowledge` | Token usage, cost tracking, request duration, cache performance |
 | **Prompt Cache Effectiveness** | `prompt-cache-effectiveness` | Cache ROI, hit/miss patterns, write overhead, per-model comparison |
+| **Queue Processing Metrics** | `queue-metrics` | Queue depth, latency, consumer health, throughput, errors |
 
 ### Prompt Cache Effectiveness Dashboard
 
@@ -1039,6 +1040,288 @@ docker/patches/
 │  - Alert on thresholds (cost, errors, latency)                  │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+## Queue Metrics (Feature 017)
+
+The queue processing metrics provide observability for message queue operations, tracking throughput, latency, consumer health, and failure patterns. These metrics use the `messaging_` prefix.
+
+### Overview
+
+Queue metrics monitor the full lifecycle of message processing:
+
+- **Enqueue** - Messages added to queue
+- **Wait** - Time spent in queue before processing
+- **Processing** - Time to process each message
+- **Completion** - Success or failure with error categorization
+- **Consumer Health** - Lag, saturation, active consumer count
+
+### Available Metrics
+
+#### Throughput Counters
+
+Track cumulative message counts.
+
+| Metric | Labels | Description |
+|--------|--------|-------------|
+| `messaging_messages_processed_total` | `queue_name`, `status` | Total messages processed (success/failure) |
+| `messaging_messages_failed_total` | `queue_name`, `error_type` | Total failures by error category |
+| `messaging_retries_total` | `queue_name` | Total retry attempts |
+
+**Error categories** (coarse-grained to prevent high cardinality):
+
+| Category | Example Errors |
+|----------|----------------|
+| `ConnectionError` | `ConnectionError`, `ConnectionRefusedError`, `OperationalError` |
+| `ValidationError` | `ValidationError`, `ValueError`, `PydanticException` |
+| `TimeoutError` | `TimeoutError`, `AsyncTimeoutError` |
+| `RateLimitError` | `RateLimitError`, `RateLimitExceededError` |
+| `UnknownError` | Any uncategorized error |
+
+#### Queue Depth Gauge
+
+Track current queue size (messages waiting).
+
+| Metric | Labels | Description |
+|--------|--------|-------------|
+| `messaging_queue_depth` | `queue_name`, `priority` | Current number of messages waiting |
+
+#### Consumer Health Gauges
+
+Track consumer pool state and utilization.
+
+| Metric | Labels | Description |
+|--------|--------|-------------|
+| `messaging_active_consumers` | `queue_name` | Number of active consumers |
+| `messaging_consumer_saturation` | `queue_name` | Consumer utilization (0-1, 1=fully saturated) |
+| `messaging_consumer_lag_seconds` | `queue_name` | Time to catch up (seconds) |
+
+#### Latency Histograms
+
+Track processing time distributions for percentile analysis.
+
+| Metric | Bucket Range | Description |
+|--------|--------------|-------------|
+| `messaging_processing_duration_seconds` | 5ms - 10s | Time to process a message |
+| `messaging_wait_time_seconds` | 5ms - 10s | Time spent in queue before processing |
+| `messaging_end_to_end_latency_seconds` | 5ms - 10s | Total time from enqueue to completion |
+
+**Duration bucket boundaries (seconds):**
+
+```
+0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1, 2.5, 5, 7.5, 10
+```
+
+| Range | Processing Type |
+|-------|-----------------|
+| 5-50ms | Fast processing (simple operations) |
+| 50-250ms | Normal processing |
+| 250ms-1s | Slow processing |
+| 1-10s | Very slow processing (possible issues) |
+
+### Example PromQL Queries
+
+**Queue depth trend:**
+
+```promql
+messaging_queue_depth
+```
+
+**Processing throughput (messages/second):**
+
+```promql
+sum(rate(messaging_messages_processed_total{status="success"}[5m]))
+```
+
+**Error rate (percentage):**
+
+```promql
+sum(rate(messaging_messages_failed_total[5m]))
+/
+sum(rate(messaging_messages_processed_total[5m])) * 100
+```
+
+**P95 processing latency:**
+
+```promql
+histogram_quantile(0.95, sum(rate(messaging_processing_duration_seconds_bucket[5m])) by (le))
+```
+
+**P95 wait time (queue delay):**
+
+```promql
+histogram_quantile(0.95, sum(rate(messaging_wait_time_seconds_bucket[5m])) by (le))
+```
+
+**P95 end-to-end latency:**
+
+```promql
+histogram_quantile(0.95, sum(rate(messaging_end_to_end_latency_seconds_bucket[5m])) by (le))
+```
+
+**Consumer saturation check:**
+
+```promql
+messaging_consumer_saturation
+# Alert if > 0.85 (85% utilization)
+```
+
+**Time to drain queue (at current rate):**
+
+```promql
+messaging_queue_depth / sum(rate(messaging_messages_processed_total{status="success"}[5m]))
+```
+
+**Retry rate (retries per message):**
+
+```promql
+sum(rate(messaging_retries_total[5m])) / sum(rate(messaging_messages_processed_total[5m]))
+```
+
+### Queue Metrics Dashboard
+
+**Access**: `http://localhost:3002/d/queue-metrics` (dev)
+
+A 12-panel Grafana dashboard provides comprehensive queue monitoring:
+
+**Overview Row (4 panels):**
+
+| Panel | Metric | Thresholds |
+|-------|--------|------------|
+| Queue Depth | `messaging_queue_depth` | green=0, yellow=10, red=50 |
+| Consumer Saturation | `messaging_consumer_saturation` | green=0, yellow=0.5, red=0.85 |
+| Consumer Lag | `messaging_consumer_lag_seconds` | green=0, yellow=30s, red=300s |
+| Active Consumers | `messaging_active_consumers` | green=1+, yellow=1, red=0 |
+
+**Time Series Rows:**
+
+- Queue Depth Over Time - Trend analysis
+- Processing Latency (P50/P95/P99) - Percentile analysis
+- Wait Time (P50/P95) - Queue delay analysis
+- End-to-End Latency (P50/P95) - Full journey latency
+- Throughput (Success/Failure Rate) - Ops/second
+- Error Rate (%) - Gauge panel
+- Failures by Error Type - Pie chart
+- Retry Rate - Retries/second trend
+
+### Troubleshooting Queue Issues
+
+#### Growing Queue Backlog
+
+**Symptoms:**
+- `messaging_queue_depth` increasing over time
+- `messaging_consumer_lag_seconds` increasing
+- `messaging_consumer_saturation` near 1.0
+
+**Diagnosis:**
+
+```promql
+# Check if production rate exceeds consumption rate
+sum(rate(messaging_messages_processed_total[5m])) < sum(rate(messages_enqueued[5m]))
+
+# Check processing latency trend
+histogram_quantile(0.95, sum(rate(messaging_processing_duration_seconds_bucket[5m])) by (le))
+```
+
+**Solutions:**
+1. Scale consumers (increase `messaging_active_consumers`)
+2. Optimize processing (reduce latency)
+3. Implement priority queueing
+4. Add rate limiting at enqueue
+
+#### High Consumer Lag
+
+**Symptoms:**
+- `messaging_consumer_lag_seconds` > 300 (5 minutes)
+- Queue depth stable but lag increasing
+
+**Diagnosis:**
+
+```promql
+# Time to catch up at current rate
+messaging_queue_depth / sum(rate(messaging_messages_processed_total{status="success"}[5m]))
+```
+
+**Solutions:**
+1. Increase consumer count
+2. Reduce processing time per message
+3. Implement batch processing
+4. Scale horizontally (multiple queue instances)
+
+#### Consumer Saturation
+
+**Symptoms:**
+- `messaging_consumer_saturation` > 0.85
+- Wait times increasing
+
+**Diagnosis:**
+
+```promql
+# Check wait time trend
+histogram_quantile(0.95, sum(rate(messaging_wait_time_seconds_bucket[5m])) by (le))
+```
+
+**Solutions:**
+1. Add more consumers
+2. Increase consumer parallelism
+3. Implement async processing
+
+#### High Error Rate
+
+**Symptoms:**
+- `messaging_messages_failed_total` increasing
+- Error rate gauge > 5%
+
+**Diagnosis:**
+
+```promql
+# Error breakdown by type
+sum by (error_type) (messaging_messages_failed_total)
+```
+
+**Solutions:**
+1. Check error types in failures panel
+2. Fix common error patterns
+3. Implement circuit breaker for failing services
+4. Add retry with exponential backoff
+
+#### High Retry Rate
+
+**Symptoms:**
+- `messaging_retries_total` increasing rapidly
+- Retry rate > 0.1 retries/message
+
+**Diagnosis:**
+
+```promql
+# Retries per successful message
+sum(rate(messaging_retries_total[5m])) / sum(rate(messaging_messages_processed_total{status="success"}[5m]))
+```
+
+**Solutions:**
+1. Identify root cause of failures
+2. Implement dead letter queue
+3. Add backoff strategy
+4. Limit max retry attempts
+
+### Implementation
+
+The queue metrics are implemented in `docker/patches/metrics_exporter.py`:
+
+```python
+class QueueMetricsExporter:
+    """Manages queue processing metrics."""
+
+    def record_enqueue(queue_name, priority)
+    def record_dequeue(queue_name)
+    def record_processing_complete(queue_name, duration, success, error_type)
+    def record_retry(queue_name)
+    def update_queue_depth(queue_name, depth, priority)
+    def update_consumer_metrics(queue_name, active, saturation, lag_seconds)
+```
+
+**Thread safety**: All state modifications use locks.
+
+**Graceful degradation**: Methods do nothing if metrics are disabled.
 
 ## Related Documentation
 
