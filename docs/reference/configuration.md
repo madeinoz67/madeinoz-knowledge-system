@@ -80,10 +80,24 @@ MADEINOZ_KNOWLEDGE_MODEL_NAME=gpt-4o-mini
 
 **Recommended models:**
 
+- `arcee-ai/trinity-large-preview:free` (OpenRouter) - **FREE model that passes all tests**
+- `arcee-ai/trinity-mini:free` (OpenRouter) - **FREE alternative that passes all tests**
 - `gpt-4o-mini` (OpenAI) - Best balance of cost and quality
-- `google/gemini-2.0-flash-001` (OpenRouter) - Cheapest working model
+- `google/gemini-2.0-flash-001` (OpenRouter) - Fast, reliable, NOT being retired
 - `openai/gpt-4o` (OpenRouter) - Fastest extraction
 - `meta-llama/llama-3.1-8b-instruct` (OpenRouter) - Lowest cost (may have validation issues)
+
+!!! warning "Gemini Retirement Notice"
+    `google/gemini-2.0-flash-001` **will be retired in March 2026**. Switch to either Trinity model as free alternatives:
+    - `arcee-ai/trinity-large-preview:free` (recommended)
+    - `arcee-ai/trinity-mini:free` (faster)
+
+!!! success "Free Trinity Models"
+    Both Trinity models are **free** via OpenRouter and successfully pass all Graphiti entity extraction tests:
+    - `arcee-ai/trinity-large-preview:free` - Larger model, more detailed extraction
+    - `arcee-ai/trinity-mini:free` - Smaller model, faster processing (~16s)
+
+    These are excellent options for cost-conscious users, especially with Gemini retiring in March 2026.
 
 ### API Keys
 

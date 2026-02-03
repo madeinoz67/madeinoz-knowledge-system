@@ -20,6 +20,51 @@ The knowledge system uses two types of AI models:
 
 For cost savings while maintaining reliability, we recommend a **hybrid setup**:
 
+### Option 1: Free Trinity Models (Recommended for cost savings)
+
+**Option 1a: Trinity Large Preview (More detailed extraction)**
+
+```env
+# LLM: Trinity Large Preview (FREE, passes all tests)
+MADEINOZ_KNOWLEDGE_LLM_PROVIDER=openai
+MADEINOZ_KNOWLEDGE_MODEL_NAME=arcee-ai/trinity-large-preview:free
+MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL=https://openrouter.ai/api/v1
+MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=your-openrouter-api-key
+
+# Embedder: Ollama (free local embeddings)
+MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER=openai
+MADEINOZ_KNOWLEDGE_EMBEDDER_BASE_URL=http://your-ollama-server:11434/v1
+MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL=mxbai-embed-large
+MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS=1024
+```
+
+**Option 1b: Trinity Mini (Faster processing)**
+
+```env
+# LLM: Trinity Mini (FREE, faster processing ~16s)
+MADEINOZ_KNOWLEDGE_LLM_PROVIDER=openai
+MADEINOZ_KNOWLEDGE_MODEL_NAME=arcee-ai/trinity-mini:free
+MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL=https://openrouter.ai/api/v1
+MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=your-openrouter-api-key
+
+# Embedder: Ollama (free local embeddings)
+MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER=openai
+MADEINOZ_KNOWLEDGE_EMBEDDER_BASE_URL=http://your-ollama-server:11434/v1
+MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL=mxbai-embed-large
+MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS=1024
+```
+
+Both configurations:
+- Use Trinity models via OpenRouter for LLM (**completely free**)
+- Successfully pass all Graphiti entity extraction tests
+- Use Ollama for embeddings (free, runs locally)
+- **Zero cloud LLM costs** while maintaining extraction quality
+
+**Trinity Large Preview:** More detailed entity extraction, ~25s processing time
+**Trinity Mini:** Faster processing ~16s, good quality extraction
+
+### Option 2: Gemini Flash (Fast, reliable - RETIRING MARCH 2026)
+
 ```env
 # LLM: gemini-2.0-Flash (reliable JSON output for entity extraction)
 MADEINOZ_KNOWLEDGE_LLM_PROVIDER=openai
@@ -37,6 +82,7 @@ MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS=1024
 This configuration:
 
 - Uses gemini-2.0-flash-001 via OpenRouter for LLM (reliable and cost effective)
+- **WARNING: Gemini will be RETIRED in March 2026** - use Trinity as alternative
 - Note: `LLM_PROVIDER=openai` because OpenRouter is OpenAI-compatible
 - Uses Ollama for embeddings (free, runs locally)
 - Reduces cloud costs while maintaining extraction quality
@@ -108,7 +154,10 @@ entity_resolutions
 
 The model outputs JSON schema definitions instead of data conforming to the schema.
 
-**Recommendation**: For production LLM use, stick with OpenAI models (gpt-4o-mini, gpt-4o) which reliably produce valid JSON matching Graphiti's Pydantic schemas.
+**Recommendation**: For production LLM use, choose from these tested options:
+- **Free:** `arcee-ai/trinity-large-preview:free` (passes all tests)
+**Low-cost:** `google/gemini-2.0-flash-001` (fast, reliable - but RETIRING March 2026)
+- **Premium:** OpenAI models (gpt-4o-mini, gpt-4o) which reliably produce valid JSON matching Graphiti's Pydantic schemas
 
 ## Embedding Models
 
@@ -272,6 +321,76 @@ This configuration:
 - Uses OpenRouter for LLM (access to Claude, GPT-4, etc.)
 - Uses Ollama for embeddings (free, runs locally)
 - Gives you flexibility to choose any model on OpenRouter
+
+## Free Cloud Models (OpenRouter)
+
+Several free models on OpenRouter work correctly with Graphiti. These are excellent options for cost-conscious users.
+
+### Tested Free Models
+
+| Model | Status | Notes | Test Date |
+|-------|--------|-------|-----------|
+| **arcee-ai/trinity-large-preview:free** | ✅ **PASSING** | Reliable JSON output, recommended | 2026-02-03 |
+| google/gemini-2.0-flash-001 | ✅ PASSING | Fast, reliable, but RETIRING March 2026 | 2026-02-03 |
+| z-ai/glm-4.5-air:free | ❌ FAILING | ValidationError on ExtractedEntities | 2026-02-03 |
+
+### Trinity Model Test Results
+
+**Model:** `arcee-ai/trinity-large-preview:free` (via OpenRouter)
+
+**Test Results (2026-02-03):**
+
+| Test | Result | Details |
+|------|--------|---------|
+| Episode processing | ✅ PASS | All episodes processed successfully |
+| Entity extraction | ✅ PASS | Proper JSON schema compliance |
+| Relationship extraction | ✅ PASS | Entities and relationships extracted correctly |
+| Validation errors | ✅ NONE | No ValidationError for ExtractedEntities |
+
+**Example Test Episodes:**
+- SQL Databases → Extracted: "SQL", "tables", "primary keys", "foreign keys"
+- GraphQL → Extracted: "GraphQL", "query language", "strongly typed schemas"
+- Black Holes → Extracted: "Black holes", "event horizon", "Sagittarius A*"
+
+**Configuration:**
+
+```env
+MADEINOZ_KNOWLEDGE_LLM_PROVIDER=openai
+MADEINOZ_KNOWLEDGE_MODEL_NAME=arcee-ai/trinity-large-preview:free
+MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL=https://openrouter.ai/api/v1
+MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=your-openrouter-api-key
+```
+
+**Advantages:**
+- **Completely free** - no LLM costs
+- Reliable entity extraction
+- No JSON validation errors
+- Works with OpenRouter's free tier
+
+**Comparison with Paid Models:**
+
+| Model | Cost | Speed | Quality |
+|-------|------|-------|----------|
+| Trinity (free) | $0 | Medium | Good |
+| Gemini 2.0 Flash | ~$0.07/1M tokens | Fast | Excellent |
+| GPT-4o-mini | ~$0.15/1M tokens | Fast | Excellent |
+
+### Failing Free Models
+
+**GLM Models (`z-ai/glm-4.5-air:free` and variants)**
+
+These models fail with Graphiti due to JSON output issues:
+
+```
+ValidationError: 1 validation error for ExtractedEntities
+```
+
+**Issue:** GLM models return text or malformed JSON instead of the structured Pydantic schema required by Graphiti.
+
+**Workaround:** Use Trinity, Gemini, or paid models (GPT-4o-mini, Claude) instead.
+
+!!! warning "Avoid GLM Models"
+    Do not use `z-ai/glm-*` models with this knowledge system. They consistently fail entity extraction due to incompatible JSON output.
 
 ### Running the Interactive Installer
 
