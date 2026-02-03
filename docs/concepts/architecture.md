@@ -143,7 +143,7 @@ Example: "FalkorDB backend for Graphiti (learned 2025-01-03, updated 2025-01-05)
 The knowledge system includes automatic query sanitization to handle special characters in search terms, particularly important for CTI/OSINT data with hyphenated identifiers (e.g., `apt-28`, `threat-intel`).
 
 !!! note "Full Documentation"
-    For detailed information about Lucene query sanitization, including the problem, solution, and sanitization functions, see the [Known Issues](../troubleshooting/known-issues.md#lucene-query-sanitization) page.
+    For detailed information about Lucene query sanitization, including the problem, solution, and sanitization functions, see `src/server/lib/lucene.ts`.
 
 ## Component Stack
 

@@ -251,6 +251,6 @@ A:
 
 ## Related Documentation
 
-- [Memory Decay System](./memory-decay.md) - How importance and stability are calculated
-- [CLI Reference](./reference/cli.md) - Complete command documentation
-- [Configuration](./reference/configuration.md) - Setting up the knowledge system
+- [Memory Decay System](usage/memory-decay.md) - How importance and stability are calculated
+- [CLI Reference](reference/cli.md) - Complete command documentation
+- [Configuration](reference/configuration.md) - Setting up the knowledge system

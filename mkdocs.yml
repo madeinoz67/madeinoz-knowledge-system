@@ -49,6 +49,7 @@ nav:
     - Basic Usage: usage/basic-usage.md
     - Advanced: usage/advanced.md
     - Memory Decay & Lifecycle: usage/memory-decay.md
+    - Weighted Search: weighted-search.md
     - Monitoring: usage/monitoring.md
     - Backup & Restore: usage/backup-restore.md
   - Concepts:
