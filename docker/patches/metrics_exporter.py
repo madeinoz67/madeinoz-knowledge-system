@@ -1760,8 +1760,8 @@ class QueueMetricsExporter:
             queue_name: Name of the queue (default: "default")
             priority: Priority level ("low", "normal", "high")
         """
-        if not self._counters or not self._gauges:
-            return
+        # Note: Internal state tracking happens regardless of OTEL availability
+        # Only OTEL metric recording requires _counters/_gauges to be available
 
         try:
             with self._state_lock:
@@ -1787,8 +1787,8 @@ class QueueMetricsExporter:
         Args:
             queue_name: Name of the queue
         """
-        if not self._gauges:
-            return
+        # Note: Internal state tracking happens regardless of OTEL availability
+        # Only OTEL metric recording requires _gauges to be available
 
         try:
             with self._state_lock:
@@ -1892,8 +1892,8 @@ class QueueMetricsExporter:
             depth: Current queue depth (must be >= 0)
             priority: Priority level
         """
-        if not self._gauges:
-            return
+        # Note: Internal state tracking happens regardless of OTEL availability
+        # Only OTEL metric recording requires _gauges to be available
 
         try:
             with self._state_lock:
@@ -1923,8 +1923,8 @@ class QueueMetricsExporter:
             saturation: Utilization ratio 0.0 to 1.0
             lag_seconds: Time to catch up, in seconds (>= 0)
         """
-        if not self._gauges:
-            return
+        # Note: Internal state tracking happens regardless of OTEL availability
+        # Only OTEL metric recording requires _gauges to be available
 
         try:
             with self._state_lock:
