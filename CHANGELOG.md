@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 - Add weighted search support to Knowledge CLI ([#59](https://github.com/madeinoz67/madeinoz-knowledge-system/issues/59))
+- Add queue processing metrics for input monitoring ([#62](https://github.com/madeinoz67/madeinoz-knowledge-system/issues/62))
 
 ## [1.8.4] - 2026-02-02
 
