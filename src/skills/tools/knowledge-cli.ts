@@ -315,6 +315,7 @@ class MCPWrapper {
 
     const query = args[0];
     const limit = args.length > 1 ? Number.parseInt(args[1], 10) : 5;
+    const weighted = this.flags.weighted;
 
     const client = this.createClient();
     const result = await client.searchNodes({
@@ -322,7 +323,7 @@ class MCPWrapper {
       limit,
       since: this.flags.since,
       until: this.flags.until,
-      include_weighted_scores: this.flags.weighted,
+      include_weighted_scores: weighted,
     });
 
     return { ...result, query };

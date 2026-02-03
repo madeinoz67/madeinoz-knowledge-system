@@ -458,7 +458,26 @@ export class MCPClient {
           const parsed = JSON.parse(jsonStr);
           // Extract result from the MCP response format
           if (parsed.result) {
-            // Handle tool call response format
+            // Handle structured Pydantic responses from FastMCP (NodeSearchResponse, etc.)
+            // These have direct fields (nodes, facts, episodes, status) not wrapped in content array
+            if (parsed.result.nodes && Array.isArray(parsed.result.nodes)) {
+              // NodeSearchResponse - return as-is with nodes array
+              return parsed.result;
+            }
+            if (parsed.result.facts && Array.isArray(parsed.result.facts)) {
+              // FactSearchResponse - return as-is with facts array
+              return parsed.result;
+            }
+            if (parsed.result.episodes && Array.isArray(parsed.result.episodes)) {
+              // EpisodeSearchResponse - return as-is with episodes array
+              return parsed.result;
+            }
+            if (parsed.result.status !== undefined) {
+              // StatusResponse - return as-is
+              return parsed.result;
+            }
+
+            // Handle tool call response format (content array)
             if (parsed.result.content && Array.isArray(parsed.result.content)) {
               // Check for structuredContent first (preferred)
               if (parsed.result.structuredContent) {

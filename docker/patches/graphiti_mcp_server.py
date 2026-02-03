@@ -904,6 +904,7 @@ async def search_nodes(
     include_weighted_scores: bool = False,
     exclude_lifecycle_states: list[str] | None = None,
 ) -> NodeSearchResponse | ErrorResponse:
+    logger.info(f"🔍 search_nodes CALLED: query='{query}', include_weighted_scores={include_weighted_scores}, _decay_modules_available={_decay_modules_available}")
     """Search for nodes in the graph memory with optional temporal filtering and weighted scoring.
 
     Args:
@@ -1009,6 +1010,7 @@ async def search_nodes(
 
         # Feature 009: Apply weighted scoring if requested
         if include_weighted_scores and _decay_modules_available:
+            logger.info(f"🎯 WEIGHTED SCORING ENABLED for query '{query}' with {len(nodes)} nodes")
             # Generate synthetic semantic scores (in production, these would come from the search)
             # For now, use position-based scores (first result = highest)
             semantic_scores = [1.0 - (i * 0.05) for i in range(len(nodes))]
