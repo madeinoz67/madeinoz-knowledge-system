@@ -21,15 +21,16 @@ logger = logging.getLogger(__name__)
 
 def wrap_openai_client_for_caching(client: Any, model: str) -> Any:
     """
-    Wrap an OpenAI-compatible client to add prompt caching support.
+    Wrap an OpenAI-compatible client to add prompt caching support AND metrics recording.
 
     This function monkey-patches BOTH of the client's completion methods to:
-    1. Format messages with cache_control markers (request preprocessing)
-    2. Extract cache metrics from responses (response post-processing)
+    1. Format messages with cache_control markers (Gemini models only)
+    2. Extract cache metrics from responses (Gemini models only)
+    3. Record standard OpenAI metrics for ALL models (tokens, duration, cost)
 
     Args:
         client: OpenAI-compatible client instance (Graphiti's LLMClient wrapper)
-        model: Model identifier (e.g., 'google/gemini-2.0-flash-001')
+        model: Model identifier (e.g., 'google/gemini-2.0-flash-001', 'arcee-ai/trinity-large-preview:free')
 
     Returns:
         The same client instance with patched methods
@@ -41,10 +42,9 @@ def wrap_openai_client_for_caching(client: Any, model: str) -> Any:
         from utils.session_metrics import SessionMetrics
         from utils.metrics_exporter import get_metrics_exporter
 
-        # Check if caching should be applied
-        if not is_gemini_model(model):
-            logger.debug(f"Model {model} is not Gemini, skipping caching wrapper")
-            return client
+        # Check if caching should be applied for this model
+        # Note: Metrics are recorded for ALL models, caching only for Gemini
+        enable_caching = is_gemini_model(model)
 
         # Graphiti's LLMClient wrappers have a .client attribute that contains the underlying OpenAI client
         # We need to wrap that underlying client, not the Graphiti wrapper
@@ -55,6 +55,12 @@ def wrap_openai_client_for_caching(client: Any, model: str) -> Any:
         else:
             logger.warning(f"Client {type(client).__name__} doesn't have expected structure for caching wrapper")
             return client
+
+        # Log whether caching is enabled for this model
+        if enable_caching:
+            logger.info(f"Prompt caching ENABLED for model: {model}")
+        else:
+            logger.info(f"Prompt caching DISABLED for model: {model} (metrics only)")
 
         # Detect provider from base_url to determine which endpoints to wrap
         provider_name = "Unknown"
@@ -76,9 +82,14 @@ def wrap_openai_client_for_caching(client: Any, model: str) -> Any:
         if not hasattr(client, '_cache_session_metrics'):
             client._cache_session_metrics = SessionMetrics()
 
-        # Helper function to extract and record cache metrics (shared by both wrappers)
+        # Helper function to extract and record metrics (shared by both wrappers)
         def extract_and_record_metrics(response: Any) -> None:
-            """Extract cache metrics from response and record to Prometheus."""
+            """Extract metrics from response and record to Prometheus.
+
+            Records:
+            - General metrics (tokens, duration, cost) for ALL models
+            - Cache-specific metrics (hit/miss, tokens_saved) only for Gemini models
+            """
             metrics_enabled = os.getenv("PROMPT_CACHE_METRICS_ENABLED", "true").lower() == "true"
 
             if not metrics_enabled:
@@ -104,10 +115,13 @@ def wrap_openai_client_for_caching(client: Any, model: str) -> Any:
                             if hasattr(response.usage, 'prompt_tokens_details'):
                                 logger.info(f"📦 response.usage.prompt_tokens_details: {response.usage.prompt_tokens_details}")
 
-                # Get pricing tier
-                pricing = get_pricing_tier(model)
-                if not pricing:
-                    return
+                # Get pricing tier (only needed for cache metrics)
+                pricing = None
+                if enable_caching:
+                    pricing = get_pricing_tier(model)
+                    if not pricing:
+                        logger.debug(f"No pricing tier found for model {model}, skipping cache metrics")
+                        # Continue without cache metrics - still record general metrics
 
                 # Convert response to dict if needed
                 # Special handling for ParsedResponse with ResponseUsage object
@@ -175,30 +189,61 @@ def wrap_openai_client_for_caching(client: Any, model: str) -> Any:
 
                     logger.info("=" * 70)
 
-                # Extract cache metrics
-                cache_metrics = CacheMetrics.from_openrouter_response(
-                    response_dict,
-                    model,
-                    pricing
-                )
+                # Extract and record cache metrics (only if caching is enabled for this model)
+                cache_metrics = None
+                if enable_caching and pricing:
+                    cache_metrics = CacheMetrics.from_openrouter_response(
+                        response_dict,
+                        model,
+                        pricing
+                    )
 
-                # Record to session metrics
-                client._cache_session_metrics.record_request(cache_metrics)
+                    # Record to session metrics
+                    client._cache_session_metrics.record_request(cache_metrics)
 
-                # Record to Prometheus/OpenTelemetry
+                # Record to Prometheus/OpenTelemetry (for ALL models)
                 metrics_exporter = get_metrics_exporter()
                 if metrics_exporter:
-                    # Record cache-specific metrics (hit/miss)
-                    if cache_metrics.cache_hit:
-                        metrics_exporter.record_cache_hit(
-                            model,
-                            cache_metrics.tokens_saved,
-                            cache_metrics.cost_saved
-                        )
-                    else:
-                        metrics_exporter.record_cache_miss(model)
+                    # Record cache-specific metrics (hit/miss) only if caching enabled
+                    if enable_caching and cache_metrics:
+                        if cache_metrics.cache_hit:
+                            metrics_exporter.record_cache_hit(
+                                model,
+                                cache_metrics.tokens_saved,
+                                cache_metrics.cost_saved
+                            )
+                        else:
+                            metrics_exporter.record_cache_miss(model)
 
-                    # Record general request metrics (tokens, costs) - works even with caching disabled
+                        # Record cache writes (tokens written to cache on cache miss)
+                        # Gemini returns cache_creation_input_tokens when new cache is created
+                        usage = response_dict.get("usage", {})
+                        cache_write_tokens = 0
+                        # Check in usage dict
+                        if 'cache_creation_input_tokens' in usage:
+                            cache_write_tokens = usage.get('cache_creation_input_tokens', 0)
+                        # Check in prompt_tokens_details
+                        elif 'prompt_tokens_details' in usage:
+                            details = usage.get('prompt_tokens_details', {})
+                            if isinstance(details, dict):
+                                cache_write_tokens = details.get('cache_creation_input_tokens', 0) or 0
+
+                        if cache_write_tokens > 0:
+                            metrics_exporter.record_cache_write(model, cache_write_tokens)
+                            logger.debug(f"📝 Cache write: {cache_write_tokens} tokens written to cache")
+
+                        # Attach cache metrics to response object for MCP layer to access
+                        if hasattr(response, '__dict__'):
+                            response._cache_metrics = cache_metrics
+
+                        if os.getenv("PROMPT_CACHE_LOG_REQUESTS", "false").lower() == "true":
+                            logger.info(
+                                f"Cache metrics: hit={cache_metrics.cache_hit}, "
+                                f"cached_tokens={cache_metrics.cached_tokens}, "
+                                f"cost_saved=${cache_metrics.cost_saved:.6f}"
+                            )
+
+                    # Record general request metrics (tokens, costs) - works for ALL models
                     usage = response_dict.get("usage", {})
                     prompt_tokens = usage.get("prompt_tokens", 0)
                     completion_tokens = usage.get("completion_tokens", 0)
@@ -229,35 +274,8 @@ def wrap_openai_client_for_caching(client: Any, model: str) -> Any:
                         output_cost=output_cost
                     )
 
-                    # Record cache writes (tokens written to cache on cache miss)
-                    # Gemini returns cache_creation_input_tokens when new cache is created
-                    cache_write_tokens = 0
-                    # Check in usage dict
-                    if 'cache_creation_input_tokens' in usage:
-                        cache_write_tokens = usage.get('cache_creation_input_tokens', 0)
-                    # Check in prompt_tokens_details
-                    elif 'prompt_tokens_details' in usage:
-                        details = usage.get('prompt_tokens_details', {})
-                        if isinstance(details, dict):
-                            cache_write_tokens = details.get('cache_creation_input_tokens', 0) or 0
-
-                    if cache_write_tokens > 0:
-                        metrics_exporter.record_cache_write(model, cache_write_tokens)
-                        logger.debug(f"📝 Cache write: {cache_write_tokens} tokens written to cache")
-
-                # Attach metrics to response object for MCP layer to access
-                if hasattr(response, '__dict__'):
-                    response._cache_metrics = cache_metrics
-
-                if os.getenv("PROMPT_CACHE_LOG_REQUESTS", "false").lower() == "true":
-                    logger.info(
-                        f"Cache metrics: hit={cache_metrics.cache_hit}, "
-                        f"cached_tokens={cache_metrics.cached_tokens}, "
-                        f"cost_saved=${cache_metrics.cost_saved:.6f}"
-                    )
-
             except Exception as e:
-                logger.error(f"Failed to extract cache metrics: {e}", exc_info=True)
+                logger.error(f"Failed to extract metrics: {e}", exc_info=True)
 
         # WRAPPER 1: chat.completions.create (used for regular JSON responses)
         if hasattr(underlying_client.chat.completions, 'create'):
@@ -265,7 +283,7 @@ def wrap_openai_client_for_caching(client: Any, model: str) -> Any:
 
             @wraps(original_create)
             async def create_with_caching(*args, **kwargs):
-                """Wrapped chat.completions.create method with caching support."""
+                """Wrapped chat.completions.create method with metrics and optional caching support."""
 
                 # ALWAYS log this to verify wrapper is being called
                 import sys
@@ -273,8 +291,8 @@ def wrap_openai_client_for_caching(client: Any, model: str) -> Any:
                 logger.info(f"🔍 chat.completions.create CALLED for model: {model}")
 
                 # PHASE 1: REQUEST PREPROCESSING
-                # Format messages with cache_control markers
-                if 'messages' in kwargs:
+                # Format messages with cache_control markers (only if caching enabled for this model)
+                if enable_caching and 'messages' in kwargs:
                     original_messages = kwargs['messages']
                     kwargs['messages'] = format_messages_for_caching(original_messages, model)
 
@@ -322,27 +340,20 @@ def wrap_openai_client_for_caching(client: Any, model: str) -> Any:
 
             @wraps(original_parse)
             async def parse_with_caching(*args, **kwargs):
-                """Wrapped responses.parse method with caching support."""
+                """Wrapped responses.parse method with metrics support.
+
+                Note: responses.parse endpoint does NOT support multipart format, so caching
+                is never applied to this endpoint. Only metrics are recorded.
+                """
 
                 logger.info(f"🔍 responses.parse CALLED for model: {model}")
 
                 # PHASE 1: REQUEST PREPROCESSING
-                # CRITICAL BUG FIX: OpenRouter's /responses endpoint does NOT support multipart format
+                # CRITICAL: responses.parse endpoint does NOT support multipart format
                 # Multipart content with cache_control markers causes 400 BadRequestError
-                # Error: "expected string, received array" at content path
-                #
-                # Root Cause: format_messages_for_caching() converts content to:
-                #   content: [{"type": "text", "text": "...", "cache_control": {...}}]
-                # But /responses endpoint requires:
-                #   content: "string"
-                #
-                # Solution: Skip caching for responses.parse endpoint entirely
-                # Note: Caching ONLY works with chat.completions.create endpoint
-                #
-                # Future: Research if cache_control can be added without multipart format
-                # For now: responses.parse always bypasses caching
+                # Therefore, we never apply caching to this endpoint, only metrics
 
-                if os.getenv("PROMPT_CACHE_LOG_REQUESTS", "false").lower() == "true":
+                if enable_caching and os.getenv("PROMPT_CACHE_LOG_REQUESTS", "false").lower() == "true":
                     logger.info("⚠️ Skipping cache formatting for responses.parse (multipart not supported)")
 
                 # Call original method with timing and error tracking
@@ -379,7 +390,7 @@ def wrap_openai_client_for_caching(client: Any, model: str) -> Any:
             underlying_client.responses.parse = parse_with_caching
             logger.info(f"Wrapped responses.parse for caching support")
 
-        logger.info(f"✅ Wrapped OpenAI client for caching support (provider: {provider_name}, model: {model}, client: {type(client).__name__})")
+        logger.info(f"✅ Wrapped OpenAI client for metrics and caching support (provider: {provider_name}, model: {model}, caching: {enable_caching}, client: {type(client).__name__})")
 
     except ImportError as e:
         logger.warning(f"Caching modules not available: {e}")
