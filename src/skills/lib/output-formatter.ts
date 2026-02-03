@@ -124,6 +124,7 @@ interface SearchNodesResponse {
     summary?: string;
     created_at?: string;
     group_id?: string;
+    attributes?: Record<string, unknown>; // For weighted scores, importance, etc.
   }>;
 }
 
@@ -351,7 +352,8 @@ function isRecoveryResponse(data: unknown): data is RecoveryResponse {
 /**
  * Format search_nodes / search_memory_nodes response
  * Output: Found N entities for "query":
- *         1. Name [Type] - Summary (truncated to 80 chars)
+ *         1. Name [Type] - Summary (truncated to 120 chars)
+ *         When weighted scores present: 📊 Score: 0.XX (S:0.XX R:0.XX I:0.XX)
  */
 export function formatSearchNodes(data: unknown, options: FormatOptions): string {
   if (!isSearchNodesResponse(data)) {
@@ -368,12 +370,50 @@ export function formatSearchNodes(data: unknown, options: FormatOptions): string
 
   const lines: string[] = [`Found ${nodes.length} entities for "${query}":`];
 
+  // DEBUG: Log first node structure to understand what attributes are present
+  if (nodes.length > 0) {
+    const firstNode = nodes[0];
+    console.error('[DEBUG] First node keys:', Object.keys(firstNode));
+    console.error('[DEBUG] First node sample:', JSON.stringify(firstNode).substring(0, 500));
+  }
+
   const displayNodes = nodes.slice(0, maxLines);
   displayNodes.forEach((node, index) => {
     const summary = truncateText(node.summary || '', 120);
     // Use labels array (new format) or entity_type (legacy)
     const entityType = node.labels?.[0] || node.entity_type || 'Entity';
-    lines.push(`${index + 1}. ${node.name} [${entityType}] - ${summary}`);
+
+    let line = `${index + 1}. ${node.name} [${entityType}] - ${summary}`;
+
+    // Display weighted scores if present (Feature 009: Memory Decay Scoring)
+    if (node.attributes?.weighted_score !== undefined) {
+      const score = node.attributes.weighted_score as number;
+      const breakdown = node.attributes.score_breakdown as { semantic: number; recency: number; importance: number } | undefined;
+
+      if (breakdown) {
+        line += `\n   📊 Score: ${score.toFixed(2)} (S:${breakdown.semantic.toFixed(2)} R:${breakdown.recency.toFixed(2)} I:${breakdown.importance.toFixed(2)})`;
+      } else {
+        line += `\n   📊 Score: ${score.toFixed(2)}`;
+      }
+
+      // Show lifecycle state if present
+      if (node.attributes.lifecycle_state) {
+        const state = node.attributes.lifecycle_state as string;
+        line += ` [${state}]`;
+      }
+
+      // Show importance/stability if present
+      if (node.attributes.importance !== undefined || node.attributes.stability !== undefined) {
+        const imp = node.attributes.importance as number | undefined;
+        const stab = node.attributes.stability as number | undefined;
+        const parts = [];
+        if (imp !== undefined) parts.push(`Imp:${imp}`);
+        if (stab !== undefined) parts.push(`Stab:${stab}`);
+        if (parts.length > 0) line += ` (${parts.join(' ')})`;
+      }
+    }
+
+    lines.push(line);
   });
 
   if (nodes.length > maxLines) {

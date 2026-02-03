@@ -70,6 +70,8 @@ export interface SearchNodesParams {
   since?: string;
   /** Return nodes created before this date (ISO 8601 or relative) */
   until?: string;
+  /** Apply weighted scoring (60% semantic + 25% recency + 15% importance) */
+  include_weighted_scores?: boolean;
 }
 
 export interface SearchFactsParams {
@@ -456,7 +458,26 @@ export class MCPClient {
           const parsed = JSON.parse(jsonStr);
           // Extract result from the MCP response format
           if (parsed.result) {
-            // Handle tool call response format
+            // Handle structured Pydantic responses from FastMCP (NodeSearchResponse, etc.)
+            // These have direct fields (nodes, facts, episodes, status) not wrapped in content array
+            if (parsed.result.nodes && Array.isArray(parsed.result.nodes)) {
+              // NodeSearchResponse - return as-is with nodes array
+              return parsed.result;
+            }
+            if (parsed.result.facts && Array.isArray(parsed.result.facts)) {
+              // FactSearchResponse - return as-is with facts array
+              return parsed.result;
+            }
+            if (parsed.result.episodes && Array.isArray(parsed.result.episodes)) {
+              // EpisodeSearchResponse - return as-is with episodes array
+              return parsed.result;
+            }
+            if (parsed.result.status !== undefined) {
+              // StatusResponse - return as-is
+              return parsed.result;
+            }
+
+            // Handle tool call response format (content array)
             if (parsed.result.content && Array.isArray(parsed.result.content)) {
               // Check for structuredContent first (preferred)
               if (parsed.result.structuredContent) {
@@ -670,6 +691,10 @@ export class MCPClient {
     }
     if (params.until) {
       serverParams.created_before = params.until;
+    }
+    // Weighted scoring (Feature 009)
+    if (params.include_weighted_scores !== undefined) {
+      serverParams.include_weighted_scores = params.include_weighted_scores;
     }
 
     // Check cache first

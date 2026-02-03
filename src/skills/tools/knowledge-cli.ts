@@ -14,6 +14,7 @@
  *   --raw          Output raw JSON instead of compact format
  *   --metrics      Display token metrics after each operation
  *   --metrics-file Write metrics to JSONL file
+ *   --weighted     Apply weighted scoring (60% semantic + 25% recency + 15% importance)
  */
 
 import { createMCPClient, type MCPClientConfigExtended, type MCPClient } from '../lib/mcp-client';
@@ -47,6 +48,7 @@ interface CLIFlags {
   help: boolean;
   since?: string;
   until?: string;
+  weighted?: boolean;
   profile?: string;
   host?: string;
   port?: string;
@@ -65,6 +67,7 @@ function parseFlags(args: string[]): { flags: CLIFlags; positionalArgs: string[]
     help: false,
     since: undefined,
     until: undefined,
+    weighted: undefined,
     profile: undefined,
     host: undefined,
     port: undefined,
@@ -88,6 +91,8 @@ function parseFlags(args: string[]): { flags: CLIFlags; positionalArgs: string[]
       flags.since = args[++i];
     } else if (arg === '--until') {
       flags.until = args[++i];
+    } else if (arg === '--weighted') {
+      flags.weighted = true;
     } else if (arg === '--profile') {
       flags.profile = args[++i];
     } else if (arg === '--host') {
@@ -304,12 +309,13 @@ class MCPWrapper {
     if (args.length < 1) {
       return {
         success: false,
-        error: 'Usage: search_nodes <query> [limit] [--since <date>] [--until <date>]',
+        error: 'Usage: search_nodes <query> [limit] [--since <date>] [--until <date>] [--weighted]',
       };
     }
 
     const query = args[0];
     const limit = args.length > 1 ? Number.parseInt(args[1], 10) : 5;
+    const weighted = this.flags.weighted;
 
     const client = this.createClient();
     const result = await client.searchNodes({
@@ -317,6 +323,7 @@ class MCPWrapper {
       limit,
       since: this.flags.since,
       until: this.flags.until,
+      include_weighted_scores: weighted,
     });
 
     return { ...result, query };

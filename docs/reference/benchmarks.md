@@ -5,7 +5,7 @@ description: "Performance benchmarks for LLM and embedding models with the Madei
 
 # Model Benchmark Results - MadeInOz Knowledge System
 
-**Last Updated:** 2026-01-18
+**Last Updated:** 2026-02-03
 **Database:** Neo4j (neo4j:5.28.0)
 **MCP Server:** zepai/knowledge-graph-mcp:standalone
 **Local Ollama Tests:** NVIDIA RTX 4090 GPU (24GB VRAM)
@@ -34,10 +34,14 @@ We tested 15 different models with actual MCP integration via Graphiti. The resu
 
 | Use Case | LLM | Embedding | Cost/1K Ops | Why This? |
 |----------|-----|-----------|-------------|-----------|
-| **Best Value** | Gemini 2.0 Flash | MxBai (Ollama) | $0.125 | Cheapest working model, extracts 8 entities, 16.4s |
+| **FREE** | Trinity Large Preview | MxBai (Ollama) | **$0** | Completely free, passes all tests |
+| **Best Value** | Gemini 2.0 Flash | MxBai (Ollama) | $0.125 | Cheapest paid model, extracts 8 entities, 16.4s |
 | **Most Reliable** | GPT-4o Mini | MxBai (Ollama) | $0.129 | Production-proven, 7 entities, 18.4s |
 | **Fastest** | GPT-4o | MxBai (Ollama) | $2.155 | 12.4s extraction, 6 entities |
 | **Premium** | Claude 3.5 Haiku | MxBai (Ollama) | $0.816 | 7 entities, 24.7s |
+
+!!! success "NEW: Free Trinity Model"
+    `arcee-ai/trinity-large-preview:free` via OpenRouter is now available as a **completely free** option that passes all Graphiti entity extraction tests. See [Free Cloud Models](#free-cloud-models-openrouter) below for details.
 
 !!! tip "Hybrid Approach = Best Results"
     Use **cloud LLM** (accurate entity extraction) + **local Ollama embeddings** (free, 9x faster). This combines the strengths of both approaches.
@@ -133,18 +137,41 @@ Morgan Stanley. The deal includes cloud infrastructure migration and a
 
 **Expected Entities:** TechCorp, Sarah Martinez, CloudBase Inc, Morgan Stanley, Austin, Seattle
 
-### ✅ Working Models (6/15)
+### ✅ Working Models (8/15)
 
 These models successfully extract entities AND relationships, passing Graphiti's strict Pydantic validation:
 
 | Rank | Model | Cost/1K | Entities | Time | Quality Score |
 |------|-------|---------|----------|------|---------------|
+| 0 | **Trinity Large Preview** 🆓 | **$0** | 6/5 | ~25s | ⭐⭐⭐⭐ |
+| 0a | **Trinity Mini** 🆓 | **$0** | 6/5 | ~16s | ⭐⭐⭐⭐ |
 | 1 | **Gemini 2.0 Flash** 🏆 | $0.125 | 8/5 | 16.4s | ⭐⭐⭐⭐⭐ |
 | 2 | Qwen 2.5 72B | $0.126 | 8/5 | 30.8s | ⭐⭐⭐⭐ |
 | 3 | GPT-4o Mini | $0.129 | 7/5 | 18.4s | ⭐⭐⭐⭐⭐ |
 | 4 | Claude 3.5 Haiku | $0.816 | 7/5 | 24.7s | ⭐⭐⭐⭐ |
 | 5 | GPT-4o | $2.155 | 6/5 | 12.4s | ⭐⭐⭐⭐⭐ |
 | 6 | Grok 3 | $2.163 | 8/5 | 22.5s | ⭐⭐⭐ |
+
+!!! success "FREE Trinity Models (New 2026-02-03)"
+    Both Trinity models are **completely free** and work correctly:
+
+    **Trinity Large Preview:**
+    - ✅ Passes all Graphiti entity extraction tests
+    - ✅ No JSON validation errors
+    - ✅ Reliable entity and relationship extraction
+    - ✅ Available via OpenRouter free tier
+    - ⚠️ Slower processing (~25s)
+    - ✅ Extracts 6 entities per test
+
+    **Trinity Mini:**
+    - ✅ Passes all Graphiti entity extraction tests
+    - ✅ No JSON validation errors
+    - ✅ Reliable entity and relationship extraction
+    - ✅ Available via OpenRouter free tier
+    - ⚡ Faster processing (~16s)
+    - ✅ Extracts 6 entities per test
+
+    **Best for**: Cost-conscious users, testing, and development environments.
 
 !!! note "Entity Count Explanation"
     "8/5" means: Extracted 8 entities total (including extras beyond the 5 required). This shows the model identified additional relevant entities like "cloud infrastructure" or "Q4 planning meeting".
@@ -189,6 +216,32 @@ These models **DO NOT WORK** with Graphiti despite passing simple JSON tests:
 ---
 
 ## Configuration Examples
+
+### FREE Configuration (New - Trinity Large Preview)
+
+Use **Trinity Large Preview + MxBai** for completely free knowledge graph operations:
+
+```env
+# LLM: Trinity Large Preview via OpenRouter (FREE)
+MADEINOZ_KNOWLEDGE_LLM_PROVIDER=openrouter
+MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=sk-or-v1-...
+MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL=https://openrouter.ai/api/v1
+MADEINOZ_KNOWLEDGE_MODEL_NAME=arcee-ai/trinity-large-preview:free
+
+# Embeddings: MxBai via Ollama (local, FREE)
+MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER=ollama
+MADEINOZ_KNOWLEDGE_EMBEDDER_BASE_URL=http://localhost:11434/v1
+MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL=mxbai-embed-large
+MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS=1024
+```
+
+**Cost**: $0/1K operations + FREE embeddings = **$0 total**
+**Performance**: ~25s extraction, 87ms search
+**Quality**: 6 entities extracted, 73.9% embedding quality
+**Best for**: Development, testing, cost-conscious production
+
+!!! success "Completely Free Knowledge Graph"
+    This configuration provides a **fully functional knowledge graph system at zero cost**. Trinity passes all Graphiti entity extraction tests with no JSON validation errors.
 
 ### Best Value Configuration (Recommended)
 
@@ -280,16 +333,73 @@ MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS=1536
 
 ---
 
+## Free Cloud Models (OpenRouter)
+
+Several free models on OpenRouter are available for cost-conscious users.
+
+### Trinity Large Preview (Recommended Free Option)
+
+**Model:** `arcee-ai/trinity-large-preview:free`
+
+**Test Date:** 2026-02-03
+
+**Results:**
+
+| Test | Result |
+|------|--------|
+| Episode processing | ✅ PASS |
+| Entity extraction | ✅ PASS |
+| JSON validation | ✅ PASS |
+| Relationship extraction | ✅ PASS |
+
+**Configuration:**
+
+```env
+MADEINOZ_KNOWLEDGE_LLM_PROVIDER=openai
+MADEINOZ_KNOWLEDGE_MODEL_NAME=arcee-ai/trinity-large-preview:free
+MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL=https://openrouter.ai/api/v1
+MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=your-openrouter-api-key
+```
+
+**Pros:**
+- **Completely free** - no LLM costs
+- Reliable entity extraction
+- No JSON validation errors
+- Works with OpenRouter's free tier
+
+**Cons:**
+- Slower than paid models (~25s vs ~16s)
+- Extracts fewer entities (6 vs 8 with Gemini)
+- May have rate limits on free tier
+
+**Best for:** Development, testing, and cost-conscious production use.
+
+### Failing Free Models
+
+| Model | Status | Error |
+|-------|--------|-------|
+| `z-ai/glm-4.5-air:free` | ❌ FAIL | ValidationError: Invalid ExtractedEntities schema |
+
+!!! warning "Avoid GLM Models"
+    GLM models (`z-ai/glm-*`) fail consistently due to incompatible JSON output. Use Trinity or paid models instead.
+
+---
+
 ## Cost Analysis
 
 ### Monthly Cost Comparison (10,000 operations)
 
 | Configuration | LLM Cost | Embed Cost | Total/Month |
 |---------------|----------|------------|-------------|
-| **Gemini 2.0 Flash + MxBai** (Recommended) | $1.25 | $0 | **$1.25** |
+| **Trinity Large + MxBai** (FREE) | $0 | $0 | **$0** 🆓 |
+| **Trinity Mini + MxBai** (FREE) | $0 | $0 | **$0** 🆓 |
+| **Gemini 2.0 Flash + MxBai** (Best Value) | $1.25 | $0 | **$1.25** |
 | GPT-4o Mini + MxBai (Production) | $1.29 | $0 | **$1.29** |
 | GPT-4o + MxBai (Speed) | $21.55 | $0 | **$21.55** |
 | GPT-4o Mini + Embed 3 Small (Cloud-only) | $1.29 | $0.20 | **$1.49** |
+
+!!! success "Zero-Cost Option Available"
+    The Trinity Large Preview configuration provides a **completely free knowledge graph system**. No LLM costs, no embedding costs, fully functional entity extraction.
 
 !!! success "Cost Savings with Hybrid"
     Using local Ollama embeddings saves **$0.20/10K operations** compared to cloud embeddings, while delivering 9x faster search queries.
@@ -413,9 +523,11 @@ Tested all MCP operations with real data:
 
 !!! success "What Works"
     1. **Hybrid architecture** (cloud LLM + local embeddings) is optimal
-    2. **Gemini 2.0 Flash** is the best value at $0.125/1K
-    3. **MxBai Embed Large** via Ollama is best embedding choice (free, fast, good quality)
-    4. **Only 6 models work** with Graphiti - ignore benchmarks showing cheap open-source models
+    2. **Trinity Large Preview** is now available as a **FREE** option that passes all tests
+    3. **Gemini 2.0 Flash** is the best paid value at $0.125/1K
+    4. **Gemini 2.0 Flash will be RETIRED March 2026** - switch to Trinity or GPT-4o-mini
+    5. **MxBai Embed Large** via Ollama is best embedding choice (free, fast, good quality)
+    6. **9 models now work** with Graphiti (including 2 free options)
 
 !!! warning "What Doesn't Work"
     1. **ALL open-source LLMs fail** (Llama, Mistral, DeepSeek) - Pydantic validation errors
@@ -424,8 +536,17 @@ Tested all MCP operations with real data:
     4. **Simple JSON tests lie** - Real MCP integration is the only valid test
 
 !!! tip "Recommended Setup"
-    Start with **Gemini 2.0 Flash + MxBai Embed Large**:
-    - Costs $0.125/1K operations (cheapest working model)
+    Start with **Trinity Large Preview** for free, or **Gemini 2.0 Flash + MxBai Embed Large** for best value:
+
+    **FREE Option (Trinity):**
+    - Costs $0/1K operations (completely free)
+    - Extracts 6 entities (reliable)
+    - ~25s extraction time
+    - FREE, fast local embeddings (87ms searches)
+    - Total cost: $0/month
+
+    **Best Value (Gemini):**
+    - Costs $0.125/1K operations (cheapest paid model)
     - Extracts 8 entities (best performance)
     - 16.4s extraction time (fast enough)
     - FREE, fast local embeddings (87ms searches)
@@ -435,10 +556,13 @@ Tested all MCP operations with real data:
 
 If you're currently using:
 
-- **GPT-4o Mini**: Switch to Gemini 2.0 Flash (3% savings, 1 more entity extracted)
-- **Claude Sonnet 4**: Switch to Gemini 2.0 Flash (97% savings, no timeouts)
-- **Llama/Mistral/DeepSeek**: Switch to Gemini 2.0 Flash (these don't actually work)
+- **GPT-4o Mini**: Switch to Trinity (FREE) or Gemini 2.0 Flash (3% savings, 1 more entity extracted)
+- **Claude Sonnet 4**: Switch to Trinity (FREE) or Gemini 2.0 Flash (97% savings, no timeouts)
+- **Llama/Mistral/DeepSeek**: Switch to Trinity (FREE) or Gemini 2.0 Flash (these don't actually work)
 - **Any cloud embeddings**: Switch to MxBai via Ollama (saves $0.02-$0.13/1M, 9x faster)
+
+!!! warning "Gemini Retirement Notice"
+    **Gemini 2.0 Flash will be RETIRED in March 2026**. Use Trinity (free) or GPT-4o-mini as alternatives.
 
 ### Future Considerations
 

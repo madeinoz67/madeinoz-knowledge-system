@@ -107,6 +107,25 @@ bun run tools/knowledge-cli.ts search_nodes "project" --since 2026-01-01 --until
 
 **Date formats:** `today`, `yesterday`, `7d`, `1w`, `1m`, or ISO dates (`2026-01-26`)
 
+### Weighted Search (Low-Cost)
+
+Rank results by **semantic relevance (60%) + recency (25%) + importance (15%)** using the `--weighted` flag:
+
+```bash
+# Weighted search - prioritizes important, recent, relevant knowledge
+bun run tools/knowledge-cli.ts search_nodes "topic" --weighted
+```
+
+**Cost benefit:** Weighted scoring uses already-computed embeddings and metadata — **no additional LLM calls**. Works with any embedding model including free/local options like Ollama, Trinity, or gpt-4o-mini.
+
+**Output includes:**
+- 📊 Overall score (0-1)
+- S: Semantic similarity
+- R: Recency score
+- I: Importance score
+- Lifecycle state (ACTIVE/DORMANT/ARCHIVED)
+- Importance/Stability ratings (1-5)
+
 ## What's Included
 
 | Component | Purpose |
