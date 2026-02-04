@@ -833,6 +833,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/osint-workflows.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OSINT &amp; CTI Workflows
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1467,6 +1495,17 @@
     <span class="md-ellipsis">
       
         search_facts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#investigate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        investigate
       
     </span>
   </a>
@@ -2393,6 +2432,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#investigate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        investigate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#get_episodes" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2822,7 +2872,7 @@ Key Components: server-cli (container management), knowledge-cli (knowledge oper
 
 Key Tools/Commands:
 - server-cli: start/stop/restart/status/logs for MCP server containers
-- knowledge-cli: add_episode, search_nodes, search_facts, get_episodes, get_status, clear_graph, health, status, list_profiles
+- knowledge-cli: add_episode, search_nodes, search_facts, investigate, get_episodes, get_status, clear_graph, health, status, list_profiles
 
 Configuration Prefix: MADEINOZ_KNOWLEDGE_
 Default Ports: 8001 (MCP HTTP), 8000 (MCP Server), 7474 (Neo4j Browser), 7687 (Neo4j Bolt)
@@ -3089,12 +3139,37 @@ Remote Access (Feature 010):
 <li>Shows relationship text and type</li>
 <li>~30% token savings vs raw MCP output</li>
 </ul>
+<h4 id="investigate">investigate<a class="headerlink" href="#investigate" title="Permanent link">¶</a></h4>
+<p>Investigate an entity and return all its connected relationships in a single query:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>investigate<span class="w"> </span><span class="s2">"APT28"</span>
+</span></code></pre></div>
+<p>Investigate with depth 2 (friends of friends):</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>investigate<span class="w"> </span><span class="s2">"APT28"</span><span class="w"> </span>--depth<span class="w"> </span><span class="m">2</span>
+</span></code></pre></div>
+<p>Investigate with relationship type filtering:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>investigate<span class="w"> </span><span class="s2">"APT28"</span><span class="w"> </span>--relationship-type<span class="w"> </span>USES<span class="w"> </span>--relationship-type<span class="w"> </span>TARGETS
+</span></code></pre></div>
+<p><strong>Arguments:</strong></p>
+<ul>
+<li><code>&lt;entity_name&gt;</code> (required): Name or identifier of the entity to investigate</li>
+<li><code>--depth &lt;N&gt;</code> (optional): Number of hops to traverse (1-3, default: 1)</li>
+<li><code>--relationship-type &lt;TYPE&gt;</code> (optional, repeatable): Filter by relationship type (e.g., OWNED_BY, USES, TARGETS)</li>
+</ul>
+<p><strong>Output format:</strong></p>
+<ul>
+<li>Primary entity with name, type, and labels</li>
+<li>All connected entities with names, types, and UUIDs</li>
+<li>Relationship type and direction for each connection</li>
+<li>Hop distance from primary entity</li>
+<li>Metadata including depth explored, connection counts, cycles detected</li>
+</ul>
+<p><strong>Feature 020:</strong> Investigative search returns AI-friendly JSON with full entity context without requiring additional lookups.</p>
 <h4 id="get_episodes">get_episodes<a class="headerlink" href="#get_episodes" title="Permanent link">¶</a></h4>
 <p>Retrieve recent episodes from the knowledge graph:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>get_episodes
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>get_episodes
 </span></code></pre></div>
 <p>Limit number of episodes:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>get_episodes<span class="w"> </span><span class="m">10</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>get_episodes<span class="w"> </span><span class="m">10</span>
 </span></code></pre></div>
 <p><strong>Arguments:</strong></p>
 <ul>
@@ -3107,7 +3182,7 @@ Remote Access (Feature 010):
 </ul>
 <h4 id="get_status">get_status<a class="headerlink" href="#get_status" title="Permanent link">¶</a></h4>
 <p>Get knowledge graph status and health:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>get_status
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>get_status
 </span></code></pre></div>
 <p><strong>Output includes:</strong></p>
 <ul>
@@ -3118,7 +3193,7 @@ Remote Access (Feature 010):
 </ul>
 <h4 id="clear_graph">clear_graph<a class="headerlink" href="#clear_graph" title="Permanent link">¶</a></h4>
 <p>Delete all knowledge from the graph (destructive operation):</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>clear_graph<span class="w"> </span>--force
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>clear_graph<span class="w"> </span>--force
 </span></code></pre></div>
 <p><strong>Safety:</strong></p>
 <ul>
@@ -3128,7 +3203,7 @@ Remote Access (Feature 010):
 </ul>
 <h4 id="health">health<a class="headerlink" href="#health" title="Permanent link">¶</a></h4>
 <p>Check MCP server health:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>health
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>health
 </span></code></pre></div>
 <p><strong>Output:</strong></p>
 <ul>
@@ -3138,12 +3213,12 @@ Remote Access (Feature 010):
 </ul>
 <h3 id="options">Options<a class="headerlink" href="#options" title="Permanent link">¶</a></h3>
 <p>All commands support the following flags:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>--raw<span class="w">              </span><span class="c1"># Output raw JSON instead of compact format</span>
-</span><span id="__span-25-2"><a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>--metrics<span class="w">          </span><span class="c1"># Display token metrics after operation</span>
-</span><span id="__span-25-3"><a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>--metrics-file<span class="w"> </span>&lt;p&gt;<span class="w"> </span><span class="c1"># Write metrics to JSONL file</span>
-</span><span id="__span-25-4"><a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a>--since<span class="w"> </span>&lt;date&gt;<span class="w">     </span><span class="c1"># Filter results created after this date</span>
-</span><span id="__span-25-5"><a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a>--until<span class="w"> </span>&lt;date&gt;<span class="w">     </span><span class="c1"># Filter results created before this date</span>
-</span><span id="__span-25-6"><a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a>-h,<span class="w"> </span>--help<span class="w">         </span><span class="c1"># Show help message</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>--raw<span class="w">              </span><span class="c1"># Output raw JSON instead of compact format</span>
+</span><span id="__span-28-2"><a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>--metrics<span class="w">          </span><span class="c1"># Display token metrics after operation</span>
+</span><span id="__span-28-3"><a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a>--metrics-file<span class="w"> </span>&lt;p&gt;<span class="w"> </span><span class="c1"># Write metrics to JSONL file</span>
+</span><span id="__span-28-4"><a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a>--since<span class="w"> </span>&lt;date&gt;<span class="w">     </span><span class="c1"># Filter results created after this date</span>
+</span><span id="__span-28-5"><a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a>--until<span class="w"> </span>&lt;date&gt;<span class="w">     </span><span class="c1"># Filter results created before this date</span>
+</span><span id="__span-28-6"><a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a>-h,<span class="w"> </span>--help<span class="w">         </span><span class="c1"># Show help message</span>
 </span></code></pre></div>
 <p><strong>Temporal Filter Options:</strong></p>
 <p>The <code>--since</code> and <code>--until</code> flags enable date-based filtering for <code>search_nodes</code> and <code>search_facts</code> commands.</p>
@@ -3196,63 +3271,63 @@ Remote Access (Feature 010):
 </table>
 <h3 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">¶</a></h3>
 <p><strong>Add knowledge with metrics:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>add_episode<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-26-2"><a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="w">  </span><span class="s2">"Test Episode"</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-26-3"><a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a><span class="w">  </span><span class="s2">"This is a test episode"</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-26-4"><a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a><span class="w">  </span>--metrics
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>add_episode<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-29-2"><a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a><span class="w">  </span><span class="s2">"Test Episode"</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-29-3"><a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a><span class="w">  </span><span class="s2">"This is a test episode"</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-29-4"><a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a><span class="w">  </span>--metrics
 </span></code></pre></div>
 <p><strong>Search with raw JSON output:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"PAI"</span><span class="w"> </span>--raw
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"PAI"</span><span class="w"> </span>--raw
 </span></code></pre></div>
 <p><strong>Search with metrics logging:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"PAI"</span><span class="w"> </span><span class="m">10</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-28-2"><a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a><span class="w">  </span>--metrics-file<span class="w"> </span>~/.madeinoz-knowledge/metrics.jsonl
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"PAI"</span><span class="w"> </span><span class="m">10</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-31-2"><a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a><span class="w">  </span>--metrics-file<span class="w"> </span>~/.madeinoz-knowledge/metrics.jsonl
 </span></code></pre></div>
 <p><strong>Get status and track metrics:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>get_status<span class="w"> </span>--metrics
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>get_status<span class="w"> </span>--metrics
 </span></code></pre></div>
 <h3 id="temporal-search-examples">Temporal Search Examples<a class="headerlink" href="#temporal-search-examples" title="Permanent link">¶</a></h3>
 <p><strong>Search for today's knowledge:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"PAI"</span><span class="w"> </span>--since<span class="w"> </span>today
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"PAI"</span><span class="w"> </span>--since<span class="w"> </span>today
 </span></code></pre></div>
 <p><strong>Search from the last 7 days:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_facts<span class="w"> </span><span class="s2">"decisions"</span><span class="w"> </span>--since<span class="w"> </span>7d
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_facts<span class="w"> </span><span class="s2">"decisions"</span><span class="w"> </span>--since<span class="w"> </span>7d
 </span></code></pre></div>
 <p><strong>Search within a specific date range:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"project"</span><span class="w"> </span>--since<span class="w"> </span><span class="m">2026</span>-01-01<span class="w"> </span>--until<span class="w"> </span><span class="m">2026</span>-01-15
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"project"</span><span class="w"> </span>--since<span class="w"> </span><span class="m">2026</span>-01-01<span class="w"> </span>--until<span class="w"> </span><span class="m">2026</span>-01-15
 </span></code></pre></div>
 <p><strong>Search yesterday's knowledge:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"learning"</span><span class="w"> </span>--since<span class="w"> </span>yesterday<span class="w"> </span>--until<span class="w"> </span>today
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-36-1"><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"learning"</span><span class="w"> </span>--since<span class="w"> </span>yesterday<span class="w"> </span>--until<span class="w"> </span>today
 </span></code></pre></div>
 <p><strong>Search from last month:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_facts<span class="w"> </span><span class="s2">"architecture"</span><span class="w"> </span>--since<span class="w"> </span>1m
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-37-1"><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_facts<span class="w"> </span><span class="s2">"architecture"</span><span class="w"> </span>--since<span class="w"> </span>1m
 </span></code></pre></div>
 <p><strong>Combine temporal filters with other options:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"AI"</span><span class="w"> </span><span class="m">20</span><span class="w"> </span>--since<span class="w"> </span>7d<span class="w"> </span>--metrics
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-38-1"><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"AI"</span><span class="w"> </span><span class="m">20</span><span class="w"> </span>--since<span class="w"> </span>7d<span class="w"> </span>--metrics
 </span></code></pre></div>
 <h3 id="environment-variables">Environment Variables<a class="headerlink" href="#environment-variables" title="Permanent link">¶</a></h3>
 <p>The Knowledge CLI respects the following environment variables for customization:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-36-1"><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="c1"># Disable compact output (use raw JSON by default)</span>
-</span><span id="__span-36-2"><a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_WRAPPER_COMPACT</span><span class="o">=</span><span class="nb">false</span>
-</span><span id="__span-36-3"><a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a>
-</span><span id="__span-36-4"><a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a><span class="c1"># Enable metrics collection by default</span>
-</span><span id="__span-36-5"><a id="__codelineno-36-5" name="__codelineno-36-5" href="#__codelineno-36-5"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_WRAPPER_METRICS</span><span class="o">=</span><span class="nb">true</span>
-</span><span id="__span-36-6"><a id="__codelineno-36-6" name="__codelineno-36-6" href="#__codelineno-36-6"></a>
-</span><span id="__span-36-7"><a id="__codelineno-36-7" name="__codelineno-36-7" href="#__codelineno-36-7"></a><span class="c1"># Default metrics file path</span>
-</span><span id="__span-36-8"><a id="__codelineno-36-8" name="__codelineno-36-8" href="#__codelineno-36-8"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_WRAPPER_METRICS_FILE</span><span class="o">=</span>~/.madeinoz-knowledge/metrics.jsonl
-</span><span id="__span-36-9"><a id="__codelineno-36-9" name="__codelineno-36-9" href="#__codelineno-36-9"></a>
-</span><span id="__span-36-10"><a id="__codelineno-36-10" name="__codelineno-36-10" href="#__codelineno-36-10"></a><span class="c1"># Error log path for transformation issues</span>
-</span><span id="__span-36-11"><a id="__codelineno-36-11" name="__codelineno-36-11" href="#__codelineno-36-11"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_WRAPPER_LOG_FILE</span><span class="o">=</span>~/.madeinoz-knowledge/errors.log
-</span><span id="__span-36-12"><a id="__codelineno-36-12" name="__codelineno-36-12" href="#__codelineno-36-12"></a>
-</span><span id="__span-36-13"><a id="__codelineno-36-13" name="__codelineno-36-13" href="#__codelineno-36-13"></a><span class="c1"># Slow processing threshold in milliseconds (default: 50)</span>
-</span><span id="__span-36-14"><a id="__codelineno-36-14" name="__codelineno-36-14" href="#__codelineno-36-14"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_WRAPPER_SLOW_THRESHOLD</span><span class="o">=</span><span class="m">50</span>
-</span><span id="__span-36-15"><a id="__codelineno-36-15" name="__codelineno-36-15" href="#__codelineno-36-15"></a>
-</span><span id="__span-36-16"><a id="__codelineno-36-16" name="__codelineno-36-16" href="#__codelineno-36-16"></a><span class="c1"># Processing timeout in milliseconds (default: 100)</span>
-</span><span id="__span-36-17"><a id="__codelineno-36-17" name="__codelineno-36-17" href="#__codelineno-36-17"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_WRAPPER_TIMEOUT</span><span class="o">=</span><span class="m">100</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-39-1"><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a><span class="c1"># Disable compact output (use raw JSON by default)</span>
+</span><span id="__span-39-2"><a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_WRAPPER_COMPACT</span><span class="o">=</span><span class="nb">false</span>
+</span><span id="__span-39-3"><a id="__codelineno-39-3" name="__codelineno-39-3" href="#__codelineno-39-3"></a>
+</span><span id="__span-39-4"><a id="__codelineno-39-4" name="__codelineno-39-4" href="#__codelineno-39-4"></a><span class="c1"># Enable metrics collection by default</span>
+</span><span id="__span-39-5"><a id="__codelineno-39-5" name="__codelineno-39-5" href="#__codelineno-39-5"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_WRAPPER_METRICS</span><span class="o">=</span><span class="nb">true</span>
+</span><span id="__span-39-6"><a id="__codelineno-39-6" name="__codelineno-39-6" href="#__codelineno-39-6"></a>
+</span><span id="__span-39-7"><a id="__codelineno-39-7" name="__codelineno-39-7" href="#__codelineno-39-7"></a><span class="c1"># Default metrics file path</span>
+</span><span id="__span-39-8"><a id="__codelineno-39-8" name="__codelineno-39-8" href="#__codelineno-39-8"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_WRAPPER_METRICS_FILE</span><span class="o">=</span>~/.madeinoz-knowledge/metrics.jsonl
+</span><span id="__span-39-9"><a id="__codelineno-39-9" name="__codelineno-39-9" href="#__codelineno-39-9"></a>
+</span><span id="__span-39-10"><a id="__codelineno-39-10" name="__codelineno-39-10" href="#__codelineno-39-10"></a><span class="c1"># Error log path for transformation issues</span>
+</span><span id="__span-39-11"><a id="__codelineno-39-11" name="__codelineno-39-11" href="#__codelineno-39-11"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_WRAPPER_LOG_FILE</span><span class="o">=</span>~/.madeinoz-knowledge/errors.log
+</span><span id="__span-39-12"><a id="__codelineno-39-12" name="__codelineno-39-12" href="#__codelineno-39-12"></a>
+</span><span id="__span-39-13"><a id="__codelineno-39-13" name="__codelineno-39-13" href="#__codelineno-39-13"></a><span class="c1"># Slow processing threshold in milliseconds (default: 50)</span>
+</span><span id="__span-39-14"><a id="__codelineno-39-14" name="__codelineno-39-14" href="#__codelineno-39-14"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_WRAPPER_SLOW_THRESHOLD</span><span class="o">=</span><span class="m">50</span>
+</span><span id="__span-39-15"><a id="__codelineno-39-15" name="__codelineno-39-15" href="#__codelineno-39-15"></a>
+</span><span id="__span-39-16"><a id="__codelineno-39-16" name="__codelineno-39-16" href="#__codelineno-39-16"></a><span class="c1"># Processing timeout in milliseconds (default: 100)</span>
+</span><span id="__span-39-17"><a id="__codelineno-39-17" name="__codelineno-39-17" href="#__codelineno-39-17"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_WRAPPER_TIMEOUT</span><span class="o">=</span><span class="m">100</span>
 </span></code></pre></div>
 <h3 id="metrics-tracking">Metrics Tracking<a class="headerlink" href="#metrics-tracking" title="Permanent link">¶</a></h3>
 <p>When <code>--metrics</code> flag is enabled or <code>MADEINOZ_WRAPPER_METRICS=true</code>, the CLI displays token usage statistics:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-37-1"><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"AI models"</span><span class="w"> </span>--metrics
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-40-1"><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"AI models"</span><span class="w"> </span>--metrics
 </span></code></pre></div>
 <p><strong>Metrics output includes:</strong></p>
 <ul>
@@ -3264,17 +3339,17 @@ Remote Access (Feature 010):
 <li>Processing time (milliseconds)</li>
 </ul>
 <p><strong>Example output:</strong></p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-38-1"><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a>--- Token Metrics ---
-</span><span id="__span-38-2"><a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a>Operation: search_nodes
-</span><span id="__span-38-3"><a id="__codelineno-38-3" name="__codelineno-38-3" href="#__codelineno-38-3"></a>Raw size: 12,345 bytes (3,086 est. tokens)
-</span><span id="__span-38-4"><a id="__codelineno-38-4" name="__codelineno-38-4" href="#__codelineno-38-4"></a>Compact size: 8,234 bytes (2,059 est. tokens)
-</span><span id="__span-38-5"><a id="__codelineno-38-5" name="__codelineno-38-5" href="#__codelineno-38-5"></a>Savings: 33.3% (1,027 tokens saved)
-</span><span id="__span-38-6"><a id="__codelineno-38-6" name="__codelineno-38-6" href="#__codelineno-38-6"></a>Processing time: 42ms
+<div class="language-text highlight"><pre><span></span><code><span id="__span-41-1"><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a>--- Token Metrics ---
+</span><span id="__span-41-2"><a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a>Operation: search_nodes
+</span><span id="__span-41-3"><a id="__codelineno-41-3" name="__codelineno-41-3" href="#__codelineno-41-3"></a>Raw size: 12,345 bytes (3,086 est. tokens)
+</span><span id="__span-41-4"><a id="__codelineno-41-4" name="__codelineno-41-4" href="#__codelineno-41-4"></a>Compact size: 8,234 bytes (2,059 est. tokens)
+</span><span id="__span-41-5"><a id="__codelineno-41-5" name="__codelineno-41-5" href="#__codelineno-41-5"></a>Savings: 33.3% (1,027 tokens saved)
+</span><span id="__span-41-6"><a id="__codelineno-41-6" name="__codelineno-41-6" href="#__codelineno-41-6"></a>Processing time: 42ms
 </span></code></pre></div>
 <h3 id="metrics-file-format">Metrics File Format<a class="headerlink" href="#metrics-file-format" title="Permanent link">¶</a></h3>
 <p>When using <code>--metrics-file</code>, metrics are written as JSONL (one JSON object per line):</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-39-1"><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a>{"operation":"search_nodes","timestamp":"2025-01-19T12:34:56.789Z","rawBytes":12345,"compactBytes":8234,"savingsPercent":33.3,"estimatedTokensBefore":3086,"estimatedTokensAfter":2059,"processingTimeMs":42}
-</span><span id="__span-39-2"><a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a>{"operation":"get_status","timestamp":"2025-01-19T12:35:12.345Z","rawBytes":567,"compactBytes":234,"savingsPercent":58.7,"estimatedTokensBefore":142,"estimatedTokensAfter":59,"processingTimeMs":15}
+<div class="language-text highlight"><pre><span></span><code><span id="__span-42-1"><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a>{"operation":"search_nodes","timestamp":"2025-01-19T12:34:56.789Z","rawBytes":12345,"compactBytes":8234,"savingsPercent":33.3,"estimatedTokensBefore":3086,"estimatedTokensAfter":2059,"processingTimeMs":42}
+</span><span id="__span-42-2"><a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a>{"operation":"get_status","timestamp":"2025-01-19T12:35:12.345Z","rawBytes":567,"compactBytes":234,"savingsPercent":58.7,"estimatedTokensBefore":142,"estimatedTokensAfter":59,"processingTimeMs":15}
 </span></code></pre></div>
 <p>This format is ideal for:</p>
 <ul>
@@ -3287,14 +3362,14 @@ Remote Access (Feature 010):
 <p>The Knowledge CLI supports remote MCP access via connection profiles and CLI flags. See <a href="../remote-access.html">Remote Access Documentation</a> for complete details.</p>
 <h3 id="connection-profiles">Connection Profiles<a class="headerlink" href="#connection-profiles" title="Permanent link">¶</a></h3>
 <p>Use predefined connection profiles for different environments:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-40-1"><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a><span class="c1"># List all available profiles</span>
-</span><span id="__span-40-2"><a id="__codelineno-40-2" name="__codelineno-40-2" href="#__codelineno-40-2"></a>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli.ts<span class="w"> </span>list_profiles
-</span><span id="__span-40-3"><a id="__codelineno-40-3" name="__codelineno-40-3" href="#__codelineno-40-3"></a>
-</span><span id="__span-40-4"><a id="__codelineno-40-4" name="__codelineno-40-4" href="#__codelineno-40-4"></a><span class="c1"># Use specific profile</span>
-</span><span id="__span-40-5"><a id="__codelineno-40-5" name="__codelineno-40-5" href="#__codelineno-40-5"></a>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"query"</span><span class="w"> </span>--profile<span class="w"> </span>production
-</span><span id="__span-40-6"><a id="__codelineno-40-6" name="__codelineno-40-6" href="#__codelineno-40-6"></a>
-</span><span id="__span-40-7"><a id="__codelineno-40-7" name="__codelineno-40-7" href="#__codelineno-40-7"></a><span class="c1"># Show current connection status</span>
-</span><span id="__span-40-8"><a id="__codelineno-40-8" name="__codelineno-40-8" href="#__codelineno-40-8"></a>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli.ts<span class="w"> </span>status
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-43-1"><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a><span class="c1"># List all available profiles</span>
+</span><span id="__span-43-2"><a id="__codelineno-43-2" name="__codelineno-43-2" href="#__codelineno-43-2"></a>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli.ts<span class="w"> </span>list_profiles
+</span><span id="__span-43-3"><a id="__codelineno-43-3" name="__codelineno-43-3" href="#__codelineno-43-3"></a>
+</span><span id="__span-43-4"><a id="__codelineno-43-4" name="__codelineno-43-4" href="#__codelineno-43-4"></a><span class="c1"># Use specific profile</span>
+</span><span id="__span-43-5"><a id="__codelineno-43-5" name="__codelineno-43-5" href="#__codelineno-43-5"></a>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"query"</span><span class="w"> </span>--profile<span class="w"> </span>production
+</span><span id="__span-43-6"><a id="__codelineno-43-6" name="__codelineno-43-6" href="#__codelineno-43-6"></a>
+</span><span id="__span-43-7"><a id="__codelineno-43-7" name="__codelineno-43-7" href="#__codelineno-43-7"></a><span class="c1"># Show current connection status</span>
+</span><span id="__span-43-8"><a id="__codelineno-43-8" name="__codelineno-43-8" href="#__codelineno-43-8"></a>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli.ts<span class="w"> </span>status
 </span></code></pre></div>
 <p><strong>Profile Configuration Priority:</strong></p>
 <ol>
@@ -3394,49 +3469,49 @@ Remote Access (Feature 010):
 </tbody>
 </table>
 <p><strong>Example usage:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-41-1"><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a><span class="c1"># Use environment variables for remote connection</span>
-</span><span id="__span-41-2"><a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_KNOWLEDGE_HOST</span><span class="o">=</span><span class="m">192</span>.168.1.100
-</span><span id="__span-41-3"><a id="__codelineno-41-3" name="__codelineno-41-3" href="#__codelineno-41-3"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_KNOWLEDGE_PORT</span><span class="o">=</span><span class="m">8001</span>
-</span><span id="__span-41-4"><a id="__codelineno-41-4" name="__codelineno-41-4" href="#__codelineno-41-4"></a>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"my query"</span>
-</span><span id="__span-41-5"><a id="__codelineno-41-5" name="__codelineno-41-5" href="#__codelineno-41-5"></a>
-</span><span id="__span-41-6"><a id="__codelineno-41-6" name="__codelineno-41-6" href="#__codelineno-41-6"></a><span class="c1"># Combine profile with host override</span>
-</span><span id="__span-41-7"><a id="__codelineno-41-7" name="__codelineno-41-7" href="#__codelineno-41-7"></a>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli.ts<span class="w"> </span>get_status<span class="w"> </span>--profile<span class="w"> </span>production<span class="w"> </span>--host<span class="w"> </span>backup.example.com
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-44-1"><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a><span class="c1"># Use environment variables for remote connection</span>
+</span><span id="__span-44-2"><a id="__codelineno-44-2" name="__codelineno-44-2" href="#__codelineno-44-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_KNOWLEDGE_HOST</span><span class="o">=</span><span class="m">192</span>.168.1.100
+</span><span id="__span-44-3"><a id="__codelineno-44-3" name="__codelineno-44-3" href="#__codelineno-44-3"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_KNOWLEDGE_PORT</span><span class="o">=</span><span class="m">8001</span>
+</span><span id="__span-44-4"><a id="__codelineno-44-4" name="__codelineno-44-4" href="#__codelineno-44-4"></a>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli.ts<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"my query"</span>
+</span><span id="__span-44-5"><a id="__codelineno-44-5" name="__codelineno-44-5" href="#__codelineno-44-5"></a>
+</span><span id="__span-44-6"><a id="__codelineno-44-6" name="__codelineno-44-6" href="#__codelineno-44-6"></a><span class="c1"># Combine profile with host override</span>
+</span><span id="__span-44-7"><a id="__codelineno-44-7" name="__codelineno-44-7" href="#__codelineno-44-7"></a>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli.ts<span class="w"> </span>get_status<span class="w"> </span>--profile<span class="w"> </span>production<span class="w"> </span>--host<span class="w"> </span>backup.example.com
 </span></code></pre></div>
 <h3 id="profile-configuration-file">Profile Configuration File<a class="headerlink" href="#profile-configuration-file" title="Permanent link">¶</a></h3>
 <p>Connection profiles are stored in:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-42-1"><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a><span class="c1"># Priority location</span>
-</span><span id="__span-42-2"><a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a><span class="nv">$PAI_DIR</span>/config/knowledge-profiles.yaml
-</span><span id="__span-42-3"><a id="__codelineno-42-3" name="__codelineno-42-3" href="#__codelineno-42-3"></a>
-</span><span id="__span-42-4"><a id="__codelineno-42-4" name="__codelineno-42-4" href="#__codelineno-42-4"></a><span class="c1"># Fallback location</span>
-</span><span id="__span-42-5"><a id="__codelineno-42-5" name="__codelineno-42-5" href="#__codelineno-42-5"></a>~/.claude/config/knowledge-profiles.yaml
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-45-1"><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a><span class="c1"># Priority location</span>
+</span><span id="__span-45-2"><a id="__codelineno-45-2" name="__codelineno-45-2" href="#__codelineno-45-2"></a><span class="nv">$PAI_DIR</span>/config/knowledge-profiles.yaml
+</span><span id="__span-45-3"><a id="__codelineno-45-3" name="__codelineno-45-3" href="#__codelineno-45-3"></a>
+</span><span id="__span-45-4"><a id="__codelineno-45-4" name="__codelineno-45-4" href="#__codelineno-45-4"></a><span class="c1"># Fallback location</span>
+</span><span id="__span-45-5"><a id="__codelineno-45-5" name="__codelineno-45-5" href="#__codelineno-45-5"></a>~/.claude/config/knowledge-profiles.yaml
 </span></code></pre></div>
 <p><strong>Example profile configuration:</strong></p>
-<div class="language-yaml highlight"><pre><span></span><code><span id="__span-43-1"><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">"1.0"</span>
-</span><span id="__span-43-2"><a id="__codelineno-43-2" name="__codelineno-43-2" href="#__codelineno-43-2"></a><span class="nt">default_profile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
-</span><span id="__span-43-3"><a id="__codelineno-43-3" name="__codelineno-43-3" href="#__codelineno-43-3"></a>
-</span><span id="__span-43-4"><a id="__codelineno-43-4" name="__codelineno-43-4" href="#__codelineno-43-4"></a><span class="nt">profiles</span><span class="p">:</span>
-</span><span id="__span-43-5"><a id="__codelineno-43-5" name="__codelineno-43-5" href="#__codelineno-43-5"></a><span class="w">  </span><span class="nt">default</span><span class="p">:</span>
-</span><span id="__span-43-6"><a id="__codelineno-43-6" name="__codelineno-43-6" href="#__codelineno-43-6"></a><span class="w">    </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">localhost</span>
-</span><span id="__span-43-7"><a id="__codelineno-43-7" name="__codelineno-43-7" href="#__codelineno-43-7"></a><span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8001</span>
-</span><span id="__span-43-8"><a id="__codelineno-43-8" name="__codelineno-43-8" href="#__codelineno-43-8"></a><span class="w">    </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
-</span><span id="__span-43-9"><a id="__codelineno-43-9" name="__codelineno-43-9" href="#__codelineno-43-9"></a>
-</span><span id="__span-43-10"><a id="__codelineno-43-10" name="__codelineno-43-10" href="#__codelineno-43-10"></a><span class="w">  </span><span class="nt">production</span><span class="p">:</span>
-</span><span id="__span-43-11"><a id="__codelineno-43-11" name="__codelineno-43-11" href="#__codelineno-43-11"></a><span class="w">    </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">knowledge.example.com</span>
-</span><span id="__span-43-12"><a id="__codelineno-43-12" name="__codelineno-43-12" href="#__codelineno-43-12"></a><span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span>
-</span><span id="__span-43-13"><a id="__codelineno-43-13" name="__codelineno-43-13" href="#__codelineno-43-13"></a><span class="w">    </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https</span>
-</span><span id="__span-43-14"><a id="__codelineno-43-14" name="__codelineno-43-14" href="#__codelineno-43-14"></a><span class="w">    </span><span class="nt">tls</span><span class="p">:</span>
-</span><span id="__span-43-15"><a id="__codelineno-43-15" name="__codelineno-43-15" href="#__codelineno-43-15"></a><span class="w">      </span><span class="nt">verify</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-</span><span id="__span-43-16"><a id="__codelineno-43-16" name="__codelineno-43-16" href="#__codelineno-43-16"></a><span class="w">      </span><span class="nt">minVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TLSv1.3</span>
-</span><span id="__span-43-17"><a id="__codelineno-43-17" name="__codelineno-43-17" href="#__codelineno-43-17"></a>
-</span><span id="__span-43-18"><a id="__codelineno-43-18" name="__codelineno-43-18" href="#__codelineno-43-18"></a><span class="w">  </span><span class="nt">development</span><span class="p">:</span>
-</span><span id="__span-43-19"><a id="__codelineno-43-19" name="__codelineno-43-19" href="#__codelineno-43-19"></a><span class="w">    </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.168.1.100</span>
-</span><span id="__span-43-20"><a id="__codelineno-43-20" name="__codelineno-43-20" href="#__codelineno-43-20"></a><span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8001</span>
-</span><span id="__span-43-21"><a id="__codelineno-43-21" name="__codelineno-43-21" href="#__codelineno-43-21"></a><span class="w">    </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-46-1"><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">"1.0"</span>
+</span><span id="__span-46-2"><a id="__codelineno-46-2" name="__codelineno-46-2" href="#__codelineno-46-2"></a><span class="nt">default_profile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+</span><span id="__span-46-3"><a id="__codelineno-46-3" name="__codelineno-46-3" href="#__codelineno-46-3"></a>
+</span><span id="__span-46-4"><a id="__codelineno-46-4" name="__codelineno-46-4" href="#__codelineno-46-4"></a><span class="nt">profiles</span><span class="p">:</span>
+</span><span id="__span-46-5"><a id="__codelineno-46-5" name="__codelineno-46-5" href="#__codelineno-46-5"></a><span class="w">  </span><span class="nt">default</span><span class="p">:</span>
+</span><span id="__span-46-6"><a id="__codelineno-46-6" name="__codelineno-46-6" href="#__codelineno-46-6"></a><span class="w">    </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">localhost</span>
+</span><span id="__span-46-7"><a id="__codelineno-46-7" name="__codelineno-46-7" href="#__codelineno-46-7"></a><span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8001</span>
+</span><span id="__span-46-8"><a id="__codelineno-46-8" name="__codelineno-46-8" href="#__codelineno-46-8"></a><span class="w">    </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+</span><span id="__span-46-9"><a id="__codelineno-46-9" name="__codelineno-46-9" href="#__codelineno-46-9"></a>
+</span><span id="__span-46-10"><a id="__codelineno-46-10" name="__codelineno-46-10" href="#__codelineno-46-10"></a><span class="w">  </span><span class="nt">production</span><span class="p">:</span>
+</span><span id="__span-46-11"><a id="__codelineno-46-11" name="__codelineno-46-11" href="#__codelineno-46-11"></a><span class="w">    </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">knowledge.example.com</span>
+</span><span id="__span-46-12"><a id="__codelineno-46-12" name="__codelineno-46-12" href="#__codelineno-46-12"></a><span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span>
+</span><span id="__span-46-13"><a id="__codelineno-46-13" name="__codelineno-46-13" href="#__codelineno-46-13"></a><span class="w">    </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https</span>
+</span><span id="__span-46-14"><a id="__codelineno-46-14" name="__codelineno-46-14" href="#__codelineno-46-14"></a><span class="w">    </span><span class="nt">tls</span><span class="p">:</span>
+</span><span id="__span-46-15"><a id="__codelineno-46-15" name="__codelineno-46-15" href="#__codelineno-46-15"></a><span class="w">      </span><span class="nt">verify</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id="__span-46-16"><a id="__codelineno-46-16" name="__codelineno-46-16" href="#__codelineno-46-16"></a><span class="w">      </span><span class="nt">minVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TLSv1.3</span>
+</span><span id="__span-46-17"><a id="__codelineno-46-17" name="__codelineno-46-17" href="#__codelineno-46-17"></a>
+</span><span id="__span-46-18"><a id="__codelineno-46-18" name="__codelineno-46-18" href="#__codelineno-46-18"></a><span class="w">  </span><span class="nt">development</span><span class="p">:</span>
+</span><span id="__span-46-19"><a id="__codelineno-46-19" name="__codelineno-46-19" href="#__codelineno-46-19"></a><span class="w">    </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.168.1.100</span>
+</span><span id="__span-46-20"><a id="__codelineno-46-20" name="__codelineno-46-20" href="#__codelineno-46-20"></a><span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8001</span>
+</span><span id="__span-46-21"><a id="__codelineno-46-21" name="__codelineno-46-21" href="#__codelineno-46-21"></a><span class="w">    </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
 </span></code></pre></div>
 <h3 id="new-commands-feature-010">New Commands (Feature 010)<a class="headerlink" href="#new-commands-feature-010" title="Permanent link">¶</a></h3>
 <h4 id="status">status<a class="headerlink" href="#status" title="Permanent link">¶</a></h4>
 <p>Show connection status and active profile:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-44-1"><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli.ts<span class="w"> </span>status
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-47-1"><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli.ts<span class="w"> </span>status
 </span></code></pre></div>
 <p><strong>Output includes:</strong></p>
 <ul>
@@ -3447,21 +3522,21 @@ Remote Access (Feature 010):
 <li>Server version (if available)</li>
 <li>Last connection time</li>
 </ul>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-45-1"><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a>$<span class="w"> </span>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli.ts<span class="w"> </span>status<span class="w"> </span>--profile<span class="w"> </span>production
-</span><span id="__span-45-2"><a id="__codelineno-45-2" name="__codelineno-45-2" href="#__codelineno-45-2"></a>
-</span><span id="__span-45-3"><a id="__codelineno-45-3" name="__codelineno-45-3" href="#__codelineno-45-3"></a>Knowledge<span class="w"> </span>CLI<span class="w"> </span>Connection<span class="w"> </span><span class="nv">Status</span>
-</span><span id="__span-45-4"><a id="__codelineno-45-4" name="__codelineno-45-4" href="#__codelineno-45-4"></a><span class="o">================================</span>
-</span><span id="__span-45-5"><a id="__codelineno-45-5" name="__codelineno-45-5" href="#__codelineno-45-5"></a>Profile:<span class="w"> </span>production
-</span><span id="__span-45-6"><a id="__codelineno-45-6" name="__codelineno-45-6" href="#__codelineno-45-6"></a>Status:<span class="w"> </span>connected
-</span><span id="__span-45-7"><a id="__codelineno-45-7" name="__codelineno-45-7" href="#__codelineno-45-7"></a>Host:<span class="w"> </span>knowledge.example.com
-</span><span id="__span-45-8"><a id="__codelineno-45-8" name="__codelineno-45-8" href="#__codelineno-45-8"></a>Port:<span class="w"> </span><span class="m">443</span>
-</span><span id="__span-45-9"><a id="__codelineno-45-9" name="__codelineno-45-9" href="#__codelineno-45-9"></a>Protocol:<span class="w"> </span>https
-</span><span id="__span-45-10"><a id="__codelineno-45-10" name="__codelineno-45-10" href="#__codelineno-45-10"></a>Server<span class="w"> </span>Version:<span class="w"> </span><span class="m">1</span>.7.0
-</span><span id="__span-45-11"><a id="__codelineno-45-11" name="__codelineno-45-11" href="#__codelineno-45-11"></a>Last<span class="w"> </span>Connected:<span class="w"> </span><span class="m">2026</span>-01-30T12:34:56Z
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-48-1"><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a>$<span class="w"> </span>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli.ts<span class="w"> </span>status<span class="w"> </span>--profile<span class="w"> </span>production
+</span><span id="__span-48-2"><a id="__codelineno-48-2" name="__codelineno-48-2" href="#__codelineno-48-2"></a>
+</span><span id="__span-48-3"><a id="__codelineno-48-3" name="__codelineno-48-3" href="#__codelineno-48-3"></a>Knowledge<span class="w"> </span>CLI<span class="w"> </span>Connection<span class="w"> </span><span class="nv">Status</span>
+</span><span id="__span-48-4"><a id="__codelineno-48-4" name="__codelineno-48-4" href="#__codelineno-48-4"></a><span class="o">================================</span>
+</span><span id="__span-48-5"><a id="__codelineno-48-5" name="__codelineno-48-5" href="#__codelineno-48-5"></a>Profile:<span class="w"> </span>production
+</span><span id="__span-48-6"><a id="__codelineno-48-6" name="__codelineno-48-6" href="#__codelineno-48-6"></a>Status:<span class="w"> </span>connected
+</span><span id="__span-48-7"><a id="__codelineno-48-7" name="__codelineno-48-7" href="#__codelineno-48-7"></a>Host:<span class="w"> </span>knowledge.example.com
+</span><span id="__span-48-8"><a id="__codelineno-48-8" name="__codelineno-48-8" href="#__codelineno-48-8"></a>Port:<span class="w"> </span><span class="m">443</span>
+</span><span id="__span-48-9"><a id="__codelineno-48-9" name="__codelineno-48-9" href="#__codelineno-48-9"></a>Protocol:<span class="w"> </span>https
+</span><span id="__span-48-10"><a id="__codelineno-48-10" name="__codelineno-48-10" href="#__codelineno-48-10"></a>Server<span class="w"> </span>Version:<span class="w"> </span><span class="m">1</span>.7.0
+</span><span id="__span-48-11"><a id="__codelineno-48-11" name="__codelineno-48-11" href="#__codelineno-48-11"></a>Last<span class="w"> </span>Connected:<span class="w"> </span><span class="m">2026</span>-01-30T12:34:56Z
 </span></code></pre></div>
 <h4 id="list_profiles">list_profiles<a class="headerlink" href="#list_profiles" title="Permanent link">¶</a></h4>
 <p>List all available connection profiles:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-46-1"><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli.ts<span class="w"> </span>list_profiles
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-49-1"><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli.ts<span class="w"> </span>list_profiles
 </span></code></pre></div>
 <p><strong>Output includes:</strong></p>
 <ul>
@@ -3469,21 +3544,21 @@ Remote Access (Feature 010):
 <li>Default profile indicator</li>
 <li>Configuration file path</li>
 </ul>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-47-1"><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a>$<span class="w"> </span>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli.ts<span class="w"> </span>list_profiles
-</span><span id="__span-47-2"><a id="__codelineno-47-2" name="__codelineno-47-2" href="#__codelineno-47-2"></a>
-</span><span id="__span-47-3"><a id="__codelineno-47-3" name="__codelineno-47-3" href="#__codelineno-47-3"></a>Available<span class="w"> </span><span class="nv">Profiles</span>
-</span><span id="__span-47-4"><a id="__codelineno-47-4" name="__codelineno-47-4" href="#__codelineno-47-4"></a><span class="o">==================</span>
-</span><span id="__span-47-5"><a id="__codelineno-47-5" name="__codelineno-47-5" href="#__codelineno-47-5"></a>Configuration:<span class="w"> </span>~/.claude/config/knowledge-profiles.yaml
-</span><span id="__span-47-6"><a id="__codelineno-47-6" name="__codelineno-47-6" href="#__codelineno-47-6"></a>Default<span class="w"> </span>Profile:<span class="w"> </span>default
-</span><span id="__span-47-7"><a id="__codelineno-47-7" name="__codelineno-47-7" href="#__codelineno-47-7"></a>
-</span><span id="__span-47-8"><a id="__codelineno-47-8" name="__codelineno-47-8" href="#__codelineno-47-8"></a>Profiles:
-</span><span id="__span-47-9"><a id="__codelineno-47-9" name="__codelineno-47-9" href="#__codelineno-47-9"></a><span class="w">  </span>-<span class="w"> </span>default<span class="w"> </span><span class="o">(</span>localhost:8001,<span class="w"> </span>http<span class="o">)</span>
-</span><span id="__span-47-10"><a id="__codelineno-47-10" name="__codelineno-47-10" href="#__codelineno-47-10"></a><span class="w">  </span>-<span class="w"> </span>production<span class="w"> </span><span class="o">(</span>knowledge.example.com:443,<span class="w"> </span>https<span class="o">)</span>
-</span><span id="__span-47-11"><a id="__codelineno-47-11" name="__codelineno-47-11" href="#__codelineno-47-11"></a><span class="w">  </span>-<span class="w"> </span>development<span class="w"> </span><span class="o">(</span><span class="m">192</span>.168.1.100:8001,<span class="w"> </span>http<span class="o">)</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-50-1"><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a>$<span class="w"> </span>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli.ts<span class="w"> </span>list_profiles
+</span><span id="__span-50-2"><a id="__codelineno-50-2" name="__codelineno-50-2" href="#__codelineno-50-2"></a>
+</span><span id="__span-50-3"><a id="__codelineno-50-3" name="__codelineno-50-3" href="#__codelineno-50-3"></a>Available<span class="w"> </span><span class="nv">Profiles</span>
+</span><span id="__span-50-4"><a id="__codelineno-50-4" name="__codelineno-50-4" href="#__codelineno-50-4"></a><span class="o">==================</span>
+</span><span id="__span-50-5"><a id="__codelineno-50-5" name="__codelineno-50-5" href="#__codelineno-50-5"></a>Configuration:<span class="w"> </span>~/.claude/config/knowledge-profiles.yaml
+</span><span id="__span-50-6"><a id="__codelineno-50-6" name="__codelineno-50-6" href="#__codelineno-50-6"></a>Default<span class="w"> </span>Profile:<span class="w"> </span>default
+</span><span id="__span-50-7"><a id="__codelineno-50-7" name="__codelineno-50-7" href="#__codelineno-50-7"></a>
+</span><span id="__span-50-8"><a id="__codelineno-50-8" name="__codelineno-50-8" href="#__codelineno-50-8"></a>Profiles:
+</span><span id="__span-50-9"><a id="__codelineno-50-9" name="__codelineno-50-9" href="#__codelineno-50-9"></a><span class="w">  </span>-<span class="w"> </span>default<span class="w"> </span><span class="o">(</span>localhost:8001,<span class="w"> </span>http<span class="o">)</span>
+</span><span id="__span-50-10"><a id="__codelineno-50-10" name="__codelineno-50-10" href="#__codelineno-50-10"></a><span class="w">  </span>-<span class="w"> </span>production<span class="w"> </span><span class="o">(</span>knowledge.example.com:443,<span class="w"> </span>https<span class="o">)</span>
+</span><span id="__span-50-11"><a id="__codelineno-50-11" name="__codelineno-50-11" href="#__codelineno-50-11"></a><span class="w">  </span>-<span class="w"> </span>development<span class="w"> </span><span class="o">(</span><span class="m">192</span>.168.1.100:8001,<span class="w"> </span>http<span class="o">)</span>
 </span></code></pre></div>
 <h2 id="interactive-installation">Interactive Installation<a class="headerlink" href="#interactive-installation" title="Permanent link">¶</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-48-1"><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a><span class="nb">cd</span><span class="w"> </span>~/.claude/skills/Knowledge
-</span><span id="__span-48-2"><a id="__codelineno-48-2" name="__codelineno-48-2" href="#__codelineno-48-2"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/install.ts
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-51-1"><a id="__codelineno-51-1" name="__codelineno-51-1" href="#__codelineno-51-1"></a><span class="nb">cd</span><span class="w"> </span>~/.claude/skills/Knowledge
+</span><span id="__span-51-2"><a id="__codelineno-51-2" name="__codelineno-51-2" href="#__codelineno-51-2"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/install.ts
 </span></code></pre></div>
 <p>Guides through:</p>
 <ol>
@@ -3500,61 +3575,61 @@ Remote Access (Feature 010):
 </ul>
 <h2 id="utilities">Utilities<a class="headerlink" href="#utilities" title="Permanent link">¶</a></h2>
 <h3 id="health-check">Health Check<a class="headerlink" href="#health-check" title="Permanent link">¶</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-49-1"><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a>curl<span class="w"> </span>http://localhost:8000/health
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-52-1"><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a>curl<span class="w"> </span>http://localhost:8000/health
 </span></code></pre></div>
 <p>Returns server health status as JSON:</p>
-<div class="language-json highlight"><pre><span></span><code><span id="__span-50-1"><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a><span class="p">{</span>
-</span><span id="__span-50-2"><a id="__codelineno-50-2" name="__codelineno-50-2" href="#__codelineno-50-2"></a><span class="w">  </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"healthy"</span><span class="p">,</span>
-</span><span id="__span-50-3"><a id="__codelineno-50-3" name="__codelineno-50-3" href="#__codelineno-50-3"></a><span class="w">  </span><span class="nt">"service"</span><span class="p">:</span><span class="w"> </span><span class="s2">"graphiti-mcp"</span><span class="p">,</span>
-</span><span id="__span-50-4"><a id="__codelineno-50-4" name="__codelineno-50-4" href="#__codelineno-50-4"></a><span class="w">  </span><span class="nt">"patch"</span><span class="p">:</span><span class="w"> </span><span class="s2">"madeinoz-all-groups-enabled"</span>
-</span><span id="__span-50-5"><a id="__codelineno-50-5" name="__codelineno-50-5" href="#__codelineno-50-5"></a><span class="p">}</span>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-53-1"><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a><span class="p">{</span>
+</span><span id="__span-53-2"><a id="__codelineno-53-2" name="__codelineno-53-2" href="#__codelineno-53-2"></a><span class="w">  </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"healthy"</span><span class="p">,</span>
+</span><span id="__span-53-3"><a id="__codelineno-53-3" name="__codelineno-53-3" href="#__codelineno-53-3"></a><span class="w">  </span><span class="nt">"service"</span><span class="p">:</span><span class="w"> </span><span class="s2">"graphiti-mcp"</span><span class="p">,</span>
+</span><span id="__span-53-4"><a id="__codelineno-53-4" name="__codelineno-53-4" href="#__codelineno-53-4"></a><span class="w">  </span><span class="nt">"patch"</span><span class="p">:</span><span class="w"> </span><span class="s2">"madeinoz-all-groups-enabled"</span>
+</span><span id="__span-53-5"><a id="__codelineno-53-5" name="__codelineno-53-5" href="#__codelineno-53-5"></a><span class="p">}</span>
 </span></code></pre></div>
 <h3 id="mcp-endpoint">MCP Endpoint<a class="headerlink" href="#mcp-endpoint" title="Permanent link">¶</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-51-1"><a id="__codelineno-51-1" name="__codelineno-51-1" href="#__codelineno-51-1"></a>curl<span class="w"> </span>http://localhost:8000/mcp
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-54-1"><a id="__codelineno-54-1" name="__codelineno-54-1" href="#__codelineno-54-1"></a>curl<span class="w"> </span>http://localhost:8000/mcp
 </span></code></pre></div>
 <p>SSE endpoint for MCP protocol communication.</p>
 <h2 id="environment-variables_1">Environment Variables<a class="headerlink" href="#environment-variables_1" title="Permanent link">¶</a></h2>
 <p>All CLI commands read from PAI configuration:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-52-1"><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a><span class="c1"># Set PAI directory (defaults to ~/.claude)</span>
-</span><span id="__span-52-2"><a id="__codelineno-52-2" name="__codelineno-52-2" href="#__codelineno-52-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PAI_DIR</span><span class="o">=</span>/path/to/pai
-</span><span id="__span-52-3"><a id="__codelineno-52-3" name="__codelineno-52-3" href="#__codelineno-52-3"></a>
-</span><span id="__span-52-4"><a id="__codelineno-52-4" name="__codelineno-52-4" href="#__codelineno-52-4"></a><span class="c1"># Set database type</span>
-</span><span id="__span-52-5"><a id="__codelineno-52-5" name="__codelineno-52-5" href="#__codelineno-52-5"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_KNOWLEDGE_DATABASE_TYPE</span><span class="o">=</span>neo4j
-</span><span id="__span-52-6"><a id="__codelineno-52-6" name="__codelineno-52-6" href="#__codelineno-52-6"></a>
-</span><span id="__span-52-7"><a id="__codelineno-52-7" name="__codelineno-52-7" href="#__codelineno-52-7"></a><span class="c1"># Set logging level</span>
-</span><span id="__span-52-8"><a id="__codelineno-52-8" name="__codelineno-52-8" href="#__codelineno-52-8"></a><span class="nb">export</span><span class="w"> </span><span class="nv">LOG_LEVEL</span><span class="o">=</span>debug
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-55-1"><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a><span class="c1"># Set PAI directory (defaults to ~/.claude)</span>
+</span><span id="__span-55-2"><a id="__codelineno-55-2" name="__codelineno-55-2" href="#__codelineno-55-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PAI_DIR</span><span class="o">=</span>/path/to/pai
+</span><span id="__span-55-3"><a id="__codelineno-55-3" name="__codelineno-55-3" href="#__codelineno-55-3"></a>
+</span><span id="__span-55-4"><a id="__codelineno-55-4" name="__codelineno-55-4" href="#__codelineno-55-4"></a><span class="c1"># Set database type</span>
+</span><span id="__span-55-5"><a id="__codelineno-55-5" name="__codelineno-55-5" href="#__codelineno-55-5"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_KNOWLEDGE_DATABASE_TYPE</span><span class="o">=</span>neo4j
+</span><span id="__span-55-6"><a id="__codelineno-55-6" name="__codelineno-55-6" href="#__codelineno-55-6"></a>
+</span><span id="__span-55-7"><a id="__codelineno-55-7" name="__codelineno-55-7" href="#__codelineno-55-7"></a><span class="c1"># Set logging level</span>
+</span><span id="__span-55-8"><a id="__codelineno-55-8" name="__codelineno-55-8" href="#__codelineno-55-8"></a><span class="nb">export</span><span class="w"> </span><span class="nv">LOG_LEVEL</span><span class="o">=</span>debug
 </span></code></pre></div>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">¶</a></h2>
 <h3 id="port-already-in-use">"Port already in use"<a class="headerlink" href="#port-already-in-use" title="Permanent link">¶</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-53-1"><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a><span class="c1"># Find process using port 8000</span>
-</span><span id="__span-53-2"><a id="__codelineno-53-2" name="__codelineno-53-2" href="#__codelineno-53-2"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:8000
-</span><span id="__span-53-3"><a id="__codelineno-53-3" name="__codelineno-53-3" href="#__codelineno-53-3"></a>
-</span><span id="__span-53-4"><a id="__codelineno-53-4" name="__codelineno-53-4" href="#__codelineno-53-4"></a><span class="c1"># Kill process if needed</span>
-</span><span id="__span-53-5"><a id="__codelineno-53-5" name="__codelineno-53-5" href="#__codelineno-53-5"></a><span class="nb">kill</span><span class="w"> </span>-9<span class="w"> </span><span class="o">[</span>PID<span class="o">]</span>
-</span><span id="__span-53-6"><a id="__codelineno-53-6" name="__codelineno-53-6" href="#__codelineno-53-6"></a>
-</span><span id="__span-53-7"><a id="__codelineno-53-7" name="__codelineno-53-7" href="#__codelineno-53-7"></a><span class="c1"># Or use different port by modifying the Docker Compose files</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-56-1"><a id="__codelineno-56-1" name="__codelineno-56-1" href="#__codelineno-56-1"></a><span class="c1"># Find process using port 8000</span>
+</span><span id="__span-56-2"><a id="__codelineno-56-2" name="__codelineno-56-2" href="#__codelineno-56-2"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:8000
+</span><span id="__span-56-3"><a id="__codelineno-56-3" name="__codelineno-56-3" href="#__codelineno-56-3"></a>
+</span><span id="__span-56-4"><a id="__codelineno-56-4" name="__codelineno-56-4" href="#__codelineno-56-4"></a><span class="c1"># Kill process if needed</span>
+</span><span id="__span-56-5"><a id="__codelineno-56-5" name="__codelineno-56-5" href="#__codelineno-56-5"></a><span class="nb">kill</span><span class="w"> </span>-9<span class="w"> </span><span class="o">[</span>PID<span class="o">]</span>
+</span><span id="__span-56-6"><a id="__codelineno-56-6" name="__codelineno-56-6" href="#__codelineno-56-6"></a>
+</span><span id="__span-56-7"><a id="__codelineno-56-7" name="__codelineno-56-7" href="#__codelineno-56-7"></a><span class="c1"># Or use different port by modifying the Docker Compose files</span>
 </span></code></pre></div>
 <h3 id="container-not-found">"Container not found"<a class="headerlink" href="#container-not-found" title="Permanent link">¶</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-54-1"><a id="__codelineno-54-1" name="__codelineno-54-1" href="#__codelineno-54-1"></a><span class="c1"># List all containers</span>
-</span><span id="__span-54-2"><a id="__codelineno-54-2" name="__codelineno-54-2" href="#__codelineno-54-2"></a>podman<span class="w"> </span>ps<span class="w"> </span>-a
-</span><span id="__span-54-3"><a id="__codelineno-54-3" name="__codelineno-54-3" href="#__codelineno-54-3"></a><span class="c1"># or: docker ps -a</span>
-</span><span id="__span-54-4"><a id="__codelineno-54-4" name="__codelineno-54-4" href="#__codelineno-54-4"></a>
-</span><span id="__span-54-5"><a id="__codelineno-54-5" name="__codelineno-54-5" href="#__codelineno-54-5"></a><span class="c1"># Start services</span>
-</span><span id="__span-54-6"><a id="__codelineno-54-6" name="__codelineno-54-6" href="#__codelineno-54-6"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>start
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-57-1"><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a><span class="c1"># List all containers</span>
+</span><span id="__span-57-2"><a id="__codelineno-57-2" name="__codelineno-57-2" href="#__codelineno-57-2"></a>podman<span class="w"> </span>ps<span class="w"> </span>-a
+</span><span id="__span-57-3"><a id="__codelineno-57-3" name="__codelineno-57-3" href="#__codelineno-57-3"></a><span class="c1"># or: docker ps -a</span>
+</span><span id="__span-57-4"><a id="__codelineno-57-4" name="__codelineno-57-4" href="#__codelineno-57-4"></a>
+</span><span id="__span-57-5"><a id="__codelineno-57-5" name="__codelineno-57-5" href="#__codelineno-57-5"></a><span class="c1"># Start services</span>
+</span><span id="__span-57-6"><a id="__codelineno-57-6" name="__codelineno-57-6" href="#__codelineno-57-6"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>start
 </span></code></pre></div>
 <h3 id="health-check-failed">"Health check failed"<a class="headerlink" href="#health-check-failed" title="Permanent link">¶</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-55-1"><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a><span class="c1"># Check logs</span>
-</span><span id="__span-55-2"><a id="__codelineno-55-2" name="__codelineno-55-2" href="#__codelineno-55-2"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>logs
-</span><span id="__span-55-3"><a id="__codelineno-55-3" name="__codelineno-55-3" href="#__codelineno-55-3"></a>
-</span><span id="__span-55-4"><a id="__codelineno-55-4" name="__codelineno-55-4" href="#__codelineno-55-4"></a><span class="c1"># Verify server is responding</span>
-</span><span id="__span-55-5"><a id="__codelineno-55-5" name="__codelineno-55-5" href="#__codelineno-55-5"></a>curl<span class="w"> </span>--max-time<span class="w"> </span><span class="m">5</span><span class="w"> </span>http://localhost:8000/health
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-58-1"><a id="__codelineno-58-1" name="__codelineno-58-1" href="#__codelineno-58-1"></a><span class="c1"># Check logs</span>
+</span><span id="__span-58-2"><a id="__codelineno-58-2" name="__codelineno-58-2" href="#__codelineno-58-2"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>logs
+</span><span id="__span-58-3"><a id="__codelineno-58-3" name="__codelineno-58-3" href="#__codelineno-58-3"></a>
+</span><span id="__span-58-4"><a id="__codelineno-58-4" name="__codelineno-58-4" href="#__codelineno-58-4"></a><span class="c1"># Verify server is responding</span>
+</span><span id="__span-58-5"><a id="__codelineno-58-5" name="__codelineno-58-5" href="#__codelineno-58-5"></a>curl<span class="w"> </span>--max-time<span class="w"> </span><span class="m">5</span><span class="w"> </span>http://localhost:8000/health
 </span></code></pre></div>
 <h3 id="connection-refused">"Connection refused"<a class="headerlink" href="#connection-refused" title="Permanent link">¶</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-56-1"><a id="__codelineno-56-1" name="__codelineno-56-1" href="#__codelineno-56-1"></a><span class="c1"># Verify MCP server endpoint</span>
-</span><span id="__span-56-2"><a id="__codelineno-56-2" name="__codelineno-56-2" href="#__codelineno-56-2"></a>curl<span class="w"> </span>http://localhost:8000/health
-</span><span id="__span-56-3"><a id="__codelineno-56-3" name="__codelineno-56-3" href="#__codelineno-56-3"></a>
-</span><span id="__span-56-4"><a id="__codelineno-56-4" name="__codelineno-56-4" href="#__codelineno-56-4"></a><span class="c1"># If unavailable, start server</span>
-</span><span id="__span-56-5"><a id="__codelineno-56-5" name="__codelineno-56-5" href="#__codelineno-56-5"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>start
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-59-1"><a id="__codelineno-59-1" name="__codelineno-59-1" href="#__codelineno-59-1"></a><span class="c1"># Verify MCP server endpoint</span>
+</span><span id="__span-59-2"><a id="__codelineno-59-2" name="__codelineno-59-2" href="#__codelineno-59-2"></a>curl<span class="w"> </span>http://localhost:8000/health
+</span><span id="__span-59-3"><a id="__codelineno-59-3" name="__codelineno-59-3" href="#__codelineno-59-3"></a>
+</span><span id="__span-59-4"><a id="__codelineno-59-4" name="__codelineno-59-4" href="#__codelineno-59-4"></a><span class="c1"># If unavailable, start server</span>
+</span><span id="__span-59-5"><a id="__codelineno-59-5" name="__codelineno-59-5" href="#__codelineno-59-5"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>start
 </span></code></pre></div>
 <h2 id="configuration-files">Configuration Files<a class="headerlink" href="#configuration-files" title="Permanent link">¶</a></h2>
 <h3 id="pai-environment-file">PAI Environment File<a class="headerlink" href="#pai-environment-file" title="Permanent link">¶</a></h3>
@@ -3577,17 +3652,17 @@ Remote Access (Feature 010):
 <p>Reference file: <code>config/.env.example</code></p>
 <p>Complete example of all available configuration options.</p>
 <h2 id="related-commands">Related Commands<a class="headerlink" href="#related-commands" title="Permanent link">¶</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-57-1"><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a><span class="c1"># View all available skills (from installed location)</span>
-</span><span id="__span-57-2"><a id="__codelineno-57-2" name="__codelineno-57-2" href="#__codelineno-57-2"></a>ls<span class="w"> </span>-la<span class="w"> </span>~/.claude/skills/Knowledge/workflows/
-</span><span id="__span-57-3"><a id="__codelineno-57-3" name="__codelineno-57-3" href="#__codelineno-57-3"></a>
-</span><span id="__span-57-4"><a id="__codelineno-57-4" name="__codelineno-57-4" href="#__codelineno-57-4"></a><span class="c1"># Test LLM connectivity</span>
-</span><span id="__span-57-5"><a id="__codelineno-57-5" name="__codelineno-57-5" href="#__codelineno-57-5"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/install.ts
-</span><span id="__span-57-6"><a id="__codelineno-57-6" name="__codelineno-57-6" href="#__codelineno-57-6"></a>
-</span><span id="__span-57-7"><a id="__codelineno-57-7" name="__codelineno-57-7" href="#__codelineno-57-7"></a><span class="c1"># Export knowledge data</span>
-</span><span id="__span-57-8"><a id="__codelineno-57-8" name="__codelineno-57-8" href="#__codelineno-57-8"></a><span class="c1"># (Via MCP: get_episodes with limit=999999)</span>
-</span><span id="__span-57-9"><a id="__codelineno-57-9" name="__codelineno-57-9" href="#__codelineno-57-9"></a>
-</span><span id="__span-57-10"><a id="__codelineno-57-10" name="__codelineno-57-10" href="#__codelineno-57-10"></a><span class="c1"># Monitor memory sync</span>
-</span><span id="__span-57-11"><a id="__codelineno-57-11" name="__codelineno-57-11" href="#__codelineno-57-11"></a>bun<span class="w"> </span>run<span class="w"> </span>~/.claude/hooks/sync-memory-to-knowledge.ts<span class="w"> </span>--verbose
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-60-1"><a id="__codelineno-60-1" name="__codelineno-60-1" href="#__codelineno-60-1"></a><span class="c1"># View all available skills (from installed location)</span>
+</span><span id="__span-60-2"><a id="__codelineno-60-2" name="__codelineno-60-2" href="#__codelineno-60-2"></a>ls<span class="w"> </span>-la<span class="w"> </span>~/.claude/skills/Knowledge/workflows/
+</span><span id="__span-60-3"><a id="__codelineno-60-3" name="__codelineno-60-3" href="#__codelineno-60-3"></a>
+</span><span id="__span-60-4"><a id="__codelineno-60-4" name="__codelineno-60-4" href="#__codelineno-60-4"></a><span class="c1"># Test LLM connectivity</span>
+</span><span id="__span-60-5"><a id="__codelineno-60-5" name="__codelineno-60-5" href="#__codelineno-60-5"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/install.ts
+</span><span id="__span-60-6"><a id="__codelineno-60-6" name="__codelineno-60-6" href="#__codelineno-60-6"></a>
+</span><span id="__span-60-7"><a id="__codelineno-60-7" name="__codelineno-60-7" href="#__codelineno-60-7"></a><span class="c1"># Export knowledge data</span>
+</span><span id="__span-60-8"><a id="__codelineno-60-8" name="__codelineno-60-8" href="#__codelineno-60-8"></a><span class="c1"># (Via MCP: get_episodes with limit=999999)</span>
+</span><span id="__span-60-9"><a id="__codelineno-60-9" name="__codelineno-60-9" href="#__codelineno-60-9"></a>
+</span><span id="__span-60-10"><a id="__codelineno-60-10" name="__codelineno-60-10" href="#__codelineno-60-10"></a><span class="c1"># Monitor memory sync</span>
+</span><span id="__span-60-11"><a id="__codelineno-60-11" name="__codelineno-60-11" href="#__codelineno-60-11"></a>bun<span class="w"> </span>run<span class="w"> </span>~/.claude/hooks/sync-memory-to-knowledge.ts<span class="w"> </span>--verbose
 </span></code></pre></div>
 
 

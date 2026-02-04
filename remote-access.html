@@ -1185,6 +1185,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guides/osint-workflows.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OSINT &amp; CTI Workflows
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2221,12 +2249,14 @@ Limits:
 </tr>
 </tbody>
 </table>
-<p><strong>Configuration Priority</strong> (highest to lowest):
-1. CLI flags (<code>--host</code>, <code>--port</code>, etc.)
-2. Individual environment variables (<code>MADEINOZ_KNOWLEDGE_HOST</code>)
-3. Selected profile (<code>MADEINOZ_KNOWLEDGE_PROFILE</code>)
-4. Default profile in YAML file
-5. Code defaults</p>
+<p><strong>Configuration Priority</strong> (highest to lowest):</p>
+<ol>
+<li>CLI flags (<code>--host</code>, <code>--port</code>, etc.)</li>
+<li>Individual environment variables (<code>MADEINOZ_KNOWLEDGE_HOST</code>)</li>
+<li>Selected profile (<code>MADEINOZ_KNOWLEDGE_PROFILE</code>)</li>
+<li>Default profile in YAML file</li>
+<li>Code defaults</li>
+</ol>
 <h3 id="cli-commands">CLI Commands<a class="headerlink" href="#cli-commands" title="Permanent link">¶</a></h3>
 <table>
 <thead>
@@ -2364,23 +2394,23 @@ Limits:
 </span></code></pre></div>
 <p><strong>⚠️ Deprecation Notice</strong>: Localhost-only access is deprecated for production deployments. Use remote access configuration for team environments.</p>
 <h3 id="remote-connection">Remote Connection<a class="headerlink" href="#remote-connection" title="Permanent link">¶</a></h3>
-<p><strong>Using environment variables:</strong>
-</p><div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># Set the remote host</span>
+<p><strong>Using environment variables:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># Set the remote host</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_KNOWLEDGE_HOST</span><span class="o">=</span><span class="m">192</span>.168.1.100
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_KNOWLEDGE_PORT</span><span class="o">=</span><span class="m">8001</span>
 </span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
 </span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="c1"># Run knowledge commands</span>
 </span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"my query"</span>
-</span></code></pre></div><p></p>
-<p><strong>Using CLI flags:</strong>
-</p><div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Override connection settings per command</span>
+</span></code></pre></div>
+<p><strong>Using CLI flags:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Override connection settings per command</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli<span class="w"> </span>--host<span class="w"> </span>knowledge.example.com<span class="w"> </span>--port<span class="w"> </span><span class="m">8001</span><span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"my query"</span>
 </span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
 </span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="c1"># With HTTPS</span>
 </span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli<span class="w"> </span>--host<span class="w"> </span>knowledge.example.com<span class="w"> </span>--protocol<span class="w"> </span>https<span class="w"> </span>--port<span class="w"> </span><span class="m">443</span><span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"my query"</span>
-</span></code></pre></div><p></p>
-<p><strong>Using profiles:</strong>
-</p><div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Use specific profile</span>
+</span></code></pre></div>
+<p><strong>Using profiles:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Use specific profile</span>
 </span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_KNOWLEDGE_PROFILE</span><span class="o">=</span>production
 </span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
 </span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># Run commands (uses production profile)</span>
@@ -2388,17 +2418,17 @@ Limits:
 </span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
 </span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="c1"># List available profiles</span>
 </span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli<span class="w"> </span>--list-profiles
-</span></code></pre></div><p></p>
+</span></code></pre></div>
 <h3 id="server-configuration">Server Configuration<a class="headerlink" href="#server-configuration" title="Permanent link">¶</a></h3>
-<p><strong>Enable external access:</strong>
-</p><div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Set the MCP host to all interfaces</span>
+<p><strong>Enable external access:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Set the MCP host to all interfaces</span>
 </span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MCP_HOST</span><span class="o">=</span><span class="m">0</span>.0.0.0
 </span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
 </span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="c1"># Restart the server</span>
 </span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>bun<span class="w"> </span>run<span class="w"> </span>server<span class="w"> </span>restart
-</span></code></pre></div><p></p>
-<p><strong>Enable TLS on server:</strong>
-</p><div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># Generate self-signed certificate (development)</span>
+</span></code></pre></div>
+<p><strong>Enable TLS on server:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># Generate self-signed certificate (development)</span>
 </span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>openssl<span class="w"> </span>req<span class="w"> </span>-x509<span class="w"> </span>-newkey<span class="w"> </span>rsa:4096<span class="w"> </span>-keyout<span class="w"> </span>certs/key.pem<span class="w"> </span>-out<span class="w"> </span>certs/cert.pem<span class="w"> </span>-days<span class="w"> </span><span class="m">365</span><span class="w"> </span>-nodes<span class="w"> </span>-subj<span class="w"> </span><span class="s2">"/CN=knowledge.example.com"</span>
 </span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
 </span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c1"># Enable TLS in environment</span>
@@ -2408,19 +2438,21 @@ Limits:
 </span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>
 </span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="c1"># Restart server with TLS</span>
 </span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>bun<span class="w"> </span>run<span class="w"> </span>server<span class="w"> </span>restart
-</span></code></pre></div><p></p>
+</span></code></pre></div>
 <hr>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">¶</a></h2>
 <h3 id="connection-refused">Connection Refused<a class="headerlink" href="#connection-refused" title="Permanent link">¶</a></h3>
 <p><strong>Symptom</strong>: <code>ECONNREFUSED</code> when connecting</p>
-<p><strong>Solutions</strong>:
-1. Check server is running: <code>bun run server status</code>
-2. Verify <code>MCP_HOST=0.0.0.0</code> on server
-3. Check firewall allows port <code>8001</code> (or custom port)
-4. Test with <code>curl http://&lt;host&gt;:&lt;port&gt;/health</code>
-5. Verify network connectivity: <code>ping &lt;server-host&gt;</code></p>
-<p><strong>Diagnostic commands:</strong>
-</p><div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># Check if server is listening</span>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li>Check server is running: <code>bun run server status</code></li>
+<li>Verify <code>MCP_HOST=0.0.0.0</code> on server</li>
+<li>Check firewall allows port <code>8001</code> (or custom port)</li>
+<li>Test with <code>curl http://&lt;host&gt;:&lt;port&gt;/health</code></li>
+<li>Verify network connectivity: <code>ping &lt;server-host&gt;</code></li>
+</ol>
+<p><strong>Diagnostic commands:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># Check if server is listening</span>
 </span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>netstat<span class="w"> </span>-an<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="m">8001</span>
 </span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
 </span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="c1"># Test HTTP endpoint</span>
@@ -2429,22 +2461,24 @@ Limits:
 </span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="c1"># Check firewall status</span>
 </span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>sudo<span class="w"> </span>ufw<span class="w"> </span>status<span class="w">  </span><span class="c1"># Linux</span>
 </span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>sudo<span class="w"> </span>pfctl<span class="w"> </span>-s<span class="w"> </span>rules<span class="w">  </span><span class="c1"># macOS</span>
-</span></code></pre></div><p></p>
+</span></code></pre></div>
 <h3 id="tls-certificate-errors">TLS Certificate Errors<a class="headerlink" href="#tls-certificate-errors" title="Permanent link">¶</a></h3>
 <p><strong>Symptom</strong>: <code>certificate verify failed</code> or <code>unable to verify</code></p>
-<p><strong>Solutions</strong>:
-1. <strong>For self-signed certificates</strong> (development only):
-   </p><div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_KNOWLEDGE_TLS_VERIFY</span><span class="o">=</span><span class="nb">false</span>
-</span></code></pre></div><p></p>
+<p><strong>Solutions</strong>:</p>
 <ol>
-<li>
-<p><strong>For custom CA certificates</strong>:
-   </p><div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_KNOWLEDGE_TLS_CA</span><span class="o">=</span>/path/to/ca.pem
-</span></code></pre></div><p></p>
-</li>
-<li>
-<p><strong>Check certificate validity</strong>:
-   </p><div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># View certificate details</span>
+<li><strong>For self-signed certificates</strong> (development only):</li>
+</ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_KNOWLEDGE_TLS_VERIFY</span><span class="o">=</span><span class="nb">false</span>
+</span></code></pre></div>
+<ol>
+<li><strong>For custom CA certificates</strong>:</li>
+</ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_KNOWLEDGE_TLS_CA</span><span class="o">=</span>/path/to/ca.pem
+</span></code></pre></div>
+<ol>
+<li><strong>Check certificate validity</strong>:</li>
+</ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># View certificate details</span>
 </span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>openssl<span class="w"> </span>x509<span class="w"> </span>-in<span class="w"> </span>cert.pem<span class="w"> </span>-noout<span class="w"> </span>-text
 </span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>
 </span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="c1"># Check expiration</span>
@@ -2452,92 +2486,90 @@ Limits:
 </span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>
 </span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="c1"># Verify hostname matches</span>
 </span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>openssl<span class="w"> </span>x509<span class="w"> </span>-in<span class="w"> </span>cert.pem<span class="w"> </span>-noout<span class="w"> </span>-subject
-</span></code></pre></div><p></p>
-</li>
-<li>
-<p><strong>Verify certificate chain</strong>:
-   </p><div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>openssl<span class="w"> </span>s_client<span class="w"> </span>-connect<span class="w"> </span>knowledge.example.com:443<span class="w"> </span>-showcerts
-</span></code></pre></div><p></p>
-</li>
+</span></code></pre></div>
+<ol>
+<li><strong>Verify certificate chain</strong>:</li>
 </ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>openssl<span class="w"> </span>s_client<span class="w"> </span>-connect<span class="w"> </span>knowledge.example.com:443<span class="w"> </span>-showcerts
+</span></code></pre></div>
 <h3 id="timeout-errors">Timeout Errors<a class="headerlink" href="#timeout-errors" title="Permanent link">¶</a></h3>
 <p><strong>Symptom</strong>: <code>Connection timed out</code> after 30 seconds</p>
-<p><strong>Solutions</strong>:
-1. <strong>Check network connectivity</strong>:
-   </p><div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>ping<span class="w"> </span>&lt;server-host&gt;
-</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>traceroute<span class="w"> </span>&lt;server-host&gt;
-</span></code></pre></div><p></p>
+<p><strong>Solutions</strong>:</p>
 <ol>
-<li>
-<p><strong>Increase timeout</strong>:
-   </p><div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_KNOWLEDGE_TIMEOUT</span><span class="o">=</span><span class="m">60000</span><span class="w">  </span><span class="c1"># 60 seconds</span>
-</span></code></pre></div><p></p>
-</li>
-<li>
-<p><strong>Verify server is listening</strong>:
-   </p><div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>netstat<span class="w"> </span>-an<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="m">8001</span>
+<li><strong>Check network connectivity</strong>:</li>
+</ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>ping<span class="w"> </span>&lt;server-host&gt;
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>traceroute<span class="w"> </span>&lt;server-host&gt;
+</span></code></pre></div>
+<ol>
+<li><strong>Increase timeout</strong>:</li>
+</ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">MADEINOZ_KNOWLEDGE_TIMEOUT</span><span class="o">=</span><span class="m">60000</span><span class="w">  </span><span class="c1"># 60 seconds</span>
+</span></code></pre></div>
+<ol>
+<li><strong>Verify server is listening</strong>:</li>
+</ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>netstat<span class="w"> </span>-an<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="m">8001</span>
 </span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:8001
-</span></code></pre></div><p></p>
-</li>
-<li>
-<p><strong>Check for network issues</strong>:
-   </p><div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="c1"># Test port connectivity</span>
+</span></code></pre></div>
+<ol>
+<li><strong>Check for network issues</strong>:</li>
+</ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="c1"># Test port connectivity</span>
 </span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>nc<span class="w"> </span>-zv<span class="w"> </span>&lt;host&gt;<span class="w"> </span><span class="m">8001</span>
 </span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>telnet<span class="w"> </span>&lt;host&gt;<span class="w"> </span><span class="m">8001</span>
-</span></code></pre></div><p></p>
-</li>
-</ol>
+</span></code></pre></div>
 <h3 id="profile-not-found">Profile Not Found<a class="headerlink" href="#profile-not-found" title="Permanent link">¶</a></h3>
 <p><strong>Symptom</strong>: <code>Profile 'production' not found</code></p>
-<p><strong>Solutions</strong>:
-1. <strong>Check profile file exists</strong>:
-   </p><div class="language-bash highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>ls<span class="w"> </span><span class="nv">$PAI_DIR</span>/config/knowledge-profiles.yaml
-</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>ls<span class="w"> </span>~/.claude/config/knowledge-profiles.yaml
-</span></code></pre></div><p></p>
+<p><strong>Solutions</strong>:</p>
 <ol>
-<li>
-<p><strong>List available profiles</strong>:
-   </p><div class="language-bash highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli<span class="w"> </span>--list-profiles
-</span></code></pre></div><p></p>
-</li>
-<li>
-<p><strong>Verify YAML syntax</strong>:
-   </p><div class="language-bash highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="c1"># Validate YAML</span>
-</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">"import yaml; yaml.safe_load(open('</span><span class="nv">$PAI_DIR</span><span class="s2">/config/knowledge-profiles.yaml'))"</span>
-</span></code></pre></div><p></p>
-</li>
-<li>
-<p><strong>Check profile name in YAML file</strong>:
-   </p><div class="language-bash highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>grep<span class="w"> </span>-A<span class="w"> </span><span class="m">5</span><span class="w"> </span><span class="s2">"profiles:"</span><span class="w"> </span><span class="nv">$PAI_DIR</span>/config/knowledge-profiles.yaml
-</span></code></pre></div><p></p>
-</li>
+<li><strong>Check profile file exists</strong>:</li>
 </ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>ls<span class="w"> </span><span class="nv">$PAI_DIR</span>/config/knowledge-profiles.yaml
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>ls<span class="w"> </span>~/.claude/config/knowledge-profiles.yaml
+</span></code></pre></div>
+<ol>
+<li><strong>List available profiles</strong>:</li>
+</ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli<span class="w"> </span>--list-profiles
+</span></code></pre></div>
+<ol>
+<li><strong>Verify YAML syntax</strong>:</li>
+</ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="c1"># Validate YAML</span>
+</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">"import yaml; yaml.safe_load(open('</span><span class="nv">$PAI_DIR</span><span class="s2">/config/knowledge-profiles.yaml'))"</span>
+</span></code></pre></div>
+<ol>
+<li><strong>Check profile name in YAML file</strong>:</li>
+</ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>grep<span class="w"> </span>-A<span class="w"> </span><span class="m">5</span><span class="w"> </span><span class="s2">"profiles:"</span><span class="w"> </span><span class="nv">$PAI_DIR</span>/config/knowledge-profiles.yaml
+</span></code></pre></div>
 <h3 id="concurrent-connection-issues">Concurrent Connection Issues<a class="headerlink" href="#concurrent-connection-issues" title="Permanent link">¶</a></h3>
 <p><strong>Symptom</strong>: Errors when multiple clients connect simultaneously</p>
-<p><strong>Solutions</strong>:
-1. <strong>Check server logs for connection errors</strong>:
-   </p><div class="language-bash highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>bun<span class="w"> </span>run<span class="w"> </span>server<span class="w"> </span>logs<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span>connection
-</span></code></pre></div><p></p>
+<p><strong>Solutions</strong>:</p>
 <ol>
-<li>
-<p><strong>Verify server configuration</strong>:
-   </p><div class="language-bash highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="c1"># Query server configuration</span>
+<li><strong>Check server logs for connection errors</strong>:</li>
+</ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>bun<span class="w"> </span>run<span class="w"> </span>server<span class="w"> </span>logs<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span>connection
+</span></code></pre></div>
+<ol>
+<li><strong>Verify server configuration</strong>:</li>
+</ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="c1"># Query server configuration</span>
 </span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>curl<span class="w"> </span>http://&lt;host&gt;:8001/config
 </span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>
 </span><span id="__span-23-4"><a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="c1"># Check health endpoint</span>
 </span><span id="__span-23-5"><a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>curl<span class="w"> </span>http://&lt;host&gt;:8001/health
-</span></code></pre></div><p></p>
-</li>
-<li>
-<p><strong>Test concurrent connections</strong>:
-   </p><div class="language-bash highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="c1"># Run multiple queries in parallel</span>
+</span></code></pre></div>
+<ol>
+<li><strong>Test concurrent connections</strong>:</li>
+</ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="c1"># Run multiple queries in parallel</span>
 </span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="o">{</span><span class="m">1</span>..10<span class="o">}</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
 </span><span id="__span-24-3"><a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="w">  </span>bun<span class="w"> </span>run<span class="w"> </span>knowledge-cli<span class="w"> </span>search_nodes<span class="w"> </span><span class="s2">"test </span><span class="nv">$i</span><span class="s2">"</span><span class="w"> </span><span class="p">&amp;</span>
 </span><span id="__span-24-4"><a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a><span class="k">done</span>
 </span><span id="__span-24-5"><a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a><span class="nb">wait</span>
-</span></code></pre></div><p></p>
-</li>
-</ol>
+</span></code></pre></div>
 <hr>
 <h2 id="security-best-practices">Security Best Practices<a class="headerlink" href="#security-best-practices" title="Permanent link">¶</a></h2>
 <table>

@@ -833,6 +833,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/osint-workflows.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OSINT &amp; CTI Workflows
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1369,10 +1397,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#option-2-gemini-flash-fast-reliable-retiring-march-2026" class="md-nav__link">
+  <a href="#option-2-gemini-flash-fast-reliable-cost-effective-retiring-march-2026" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Option 2: Gemini Flash (Fast, reliable - RETIRING MARCH 2026)
+        Option 2: Gemini Flash (Fast, reliable, Cost effective - RETIRING MARCH 2026)
       
     </span>
   </a>
@@ -1911,10 +1939,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#option-2-gemini-flash-fast-reliable-retiring-march-2026" class="md-nav__link">
+  <a href="#option-2-gemini-flash-fast-reliable-cost-effective-retiring-march-2026" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Option 2: Gemini Flash (Fast, reliable - RETIRING MARCH 2026)
+        Option 2: Gemini Flash (Fast, reliable, Cost effective - RETIRING MARCH 2026)
       
     </span>
   </a>
@@ -2339,14 +2367,16 @@
 </span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL=mxbai-embed-large
 </span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS=1024
 </span></code></pre></div>
-<p>Both configurations:
-- Use Trinity models via OpenRouter for LLM (<strong>completely free</strong>)
-- Successfully pass all Graphiti entity extraction tests
-- Use Ollama for embeddings (free, runs locally)
-- <strong>Zero cloud LLM costs</strong> while maintaining extraction quality</p>
+<p>Both configurations:</p>
+<ul>
+<li>Use Trinity models via OpenRouter for LLM (<strong>completely free</strong>)</li>
+<li>Successfully pass all Graphiti entity extraction tests</li>
+<li>Use Ollama for embeddings (free, runs locally)</li>
+<li><strong>Zero cloud LLM costs</strong> while maintaining extraction quality</li>
+</ul>
 <p><strong>Trinity Large Preview:</strong> More detailed entity extraction, ~25s processing time
 <strong>Trinity Mini:</strong> Faster processing ~16s, good quality extraction</p>
-<h3 id="option-2-gemini-flash-fast-reliable-retiring-march-2026">Option 2: Gemini Flash (Fast, reliable - RETIRING MARCH 2026)<a class="headerlink" href="#option-2-gemini-flash-fast-reliable-retiring-march-2026" title="Permanent link">¶</a></h3>
+<h3 id="option-2-gemini-flash-fast-reliable-cost-effective-retiring-march-2026">Option 2: Gemini Flash (Fast, reliable, Cost effective - RETIRING MARCH 2026)<a class="headerlink" href="#option-2-gemini-flash-fast-reliable-cost-effective-retiring-march-2026" title="Permanent link">¶</a></h3>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a># LLM: gemini-2.0-Flash (reliable JSON output for entity extraction)
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>MADEINOZ_KNOWLEDGE_LLM_PROVIDER=openai
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>MADEINOZ_KNOWLEDGE_MODEL_NAME=google/gemini-2.0-flash-001
@@ -2386,6 +2416,12 @@
 </tr>
 <tr>
 <td>Hybrid (recommended)</td>
+<td>Free</td>
+<td>Free</td>
+<td>Free</td>
+</tr>
+<tr>
+<td>Gemini Flash</td>
 <td>~$0.15/1M tokens</td>
 <td>Free</td>
 <td>$$</td>
@@ -2566,10 +2602,12 @@
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>  Field required [type=missing, input_value={'$defs': {'NodeDuplicate...
 </span></code></pre></div>
 <p>The model outputs JSON schema definitions instead of data conforming to the schema.</p>
-<p><strong>Recommendation</strong>: For production LLM use, choose from these tested options:
-- <strong>Free:</strong> <code>arcee-ai/trinity-large-preview:free</code> (passes all tests)
-<strong>Low-cost:</strong> <code>google/gemini-2.0-flash-001</code> (fast, reliable - but RETIRING March 2026)
-- <strong>Premium:</strong> OpenAI models (gpt-4o-mini, gpt-4o) which reliably produce valid JSON matching Graphiti's Pydantic schemas</p>
+<p><strong>Recommendation</strong>: For production LLM use, choose from these tested options:</p>
+<ul>
+<li><strong>Free:</strong> <code>arcee-ai/trinity-large-preview:free</code> (passes all tests)
+<strong>Low-cost:</strong> <code>google/gemini-2.0-flash-001</code> (fast, reliable - but RETIRING March 2026)</li>
+<li><strong>Premium:</strong> OpenAI models (gpt-4o-mini, gpt-4o) which reliably produce valid JSON matching Graphiti's Pydantic schemas</li>
+</ul>
 <h2 id="embedding-models">Embedding Models<a class="headerlink" href="#embedding-models" title="Permanent link">¶</a></h2>
 <h3 id="performance-comparison-tested-2026-01-18">Performance Comparison (Tested 2026-01-18)<a class="headerlink" href="#performance-comparison-tested-2026-01-18" title="Permanent link">¶</a></h3>
 <table>
@@ -2893,21 +2931,25 @@
 </tr>
 </tbody>
 </table>
-<p><strong>Example Test Episodes:</strong>
-- SQL Databases → Extracted: "SQL", "tables", "primary keys", "foreign keys"
-- GraphQL → Extracted: "GraphQL", "query language", "strongly typed schemas"
-- Black Holes → Extracted: "Black holes", "event horizon", "Sagittarius A*"</p>
+<p><strong>Example Test Episodes:</strong></p>
+<ul>
+<li>SQL Databases → Extracted: "SQL", "tables", "primary keys", "foreign keys"</li>
+<li>GraphQL → Extracted: "GraphQL", "query language", "strongly typed schemas"</li>
+<li>Black Holes → Extracted: "Black holes", "event horizon", "Sagittarius A*"</li>
+</ul>
 <p><strong>Configuration:</strong></p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>MADEINOZ_KNOWLEDGE_LLM_PROVIDER=openai
 </span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>MADEINOZ_KNOWLEDGE_MODEL_NAME=arcee-ai/trinity-large-preview:free
 </span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL=https://openrouter.ai/api/v1
 </span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=your-openrouter-api-key
 </span></code></pre></div>
-<p><strong>Advantages:</strong>
-- <strong>Completely free</strong> - no LLM costs
-- Reliable entity extraction
-- No JSON validation errors
-- Works with OpenRouter's free tier</p>
+<p><strong>Advantages:</strong></p>
+<ul>
+<li><strong>Completely free</strong> - no LLM costs</li>
+<li>Reliable entity extraction</li>
+<li>No JSON validation errors</li>
+<li>Works with OpenRouter's free tier</li>
+</ul>
 <p><strong>Comparison with Paid Models:</strong></p>
 <table>
 <thead>

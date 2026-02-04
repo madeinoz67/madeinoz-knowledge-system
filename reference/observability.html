@@ -833,6 +833,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/osint-workflows.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OSINT &amp; CTI Workflows
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -4207,12 +4235,14 @@
 </tbody>
 </table>
 <p><strong>Dashboard unit configuration:</strong></p>
-<p>Instead of embedding units in metric names, Grafana dashboards use the <code>unit</code> field to display appropriate units:
-- <code>currencyUSD</code> - Cost metrics display in USD
-- <code>short</code> - Count metrics display as plain numbers
-- <code>percent</code> - Rate metrics display as percentages
-- <code>seconds</code> - Duration metrics display in seconds
-- <code>locale</code> - Token count display with locale formatting</p>
+<p>Instead of embedding units in metric names, Grafana dashboards use the <code>unit</code> field to display appropriate units:</p>
+<ul>
+<li><code>currencyUSD</code> - Cost metrics display in USD</li>
+<li><code>short</code> - Count metrics display as plain numbers</li>
+<li><code>percent</code> - Rate metrics display as percentages</li>
+<li><code>seconds</code> - Duration metrics display in seconds</li>
+<li><code>locale</code> - Token count display with locale formatting</li>
+</ul>
 <h3 id="handling-service-restarts">Handling Service Restarts<a class="headerlink" href="#handling-service-restarts" title="Permanent link">¶</a></h3>
 <p>Counter metrics reset to zero when the service restarts, which causes <code>rate()</code> calculations to show brief gaps or spikes in visualizations. This is expected Prometheus behavior for counter resets.</p>
 <p><strong>Current dashboard behavior:</strong></p>
@@ -4493,11 +4523,13 @@
 </tr>
 </tbody>
 </table>
-<p><strong>Key Features</strong>:
-- Time-over-time queries (<code>max_over_time()[1h]</code>) handle service restarts without data gaps
-- Color-coded thresholds for quick health assessment
-- 30-second auto-refresh (user-configurable)
-- Single 1080p screen layout (no scrolling required)</p>
+<p><strong>Key Features</strong>:</p>
+<ul>
+<li>Time-over-time queries (<code>max_over_time()[1h]</code>) handle service restarts without data gaps</li>
+<li>Color-coded thresholds for quick health assessment</li>
+<li>30-second auto-refresh (user-configurable)</li>
+<li>Single 1080p screen layout (no scrolling required)</li>
+</ul>
 <p><strong>Troubleshooting Dashboard</strong>:</p>
 <ol>
 <li><strong>No data showing</strong>: Verify cache is enabled (<code>curl http://localhost:9091/metrics | grep cache_enabled</code>)</li>
@@ -4617,22 +4649,20 @@
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">¶</a></h2>
 <h3 id="metrics-not-appearing">Metrics Not Appearing<a class="headerlink" href="#metrics-not-appearing" title="Permanent link">¶</a></h3>
 <ol>
-<li>
-<p><strong>Check metrics are enabled:</strong>
-   </p><div class="language-bash highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>grep<span class="w"> </span>MADEINOZ_KNOWLEDGE_PROMPT_CACHE_METRICS_ENABLED<span class="w"> </span>~/.claude/.env
-</span></code></pre></div><p></p>
-</li>
-<li>
-<p><strong>Verify endpoint is accessible:</strong>
-   </p><div class="language-bash highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>curl<span class="w"> </span>http://localhost:9091/metrics
-</span></code></pre></div><p></p>
-</li>
-<li>
-<p><strong>Check container logs:</strong>
-   </p><div class="language-bash highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>docker<span class="w"> </span>logs<span class="w"> </span>madeinoz-knowledge-graph-mcp-dev<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span>metric
-</span></code></pre></div><p></p>
-</li>
+<li><strong>Check metrics are enabled:</strong></li>
 </ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>grep<span class="w"> </span>MADEINOZ_KNOWLEDGE_PROMPT_CACHE_METRICS_ENABLED<span class="w"> </span>~/.claude/.env
+</span></code></pre></div>
+<ol>
+<li><strong>Verify endpoint is accessible:</strong></li>
+</ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>curl<span class="w"> </span>http://localhost:9091/metrics
+</span></code></pre></div>
+<ol>
+<li><strong>Check container logs:</strong></li>
+</ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>docker<span class="w"> </span>logs<span class="w"> </span>madeinoz-knowledge-graph-mcp-dev<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span>metric
+</span></code></pre></div>
 <h3 id="counters-not-incrementing">Counters Not Incrementing<a class="headerlink" href="#counters-not-incrementing" title="Permanent link">¶</a></h3>
 <p>Counter and histogram metrics only appear after LLM API calls are made. Metrics populate when:</p>
 <ul>
@@ -4709,12 +4739,14 @@
 </tbody>
 </table>
 <p><strong>Recommended Model:</strong> <code>google/gemini-2.0-flash-001</code> via OpenRouter</p>
-<p>This implementation uses the <strong>CachingLLMClient</strong> wrapper which:
-1. Checks if caching is enabled (environment variable)
-2. Verifies the model is Gemini via OpenRouter
-3. Converts messages to multipart format
-4. Adds <code>cache_control</code> marker to the last content part
-5. Extracts cache metrics from responses (cache_read_tokens, cache_write_tokens)</p>
+<p>This implementation uses the <strong>CachingLLMClient</strong> wrapper which:</p>
+<ol>
+<li>Checks if caching is enabled (environment variable)</li>
+<li>Verifies the model is Gemini via OpenRouter</li>
+<li>Converts messages to multipart format</li>
+<li>Adds <code>cache_control</code> marker to the last content part</li>
+<li>Extracts cache metrics from responses (cache_read_tokens, cache_write_tokens)</li>
+</ol>
 <h3 id="configuration_1">Configuration<a class="headerlink" href="#configuration_1" title="Permanent link">¶</a></h3>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-39-1"><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a><span class="c1"># Enable prompt caching (disabled by default)</span>
 </span><span id="__span-39-2"><a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a><span class="nv">MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED</span><span class="o">=</span><span class="nb">true</span>
@@ -5169,10 +5201,12 @@
 </ul>
 <h3 id="troubleshooting-queue-issues">Troubleshooting Queue Issues<a class="headerlink" href="#troubleshooting-queue-issues" title="Permanent link">¶</a></h3>
 <h4 id="growing-queue-backlog">Growing Queue Backlog<a class="headerlink" href="#growing-queue-backlog" title="Permanent link">¶</a></h4>
-<p><strong>Symptoms:</strong>
-- <code>messaging_queue_depth</code> increasing over time
-- <code>messaging_consumer_lag_seconds</code> increasing
-- <code>messaging_consumer_saturation</code> near 1.0</p>
+<p><strong>Symptoms:</strong></p>
+<ul>
+<li><code>messaging_queue_depth</code> increasing over time</li>
+<li><code>messaging_consumer_lag_seconds</code> increasing</li>
+<li><code>messaging_consumer_saturation</code> near 1.0</li>
+</ul>
 <p><strong>Diagnosis:</strong></p>
 <div class="language-promql highlight"><pre><span></span><code><span id="__span-57-1"><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a><span class="c1"># Check if production rate exceeds consumption rate</span>
 </span><span id="__span-57-2"><a id="__codelineno-57-2" name="__codelineno-57-2" href="#__codelineno-57-2"></a><span class="k">sum</span><span class="o">(</span><span class="kr">rate</span><span class="o">(</span><span class="nv">messaging_messages_processed_total</span><span class="p">[</span><span class="s">5m</span><span class="p">]</span><span class="o">))</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="k">sum</span><span class="o">(</span><span class="kr">rate</span><span class="o">(</span><span class="nv">messages_enqueued</span><span class="p">[</span><span class="s">5m</span><span class="p">]</span><span class="o">))</span>
@@ -5180,62 +5214,80 @@
 </span><span id="__span-57-4"><a id="__codelineno-57-4" name="__codelineno-57-4" href="#__codelineno-57-4"></a><span class="c1"># Check processing latency trend</span>
 </span><span id="__span-57-5"><a id="__codelineno-57-5" name="__codelineno-57-5" href="#__codelineno-57-5"></a><span class="kr">histogram_quantile</span><span class="o">(</span><span class="mf">0.95</span><span class="p">,</span><span class="w"> </span><span class="k">sum</span><span class="o">(</span><span class="kr">rate</span><span class="o">(</span><span class="nv">messaging_processing_duration_seconds_bucket</span><span class="p">[</span><span class="s">5m</span><span class="p">]</span><span class="o">))</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="o">(</span><span class="nv">le</span><span class="o">))</span>
 </span></code></pre></div>
-<p><strong>Solutions:</strong>
-1. Scale consumers (increase <code>messaging_active_consumers</code>)
-2. Optimize processing (reduce latency)
-3. Implement priority queueing
-4. Add rate limiting at enqueue</p>
+<p><strong>Solutions:</strong></p>
+<ol>
+<li>Scale consumers (increase <code>messaging_active_consumers</code>)</li>
+<li>Optimize processing (reduce latency)</li>
+<li>Implement priority queueing</li>
+<li>Add rate limiting at enqueue</li>
+</ol>
 <h4 id="high-consumer-lag">High Consumer Lag<a class="headerlink" href="#high-consumer-lag" title="Permanent link">¶</a></h4>
-<p><strong>Symptoms:</strong>
-- <code>messaging_consumer_lag_seconds</code> &gt; 300 (5 minutes)
-- Queue depth stable but lag increasing</p>
+<p><strong>Symptoms:</strong></p>
+<ul>
+<li><code>messaging_consumer_lag_seconds</code> &gt; 300 (5 minutes)</li>
+<li>Queue depth stable but lag increasing</li>
+</ul>
 <p><strong>Diagnosis:</strong></p>
 <div class="language-promql highlight"><pre><span></span><code><span id="__span-58-1"><a id="__codelineno-58-1" name="__codelineno-58-1" href="#__codelineno-58-1"></a><span class="c1"># Time to catch up at current rate</span>
 </span><span id="__span-58-2"><a id="__codelineno-58-2" name="__codelineno-58-2" href="#__codelineno-58-2"></a><span class="nv">messaging_queue_depth</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="k">sum</span><span class="o">(</span><span class="kr">rate</span><span class="o">(</span><span class="nv">messaging_messages_processed_total</span><span class="p">{</span><span class="nl">status</span><span class="o">=</span><span class="p">"</span><span class="s">success</span><span class="p">"}[</span><span class="s">5m</span><span class="p">]</span><span class="o">))</span>
 </span></code></pre></div>
-<p><strong>Solutions:</strong>
-1. Increase consumer count
-2. Reduce processing time per message
-3. Implement batch processing
-4. Scale horizontally (multiple queue instances)</p>
+<p><strong>Solutions:</strong></p>
+<ol>
+<li>Increase consumer count</li>
+<li>Reduce processing time per message</li>
+<li>Implement batch processing</li>
+<li>Scale horizontally (multiple queue instances)</li>
+</ol>
 <h4 id="consumer-saturation">Consumer Saturation<a class="headerlink" href="#consumer-saturation" title="Permanent link">¶</a></h4>
-<p><strong>Symptoms:</strong>
-- <code>messaging_consumer_saturation</code> &gt; 0.85
-- Wait times increasing</p>
+<p><strong>Symptoms:</strong></p>
+<ul>
+<li><code>messaging_consumer_saturation</code> &gt; 0.85</li>
+<li>Wait times increasing</li>
+</ul>
 <p><strong>Diagnosis:</strong></p>
 <div class="language-promql highlight"><pre><span></span><code><span id="__span-59-1"><a id="__codelineno-59-1" name="__codelineno-59-1" href="#__codelineno-59-1"></a><span class="c1"># Check wait time trend</span>
 </span><span id="__span-59-2"><a id="__codelineno-59-2" name="__codelineno-59-2" href="#__codelineno-59-2"></a><span class="kr">histogram_quantile</span><span class="o">(</span><span class="mf">0.95</span><span class="p">,</span><span class="w"> </span><span class="k">sum</span><span class="o">(</span><span class="kr">rate</span><span class="o">(</span><span class="nv">messaging_wait_time_seconds_bucket</span><span class="p">[</span><span class="s">5m</span><span class="p">]</span><span class="o">))</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="o">(</span><span class="nv">le</span><span class="o">))</span>
 </span></code></pre></div>
-<p><strong>Solutions:</strong>
-1. Add more consumers
-2. Increase consumer parallelism
-3. Implement async processing</p>
+<p><strong>Solutions:</strong></p>
+<ol>
+<li>Add more consumers</li>
+<li>Increase consumer parallelism</li>
+<li>Implement async processing</li>
+</ol>
 <h4 id="high-error-rate">High Error Rate<a class="headerlink" href="#high-error-rate" title="Permanent link">¶</a></h4>
-<p><strong>Symptoms:</strong>
-- <code>messaging_messages_failed_total</code> increasing
-- Error rate gauge &gt; 5%</p>
+<p><strong>Symptoms:</strong></p>
+<ul>
+<li><code>messaging_messages_failed_total</code> increasing</li>
+<li>Error rate gauge &gt; 5%</li>
+</ul>
 <p><strong>Diagnosis:</strong></p>
 <div class="language-promql highlight"><pre><span></span><code><span id="__span-60-1"><a id="__codelineno-60-1" name="__codelineno-60-1" href="#__codelineno-60-1"></a><span class="c1"># Error breakdown by type</span>
 </span><span id="__span-60-2"><a id="__codelineno-60-2" name="__codelineno-60-2" href="#__codelineno-60-2"></a><span class="k">sum</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="o">(</span><span class="nv">error_type</span><span class="o">)</span><span class="w"> </span><span class="o">(</span><span class="nv">messaging_messages_failed_total</span><span class="o">)</span>
 </span></code></pre></div>
-<p><strong>Solutions:</strong>
-1. Check error types in failures panel
-2. Fix common error patterns
-3. Implement circuit breaker for failing services
-4. Add retry with exponential backoff</p>
+<p><strong>Solutions:</strong></p>
+<ol>
+<li>Check error types in failures panel</li>
+<li>Fix common error patterns</li>
+<li>Implement circuit breaker for failing services</li>
+<li>Add retry with exponential backoff</li>
+</ol>
 <h4 id="high-retry-rate">High Retry Rate<a class="headerlink" href="#high-retry-rate" title="Permanent link">¶</a></h4>
-<p><strong>Symptoms:</strong>
-- <code>messaging_retries_total</code> increasing rapidly
-- Retry rate &gt; 0.1 retries/message</p>
+<p><strong>Symptoms:</strong></p>
+<ul>
+<li><code>messaging_retries_total</code> increasing rapidly</li>
+<li>Retry rate &gt; 0.1 retries/message</li>
+</ul>
 <p><strong>Diagnosis:</strong></p>
 <div class="language-promql highlight"><pre><span></span><code><span id="__span-61-1"><a id="__codelineno-61-1" name="__codelineno-61-1" href="#__codelineno-61-1"></a><span class="c1"># Retries per successful message</span>
 </span><span id="__span-61-2"><a id="__codelineno-61-2" name="__codelineno-61-2" href="#__codelineno-61-2"></a><span class="k">sum</span><span class="o">(</span><span class="kr">rate</span><span class="o">(</span><span class="nv">messaging_retries_total</span><span class="p">[</span><span class="s">5m</span><span class="p">]</span><span class="o">))</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="k">sum</span><span class="o">(</span><span class="kr">rate</span><span class="o">(</span><span class="nv">messaging_messages_processed_total</span><span class="p">{</span><span class="nl">status</span><span class="o">=</span><span class="p">"</span><span class="s">success</span><span class="p">"}[</span><span class="s">5m</span><span class="p">]</span><span class="o">))</span>
 </span></code></pre></div>
-<p><strong>Solutions:</strong>
-1. Identify root cause of failures
-2. Implement dead letter queue
-3. Add backoff strategy
-4. Limit max retry attempts</p>
+<p><strong>Solutions:</strong></p>
+<ol>
+<li>Identify root cause of failures</li>
+<li>Implement dead letter queue</li>
+<li>Add backoff strategy</li>
+<li>Limit max retry attempts</li>
+</ol>
 <h3 id="implementation">Implementation<a class="headerlink" href="#implementation" title="Permanent link">¶</a></h3>
 <p>The queue metrics are implemented in <code>docker/patches/metrics_exporter.py</code>:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-62-1"><a id="__codelineno-62-1" name="__codelineno-62-1" href="#__codelineno-62-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">QueueMetricsExporter</span><span class="p">:</span>

@@ -833,6 +833,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/osint-workflows.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OSINT &amp; CTI Workflows
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2447,25 +2475,29 @@
 <h2 id="release-workflows">Release Workflows<a class="headerlink" href="#release-workflows" title="Permanent link">¶</a></h2>
 <h3 id="1-docker-build-workflow">1. Docker Build Workflow<a class="headerlink" href="#1-docker-build-workflow" title="Permanent link">¶</a></h3>
 <p><strong>File:</strong> <code>.github/workflows/docker-build.yml</code></p>
-<p><strong>Triggers:</strong>
-- Push to <code>main</code> branch (builds and pushes <code>latest</code> + <code>fixed</code> tags)
-- Push tags matching <code>v*.*.*</code> (builds and pushes version tags)
-- Pull requests (builds only, no push)
-- Manual dispatch via GitHub UI</p>
-<p><strong>What it does:</strong>
-1. Builds Docker image for <code>linux/amd64</code> and <code>linux/arm64</code> platforms
-2. Tests the image (verifies entrypoint execution)
-3. Pushes to GitHub Container Registry (<code>ghcr.io/madeinoz67/madeinoz-knowledge-system</code>)
-4. Optionally pushes to Docker Hub (if <code>DOCKERHUB_USERNAME</code> and <code>DOCKERHUB_TOKEN</code> secrets are configured)
-5. Tags images with multiple formats:
-   - <code>latest</code> - most recent main branch build
-   - <code>fixed</code> - alias for latest (used in code references)
-   - <code>v1.0.1</code> - semantic version from git tag
-   - <code>1.0</code> - major.minor from version
-   - <code>1</code> - major version only
-   - <code>sha-abc123</code> - git commit SHA</p>
-<p><strong>Image locations:</strong>
-</p><div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># GitHub Container Registry (always available)</span>
+<p><strong>Triggers:</strong></p>
+<ul>
+<li>Push to <code>main</code> branch (builds and pushes <code>latest</code> + <code>fixed</code> tags)</li>
+<li>Push tags matching <code>v*.*.*</code> (builds and pushes version tags)</li>
+<li>Pull requests (builds only, no push)</li>
+<li>Manual dispatch via GitHub UI</li>
+</ul>
+<p><strong>What it does:</strong></p>
+<ol>
+<li>Builds Docker image for <code>linux/amd64</code> and <code>linux/arm64</code> platforms</li>
+<li>Tests the image (verifies entrypoint execution)</li>
+<li>Pushes to GitHub Container Registry (<code>ghcr.io/madeinoz67/madeinoz-knowledge-system</code>)</li>
+<li>Optionally pushes to Docker Hub (if <code>DOCKERHUB_USERNAME</code> and <code>DOCKERHUB_TOKEN</code> secrets are configured)</li>
+<li>Tags images with multiple formats:</li>
+<li><code>latest</code> - most recent main branch build</li>
+<li><code>fixed</code> - alias for latest (used in code references)</li>
+<li><code>v1.0.1</code> - semantic version from git tag</li>
+<li><code>1.0</code> - major.minor from version</li>
+<li><code>1</code> - major version only</li>
+<li><code>sha-abc123</code> - git commit SHA</li>
+</ol>
+<p><strong>Image locations:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># GitHub Container Registry (always available)</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>ghcr.io/madeinoz67/madeinoz-knowledge-system:latest
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>ghcr.io/madeinoz67/madeinoz-knowledge-system:fixed
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>ghcr.io/madeinoz67/madeinoz-knowledge-system:v1.0.1
@@ -2474,23 +2506,27 @@
 </span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>madeinoz-knowledge-system:latest
 </span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>madeinoz-knowledge-system:fixed
 </span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>madeinoz-knowledge-system:v1.0.1
-</span></code></pre></div><p></p>
+</span></code></pre></div>
 <h3 id="2-release-workflow">2. Release Workflow<a class="headerlink" href="#2-release-workflow" title="Permanent link">¶</a></h3>
 <p><strong>File:</strong> <code>.github/workflows/release.yml</code></p>
 <p><strong>Trigger:</strong> Manual dispatch only (via GitHub UI)</p>
-<p><strong>Required Input:</strong>
-- <code>version</code> - Semantic version (e.g., <code>1.0.2</code>)
-- <code>prerelease</code> - Mark as pre-release (optional, default: false)</p>
-<p><strong>What it does:</strong>
-1. Validates version format (<code>X.Y.Z</code>)
-2. Checks if tag already exists
-3. Updates <code>LABEL version</code> in Dockerfile
-4. Generates changelog from git commits
-5. Creates git tag (<code>v1.0.2</code>)
-6. Pushes tag to GitHub
-7. Creates GitHub Release with auto-generated notes
-8. Triggers Docker build workflow (via tag push)
-9. Updates documentation with release info</p>
+<p><strong>Required Input:</strong></p>
+<ul>
+<li><code>version</code> - Semantic version (e.g., <code>1.0.2</code>)</li>
+<li><code>prerelease</code> - Mark as pre-release (optional, default: false)</li>
+</ul>
+<p><strong>What it does:</strong></p>
+<ol>
+<li>Validates version format (<code>X.Y.Z</code>)</li>
+<li>Checks if tag already exists</li>
+<li>Updates <code>LABEL version</code> in Dockerfile</li>
+<li>Generates changelog from git commits</li>
+<li>Creates git tag (<code>v1.0.2</code>)</li>
+<li>Pushes tag to GitHub</li>
+<li>Creates GitHub Release with auto-generated notes</li>
+<li>Triggers Docker build workflow (via tag push)</li>
+<li>Updates documentation with release info</li>
+</ol>
 <h2 id="how-to-create-a-release">How to Create a Release<a class="headerlink" href="#how-to-create-a-release" title="Permanent link">¶</a></h2>
 <h3 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">¶</a></h3>
 <ol>
@@ -2515,32 +2551,34 @@
 <li><strong>Pre-release:</strong> Check if this is a pre-release (beta, rc, etc.)</li>
 </ul>
 <h4 id="4-click-run-workflow">4. Click "Run workflow"<a class="headerlink" href="#4-click-run-workflow" title="Permanent link">¶</a></h4>
-<p>The workflow will:
-- ✅ Validate version format
-- ✅ Update Dockerfile with new version
-- ✅ Create git tag <code>v1.0.2</code>
-- ✅ Generate release notes from commits
-- ✅ Create GitHub Release
-- ✅ Trigger Docker build (automatically via tag push)
-- ✅ Push images to registries</p>
+<p>The workflow will:</p>
+<ul>
+<li>✅ Validate version format</li>
+<li>✅ Update Dockerfile with new version</li>
+<li>✅ Create git tag <code>v1.0.2</code></li>
+<li>✅ Generate release notes from commits</li>
+<li>✅ Create GitHub Release</li>
+<li>✅ Trigger Docker build (automatically via tag push)</li>
+<li>✅ Push images to registries</li>
+</ul>
 <h4 id="5-monitor-progress">5. Monitor Progress<a class="headerlink" href="#5-monitor-progress" title="Permanent link">¶</a></h4>
 <ul>
 <li><strong>Release workflow:</strong> <code>https://github.com/madeinoz67/madeinoz-knowledge-system/actions/workflows/release.yml</code></li>
 <li><strong>Docker build:</strong> <code>https://github.com/madeinoz67/madeinoz-knowledge-system/actions/workflows/docker-build.yml</code></li>
 </ul>
 <h4 id="6-verify-release">6. Verify Release<a class="headerlink" href="#6-verify-release" title="Permanent link">¶</a></h4>
-<p><strong>Check GitHub Release:</strong>
-</p><div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>https://github.com/madeinoz67/madeinoz-knowledge-system/releases/tag/v1.0.2
-</span></code></pre></div><p></p>
-<p><strong>Pull the image:</strong>
-</p><div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># From GHCR</span>
+<p><strong>Check GitHub Release:</strong></p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>https://github.com/madeinoz67/madeinoz-knowledge-system/releases/tag/v1.0.2
+</span></code></pre></div>
+<p><strong>Pull the image:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># From GHCR</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>docker<span class="w"> </span>pull<span class="w"> </span>ghcr.io/madeinoz67/madeinoz-knowledge-system:1.0.2
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>docker<span class="w"> </span>pull<span class="w"> </span>ghcr.io/madeinoz67/madeinoz-knowledge-system:latest
 </span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
 </span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="c1"># Verify version</span>
 </span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>ghcr.io/madeinoz67/madeinoz-knowledge-system:1.0.2<span class="w"> </span><span class="se">\</span>
 </span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">  </span>sh<span class="w"> </span>-c<span class="w"> </span><span class="s1">'grep "LABEL version" /Dockerfile || echo "Version: 1.0.2"'</span>
-</span></code></pre></div><p></p>
+</span></code></pre></div>
 <h2 id="version-numbering">Version Numbering<a class="headerlink" href="#version-numbering" title="Permanent link">¶</a></h2>
 <p>We follow <a href="https://semver.org/">Semantic Versioning</a> (SemVer):</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>MAJOR.MINOR.PATCH
@@ -2552,25 +2590,31 @@
 <li><strong>PATCH</strong> - Backward-compatible bug fixes</li>
 </ul>
 <h3 id="when-to-bump-each-number">When to Bump Each Number<a class="headerlink" href="#when-to-bump-each-number" title="Permanent link">¶</a></h3>
-<p><strong>MAJOR (1.x.x → 2.0.0):</strong>
-- Breaking changes to environment variables
-- Incompatible Docker compose file changes
-- Migration to official upstream images (when patches are no longer needed)
-- Major refactoring requiring user action</p>
-<p><strong>MINOR (1.0.x → 1.1.0):</strong>
-- New features (new patches, new backend support)
-- New MCP tools or capabilities
-- New configuration options (backward-compatible)</p>
-<p><strong>PATCH (1.0.1 → 1.0.2):</strong>
-- Bug fixes (password typo, network alias, volume mount issues)
-- Documentation improvements
-- Dependency updates
-- Performance improvements</p>
+<p><strong>MAJOR (1.x.x → 2.0.0):</strong></p>
+<ul>
+<li>Breaking changes to environment variables</li>
+<li>Incompatible Docker compose file changes</li>
+<li>Migration to official upstream images (when patches are no longer needed)</li>
+<li>Major refactoring requiring user action</li>
+</ul>
+<p><strong>MINOR (1.0.x → 1.1.0):</strong></p>
+<ul>
+<li>New features (new patches, new backend support)</li>
+<li>New MCP tools or capabilities</li>
+<li>New configuration options (backward-compatible)</li>
+</ul>
+<p><strong>PATCH (1.0.1 → 1.0.2):</strong></p>
+<ul>
+<li>Bug fixes (password typo, network alias, volume mount issues)</li>
+<li>Documentation improvements</li>
+<li>Dependency updates</li>
+<li>Performance improvements</li>
+</ul>
 <h2 id="docker-hub-configuration-optional">Docker Hub Configuration (Optional)<a class="headerlink" href="#docker-hub-configuration-optional" title="Permanent link">¶</a></h2>
 <p>To enable Docker Hub publishing:</p>
 <h3 id="1-create-docker-hub-account">1. Create Docker Hub Account<a class="headerlink" href="#1-create-docker-hub-account" title="Permanent link">¶</a></h3>
 <ul>
-<li>Go to: https://hub.docker.com</li>
+<li>Go to: <a href="https://hub.docker.com">https://hub.docker.com</a></li>
 <li>Create account or sign in</li>
 </ul>
 <h3 id="2-create-access-token">2. Create Access Token<a class="headerlink" href="#2-create-access-token" title="Permanent link">¶</a></h3>
@@ -2637,15 +2681,17 @@
 </span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>
 </span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="s2">BREAKING CHANGE: Custom MADEINOZ_KNOWLEDGE_* prefixes no longer supported"</span>
 </span></code></pre></div>
-<p><strong>Prefixes:</strong>
-- <code>feat:</code> - New feature
-- <code>fix:</code> - Bug fix
-- <code>docs:</code> - Documentation
-- <code>chore:</code> - Maintenance
-- <code>refactor:</code> - Code refactoring
-- <code>test:</code> - Tests
-- <code>perf:</code> - Performance improvement
-- <code>ci:</code> - CI/CD changes</p>
+<p><strong>Prefixes:</strong></p>
+<ul>
+<li><code>feat:</code> - New feature</li>
+<li><code>fix:</code> - Bug fix</li>
+<li><code>docs:</code> - Documentation</li>
+<li><code>chore:</code> - Maintenance</li>
+<li><code>refactor:</code> - Code refactoring</li>
+<li><code>test:</code> - Tests</li>
+<li><code>perf:</code> - Performance improvement</li>
+<li><code>ci:</code> - CI/CD changes</li>
+</ul>
 <h2 id="monitoring-releases">Monitoring Releases<a class="headerlink" href="#monitoring-releases" title="Permanent link">¶</a></h2>
 <h3 id="check-latest-version">Check Latest Version<a class="headerlink" href="#check-latest-version" title="Permanent link">¶</a></h3>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># Via GitHub API</span>
@@ -2662,37 +2708,39 @@
 <li>You'll receive notifications for new releases</li>
 </ol>
 <h3 id="rss-feed">RSS Feed<a class="headerlink" href="#rss-feed" title="Permanent link">¶</a></h3>
-<p>Subscribe to releases RSS feed:
-</p><div class="language-text highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>https://github.com/madeinoz67/madeinoz-knowledge-system/releases.atom
-</span></code></pre></div><p></p>
+<p>Subscribe to releases RSS feed:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>https://github.com/madeinoz67/madeinoz-knowledge-system/releases.atom
+</span></code></pre></div>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">¶</a></h2>
 <h3 id="build-fails-with-permission-denied">Build Fails with "Permission Denied"<a class="headerlink" href="#build-fails-with-permission-denied" title="Permanent link">¶</a></h3>
 <p><strong>Problem:</strong> GitHub Actions can't push images or create releases</p>
-<p><strong>Solution:</strong> Check repository settings:
-</p><div class="language-text highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>Settings → Actions → General → Workflow permissions
+<p><strong>Solution:</strong> Check repository settings:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>Settings → Actions → General → Workflow permissions
 </span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>✓ Read and write permissions
-</span></code></pre></div><p></p>
+</span></code></pre></div>
 <h3 id="docker-hub-push-fails">Docker Hub Push Fails<a class="headerlink" href="#docker-hub-push-fails" title="Permanent link">¶</a></h3>
 <p><strong>Problem:</strong> Missing or invalid Docker Hub credentials</p>
-<p><strong>Solution:</strong>
-1. Verify secrets exist: <code>Settings → Secrets → Actions</code>
-2. Ensure <code>DOCKERHUB_TOKEN</code> is an access token (not password)
-3. Regenerate token if needed</p>
+<p><strong>Solution:</strong></p>
+<ol>
+<li>Verify secrets exist: <code>Settings → Secrets → Actions</code></li>
+<li>Ensure <code>DOCKERHUB_TOKEN</code> is an access token (not password)</li>
+<li>Regenerate token if needed</li>
+</ol>
 <h3 id="tag-already-exists">Tag Already Exists<a class="headerlink" href="#tag-already-exists" title="Permanent link">¶</a></h3>
 <p><strong>Problem:</strong> Version tag already exists in git</p>
-<p><strong>Solution:</strong>
-</p><div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1"># Delete remote tag</span>
+<p><strong>Solution:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1"># Delete remote tag</span>
 </span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>git<span class="w"> </span>push<span class="w"> </span>--delete<span class="w"> </span>origin<span class="w"> </span>v1.0.2
 </span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>
 </span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="c1"># Delete local tag</span>
 </span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>git<span class="w"> </span>tag<span class="w"> </span>-d<span class="w"> </span>v1.0.2
 </span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>
 </span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="c1"># Try release again</span>
-</span></code></pre></div><p></p>
+</span></code></pre></div>
 <h3 id="image-not-found-after-release">Image Not Found After Release<a class="headerlink" href="#image-not-found-after-release" title="Permanent link">¶</a></h3>
 <p><strong>Problem:</strong> Docker pull fails after successful release</p>
-<p><strong>Solution:</strong>
-</p><div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># Check if tag exists on GHCR</span>
+<p><strong>Solution:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># Check if tag exists on GHCR</span>
 </span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>curl<span class="w"> </span>-s<span class="w"> </span>https://ghcr.io/v2/madeinoz67/madeinoz-knowledge-system/tags/list<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>.
 </span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>
 </span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="c1"># Verify workflow completed</span>
@@ -2701,12 +2749,14 @@
 </span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>
 </span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="c1"># Try full image path</span>
 </span><span id="__span-12-9"><a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>docker<span class="w"> </span>pull<span class="w"> </span>ghcr.io/madeinoz67/madeinoz-knowledge-system:1.0.2
-</span></code></pre></div><p></p>
+</span></code></pre></div>
 <hr>
-<p><strong>See Also:</strong>
-- <a href="developer-notes.html">Developer Notes</a> - Custom image rationale
-- <a href="configuration.html">Configuration Reference</a> - Environment variables
-- <a href="../installation/index.html">Installation Guide</a> - Setup instructions</p>
+<p><strong>See Also:</strong></p>
+<ul>
+<li><a href="developer-notes.html">Developer Notes</a> - Custom image rationale</li>
+<li><a href="configuration.html">Configuration Reference</a> - Environment variables</li>
+<li><a href="../installation/index.html">Installation Guide</a> - Setup instructions</li>
+</ul>
 <hr>
 <h2 id="release-notes">Release Notes<a class="headerlink" href="#release-notes" title="Permanent link">¶</a></h2>
 <h3 id="feature-017-queue-processing-metrics">Feature 017: Queue Processing Metrics<a class="headerlink" href="#feature-017-queue-processing-metrics" title="Permanent link">¶</a></h3>
@@ -2774,38 +2824,54 @@
 </tr>
 </tbody>
 </table>
-<p><strong>Dashboard:</strong> 12-panel Grafana dashboard (<code>queue-metrics</code>) providing:
-- Overview row: Queue depth, consumer saturation, consumer lag, active consumers
-- Time series: Queue depth trend, processing latency (P50/P95/P99), wait time, end-to-end latency
-- Throughput and errors: Success/failure rate, error percentage, failures by type, retry rate</p>
-<p><strong>Error Categorization:</strong> Coarse-grained error categories prevent high cardinality:
-- <code>ConnectionError</code> - Database/network connection issues
-- <code>ValidationError</code> - Data validation failures
-- <code>TimeoutError</code> - Request timeouts
-- <code>RateLimitError</code> - API rate limit exceeded
-- <code>UnknownError</code> - Uncategorized errors</p>
-<p><strong>Implementation:</strong>
-- File: <code>docker/patches/metrics_exporter.py</code>
-- Class: <code>QueueMetricsExporter</code>
-- Thread-safe: All state modifications use locks
-- Graceful degradation: No-ops when metrics disabled</p>
-<p><strong>Testing:</strong> Comprehensive unit tests covering:
-- Metric initialization and recording
-- Error categorization
-- Thread safety (concurrent operations)
-- Performance (&lt; 1ms overhead per recording)
-- Graceful degradation without OpenTelemetry</p>
-<p><strong>Documentation:</strong>
-- Updated: <code>docs/reference/observability.md</code> with Queue Metrics section
-- Includes: PromQL query examples, troubleshooting guide</p>
-<p><strong>GitHub Issues:</strong>
-- Issue: #61</p>
-<p><strong>Pull Requests:</strong>
-- PR: #62</p>
+<p><strong>Dashboard:</strong> 12-panel Grafana dashboard (<code>queue-metrics</code>) providing:</p>
+<ul>
+<li>Overview row: Queue depth, consumer saturation, consumer lag, active consumers</li>
+<li>Time series: Queue depth trend, processing latency (P50/P95/P99), wait time, end-to-end latency</li>
+<li>Throughput and errors: Success/failure rate, error percentage, failures by type, retry rate</li>
+</ul>
+<p><strong>Error Categorization:</strong> Coarse-grained error categories prevent high cardinality:</p>
+<ul>
+<li><code>ConnectionError</code> - Database/network connection issues</li>
+<li><code>ValidationError</code> - Data validation failures</li>
+<li><code>TimeoutError</code> - Request timeouts</li>
+<li><code>RateLimitError</code> - API rate limit exceeded</li>
+<li><code>UnknownError</code> - Uncategorized errors</li>
+</ul>
+<p><strong>Implementation:</strong></p>
+<ul>
+<li>File: <code>docker/patches/metrics_exporter.py</code></li>
+<li>Class: <code>QueueMetricsExporter</code></li>
+<li>Thread-safe: All state modifications use locks</li>
+<li>Graceful degradation: No-ops when metrics disabled</li>
+</ul>
+<p><strong>Testing:</strong> Comprehensive unit tests covering:</p>
+<ul>
+<li>Metric initialization and recording</li>
+<li>Error categorization</li>
+<li>Thread safety (concurrent operations)</li>
+<li>Performance (&lt; 1ms overhead per recording)</li>
+<li>Graceful degradation without OpenTelemetry</li>
+</ul>
+<p><strong>Documentation:</strong></p>
+<ul>
+<li>Updated: <code>docs/reference/observability.md</code> with Queue Metrics section</li>
+<li>Includes: PromQL query examples, troubleshooting guide</li>
+</ul>
+<p><strong>GitHub Issues:</strong></p>
+<ul>
+<li>Issue: #61</li>
+</ul>
+<p><strong>Pull Requests:</strong></p>
+<ul>
+<li>PR: #62</li>
+</ul>
 <p><strong>Feature Flag:</strong> None - always available when metrics are enabled</p>
-<p><strong>Dependencies:</strong>
-- Requires: OpenTelemetry SDK (same as existing metrics)
-- Compatible: Feature 009 (memory decay metrics), Feature 006 (cache metrics)</p>
+<p><strong>Dependencies:</strong></p>
+<ul>
+<li>Requires: OpenTelemetry SDK (same as existing metrics)</li>
+<li>Compatible: Feature 009 (memory decay metrics), Feature 006 (cache metrics)</li>
+</ul>
 <p><strong>Migration:</strong> No migration required - metrics are additive only</p>
 <p><strong>Performance Impact:</strong> Negligible (&lt; 1ms per metric recording operation)</p>
 
