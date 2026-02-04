@@ -85,6 +85,7 @@ lsof -i :8000
 If another service is using port 8000, you need to either stop that service or change the knowledge system port.
 
 **To change the port:**
+
 Edit the Docker Compose files (`docker-compose-neo4j.yml` or `docker-compose-falkordb.yml`) and change the port number, then restart.
 
 ### "API key not configured" or "Invalid API key"

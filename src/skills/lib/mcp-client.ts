@@ -54,6 +54,8 @@ export const MCP_TOOLS = {
   IMPORT_STIX_BUNDLE: 'import_stix_bundle',
   GET_IMPORT_STATUS: 'get_import_status',
   RESUME_IMPORT: 'resume_import',
+  // Feature 020: Investigative search
+  INVESTIGATE_ENTITY: 'investigate_entity',
 } as const;
 
 /**
@@ -138,6 +140,17 @@ export interface ClassifyMemoryParams {
 
 export interface RecoverSoftDeletedParams {
   uuid: string;
+}
+
+/**
+ * Feature 020: Investigative search parameters
+ */
+export interface InvestigateEntityParams {
+  entity_name: string;
+  max_depth?: number;
+  relationship_types?: string[];
+  group_ids?: string[];
+  include_attributes?: boolean;
 }
 
 /**
@@ -1017,6 +1030,67 @@ export class MCPClient {
       failed_object_ids: string[];
       error_messages: string[];
     }>(MCP_TOOLS.GET_IMPORT_STATUS, params as unknown as Record<string, unknown>);
+  }
+
+  /**
+   * Feature 020: Investigate an entity and return all connected relationships
+   */
+  async investigateEntity(
+    params: InvestigateEntityParams
+  ): Promise<
+    MCPClientResponse<{
+      entity: {
+        uuid: string;
+        name: string;
+        labels: string[];
+        summary?: string;
+        created_at?: string;
+        group_id?: string;
+      };
+      connections: Array<{
+        relationship: string;
+        direction: string;
+        hop_distance: number;
+        target_entity: {
+          uuid: string;
+          name: string;
+          labels: string[];
+          summary?: string;
+          created_at?: string;
+          group_id?: string;
+        };
+        fact?: string;
+        confidence?: number;
+      }>;
+      metadata: {
+        depth_explored: number;
+        total_connections_explored: number;
+        connections_returned: number;
+        cycles_detected: number;
+        cycles_pruned: number;
+        entities_skipped: number;
+        query_duration_ms: number;
+        max_connections_exceeded?: boolean;
+      };
+      warning?: string;
+    }>
+  > {
+    const serverParams: Record<string, unknown> = {
+      entity_name: params.entity_name,
+    };
+    if (params.max_depth !== undefined) {
+      serverParams.max_depth = params.max_depth;
+    }
+    if (params.relationship_types) {
+      serverParams.relationship_types = params.relationship_types;
+    }
+    if (params.group_ids) {
+      serverParams.group_ids = params.group_ids;
+    }
+    if (params.include_attributes !== undefined) {
+      serverParams.include_attributes = params.include_attributes;
+    }
+    return await this.callTool(MCP_TOOLS.INVESTIGATE_ENTITY, serverParams);
   }
 
   /**

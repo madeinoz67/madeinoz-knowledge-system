@@ -148,6 +148,8 @@ git push origin :refs/tags/v1.x.x
 - Neo4j / FalkorDB (existing graph database) (015-memory-access-metrics)
 - PromQL (Prometheus Query Language), JSON (Grafana dashboard format) + Grafana 10.x, Prometheus (scraping OpenTelemetry metrics) (016-prometheus-dashboard-fixes)
 - Python 3.11+ + OpenTelemetry Prometheus exporter, threading.Lock for thread safety, Grafana dashboard JSON (017-queue-metrics)
+- Python 3.11+ (MCP server), TypeScript/Bun (CLI) + FastMCP (Python), Graphiti Core (knowledge graph), mcp-client (TypeScript) (020-investigative-search)
+- Neo4j (default) or FalkorDB with graph traversal suppor (020-investigative-search)
 
 ## Recent Changes
 - 017-queue-metrics: Queue processing metrics for monitoring queue depth, latency, consumer health, and failure tracking

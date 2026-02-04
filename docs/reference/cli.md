@@ -10,7 +10,7 @@ Key Components: server-cli (container management), knowledge-cli (knowledge oper
 
 Key Tools/Commands:
 - server-cli: start/stop/restart/status/logs for MCP server containers
-- knowledge-cli: add_episode, search_nodes, search_facts, get_episodes, get_status, clear_graph, health, status, list_profiles
+- knowledge-cli: add_episode, search_nodes, search_facts, investigate, get_episodes, get_status, clear_graph, health, status, list_profiles
 
 Configuration Prefix: MADEINOZ_KNOWLEDGE_
 Default Ports: 8001 (MCP HTTP), 8000 (MCP Server), 7474 (Neo4j Browser), 7687 (Neo4j Bolt)
@@ -318,6 +318,42 @@ bun run tools/knowledge-cli.ts search_facts "Podman" 10
 
 - Shows relationship text and type
 - ~30% token savings vs raw MCP output
+
+#### investigate
+
+Investigate an entity and return all its connected relationships in a single query:
+
+```bash
+bun run tools/knowledge-cli.ts investigate "APT28"
+```
+
+Investigate with depth 2 (friends of friends):
+
+```bash
+bun run tools/knowledge-cli.ts investigate "APT28" --depth 2
+```
+
+Investigate with relationship type filtering:
+
+```bash
+bun run tools/knowledge-cli.ts investigate "APT28" --relationship-type USES --relationship-type TARGETS
+```
+
+**Arguments:**
+
+- `<entity_name>` (required): Name or identifier of the entity to investigate
+- `--depth <N>` (optional): Number of hops to traverse (1-3, default: 1)
+- `--relationship-type <TYPE>` (optional, repeatable): Filter by relationship type (e.g., OWNED_BY, USES, TARGETS)
+
+**Output format:**
+
+- Primary entity with name, type, and labels
+- All connected entities with names, types, and UUIDs
+- Relationship type and direction for each connection
+- Hop distance from primary entity
+- Metadata including depth explored, connection counts, cycles detected
+
+**Feature 020:** Investigative search returns AI-friendly JSON with full entity context without requiring additional lookups.
 
 #### get_episodes
 

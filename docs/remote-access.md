@@ -50,6 +50,7 @@ The Madeinoz Knowledge System supports remote MCP access, enabling you to connec
 | `MCP_TLS_ENABLED` | Enable server TLS | `false` | `true` |
 
 **Configuration Priority** (highest to lowest):
+
 1. CLI flags (`--host`, `--port`, etc.)
 2. Individual environment variables (`MADEINOZ_KNOWLEDGE_HOST`)
 3. Selected profile (`MADEINOZ_KNOWLEDGE_PROFILE`)
@@ -166,6 +167,7 @@ bun run knowledge-cli --status
 ### Remote Connection
 
 **Using environment variables:**
+
 ```bash
 # Set the remote host
 export MADEINOZ_KNOWLEDGE_HOST=192.168.1.100
@@ -176,6 +178,7 @@ bun run knowledge-cli search_nodes "my query"
 ```
 
 **Using CLI flags:**
+
 ```bash
 # Override connection settings per command
 bun run knowledge-cli --host knowledge.example.com --port 8001 search_nodes "my query"
@@ -185,6 +188,7 @@ bun run knowledge-cli --host knowledge.example.com --protocol https --port 443 s
 ```
 
 **Using profiles:**
+
 ```bash
 # Use specific profile
 export MADEINOZ_KNOWLEDGE_PROFILE=production
@@ -199,6 +203,7 @@ bun run knowledge-cli --list-profiles
 ### Server Configuration
 
 **Enable external access:**
+
 ```bash
 # Set the MCP host to all interfaces
 export MCP_HOST=0.0.0.0
@@ -208,6 +213,7 @@ bun run server restart
 ```
 
 **Enable TLS on server:**
+
 ```bash
 # Generate self-signed certificate (development)
 openssl req -x509 -newkey rsa:4096 -keyout certs/key.pem -out certs/cert.pem -days 365 -nodes -subj "/CN=knowledge.example.com"
@@ -230,6 +236,7 @@ bun run server restart
 **Symptom**: `ECONNREFUSED` when connecting
 
 **Solutions**:
+
 1. Check server is running: `bun run server status`
 2. Verify `MCP_HOST=0.0.0.0` on server
 3. Check firewall allows port `8001` (or custom port)
@@ -237,6 +244,7 @@ bun run server restart
 5. Verify network connectivity: `ping <server-host>`
 
 **Diagnostic commands:**
+
 ```bash
 # Check if server is listening
 netstat -an | grep 8001
@@ -254,17 +262,21 @@ sudo pfctl -s rules  # macOS
 **Symptom**: `certificate verify failed` or `unable to verify`
 
 **Solutions**:
+
 1. **For self-signed certificates** (development only):
+
    ```bash
    export MADEINOZ_KNOWLEDGE_TLS_VERIFY=false
    ```
 
 2. **For custom CA certificates**:
+
    ```bash
    export MADEINOZ_KNOWLEDGE_TLS_CA=/path/to/ca.pem
    ```
 
 3. **Check certificate validity**:
+
    ```bash
    # View certificate details
    openssl x509 -in cert.pem -noout -text
@@ -277,6 +289,7 @@ sudo pfctl -s rules  # macOS
    ```
 
 4. **Verify certificate chain**:
+
    ```bash
    openssl s_client -connect knowledge.example.com:443 -showcerts
    ```
@@ -286,24 +299,29 @@ sudo pfctl -s rules  # macOS
 **Symptom**: `Connection timed out` after 30 seconds
 
 **Solutions**:
+
 1. **Check network connectivity**:
+
    ```bash
    ping <server-host>
    traceroute <server-host>
    ```
 
 2. **Increase timeout**:
+
    ```bash
    export MADEINOZ_KNOWLEDGE_TIMEOUT=60000  # 60 seconds
    ```
 
 3. **Verify server is listening**:
+
    ```bash
    netstat -an | grep 8001
    lsof -i :8001
    ```
 
 4. **Check for network issues**:
+
    ```bash
    # Test port connectivity
    nc -zv <host> 8001
@@ -315,24 +333,29 @@ sudo pfctl -s rules  # macOS
 **Symptom**: `Profile 'production' not found`
 
 **Solutions**:
+
 1. **Check profile file exists**:
+
    ```bash
    ls $PAI_DIR/config/knowledge-profiles.yaml
    ls ~/.claude/config/knowledge-profiles.yaml
    ```
 
 2. **List available profiles**:
+
    ```bash
    bun run knowledge-cli --list-profiles
    ```
 
 3. **Verify YAML syntax**:
+
    ```bash
    # Validate YAML
    python -c "import yaml; yaml.safe_load(open('$PAI_DIR/config/knowledge-profiles.yaml'))"
    ```
 
 4. **Check profile name in YAML file**:
+
    ```bash
    grep -A 5 "profiles:" $PAI_DIR/config/knowledge-profiles.yaml
    ```
@@ -342,12 +365,15 @@ sudo pfctl -s rules  # macOS
 **Symptom**: Errors when multiple clients connect simultaneously
 
 **Solutions**:
+
 1. **Check server logs for connection errors**:
+
    ```bash
    bun run server logs | grep -i connection
    ```
 
 2. **Verify server configuration**:
+
    ```bash
    # Query server configuration
    curl http://<host>:8001/config
@@ -357,6 +383,7 @@ sudo pfctl -s rules  # macOS
    ```
 
 3. **Test concurrent connections**:
+
    ```bash
    # Run multiple queries in parallel
    for i in {1..10}; do

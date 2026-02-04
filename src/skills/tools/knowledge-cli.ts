@@ -54,6 +54,8 @@ interface CLIFlags {
   port?: string;
   protocol?: string;
   tlsNoVerify?: boolean;
+  depth?: number;
+  relationshipType?: string[];
 }
 
 /**
@@ -73,6 +75,8 @@ function parseFlags(args: string[]): { flags: CLIFlags; positionalArgs: string[]
     port: undefined,
     protocol: undefined,
     tlsNoVerify: undefined,
+    depth: undefined,
+    relationshipType: [],
   };
   const positionalArgs: string[] = [];
 
@@ -103,6 +107,13 @@ function parseFlags(args: string[]): { flags: CLIFlags; positionalArgs: string[]
       flags.protocol = args[++i];
     } else if (arg === '--tls-no-verify') {
       flags.tlsNoVerify = true;
+    } else if (arg === '--depth') {
+      flags.depth = Number.parseInt(args[++i], 10);
+    } else if (arg === '--relationship-type') {
+      if (!flags.relationshipType) {
+        flags.relationshipType = [];
+      }
+      flags.relationshipType.push(args[++i]);
     } else if (!arg.startsWith('--')) {
       positionalArgs.push(arg);
     }
@@ -281,6 +292,13 @@ class MCPWrapper {
       name: 'status',
       description: 'Show connection status and current profile',
       handler: this.cmdStatus.bind(this),
+    });
+
+    // Feature 020: Investigative search
+    this.addCommand({
+      name: 'investigate',
+      description: 'Investigate entity connections (graph traversal)',
+      handler: this.cmdInvestigate.bind(this),
     });
   }
 
@@ -698,6 +716,41 @@ class MCPWrapper {
   }
 
   /**
+   * Feature 020: Command: investigate
+   */
+  private async cmdInvestigate(
+    args: string[]
+  ): Promise<{ success: boolean; data?: unknown; error?: string; query?: string }> {
+    if (args.length < 1) {
+      return {
+        success: false,
+        error: 'Usage: investigate <entity_name> [--depth N] [--relationship-type TYPE]',
+      };
+    }
+
+    const entityName = args[0];
+    const depth = this.flags.depth ?? 1;
+    const relationshipTypes = this.flags.relationshipType;
+
+    // Validate depth
+    if (depth < 1 || depth > 3) {
+      return {
+        success: false,
+        error: 'Invalid depth: must be between 1 and 3',
+      };
+    }
+
+    const client = this.createClient();
+    const result = await client.investigateEntity({
+      entity_name: entityName,
+      max_depth: depth,
+      relationship_types: relationshipTypes && relationshipTypes.length > 0 ? relationshipTypes : undefined,
+    });
+
+    return { ...result, query: entityName };
+  }
+
+  /**
    * Print help message
    */
   printHelp(): void {
@@ -724,17 +777,20 @@ class MCPWrapper {
     cli.blank();
     cli.info('Options:');
     cli.blank();
-    cli.dim('  --raw              Output raw JSON instead of compact format');
-    cli.dim('  --metrics          Display token metrics after each operation');
-    cli.dim('  --metrics-file <p> Write metrics to JSONL file');
-    cli.dim('  --since <date>     Filter results created after this date');
-    cli.dim('  --until <date>     Filter results created before this date');
-    cli.dim('  --profile <name>   Use specific connection profile');
-    cli.dim('  --host <hostname>  Override profile host');
-    cli.dim('  --port <port>      Override profile port');
-    cli.dim('  --protocol <proto> Override profile protocol (http/https)');
-    cli.dim('  --tls-no-verify    Disable TLS certificate verification');
-    cli.dim('  -h, --help         Show this help message');
+    cli.dim('  --raw                Output raw JSON instead of compact format');
+    cli.dim('  --metrics            Display token metrics after each operation');
+    cli.dim('  --metrics-file <p>   Write metrics to JSONL file');
+    cli.dim('  --since <date>       Filter results created after this date');
+    cli.dim('  --until <date>       Filter results created before this date');
+    cli.dim('  --weighted           Apply weighted scoring (semantic+recency+importance)');
+    cli.dim('  --profile <name>     Use specific connection profile');
+    cli.dim('  --host <hostname>    Override profile host');
+    cli.dim('  --port <port>        Override profile port');
+    cli.dim('  --protocol <proto>   Override profile protocol (http/https)');
+    cli.dim('  --tls-no-verify      Disable TLS certificate verification');
+    cli.dim('  --depth <N>          Investigation depth (1-3, default: 1)');
+    cli.dim('  --relationship-type  Filter by relationship type (can specify multiple)');
+    cli.dim('  -h, --help           Show this help message');
     cli.blank();
     cli.info('Date Formats (for --since/--until):');
     cli.blank();

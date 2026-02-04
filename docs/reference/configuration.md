@@ -525,6 +525,7 @@ decay:
 ```
 
 **Lifecycle states:**
+
 - **ACTIVE** - Recently accessed, full relevance
 - **DORMANT** - Not accessed 30+ days, lower search priority
 - **ARCHIVED** - Not accessed 90+ days, much lower priority
@@ -546,6 +547,7 @@ decay:
 ```
 
 **What maintenance does:**
+
 - Recalculates decay scores for all memories
 - Transitions memories between lifecycle states
 - Soft-deletes expired memories (90-day retention)
@@ -570,6 +572,7 @@ decay:
 **Formula:** `weighted_score = (semantic × 0.60) + (recency × 0.25) + (importance × 0.15)`
 
 **Tuning guidelines:**
+
 - Want recent stuff more? Increase `recency`
 - Only care about accuracy? Increase `semantic`
 - Always show important stuff? Increase `importance`
@@ -600,6 +603,7 @@ permanent:
 ```
 
 Memories with **importance ≥4 AND stability ≥4** are classified as **PERMANENT**:
+
 - Never accumulate decay
 - Never transition lifecycle states
 - Exempt from archival and deletion
@@ -615,6 +619,7 @@ decay:
 ```
 
 **How it works:**
+
 - Stability 1 (VOLATILE): 0.33× half-life (60 days)
 - Stability 3 (MODERATE): 1.0× half-life (180 days)
 - Stability 5 (PERMANENT): ∞ half-life (never decays)
@@ -905,12 +910,14 @@ entity_types:
 #### What You CAN Configure in YAML
 
 ✅ **Customize Existing Entity Types:**
+
 - Modify `decay_config` - Adjust half-life, importance floor, stability
 - Add/remove `attributes` - Custom fields within existing types
 - Change `permanent` flag - Mark types as exempt from decay
 - Update `description`, `icon` - Display properties
 
 ✅ **Customize Existing Relationship Types:**
+
 - Modify `description`, `forward_name`, `reverse_name`
 - Change `permanent` flag
 - Adjust `decay_config` for relationship types
@@ -918,12 +925,14 @@ entity_types:
 #### What Requires CODE Changes
 
 ❌ **Creating New Entity Types (Requires Python):**
+
 - New entity types (like `ThreatActor`, `Malware`) must be defined in code
 - Modify `docker/patches/ontology_config.py` to add new `EntityTypeConfig` classes
 - Update Pydantic models and validation logic
 - Rebuild Docker container after code changes
 
 ❌ **Creating New Relationship Types (Requires Python):**
+
 - New relationship types must be defined in code
 - Update relationship type definitions in the ontology module
 
@@ -954,6 +963,7 @@ entity_types:
 ```
 
 To add `MyCustomType`, you would need to:
+
 1. Edit `docker/patches/ontology_config.py`
 2. Define the new entity type class
 3. Add validation logic
@@ -1049,6 +1059,7 @@ These entity types are always available and don't need to be defined:
 The system includes a pre-built ontology for CTI/OSINT work with these entity types:
 
 **CTI Entity Types:**
+
 - `ThreatActor` - APT groups, threat actors (180-day half-life)
 - `Malware` - Malicious software families (90-day half-life)
 - `Vulnerability` - CVE entries, security flaws (180-day half-life)
@@ -1058,6 +1069,7 @@ The system includes a pre-built ontology for CTI/OSINT work with these entity ty
 - `TTP` - Tactics, techniques, procedures (365-day half-life)
 
 **OSINT Entity Types:**
+
 - `Account` - User accounts, social media profiles
 - `Domain` - Domain names
 - `Email` - Email addresses
@@ -1066,6 +1078,7 @@ The system includes a pre-built ontology for CTI/OSINT work with these entity ty
 - `Investigation` - OSINT investigations
 
 **Relationship Types:**
+
 - `uses` - ThreatActor uses Malware
 - `targets` - Campaign targets Organization
 - `exploits` - Malware exploits Vulnerability

@@ -52,6 +52,7 @@ nav:
     - Weighted Search: weighted-search.md
     - Monitoring: usage/monitoring.md
     - Backup & Restore: usage/backup-restore.md
+    - OSINT & CTI Workflows: guides/osint-workflows.md
   - Concepts:
     - Architecture: concepts/architecture.md
     - Knowledge Graph: concepts/knowledge-graph.md

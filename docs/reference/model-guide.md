@@ -55,6 +55,7 @@ MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS=1024
 ```
 
 Both configurations:
+
 - Use Trinity models via OpenRouter for LLM (**completely free**)
 - Successfully pass all Graphiti entity extraction tests
 - Use Ollama for embeddings (free, runs locally)
@@ -63,7 +64,7 @@ Both configurations:
 **Trinity Large Preview:** More detailed entity extraction, ~25s processing time
 **Trinity Mini:** Faster processing ~16s, good quality extraction
 
-### Option 2: Gemini Flash (Fast, reliable - RETIRING MARCH 2026)
+### Option 2: Gemini Flash (Fast, reliable, Cost effective - RETIRING MARCH 2026)
 
 ```env
 # LLM: gemini-2.0-Flash (reliable JSON output for entity extraction)
@@ -92,7 +93,8 @@ This configuration:
 | Configuration | LLM Cost | Embedding Cost | Total |
 |---------------|----------|----------------|-------|
 | Full OpenAI | ~$0.15/1M tokens | ~$0.02/1M tokens | $$$ |
-| Hybrid (recommended) | ~$0.15/1M tokens | Free | $$ |
+| Hybrid (recommended) | Free | Free | Free |
+| Gemini Flash | ~$0.15/1M tokens | Free | $$ |
 | Full Ollama | Free | Free | Free* |
 
 *Full Ollama has reliability trade-offs for entity extraction.
@@ -155,6 +157,7 @@ entity_resolutions
 The model outputs JSON schema definitions instead of data conforming to the schema.
 
 **Recommendation**: For production LLM use, choose from these tested options:
+
 - **Free:** `arcee-ai/trinity-large-preview:free` (passes all tests)
 **Low-cost:** `google/gemini-2.0-flash-001` (fast, reliable - but RETIRING March 2026)
 - **Premium:** OpenAI models (gpt-4o-mini, gpt-4o) which reliably produce valid JSON matching Graphiti's Pydantic schemas
@@ -348,6 +351,7 @@ Several free models on OpenRouter work correctly with Graphiti. These are excell
 | Validation errors | ✅ NONE | No ValidationError for ExtractedEntities |
 
 **Example Test Episodes:**
+
 - SQL Databases → Extracted: "SQL", "tables", "primary keys", "foreign keys"
 - GraphQL → Extracted: "GraphQL", "query language", "strongly typed schemas"
 - Black Holes → Extracted: "Black holes", "event horizon", "Sagittarius A*"
@@ -362,6 +366,7 @@ MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=your-openrouter-api-key
 ```
 
 **Advantages:**
+
 - **Completely free** - no LLM costs
 - Reliable entity extraction
 - No JSON validation errors

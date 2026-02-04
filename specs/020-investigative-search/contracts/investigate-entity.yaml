@@ -1,0 +1,313 @@
+openapi: 3.0.3
+info:
+  title: Investigative Search API
+  description: API for investigating entities with their connected relationships in the knowledge graph
+  version: 1.0.0
+  contact:
+    name: Madeinoz Knowledge System
+    url: https://github.com/madeinoz67/madeinoz-knowledge-system
+
+servers:
+  - url: http://localhost:8001
+    description: Local development server (HTTP)
+  - url: https://localhost:8002
+    description: Local development server (HTTPS)
+
+paths:
+  /mcp/tools/investigate_entity:
+    post:
+      summary: Investigate entity connections
+      description: |
+        Performs a graph traversal starting from a matched entity to find all connected entities
+        up to the specified depth. Returns entities with their names, types, and UUIDs in a single query.
+
+        Key features:
+        - Configurable depth (1-3 hops)
+        - Relationship type filtering
+        - Cycle detection and reporting
+        - AI-friendly JSON response
+      operationId: investigate_entity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - entity_name
+              properties:
+                entity_name:
+                  type: string
+                  description: The name or identifier of the entity to investigate
+                  example: "+1-555-0199"
+                max_depth:
+                  type: integer
+                  description: Maximum number of hops to traverse (1-3)
+                  minimum: 1
+                  maximum: 3
+                  default: 1
+                  example: 2
+                relationship_types:
+                  type: array
+                  items:
+                    type: string
+                  description: Optional filter for specific relationship types
+                  example: ["OWNED_BY", "USES"]
+                group_ids:
+                  type: array
+                  items:
+                    type: string
+                  description: Group IDs to search (default: all groups)
+                  example: ["main", "osint-profiles"]
+                include_attributes:
+                  type: boolean
+                  description: Include full entity attributes in response
+                  default: true
+      responses:
+        '200':
+          description: Successful investigation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvestigateResult'
+        '400':
+          description: Bad request (invalid parameters)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Entity not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    InvestigateResult:
+      type: object
+      required:
+        - entity
+        - connections
+        - metadata
+      properties:
+        entity:
+          $ref: '#/components/schemas/Entity'
+        connections:
+          type: array
+          items:
+            $ref: '#/components/schemas/Connection'
+        metadata:
+          $ref: '#/components/schemas/InvestigationMetadata'
+        warning:
+          type: string
+          description: Optional warning message for edge cases
+          example: "Found 1,247 connections (showing first 500). Use --relationship-type filter to narrow results."
+
+    Entity:
+      type: object
+      required:
+        - uuid
+        - name
+        - labels
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          description: Unique identifier for the entity
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        name:
+          type: string
+          description: Human-readable name
+          example: "John Doe"
+        labels:
+          type: array
+          items:
+            type: string
+          description: Entity type(s)
+          example: ["Person"]
+        summary:
+          type: string
+          description: Optional summary/description
+          example: "Person of interest in investigation #123"
+        created_at:
+          type: string
+          format: date-time
+          description: When the entity was created
+          example: "2026-02-04T10:30:00Z"
+        group_id:
+          type: string
+          description: Group ID for multi-tenant scenarios
+          example: "main"
+        attributes:
+          $ref: '#/components/schemas/EntityAttributes'
+
+    EntityAttributes:
+      type: object
+      description: Extended entity attributes
+      properties:
+        weighted_score:
+          type: number
+          format: float
+          description: Weighted search score (0-1)
+          example: 0.87
+        score_breakdown:
+          type: object
+          properties:
+            semantic:
+              type: number
+              format: float
+            recency:
+              type: number
+              format: float
+            importance:
+              type: number
+              format: float
+        lifecycle_state:
+          type: string
+          enum: [ACTIVE, DORMANT, ARCHIVED, EXPIRED, SOFT_DELETED]
+          description: Memory lifecycle state (Feature 009)
+        importance:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: Importance score (1=TRIVIAL, 5=CORE)
+        stability:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: Stability score (1=VOLATILE, 5=PERMANENT)
+        decay_score:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: Decay score (0=fresh, 1=stale)
+        last_accessed_at:
+          type: string
+          format: date-time
+          description: Last access timestamp
+        custom_attributes:
+          type: object
+          additionalProperties: true
+          description: Custom attributes for CTI entities
+
+    Connection:
+      type: object
+      required:
+        - relationship
+        - direction
+        - target_entity
+        - hop_distance
+      properties:
+        relationship:
+          type: string
+          description: Type of relationship
+          example: "OWNED_BY"
+        direction:
+          type: string
+          enum: [outgoing, incoming, bidirectional]
+          description: Direction of relationship
+        target_entity:
+          $ref: '#/components/schemas/Entity'
+        hop_distance:
+          type: integer
+          minimum: 1
+          maximum: 3
+          description: Hops from primary entity
+        confidence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: Confidence score for the relationship
+        fact:
+          type: string
+          description: Human-readable fact description
+          example: "Phone owned by John Doe"
+
+    InvestigationMetadata:
+      type: object
+      required:
+        - depth_explored
+        - total_connections_explored
+        - connections_returned
+        - cycles_detected
+      properties:
+        depth_explored:
+          type: integer
+          minimum: 1
+          maximum: 3
+          description: Number of hops explored
+        total_connections_explored:
+          type: integer
+          minimum: 0
+          description: Total connections found before filtering
+        connections_returned:
+          type: integer
+          minimum: 0
+          description: Connections returned after filtering
+        cycles_detected:
+          type: integer
+          minimum: 0
+          description: Number of cycles detected
+        cycles_pruned:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: UUIDs of entities where cycles were pruned
+        entities_skipped:
+          type: integer
+          description: Number of deleted/soft-deleted entities skipped
+        relationship_types_filtered:
+          type: array
+          items:
+            type: string
+          description: Relationship types that were filtered
+        query_duration_ms:
+          type: number
+          description: Query execution time in milliseconds
+        max_connections_exceeded:
+          type: boolean
+          description: Whether the max connections threshold was exceeded
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: "Entity not found: +1-555-0199"
+        details:
+          type: object
+          description: Additional error details
+          additionalProperties: true
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: MCP session authentication (if enabled)
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Investigate
+    description: Investigative search operations
