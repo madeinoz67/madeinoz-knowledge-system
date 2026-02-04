@@ -124,12 +124,12 @@
 
 ### Implementation for User Story 3
 
-- [ ] T038 [US3] Add relationship_types parameter to investigate_entity tool in docker/patches/graphiti_mcp_server.py
-- [ ] T039 [US3] Implement relationship type filtering in graph_traversal.py before traversal
-- [ ] T040 [US3] Add relationship_types_filtered to InvestigationMetadata in investigate_entity tool
-- [ ] T041 [US3] Update InvestigateResult to include filtered relationship metadata in investigate_entity tool
+- [x] T038 [US3] Add relationship_types parameter to investigate_entity tool in docker/patches/graphiti_mcp_server.py
+- [x] T039 [US3] Implement relationship type filtering in graph_traversal.py before traversal
+- [x] T040 [US3] Add relationship_types_filtered to InvestigationMetadata in investigate_entity tool
+- [x] T041 [US3] Update InvestigateResult to include filtered relationship metadata in investigate_entity tool
 
-**Checkpoint**: User Stories 1, 2, AND 3 should all work independently
+**Checkpoint**: ✅ User Stories 1, 2, AND 3 should all work independently
 
 ---
 
@@ -148,12 +148,12 @@
 
 ### Implementation for User Story 4
 
-- [ ] T046 [US4] Ensure graph traversal handles all entity labels (standard and custom) in docker/patches/utils/graph_traversal.py
-- [ ] T047 [US4] Ensure graph traversal handles custom relationship types in docker/patches/utils/graph_traversal.py
-- [ ] T048 [US4] Add entity labels to InvestigateResult entity in investigate_entity tool
-- [ ] T049 [US4] Add support for custom_attributes in Entity response type in models/response_types.py
+- [x] T046 [US4] Ensure graph traversal handles all entity labels (standard and custom) in docker/patches/utils/graph_traversal.py
+- [x] T047 [US4] Ensure graph traversal handles custom relationship types in docker/patches/utils/graph_traversal.py
+- [x] T048 [US4] Add entity labels to InvestigateResult entity in investigate_entity tool
+- [x] T049 [US4] Add support for custom_attributes in Entity response type in models/response_types.py
 
-**Checkpoint**: User Stories 1, 2, 3, AND 4 should all work independently
+**Checkpoint**: ✅ User Stories 1, 2, 3, AND 4 should all work independently
 
 ---
 
@@ -171,11 +171,11 @@
 
 ### Implementation for User Story 5
 
-- [ ] T053 [US5] Ensure full entity objects (name, type, UUID) returned in connections in investigate_entity tool
-- [ ] T054 [US5] Verify InvestigateResult structure includes all required entity fields in investigate_entity tool
+- [x] T053 [US5] Ensure full entity objects (name, type, UUID) returned in connections in investigate_entity tool
+- [x] T054 [US5] Verify InvestigateResult structure includes all required entity fields in investigate_entity tool
 - [ ] T055 [US5] Add format validation test for AI-friendly JSON in docker/tests/integration/test_investigate.py
 
-**Checkpoint**: User Stories 1-5 should all work independently with AI-friendly responses
+**Checkpoint**: ✅ User Stories 1-5 should all work independently with AI-friendly responses
 
 ---
 
@@ -194,13 +194,13 @@
 
 ### Implementation for User Story 6
 
-- [ ] T060 [US6] Implement cycle detection in graph_traversal.py (already in T006, verify working)
-- [ ] T061 [US6] Add cycles_detected to InvestigationMetadata in investigate_entity tool
-- [ ] T062 [US6] Add cycles_pruned (UUID list) to InvestigationMetadata in investigate_entity tool
-- [ ] T063 [US6] Ensure no duplicate entities returned in connections in investigate_entity tool
-- [ ] T064 [US6] Ensure self-referential relationships included once in investigate_entity tool
+- [x] T060 [US6] Implement cycle detection in graph_traversal.py (already in T006, verify working)
+- [x] T061 [US6] Add cycles_detected to InvestigationMetadata in investigate_entity tool
+- [x] T062 [US6] Add cycles_pruned (UUID list) to InvestigationMetadata in investigate_entity tool
+- [x] T063 [US6] Ensure no duplicate entities returned in connections in investigate_entity tool
+- [x] T064 [US6] Ensure self-referential relationships included once in investigate_entity tool
 
-**Checkpoint**: User Stories 1-6 should all work independently with cycle handling
+**Checkpoint**: ✅ User Stories 1-6 should all work independently with cycle handling
 
 ---
 
@@ -219,17 +219,17 @@
 
 ### Implementation for User Story 7
 
-- [ ] T069 [US7] Add investigate command handler to docker/patches/graphiti_mcp_server.py (already in T018, verify MCP tool complete)
-- [ ] T070 [P] [US7] Add investigateEntity() method to src/skills/Knowledge/lib/mcp-client.ts
-- [ ] T071 [P] [US7] Add cmdInvestigate() handler to src/skills/Knowledge/tools/knowledge-cli.ts
-- [ ] T072 [P] [US7] Add formatInvestigateEntity() formatter to src/skills/Knowledge/lib/output-formatter.ts
-- [ ] T073 [US7] Register investigate command in knowledge-cli.ts registerCommands() method
-- [ ] T074 [US7] Add --depth flag parsing for investigate command in knowledge-cli.ts
-- [ ] T075 [US7] Add --relationship-type flag parsing for investigate command in knowledge-cli.ts
+- [x] T069 [US7] Add investigate command handler to docker/patches/graphiti_mcp_server.py (already in T018, verify MCP tool complete)
+- [x] T070 [P] [US7] Add investigateEntity() method to src/skills/lib/mcp-client.ts
+- [x] T071 [P] [US7] Add cmdInvestigate() handler to src/skills/tools/knowledge-cli.ts
+- [x] T072 [P] [US7] Add formatInvestigateEntity() formatter to src/skills/lib/output-formatter.ts
+- [x] T073 [US7] Register investigate command in knowledge-cli.ts registerCommands() method
+- [x] T074 [US7] Add --depth flag parsing for investigate command in knowledge-cli.ts
+- [x] T075 [US7] Add --relationship-type flag parsing for investigate command in knowledge-cli.ts
 - [ ] T076 [P] [US7] Update src/skills/Knowledge/SKILL.md workflow routing for investigate command
-- [ ] T077 [US7] Verify consistent JSON structure between CLI and MCP in both implementations
+- [x] T077 [US7] Verify consistent JSON structure between CLI and MCP in both implementations
 
-**Checkpoint**: User Stories 1-7 should all work independently with CLI and MCP access
+**Checkpoint**: ✅ User Stories 1-7 should all work independently with CLI and MCP access
 
 ---
 

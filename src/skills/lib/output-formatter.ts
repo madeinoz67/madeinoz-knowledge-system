@@ -240,6 +240,44 @@ interface RecoveryResponse {
   new_state: string;
 }
 
+// Feature 020: Investigative search response types
+interface InvestigateEntityResponse {
+  entity: {
+    uuid: string;
+    name: string;
+    labels: string[];
+    summary?: string;
+    created_at?: string;
+    group_id?: string;
+  };
+  connections: Array<{
+    relationship: string;
+    direction: string;
+    hop_distance: number;
+    target_entity: {
+      uuid: string;
+      name: string;
+      labels: string[];
+      summary?: string;
+      created_at?: string;
+      group_id?: string;
+    };
+    fact?: string;
+    confidence?: number;
+  }>;
+  metadata: {
+    depth_explored: number;
+    total_connections_explored: number;
+    connections_returned: number;
+    cycles_detected: number;
+    cycles_pruned: number;
+    entities_skipped: number;
+    query_duration_ms: number;
+    max_connections_exceeded?: boolean;
+  };
+  warning?: string;
+}
+
 function isSearchNodesResponse(data: unknown): data is SearchNodesResponse {
   return (
     typeof data === 'object' &&
@@ -342,6 +380,21 @@ function isRecoveryResponse(data: unknown): data is RecoveryResponse {
     'uuid' in data &&
     'name' in data &&
     'new_state' in data
+  );
+}
+
+function isInvestigateEntityResponse(data: unknown): data is InvestigateEntityResponse {
+  if (typeof data !== 'object' || data === null) return false;
+  const d = data as Record<string, unknown>;
+  return (
+    'entity' in d &&
+    typeof d.entity === 'object' &&
+    d.entity !== null &&
+    'connections' in d &&
+    Array.isArray(d.connections) &&
+    'metadata' in d &&
+    typeof d.metadata === 'object' &&
+    d.metadata !== null
   );
 }
 
@@ -768,6 +821,74 @@ export function formatRecovery(data: unknown, _options: FormatOptions): string {
   return lines.join('\n');
 }
 
+/**
+ * Format investigate_entity response
+ * Output: Entity: [Type] Name - Summary
+ *         Connections:
+ *           1. [RELATION] Target [Type] (hop N)
+ *         Metadata: depth=X, connections=Y, cycles=Z
+ */
+export function formatInvestigateEntity(data: unknown, _options: FormatOptions): string {
+  if (!isInvestigateEntityResponse(data)) {
+    throw new Error('Invalid data format for investigate_entity');
+  }
+
+  const { entity, connections, metadata, warning } = data;
+  const lines: string[] = [];
+
+  // Format the primary entity
+  const entityType = entity.labels?.[0] || 'Entity';
+  const summary = entity.summary ? truncateText(entity.summary, 120) : '';
+  lines.push(`Entity: [${entityType}] ${entity.name}${summary ? ' - ' + summary : ''}`);
+
+  // Format connections
+  if (connections.length === 0) {
+    lines.push('No connections found.');
+  } else {
+    lines.push(`\nConnections (${connections.length}):`);
+    connections.forEach((conn, index) => {
+      const targetType = conn.target_entity.labels?.[0] || 'Entity';
+      const relation = conn.relationship.toUpperCase();
+      const directionSymbol = conn.direction === 'outbound' ? '→' : conn.direction === 'inbound' ? '←' : '↔';
+      const hopInfo = conn.hop_distance > 1 ? ` (hop ${conn.hop_distance})` : '';
+
+      let connLine = `  ${index + 1}. [${relation}] ${directionSymbol} ${conn.target_entity.name} [${targetType}]${hopInfo}`;
+
+      if (conn.fact) {
+        connLine += `\n     Fact: ${truncateText(conn.fact, 100)}`;
+      }
+
+      if (conn.confidence !== undefined) {
+        connLine += ` (${(conn.confidence * 100).toFixed(0)}% confidence)`;
+      }
+
+      lines.push(connLine);
+    });
+  }
+
+  // Format metadata
+  lines.push('\nMetadata:');
+  lines.push(`  Depth explored: ${metadata.depth_explored}`);
+  lines.push(`  Connections: ${metadata.connections_returned}/${metadata.total_connections_explored}`);
+  if (metadata.cycles_detected > 0) {
+    lines.push(`  Cycles detected: ${metadata.cycles_detected} (pruned: ${metadata.cycles_pruned})`);
+  }
+  if (metadata.entities_skipped > 0) {
+    lines.push(`  Entities skipped: ${metadata.entities_skipped}`);
+  }
+  lines.push(`  Query duration: ${metadata.query_duration_ms}ms`);
+  if (metadata.max_connections_exceeded) {
+    lines.push(`  ⚠ Max connections limit exceeded`);
+  }
+
+  // Add warning if present
+  if (warning) {
+    lines.push(`\n⚠ Warning: ${warning}`);
+  }
+
+  return lines.join('\n');
+}
+
 // ============================================================================
 // Main Entry Point (T021)
 // ============================================================================
@@ -789,6 +910,8 @@ registerFormatter('get_knowledge_health', formatHealthMetrics);
 registerFormatter('run_decay_maintenance', formatMaintenanceResult);
 registerFormatter('classify_memory', formatClassification);
 registerFormatter('recover_soft_deleted', formatRecovery);
+// Feature 020: Investigative search
+registerFormatter('investigate_entity', formatInvestigateEntity);
 
 /**
  * Main entry point for formatting MCP responses.
