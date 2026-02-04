@@ -454,6 +454,7 @@ The system follows **OpenTelemetry Semantic Conventions** for metric naming:
 **Dashboard unit configuration:**
 
 Instead of embedding units in metric names, Grafana dashboards use the `unit` field to display appropriate units:
+
 - `currencyUSD` - Cost metrics display in USD
 - `short` - Count metrics display as plain numbers
 - `percent` - Rate metrics display as percentages
@@ -688,6 +689,7 @@ The system includes multiple pre-configured Grafana dashboards:
 | **Per-Model Performance** | Table | Side-by-side comparison of caching by LLM model |
 
 **Key Features**:
+
 - Time-over-time queries (`max_over_time()[1h]`) handle service restarts without data gaps
 - Color-coded thresholds for quick health assessment
 - 30-second auto-refresh (user-configurable)
@@ -765,31 +767,34 @@ If building a custom dashboard, use these PromQL queries:
 
 **Performance:**
 
-5. **Request Duration P95** - `histogram_quantile(0.95, rate(graphiti_llm_request_duration_seconds_bucket[5m]))`
-6. **Request Duration Heatmap** - Heatmap panel with `graphiti_llm_request_duration_seconds_bucket`
-7. **Error Rate** - `sum(rate(graphiti_llm_errors_total[5m]))`
+1. **Request Duration P95** - `histogram_quantile(0.95, rate(graphiti_llm_request_duration_seconds_bucket[5m]))`
+2. **Request Duration Heatmap** - Heatmap panel with `graphiti_llm_request_duration_seconds_bucket`
+3. **Error Rate** - `sum(rate(graphiti_llm_errors_total[5m]))`
 
 **Caching (when enabled):**
 
-8. **Cache Hit Rate** - `graphiti_cache_hit_rate` (gauge metric)
-9. **Cost Savings Rate** - `rate(graphiti_cache_cost_saved_all_models_total[5m]) * 3600`
-10. **Tokens Saved** - `increase(graphiti_cache_tokens_saved_all_models_total[1h])`
+1. **Cache Hit Rate** - `graphiti_cache_hit_rate` (gauge metric)
+2. **Cost Savings Rate** - `rate(graphiti_cache_cost_saved_all_models_total[5m]) * 3600`
+3. **Tokens Saved** - `increase(graphiti_cache_tokens_saved_all_models_total[1h])`
 
 ## Troubleshooting
 
 ### Metrics Not Appearing
 
 1. **Check metrics are enabled:**
+
    ```bash
    grep MADEINOZ_KNOWLEDGE_PROMPT_CACHE_METRICS_ENABLED ~/.claude/.env
    ```
 
 2. **Verify endpoint is accessible:**
+
    ```bash
    curl http://localhost:9091/metrics
    ```
 
 3. **Check container logs:**
+
    ```bash
    docker logs madeinoz-knowledge-graph-mcp-dev 2>&1 | grep -i metric
    ```
@@ -866,6 +871,7 @@ The Madeinoz Knowledge System implements **explicit prompt caching** via OpenRou
 **Recommended Model:** `google/gemini-2.0-flash-001` via OpenRouter
 
 This implementation uses the **CachingLLMClient** wrapper which:
+
 1. Checks if caching is enabled (environment variable)
 2. Verifies the model is Gemini via OpenRouter
 3. Converts messages to multipart format
@@ -1208,6 +1214,7 @@ A 12-panel Grafana dashboard provides comprehensive queue monitoring:
 #### Growing Queue Backlog
 
 **Symptoms:**
+
 - `messaging_queue_depth` increasing over time
 - `messaging_consumer_lag_seconds` increasing
 - `messaging_consumer_saturation` near 1.0
@@ -1223,6 +1230,7 @@ histogram_quantile(0.95, sum(rate(messaging_processing_duration_seconds_bucket[5
 ```
 
 **Solutions:**
+
 1. Scale consumers (increase `messaging_active_consumers`)
 2. Optimize processing (reduce latency)
 3. Implement priority queueing
@@ -1231,6 +1239,7 @@ histogram_quantile(0.95, sum(rate(messaging_processing_duration_seconds_bucket[5
 #### High Consumer Lag
 
 **Symptoms:**
+
 - `messaging_consumer_lag_seconds` > 300 (5 minutes)
 - Queue depth stable but lag increasing
 
@@ -1242,6 +1251,7 @@ messaging_queue_depth / sum(rate(messaging_messages_processed_total{status="succ
 ```
 
 **Solutions:**
+
 1. Increase consumer count
 2. Reduce processing time per message
 3. Implement batch processing
@@ -1250,6 +1260,7 @@ messaging_queue_depth / sum(rate(messaging_messages_processed_total{status="succ
 #### Consumer Saturation
 
 **Symptoms:**
+
 - `messaging_consumer_saturation` > 0.85
 - Wait times increasing
 
@@ -1261,6 +1272,7 @@ histogram_quantile(0.95, sum(rate(messaging_wait_time_seconds_bucket[5m])) by (l
 ```
 
 **Solutions:**
+
 1. Add more consumers
 2. Increase consumer parallelism
 3. Implement async processing
@@ -1268,6 +1280,7 @@ histogram_quantile(0.95, sum(rate(messaging_wait_time_seconds_bucket[5m])) by (l
 #### High Error Rate
 
 **Symptoms:**
+
 - `messaging_messages_failed_total` increasing
 - Error rate gauge > 5%
 
@@ -1279,6 +1292,7 @@ sum by (error_type) (messaging_messages_failed_total)
 ```
 
 **Solutions:**
+
 1. Check error types in failures panel
 2. Fix common error patterns
 3. Implement circuit breaker for failing services
@@ -1287,6 +1301,7 @@ sum by (error_type) (messaging_messages_failed_total)
 #### High Retry Rate
 
 **Symptoms:**
+
 - `messaging_retries_total` increasing rapidly
 - Retry rate > 0.1 retries/message
 
@@ -1298,6 +1313,7 @@ sum(rate(messaging_retries_total[5m])) / sum(rate(messaging_messages_processed_t
 ```
 
 **Solutions:**
+
 1. Identify root cause of failures
 2. Implement dead letter queue
 3. Add backoff strategy

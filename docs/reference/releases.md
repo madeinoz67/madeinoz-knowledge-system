@@ -11,12 +11,14 @@ This project uses GitHub Actions to automate Docker image builds and releases. T
 **File:** `.github/workflows/docker-build.yml`
 
 **Triggers:**
+
 - Push to `main` branch (builds and pushes `latest` + `fixed` tags)
 - Push tags matching `v*.*.*` (builds and pushes version tags)
 - Pull requests (builds only, no push)
 - Manual dispatch via GitHub UI
 
 **What it does:**
+
 1. Builds Docker image for `linux/amd64` and `linux/arm64` platforms
 2. Tests the image (verifies entrypoint execution)
 3. Pushes to GitHub Container Registry (`ghcr.io/madeinoz67/madeinoz-knowledge-system`)
@@ -30,6 +32,7 @@ This project uses GitHub Actions to automate Docker image builds and releases. T
    - `sha-abc123` - git commit SHA
 
 **Image locations:**
+
 ```bash
 # GitHub Container Registry (always available)
 ghcr.io/madeinoz67/madeinoz-knowledge-system:latest
@@ -49,10 +52,12 @@ madeinoz-knowledge-system:v1.0.1
 **Trigger:** Manual dispatch only (via GitHub UI)
 
 **Required Input:**
+
 - `version` - Semantic version (e.g., `1.0.2`)
 - `prerelease` - Mark as pre-release (optional, default: false)
 
 **What it does:**
+
 1. Validates version format (`X.Y.Z`)
 2. Checks if tag already exists
 3. Updates `LABEL version` in Dockerfile
@@ -93,6 +98,7 @@ Go to: `https://github.com/madeinoz67/madeinoz-knowledge-system/actions`
 #### 4. Click "Run workflow"
 
 The workflow will:
+
 - ✅ Validate version format
 - ✅ Update Dockerfile with new version
 - ✅ Create git tag `v1.0.2`
@@ -109,11 +115,13 @@ The workflow will:
 #### 6. Verify Release
 
 **Check GitHub Release:**
+
 ```
 https://github.com/madeinoz67/madeinoz-knowledge-system/releases/tag/v1.0.2
 ```
 
 **Pull the image:**
+
 ```bash
 # From GHCR
 docker pull ghcr.io/madeinoz67/madeinoz-knowledge-system:1.0.2
@@ -140,17 +148,20 @@ MAJOR.MINOR.PATCH
 ### When to Bump Each Number
 
 **MAJOR (1.x.x → 2.0.0):**
+
 - Breaking changes to environment variables
 - Incompatible Docker compose file changes
 - Migration to official upstream images (when patches are no longer needed)
 - Major refactoring requiring user action
 
 **MINOR (1.0.x → 1.1.0):**
+
 - New features (new patches, new backend support)
 - New MCP tools or capabilities
 - New configuration options (backward-compatible)
 
 **PATCH (1.0.1 → 1.0.2):**
+
 - Bug fixes (password typo, network alias, volume mount issues)
 - Documentation improvements
 - Dependency updates
@@ -161,21 +172,25 @@ MAJOR.MINOR.PATCH
 To enable Docker Hub publishing:
 
 ### 1. Create Docker Hub Account
-- Go to: https://hub.docker.com
+
+- Go to: <https://hub.docker.com>
 - Create account or sign in
 
 ### 2. Create Access Token
+
 - Settings → Security → New Access Token
 - Name: `madeinoz-knowledge-system-github`
 - Permissions: Read, Write, Delete
 
 ### 3. Add GitHub Secrets
+
 - Go to: `https://github.com/madeinoz67/madeinoz-knowledge-system/settings/secrets/actions`
 - Add two secrets:
   - `DOCKERHUB_USERNAME` - Your Docker Hub username
   - `DOCKERHUB_TOKEN` - The access token from step 2
 
 ### 4. Verify in Next Build
+
 The workflow will automatically detect the secrets and push to Docker Hub.
 
 ## Rollback a Release
@@ -245,6 +260,7 @@ BREAKING CHANGE: Custom MADEINOZ_KNOWLEDGE_* prefixes no longer supported"
 ```
 
 **Prefixes:**
+
 - `feat:` - New feature
 - `fix:` - Bug fix
 - `docs:` - Documentation
@@ -276,6 +292,7 @@ docker inspect ghcr.io/madeinoz67/madeinoz-knowledge-system:latest | jq -r '.[0]
 ### RSS Feed
 
 Subscribe to releases RSS feed:
+
 ```
 https://github.com/madeinoz67/madeinoz-knowledge-system/releases.atom
 ```
@@ -287,6 +304,7 @@ https://github.com/madeinoz67/madeinoz-knowledge-system/releases.atom
 **Problem:** GitHub Actions can't push images or create releases
 
 **Solution:** Check repository settings:
+
 ```
 Settings → Actions → General → Workflow permissions
 ✓ Read and write permissions
@@ -297,6 +315,7 @@ Settings → Actions → General → Workflow permissions
 **Problem:** Missing or invalid Docker Hub credentials
 
 **Solution:**
+
 1. Verify secrets exist: `Settings → Secrets → Actions`
 2. Ensure `DOCKERHUB_TOKEN` is an access token (not password)
 3. Regenerate token if needed
@@ -306,6 +325,7 @@ Settings → Actions → General → Workflow permissions
 **Problem:** Version tag already exists in git
 
 **Solution:**
+
 ```bash
 # Delete remote tag
 git push --delete origin v1.0.2
@@ -321,6 +341,7 @@ git tag -d v1.0.2
 **Problem:** Docker pull fails after successful release
 
 **Solution:**
+
 ```bash
 # Check if tag exists on GHCR
 curl -s https://ghcr.io/v2/madeinoz67/madeinoz-knowledge-system/tags/list | jq .
@@ -336,6 +357,7 @@ docker pull ghcr.io/madeinoz67/madeinoz-knowledge-system:1.0.2
 ---
 
 **See Also:**
+
 - [Developer Notes](developer-notes.md) - Custom image rationale
 - [Configuration Reference](configuration.md) - Environment variables
 - [Installation Guide](../installation/index.md) - Setup instructions
@@ -366,11 +388,13 @@ docker pull ghcr.io/madeinoz67/madeinoz-knowledge-system:1.0.2
 | `messaging_end_to_end_latency_seconds` | Histogram | Total latency from enqueue to complete |
 
 **Dashboard:** 12-panel Grafana dashboard (`queue-metrics`) providing:
+
 - Overview row: Queue depth, consumer saturation, consumer lag, active consumers
 - Time series: Queue depth trend, processing latency (P50/P95/P99), wait time, end-to-end latency
 - Throughput and errors: Success/failure rate, error percentage, failures by type, retry rate
 
 **Error Categorization:** Coarse-grained error categories prevent high cardinality:
+
 - `ConnectionError` - Database/network connection issues
 - `ValidationError` - Data validation failures
 - `TimeoutError` - Request timeouts
@@ -378,12 +402,14 @@ docker pull ghcr.io/madeinoz67/madeinoz-knowledge-system:1.0.2
 - `UnknownError` - Uncategorized errors
 
 **Implementation:**
+
 - File: `docker/patches/metrics_exporter.py`
 - Class: `QueueMetricsExporter`
 - Thread-safe: All state modifications use locks
 - Graceful degradation: No-ops when metrics disabled
 
 **Testing:** Comprehensive unit tests covering:
+
 - Metric initialization and recording
 - Error categorization
 - Thread safety (concurrent operations)
@@ -391,18 +417,22 @@ docker pull ghcr.io/madeinoz67/madeinoz-knowledge-system:1.0.2
 - Graceful degradation without OpenTelemetry
 
 **Documentation:**
+
 - Updated: `docs/reference/observability.md` with Queue Metrics section
 - Includes: PromQL query examples, troubleshooting guide
 
 **GitHub Issues:**
+
 - Issue: #61
 
 **Pull Requests:**
+
 - PR: #62
 
 **Feature Flag:** None - always available when metrics are enabled
 
 **Dependencies:**
+
 - Requires: OpenTelemetry SDK (same as existing metrics)
 - Compatible: Feature 009 (memory decay metrics), Feature 006 (cache metrics)
 
