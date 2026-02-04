@@ -310,6 +310,7 @@ jobs:
         with:
           name: docs
           path: ./site
+          pattern: "**"
 
       - name: Setup Python
         uses: actions/setup-python@v5
