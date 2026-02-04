@@ -1,6 +1,6 @@
 ---
 name: Knowledge
-version: 1.8.4
+version: 1.8.5
 description: Personal knowledge management using Graphiti knowledge graph with Neo4j/FalkorDB, supporting remote MCP access with connection profiles and TLS. USE WHEN 'store this', 'remember this', 'add to knowledge', 'search my knowledge', 'what do I know about', 'find in knowledge base', 'save to memory', 'graphiti', 'knowledge graph', 'entity extraction', 'relationship mapping', 'semantic search', 'episode', 'install knowledge', 'setup knowledge system', 'configure knowledge graph', 'remote knowledge server', 'connect to knowledge', 'knowledge profile', knowledge capture, retrieval, synthesis, memory decay, decay scoring, lifecycle state, importance classification, stability classification, health metrics, run maintenance, permanent memory, soft-delete.
 tools:
   # MCP Wrapper CLI (76%+ token savings vs direct MCP calls)

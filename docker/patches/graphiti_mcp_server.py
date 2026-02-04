@@ -96,6 +96,46 @@ except ImportError as e:
     _decay_modules_available = False
     logging.getLogger(__name__).debug(f'Decay modules not available: {e}')
 # ==============================================================================
+# Feature 018: STIX 2.1 Importer - Import stix modules
+# ==============================================================================
+try:
+    from utils.stix_importer import (
+        parse_stix_bundle,
+        load_and_parse_stix_file,
+        load_stix_from_url,
+        process_stix_bundle,
+        get_import_session_status,
+        resume_import,
+        InvalidSTIXError,
+        generate_import_id,
+    )
+    _stix_importer_available = True
+except ImportError as e:
+    _stix_importer_available = False
+    logging.getLogger(__name__).debug(f'STIX importer not available: {e}')
+# ==============================================================================
+
+# ==============================================================================
+# Feature 018: OSINT/CTI Ontology Support - Import ontology modules
+# ==============================================================================
+try:
+    from utils.ontology_config import (
+        load_ontology_config,
+        get_entity_types_dict,
+        list_ontology_types as list_ontology_types_impl,
+        validate_ontology_config,
+        reload_ontology_config,
+        get_decay_config_for_type,
+        is_entity_type_permanent,
+        get_ontology_config,
+        OntologyConfig,
+        OntologyDecayConfig,
+    )
+    _ontology_modules_available = True
+except ImportError as e:
+    _ontology_modules_available = False
+    logging.getLogger(__name__).debug(f'Ontology modules not available: {e}')
+# ==============================================================================
 
 # ============================================================================
 # Madeinoz Patch: Date Input Parsing for Temporal Search
@@ -642,8 +682,32 @@ class GraphitiService:
             db_config = DatabaseDriverFactory.create_config(self.config.database)
 
             # Build entity types from configuration
+            # Feature 018: Load ontology configuration for custom entity/relationship types
             custom_types = None
-            if self.config.graphiti.entity_types:
+            ontology_config = None
+
+            # First, try loading from ontology YAML file
+            if _ontology_modules_available:
+                try:
+                    ontology_config = load_ontology_config()
+                    if ontology_config.entity_types:
+                        logger.info(f'Feature 018: Loading {len(ontology_config.entity_types)} custom entity types from ontology configuration')
+                        custom_types = {}
+                        for entity_type in ontology_config.entity_types:
+                            entity_model = type(
+                                entity_type.name,
+                                (BaseModel,),
+                                {
+                                    '__doc__': entity_type.description,
+                                },
+                            )
+                            custom_types[entity_type.name] = entity_model
+                            logger.debug(f'  - Registered entity type: {entity_type.name}')
+                except Exception as e:
+                    logger.warning(f'Feature 018: Failed to load ontology configuration: {e}')
+
+            # Fall back to legacy config.entity_types if ontology didn't load
+            if not custom_types and self.config.graphiti.entity_types:
                 custom_types = {}
                 for entity_type in self.config.graphiti.entity_types:
                     entity_model = type(
@@ -655,8 +719,19 @@ class GraphitiService:
                     )
                     custom_types[entity_type.name] = entity_model
 
-            # Store entity types for later use
+            # Store entity types and ontology config for later use
             self.entity_types = custom_types
+            self.ontology_config = ontology_config
+
+            # Feature 018 T042: Store relationship types for extraction
+            self.relationship_types = {}
+            if _ontology_modules_available and ontology_config and ontology_config.relationship_types:
+                logger.info(f'Feature 018: Loading {len(ontology_config.relationship_types)} custom relationship types from ontology configuration')
+                for rel_type in ontology_config.relationship_types:
+                    self.relationship_types[rel_type.name] = rel_type
+                    logger.debug(f'  - Registered relationship type: {rel_type.name}')
+                    logger.debug(f'    Source types: {rel_type.source_entity_types}')
+                    logger.debug(f'    Target types: {rel_type.target_entity_types}')
 
             # Initialize Graphiti client with appropriate driver
             try:
@@ -826,6 +901,22 @@ class GraphitiService:
         if self.client is None:
             raise RuntimeError('Failed to initialize Graphiti client')
         return self.client
+
+    def get_ontology_types(self, include_builtin: bool = False) -> dict:
+        """
+        Get loaded ontology types (entity and relationship types).
+
+        Feature 018: Returns custom ontology types loaded from configuration.
+
+        Args:
+            include_builtin: Include Graphiti built-in types (Person, Organization, etc.)
+
+        Returns:
+            Dictionary with "entity_types" and "relationship_types" lists
+        """
+        if _ontology_modules_available:
+            return list_ontology_types_impl(include_builtin=include_builtin)
+        return {"entity_types": [], "relationship_types": []}
 
 
 @mcp.tool()
@@ -1219,8 +1310,11 @@ async def search_memory_facts(
     center_node_uuid: str | None = None,
     created_after: str | None = None,
     created_before: str | None = None,
+    relationship_types: list[str] | None = None,
 ) -> FactSearchResponse | ErrorResponse:
-    """Search the graph memory for relevant facts with optional temporal filtering.
+    """Search the graph memory for relevant facts with optional temporal and relationship type filtering.
+
+    Feature 018 T044: Added relationship_types filter for custom ontology relationship types.
 
     Args:
         query: The search query
@@ -1229,6 +1323,7 @@ async def search_memory_facts(
         center_node_uuid: Optional UUID of a node to center the search around
         created_after: Return facts created after this date (ISO 8601 or relative: "today", "7d", "1 week ago")
         created_before: Return facts created before this date (ISO 8601 or relative)
+        relationship_types: Optional list of relationship type names to filter by (e.g., ["uses", "targets"])
     """
     global graphiti_service
 
@@ -1255,8 +1350,14 @@ async def search_memory_facts(
         before_date = parse_date_input(created_before)
         has_temporal_filter = after_date is not None or before_date is not None
 
-        # If temporal filtering is needed, fetch more results to filter
-        fetch_limit = max_facts * 3 if has_temporal_filter else max_facts
+        # Feature 018 T044: Parse relationship types filter
+        has_relationship_filter = relationship_types is not None and len(relationship_types) > 0
+        if has_relationship_filter:
+            relationship_types_set = set(relationship_types)
+            logger.debug(f'Feature 018: Filtering by relationship types: {relationship_types}')
+
+        # If temporal or relationship filtering is needed, fetch more results to filter
+        fetch_limit = max_facts * 3 if (has_temporal_filter or has_relationship_filter) else max_facts
 
         relevant_edges = await client.search(
             group_ids=effective_group_ids,
@@ -1298,10 +1399,32 @@ async def search_memory_facts(
                 if before_date and edge_date > before_date:
                     continue
                 filtered_edges.append(edge)
-            relevant_edges = filtered_edges[:max_facts]
+            relevant_edges = filtered_edges
             logger.debug(f'Madeinoz Patch: Temporal filter applied, {len(relevant_edges)} facts remaining')
-        else:
-            relevant_edges = relevant_edges[:max_facts]
+
+        # Feature 018 T044: Apply relationship type filtering if specified
+        if has_relationship_filter:
+            filtered_edges = []
+            for edge in relevant_edges:
+                # Get relationship type from edge
+                # Edge type is stored as the edge label or in attributes
+                edge_type = None
+                if hasattr(edge, 'label') and edge.label:
+                    edge_type = edge.label
+                elif hasattr(edge, 'relationship_type') and edge.relationship_type:
+                    edge_type = edge.relationship_type
+                elif hasattr(edge, 'attributes') and edge.attributes:
+                    edge_type = edge.attributes.get('relationship_type') or edge.attributes.get('fact_type')
+
+                # Check if edge type matches any of the requested types
+                if edge_type and edge_type in relationship_types_set:
+                    filtered_edges.append(edge)
+
+            relevant_edges = filtered_edges
+            logger.debug(f'Feature 018: Relationship type filter applied, {len(relevant_edges)} facts remaining')
+
+        # Apply max_facts limit after all filtering
+        relevant_edges = relevant_edges[:max_facts]
 
         if not relevant_edges:
             # Feature 009: Record zero-result search metrics
@@ -1538,6 +1661,46 @@ async def get_status() -> StatusResponse:
             status='error',
             message=f'Graphiti MCP server is running but database connection failed: {error_msg}',
         )
+
+
+@mcp.tool()
+async def list_ontology_types(
+    include_builtin: bool = False
+) -> dict:
+    """List all available ontology types (entity and relationship types).
+
+    Feature 018: Returns custom ontology types loaded from YAML configuration.
+    This allows querying the configured entity types (e.g., ThreatActor, Malware)
+    and relationship types (e.g., uses, targets, exploits) that can be used for
+    classification and filtering.
+
+    Args:
+        include_builtin: Include Graphiti built-in types (Person, Organization, etc.)
+
+    Returns:
+        Dictionary with:
+        - entity_types: List of entity type definitions with name, description, attributes, decay_config
+        - relationship_types: List of relationship type definitions with name, description, source/target entity types
+    """
+    global graphiti_service
+
+    if graphiti_service is None:
+        return {
+            "entity_types": [],
+            "relationship_types": [],
+            "error": "Graphiti service not initialized"
+        }
+
+    try:
+        return graphiti_service.get_ontology_types(include_builtin=include_builtin)
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f'Error listing ontology types: {error_msg}')
+        return {
+            "entity_types": [],
+            "relationship_types": [],
+            "error": f'Error listing ontology types: {error_msg}'
+        }
 
 
 @mcp.custom_route('/health', methods=['GET'])
@@ -1780,6 +1943,183 @@ async def classify_memory(
 
 
 # ==============================================================================
+# Feature 018: STIX 2.1 Importer MCP Tools (User Story 3)
+# ==============================================================================
+
+if _stix_importer_available:
+
+    @mcp.tool()
+    async def import_stix_bundle(
+        bundle_path: str,
+        batch_size: int = 1000,
+        continue_on_error: bool = True,
+        group_ids: list[str] | None = None,
+    ) -> dict[str, Any] | ErrorResponse:
+        """Import STIX 2.1 JSON bundle into the knowledge graph.
+
+        Args:
+            bundle_path: Path or URL to STIX 2.1 JSON file
+            batch_size: Number of objects per batch (default: 1000)
+            continue_on_error: Continue importing on individual object failures (default: True)
+            group_ids: Knowledge graph group IDs (default: from config or 'main')
+
+        Returns:
+            Import result with:
+            - import_id: Unique import session identifier
+            - status: Import status (IN_PROGRESS, COMPLETED, PARTIAL, FAILED)
+            - total_objects: Total objects in bundle
+            - imported_count: Successfully imported objects
+            - failed_count: Failed objects
+            - failed_objects: List of failed object details (stix_id, stix_type, error)
+            - duration_seconds: Processing duration
+        """
+        global graphiti_service
+
+        try:
+            # Get effective group IDs
+            client = await get_graphiti_client()
+            effective_group_ids = await get_effective_group_ids(client, group_ids)
+            group_id = effective_group_ids[0] if effective_group_ids else 'main'
+
+            # Load STIX bundle (from file or URL)
+            if bundle_path.startswith(('http://', 'https://')):
+                bundle_data = await load_stix_from_url(bundle_path)
+            else:
+                bundle_data = load_and_parse_stix_file(bundle_path)
+
+            # Process the bundle
+            result = await process_stix_bundle(
+                stix_bundle=bundle_data,
+                graphiti_client=client,
+                batch_size=batch_size,
+                continue_on_error=continue_on_error,
+                group_id=group_id
+            )
+
+            # Add source file info to result
+            result['source_file'] = bundle_path
+
+            return result
+
+        except InvalidSTIXError as e:
+            error_msg = f'Invalid STIX data: {e}'
+            logger.error(f'STIX import error: {error_msg}')
+            return ErrorResponse(error=error_msg)
+        except Exception as e:
+            error_msg = str(e)
+            logger.error(f'Error importing STIX bundle: {error_msg}')
+            return ErrorResponse(error=f'Error importing STIX bundle: {error_msg}')
+
+
+    @mcp.tool()
+    async def get_import_status(
+        import_id: str,
+    ) -> dict[str, Any] | ErrorResponse:
+        """Retrieve status of a previous STIX import.
+
+        Args:
+            import_id: Import session ID from import_stix_bundle
+
+        Returns:
+            Import status with:
+            - import_id: Import session identifier
+            - source_file: Original STIX bundle file path or URL
+            - started_at: ISO 8601 datetime when import started
+            - completed_at: ISO 8601 datetime when import completed (nullable)
+            - status: Import status (IN_PROGRESS, COMPLETED, PARTIAL, FAILED)
+            - total_objects: Total objects in bundle
+            - imported_count: Successfully imported objects
+            - failed_count: Failed objects
+            - failed_object_ids: List of STIX IDs of failed objects
+            - error_messages: List of error messages for failed objects
+        """
+        try:
+            client = await get_graphiti_client()
+            status = await get_import_session_status(import_id, client)
+
+            if status is None:
+                return ErrorResponse(error=f'Import session not found: {import_id}')
+
+            return status
+
+        except Exception as e:
+            error_msg = str(e)
+            logger.error(f'Error getting import status: {error_msg}')
+            return ErrorResponse(error=f'Error getting import status: {error_msg}')
+
+
+    @mcp.tool()
+    async def resume_import(
+        import_id: str,
+        retry_failed_only: bool = True,
+        group_ids: list[str] | None = None,
+    ) -> dict[str, Any] | ErrorResponse:
+        """Resume a partially failed STIX import.
+
+        Retries failed objects from a previous import that ended with PARTIAL or FAILED status.
+
+        Args:
+            import_id: Import session ID to resume
+            retry_failed_only: Only retry previously failed objects (default: True)
+            group_ids: Knowledge graph group IDs (default: from config or 'main')
+
+        Returns:
+            Resume result with:
+            - import_id: Import session identifier
+            - status: Final import status (COMPLETED, PARTIAL, FAILED)
+            - retried_count: Number of objects retried
+            - imported_count: Successfully imported on retry
+            - failed_count: Still failing after retry
+        """
+        try:
+            client = await get_graphiti_client()
+            status = await get_import_session_status(import_id, client)
+
+            if status is None:
+                return ErrorResponse(error=f'Import session not found: {import_id}')
+
+            if status['status'] not in ['PARTIAL', 'FAILED']:
+                return ErrorResponse(error=f'Cannot resume import with status: {status["status"]}')
+
+            # Get the original bundle path
+            bundle_path = status.get('source_file', '')
+            if not bundle_path:
+                return ErrorResponse(error='Cannot resume: original bundle path not stored')
+
+            # Load the original bundle
+            if bundle_path.startswith(('http://', 'https://')):
+                bundle_data = await load_stix_from_url(bundle_path)
+            else:
+                bundle_data = load_and_parse_stix_file(bundle_path)
+
+            # Get effective group IDs
+            effective_group_ids = await get_effective_group_ids(client, group_ids)
+            group_id = effective_group_ids[0] if effective_group_ids else 'main'
+
+            # Resume the import
+            result = await resume_import(
+                import_id=import_id,
+                stix_bundle=bundle_data,
+                graphiti_client=client,
+                retry_failed_only=retry_failed_only,
+                batch_size=1000,
+                group_id=group_id
+            )
+
+            return result
+
+        except InvalidSTIXError as e:
+            error_msg = f'Invalid STIX data: {e}'
+            logger.error(f'STIX resume error: {error_msg}')
+            return ErrorResponse(error=error_msg)
+        except Exception as e:
+            error_msg = str(e)
+            logger.error(f'Error resuming import: {error_msg}')
+            return ErrorResponse(error=f'Error resuming import: {error_msg}')
+
+
+# ==============================================================================
+
 
 
 async def initialize_server() -> ServerConfig:
@@ -2053,12 +2393,90 @@ async def shutdown_maintenance():
             logger.warning(f'Error stopping scheduled maintenance: {e}')
 
 
+@mcp.tool()
+async def validate_ontology(
+) -> dict[str, Any] | ErrorResponse:
+    """Validate ontology configuration without loading it.
+
+    Performs comprehensive validation including:
+    - YAML syntax
+    - Schema validation (Pydantic)
+    - Circular dependency detection
+    - Reserved attribute check
+    - Relationship type references
+    - Breaking change detection (if config was previously loaded)
+
+    Returns:
+        Dictionary with validation results including valid flag, errors, warnings, and breaking_changes
+    """
+    try:
+        from utils.ontology_config import validate_ontology_config
+        result = validate_ontology_config()
+        return result
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f'Error validating ontology config: {error_msg}')
+        return ErrorResponse(error=f'Error validating ontology config: {error_msg}')
+
+
+@mcp.tool()
+async def reload_ontology(
+) -> dict[str, Any] | ErrorResponse:
+    """Hot-reload ontology configuration without container restart.
+
+    Reloads the ontology configuration from the YAML file and validates it.
+    If breaking changes are detected, returns warnings but does not apply the reload.
+
+    Returns:
+        Dictionary with reload status including success flag, entity_types loaded,
+        relationship_types loaded, and any breaking_changes detected
+    """
+    try:
+        from utils.ontology_config import (
+            reload_ontology_config,
+            load_ontology_config,
+            get_entity_types_dict,
+            get_relationship_types_dict,
+        )
+
+        # Attempt reload with breaking change detection
+        result = reload_ontology_config()
+
+        if not result.get("success", False):
+            return {
+                "success": False,
+                "message": result.get("message", "Reload failed"),
+                "breaking_changes": result.get("breaking_changes", []),
+            }
+
+        # Get new entity and relationship types
+        config = load_ontology_config()
+        entity_types = get_entity_types_dict(config)
+        relationship_types = get_relationship_types_dict(config)
+
+        return {
+            "success": True,
+            "message": "Ontology configuration reloaded successfully",
+            "entity_types": list(entity_types.keys()),
+            "relationship_types": list(relationship_types.keys()),
+            "entity_type_count": len(entity_types),
+            "relationship_type_count": len(relationship_types),
+            "version": config.version,
+            "name": config.name,
+            "breaking_changes": result.get("breaking_changes", []),
+        }
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f'Error reloading ontology config: {error_msg}')
+        return ErrorResponse(error=f'Error reloading ontology config: {error_msg}')
+
+
 def main():
-    """Main function to run the Graphiti MCP server."""
+    """Initialize and run the MCP server with all patches."""
+
     # Feature 006: Initialize Gemini Prompt Caching metrics exporter
     if _metrics_exporter_available:
         try:
-            metrics_port = int(os.getenv("METRICS_PORT", "9090"))
             metrics_enabled = os.getenv("PROMPT_CACHE_METRICS_ENABLED", "true").lower() == "true"
             initialize_metrics_exporter(enabled=metrics_enabled, port=metrics_port)
             logger.info("Madeinoz Patch: Feature 006 - Gemini prompt caching with cost tracking and Prometheus metrics (active)")

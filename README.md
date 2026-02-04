@@ -3,10 +3,10 @@
 name: Madeinoz Knowledge System
 
 # pack-id: (format) {author}-{pack-name}-{variant}-v{version}
-pack-id: madeinoz67-madeinoz-knowledge-system-core-v1.8.4
+pack-id: madeinoz67-madeinoz-knowledge-system-core-v1.8.5
 
 # version: (format) SemVer major.minor.patch
-version: 1.8.0
+version: 1.8.5
 
 # author: (1 word) GitHub username or organization
 author: madeinoz67
@@ -43,7 +43,7 @@ keywords: [knowledge, graph, memory, semantic search, entity extraction, relatio
 
 ## Changelog
 
-**Latest: v1.7.2**
+**Latest: v1.8.5**
 
 See [CHANGELOG.md](CHANGELOG.md) for full version history.
 
@@ -76,6 +76,7 @@ See [INSTALL.md](INSTALL.md) for complete installation instructions, performance
 - **Grafana Dashboards** - Visualize knowledge, token usage, graph stats and memory health
 - **Temporal Tracking** - Know when knowledge was captured and how it evolves
 - **Memory Sync** - Auto-syncs learnings from PAI Memory System
+- **OSINT/CTI Ontology** - Custom entity types for threat intelligence (ThreatActor, Malware, Vulnerability, Indicator, etc.) with STIX 2.1 import support
 
 ## Usage
 
@@ -119,6 +120,7 @@ bun run tools/knowledge-cli.ts search_nodes "topic" --weighted
 **Cost benefit:** Weighted scoring uses already-computed embeddings and metadata — **no additional LLM calls**. Works with any embedding model including free/local options like Ollama, Trinity, or gpt-4o-mini.
 
 **Output includes:**
+
 - 📊 Overall score (0-1)
 - S: Semantic similarity
 - R: Recency score

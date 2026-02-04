@@ -842,3 +842,237 @@ Configuration is loaded in this order (later values override earlier):
 3. Shell environment variables (if set directly)
 
 Recommended: Keep all configuration in PAI .env file for consistency.
+
+## Ontology Configuration (Feature 018)
+
+The Knowledge System supports custom entity and relationship types through ontology configuration. This enables domain-specific knowledge modeling for Cyber Threat Intelligence (CTI), Open Source Intelligence (OSINT), and other specialized domains.
+
+### Configuration File
+
+**Location:** `config/ontology-types.yaml`
+
+This file is copied into the Docker container at build time. Rebuild after changes:
+
+```bash
+# 1. Edit configuration
+nano config/ontology-types.yaml
+
+# 2. Rebuild Docker image
+docker build -f docker/Dockerfile -t madeinoz-knowledge-system:local .
+
+# 3. Restart containers
+bun run server-cli stop
+bun run server-cli start --dev
+```
+
+### Entity Type Configuration
+
+Entity types define domain-specific entities (ThreatActor, Malware, Vulnerability, etc.):
+
+```yaml
+entity_types:
+  - name: "ThreatActor"
+    description: "Actor responsible for cyber threats"
+    permanent: false
+    decay_config:
+      half_life_days: 180  # Longer half-life for slow-changing CTI data
+      importance_floor: 0.5
+      stability_multiplier: 1.2
+    attributes:
+      - name: "aliases"
+        type: "list"
+        required: false
+        description: "Alternative names for the threat actor"
+      - name: "country"
+        type: "string"
+        required: false
+```
+
+**Entity Type Properties:**
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `name` | string | Yes | Unique identifier for the entity type |
+| `description` | string | Yes | Human-readable description |
+| `permanent` | boolean | No | If true, entities exempt from decay (default: false) |
+| `decay_config` | object | No | Custom decay settings (half_life_days, importance_floor, stability_multiplier) |
+| `attributes` | list | No | Custom attributes for this entity type |
+
+### Configuration Scope: What You CAN vs CANNOT Change
+
+**IMPORTANT:** The ontology configuration file allows customization of **existing** entity and relationship types. Creating entirely **new** entity types requires Python code changes.
+
+#### What You CAN Configure in YAML
+
+✅ **Customize Existing Entity Types:**
+- Modify `decay_config` - Adjust half-life, importance floor, stability
+- Add/remove `attributes` - Custom fields within existing types
+- Change `permanent` flag - Mark types as exempt from decay
+- Update `description`, `icon` - Display properties
+
+✅ **Customize Existing Relationship Types:**
+- Modify `description`, `forward_name`, `reverse_name`
+- Change `permanent` flag
+- Adjust `decay_config` for relationship types
+
+#### What Requires CODE Changes
+
+❌ **Creating New Entity Types (Requires Python):**
+- New entity types (like `ThreatActor`, `Malware`) must be defined in code
+- Modify `docker/patches/ontology_config.py` to add new `EntityTypeConfig` classes
+- Update Pydantic models and validation logic
+- Rebuild Docker container after code changes
+
+❌ **Creating New Relationship Types (Requires Python):**
+- New relationship types must be defined in code
+- Update relationship type definitions in the ontology module
+
+#### Example: Customizing an Existing Type
+
+```yaml
+# You CAN customize existing ThreatActor type
+entity_types:
+  - name: "ThreatActor"
+    decay_config:
+      half_life_days: 365  # Changed from default 180
+    attributes:
+      - name: "aliases"
+        type: "list"
+      # Adding custom attributes is OK
+      - name: "last_seen"
+        type: "datetime"
+        description: "Most recent activity"
+```
+
+#### Example: What Requires Code
+
+```yaml
+# You CANNOT add entirely new entity types via YAML
+entity_types:
+  - name: "MyCustomType"  # ❌ This won't work!
+    description: "Requires code changes"
+```
+
+To add `MyCustomType`, you would need to:
+1. Edit `docker/patches/ontology_config.py`
+2. Define the new entity type class
+3. Add validation logic
+4. Rebuild the Docker image
+
+### Relationship Type Configuration
+
+Relationship types define connections between entities:
+
+```yaml
+relationship_types:
+  - name: "uses"
+    description: "Source uses target (e.g., ThreatActor uses Malware)"
+    source_entity_types: ["ThreatActor", "Campaign"]
+    target_entity_types: ["Malware", "Infrastructure", "TTP"]
+    bidirectional: false
+    inverse_name: null
+```
+
+**Relationship Type Properties:**
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `name` | string | Yes | Relationship name (e.g., uses, targets) |
+| `description` | string | Yes | Human-readable description |
+| `source_entity_types` | list | Yes | Valid source entity types |
+| `target_entity_types` | list | Yes | Valid target entity types |
+| `bidirectional` | boolean | No | Works in both directions (default: false) |
+| `inverse_name` | string | No | Name of inverse relationship |
+| `attributes` | list | No | Custom attributes |
+
+### Decay Configuration
+
+Custom entity types can have type-specific decay settings:
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `half_life_days` | float | 180 | Days for 50% decay (higher = slower decay) |
+| `importance_floor` | float | null | Minimum importance (0-5), slows decay |
+| `stability_multiplier` | float | null | Multiplier for stability (0.1-3.0) |
+
+**Example decay configurations:**
+
+```yaml
+# Slow-changing CTI data (180-day half-life)
+ThreatActor:
+  half_life_days: 180
+  importance_floor: 0.5
+  stability_multiplier: 1.2
+
+# Fast-changing indicators (90-day half-life)
+Indicator:
+  half_life_days: 90
+  importance_floor: 0.3
+  stability_multiplier: 0.8
+
+# Infrastructure changes quickly (60-day half-life)
+Infrastructure:
+  half_life_days: 60
+  importance_floor: 0.3
+  stability_multiplier: 0.7
+```
+
+### Reserved Attributes
+
+The following attribute names are reserved and cannot be used in custom entity or relationship types:
+
+- `uuid` - Unique identifier
+- `name` - Entity/relationship name
+- `labels` - Neo4j node labels
+- `created_at` - Creation timestamp
+- `summary` - Entity summary text
+- `attributes` - Attributes dictionary
+- `name_embedding` - Vector embedding
+
+### Built-in Entity Types
+
+These entity types are always available and don't need to be defined:
+
+- `Person` - Individuals
+- `Organization` - Companies, groups
+- `Location` - Places, geographic areas
+- `Event` - Time-bounded occurrences
+- `Object` - Physical or virtual objects
+- `Document` - Documents, files
+- `Topic` - Subjects, themes
+- `Preference` - User preferences
+- `Requirement` - Requirements, specifications
+- `Procedure` - Processes, methods
+
+### Pre-built CTI/OSINT Ontology
+
+The system includes a pre-built ontology for CTI/OSINT work with these entity types:
+
+**CTI Entity Types:**
+- `ThreatActor` - APT groups, threat actors (180-day half-life)
+- `Malware` - Malicious software families (90-day half-life)
+- `Vulnerability` - CVE entries, security flaws (180-day half-life)
+- `Campaign` - Coordinated attack campaigns (120-day half-life)
+- `Indicator` - IOCs, hashes, IPs, domains (90-day half-life)
+- `Infrastructure` - C2 servers, attack infrastructure (60-day half-life)
+- `TTP` - Tactics, techniques, procedures (365-day half-life)
+
+**OSINT Entity Types:**
+- `Account` - User accounts, social media profiles
+- `Domain` - Domain names
+- `Email` - Email addresses
+- `Phone` - Phone numbers
+- `Image` - Images, media files
+- `Investigation` - OSINT investigations
+
+**Relationship Types:**
+- `uses` - ThreatActor uses Malware
+- `targets` - Campaign targets Organization
+- `exploits` - Malware exploits Vulnerability
+- `variant_of` - Malware is variant of another
+- `attributed_to` - Campaign attributed to ThreatActor
+- `located_at` - Infrastructure located at Location
+- `owns` - Person owns Account
+- `communicates_with` - ThreatActor communicates with ThreatActor
+
+For a complete example, see `config/ontology-types.yaml` in the repository.

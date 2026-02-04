@@ -238,6 +238,38 @@ class MCPWrapper {
       handler: this.cmdRecoverMemory.bind(this),
     });
 
+    // Feature 018: OSINT/CTI Ontology commands
+    this.addCommand({
+      name: 'ontology:list',
+      description: 'List custom entity and relationship types',
+      handler: this.cmdOntologyList.bind(this),
+    });
+
+    this.addCommand({
+      name: 'ontology:validate',
+      description: 'Validate ontology configuration',
+      handler: this.cmdOntologyValidate.bind(this),
+    });
+
+    this.addCommand({
+      name: 'ontology:reload',
+      description: 'Reload ontology configuration',
+      handler: this.cmdOntologyReload.bind(this),
+    });
+
+    // Feature 018: STIX 2.1 import commands
+    this.addCommand({
+      name: 'stix:import',
+      description: 'Import STIX 2.1 bundle from file or URL',
+      handler: this.cmdStixImport.bind(this),
+    });
+
+    this.addCommand({
+      name: 'stix:status',
+      description: 'Get STIX import status',
+      handler: this.cmdStixStatus.bind(this),
+    });
+
     // Feature 010: Connection profile commands
     this.addCommand({
       name: 'list_profiles',
@@ -484,6 +516,107 @@ class MCPWrapper {
 
     const client = this.createClient();
     const result = await client.recoverSoftDeleted({ uuid });
+
+    return result;
+  }
+
+  /**
+   * Feature 018: Command: ontology:list
+   */
+  private async cmdOntologyList(): Promise<{ success: boolean; data?: unknown; error?: string }> {
+    const client = this.createClient();
+    const result = await client.listOntologyTypes();
+
+    return result;
+  }
+
+  /**
+   * Feature 018: Command: ontology:validate
+   */
+  private async cmdOntologyValidate(): Promise<{ success: boolean; data?: unknown; error?: string }> {
+    const client = this.createClient();
+    const result = await client.validateOntology();
+
+    return result;
+  }
+
+  /**
+   * Feature 018: Command: ontology:reload
+   */
+  private async cmdOntologyReload(): Promise<{ success: boolean; data?: unknown; error?: string }> {
+    const client = this.createClient();
+    const result = await client.reloadOntology();
+
+    return result;
+  }
+
+  /**
+   * Feature 018: Command: stix:import
+   */
+  private async cmdStixImport(args: string[]): Promise<{ success: boolean; data?: unknown; error?: string }> {
+    if (args.length < 1) {
+      return {
+        success: false,
+        error: 'Usage: stix:import <file.json|url> [--batch-size N] [--continue-on-error]',
+      };
+    }
+
+    const source = args[0];
+    const batchSize = args.includes('--batch-size')
+      ? Number.parseInt(args[args.indexOf('--batch-size') + 1], 10)
+      : undefined;
+    const continueOnError = args.includes('--continue-on-error');
+
+    const client = this.createClient();
+
+    // Check if source is a file path or URL
+    let bundleData: Record<string, unknown>;
+
+    try {
+      if (source.startsWith('http://') || source.startsWith('https://')) {
+        // It's a URL - we'd need to fetch it, but for now let's return an error
+        return {
+          success: false,
+          error: 'URL import not yet supported. Please save the STIX bundle to a file and import from the file path.',
+        };
+      } else {
+        // It's a file path - read the file
+        const fs = await import('node:fs');
+        const fileContent = await fs.promises.readFile(source, 'utf-8');
+        bundleData = JSON.parse(fileContent);
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: `Failed to read STIX bundle: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      };
+    }
+
+    const result = await client.importStixBundle({
+      bundle_data: bundleData,
+      batch_size: batchSize,
+      continue_on_error: continueOnError,
+    });
+
+    return result;
+  }
+
+  /**
+   * Feature 018: Command: stix:status
+   */
+  private async cmdStixStatus(args: string[]): Promise<{ success: boolean; data?: unknown; error?: string }> {
+    if (args.length < 1) {
+      return {
+        success: false,
+        error: 'Usage: stix:status <import_id>',
+      };
+    }
+
+    const importId = args[0];
+    const client = this.createClient();
+
+    // Call with import_id parameter
+    const result = await (client as unknown as { getImportStatus: (params: { import_id: string }) => Promise<{ success: boolean; data?: unknown; error?: string }> }).getImportStatus({ import_id: importId });
 
     return result;
   }
