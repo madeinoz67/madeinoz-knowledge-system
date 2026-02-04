@@ -64,23 +64,23 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T013 [P] [US1] Create integration test for investigate with 1-hop connections in docker/tests/integration/test_investigate.py
-- [ ] T014 [P] [US1] Create integration test for investigate with no connections in docker/tests/integration/test_investigate.py
-- [ ] T015 [P] [US1] Create integration test for investigate entity not found in docker/tests/integration/test_investigate.py
-- [ ] T016 [P] [US1] Create unit test for graph traversal cycle detection in docker/tests/unit/test_graph_traversal.py
-- [ ] T017 [P] [US1] Create unit test for connection count warning threshold in docker/tests/unit/test_graph_traversal.py
+- [x] T013 [P] [US1] Create integration test for investigate with 1-hop connections in docker/tests/integration/test_investigate.py
+- [x] T014 [P] [US1] Create integration test for investigate with no connections in docker/tests/integration/test_investigate.py
+- [x] T015 [P] [US1] Create integration test for investigate entity not found in docker/tests/integration/test_investigate.py
+- [x] T016 [P] [US1] Create unit test for graph traversal cycle detection in docker/tests/unit/test_graph_traversal.py
+- [x] T017 [P] [US1] Create unit test for connection count warning threshold in docker/tests/unit/test_graph_traversal.py
 
 ### Implementation for User Story 1
 
-- [ ] T018 [US1] Add investigate_entity MCP tool to docker/patches/graphiti_mcp_server.py
-- [ ] T019 [US1] Implement entity lookup by name in investigate_entity tool
-- [ ] T020 [US1] Implement 1-hop traversal using graph_traversal.py in investigate_entity tool
-- [ ] T021 [US1] Build InvestigateResult response with entity and connections in investigate_entity tool
-- [ ] T022 [US1] Add depth parameter handling (default=1) in investigate_entity tool
-- [ ] T023 [US1] Add query duration tracking to InvestigationMetadata in investigate_entity tool
-- [ ] T024 [US1] Add error handling for entity not found in investigate_entity tool
+- [x] T018 [US1] Add investigate_entity MCP tool to docker/patches/graphiti_mcp_server.py
+- [x] T019 [US1] Implement entity lookup by name in investigate_entity tool
+- [x] T020 [US1] Implement 1-hop traversal using graph_traversal.py in investigate_entity tool
+- [x] T021 [US1] Build InvestigateResult response with entity and connections in investigate_entity tool
+- [x] T022 [US1] Add depth parameter handling (default=1) in investigate_entity tool
+- [x] T023 [US1] Add query duration tracking to InvestigationMetadata in investigate_entity tool
+- [x] T024 [US1] Add error handling for entity not found in investigate_entity tool
 
-**Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
+**Checkpoint**: ✅ At this point, User Story 1 should be fully functional and testable independently
 
 ---
 
@@ -92,20 +92,20 @@
 
 ### Tests for User Story 2
 
-- [ ] T025 [P] [US2] Create integration test for depth=1 traversal in docker/tests/integration/test_investigate.py
-- [ ] T026 [P] [US2] Create integration test for depth=2 traversal in docker/tests/integration/test_investigate.py
-- [ ] T027 [P] [US2] Create integration test for depth=3 traversal in docker/tests/integration/test_investigate.py
-- [ ] T028 [P] [US2] Create integration test for depth>3 rejection in docker/tests/integration/test_investigate.py
-- [ ] T029 [P] [US2] Create unit test for multi-hop traversal in docker/tests/unit/test_graph_traversal.py
+- [x] T025 [P] [US2] Create integration test for depth=1 traversal in docker/tests/integration/test_investigate.py
+- [x] T026 [P] [US2] Create integration test for depth=2 traversal in docker/tests/integration/test_investigate.py
+- [x] T027 [P] [US2] Create integration test for depth=3 traversal in docker/tests/integration/test_investigate.py
+- [x] T028 [P] [US2] Create integration test for depth>3 rejection in docker/tests/integration/test_investigate.py
+- [x] T029 [P] [US2] Create unit test for multi-hop traversal in docker/tests/unit/test_graph_traversal.py
 
 ### Implementation for User Story 2
 
-- [ ] T030 [US2] Implement variable-depth traversal (2-3 hops) in docker/patches/utils/graph_traversal.py
-- [ ] T031 [US2] Update investigate_entity tool to use depth parameter from graph_traversal.py
-- [ ] T032 [US2] Add hop_distance to Connection response type in models/response_types.py
-- [ ] T033 [US2] Include hop_distance in InvestigateResult metadata in investigate_entity tool
+- [x] T030 [US2] Implement variable-depth traversal (2-3 hops) in docker/patches/utils/graph_traversal.py
+- [x] T031 [US2] Update investigate_entity tool to use depth parameter from graph_traversal.py
+- [x] T032 [US2] Add hop_distance to Connection response type in models/response_types.py
+- [x] T033 [US2] Include hop_distance in InvestigateResult metadata in investigate_entity tool
 
-**Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
+**Checkpoint**: ✅ At this point, User Stories 1 AND 2 should both work independently
 
 ---
 

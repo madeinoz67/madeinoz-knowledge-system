@@ -1664,6 +1664,177 @@ async def get_status() -> StatusResponse:
 
 
 @mcp.tool()
+async def investigate_entity(
+    entity_name: str,
+    max_depth: int = 1,
+    relationship_types: list[str] | None = None,
+    group_ids: list[str] | None = None,
+    include_attributes: bool = True,
+) -> dict | ErrorResponse:
+    """Investigate an entity and return all its connected relationships.
+
+    Feature 020: Performs graph traversal starting from a matched entity to find
+    all connected entities up to the specified depth. Returns entities with their
+    names, types, and UUIDs in a single query for AI consumption.
+
+    Key features:
+    - Configurable depth (1-3 hops) for comprehensive analysis
+    - Relationship type filtering to reduce noise
+    - Cycle detection and reporting
+    - AI-friendly JSON response with full entity context
+
+    Args:
+        entity_name: The name or identifier of the entity to investigate (e.g., "+1-555-0199", "APT28")
+        max_depth: Maximum number of hops to traverse (1-3, default: 1)
+        relationship_types: Optional filter for specific relationship types (e.g., ["OWNED_BY", "USES"])
+        group_ids: Optional list of group IDs to search (default: all groups)
+        include_attributes: Include full entity attributes in response (default: True)
+
+    Returns:
+        InvestigateResult with entity, connections, metadata, and optional warning
+
+    Example:
+        investigate_entity(entity_name="+1-555-0199", max_depth=2)
+        Returns the phone entity with all connected entities (Person, Account, etc.)
+        up to 2 hops away, including names, types, and relationship information.
+    """
+    global graphiti_service
+
+    if graphiti_service is None:
+        return ErrorResponse(error='Graphiti service not initialized')
+
+    try:
+        client = await graphiti_service.get_client()
+
+        # Validate max_depth parameter
+        if max_depth < 1 or max_depth > 3:
+            return ErrorResponse(
+                error=f'Invalid depth: {max_depth}. Must be between 1 and 3.'
+            )
+
+        # Madeinoz Patch: Use dynamic group_id discovery
+        effective_group_ids = await get_effective_group_ids(
+            client, group_ids, config.graphiti.group_id
+        )
+
+        # First, search for the entity by name
+        from graphiti_core.search.search_config_recipes import NODE_HYBRID_SEARCH_RRF
+
+        search_results = await client.search_(
+            query=entity_name,
+            config=NODE_HYBRID_SEARCH_RRF,
+            group_ids=effective_group_ids,
+        )
+
+        # Extract the best matching entity
+        nodes = search_results.nodes if search_results.nodes else []
+
+        if not nodes:
+            return ErrorResponse(
+                error=f'Entity not found: {entity_name}',
+                details={
+                    'query': entity_name,
+                    'suggestion': 'Use search_nodes to find the exact entity name first.'
+                }
+            )
+
+        # Use the best match (first result has highest score)
+        start_entity = nodes[0]
+        start_uuid = start_entity.uuid
+
+        # Import graph traversal module
+        from utils.graph_traversal import GraphTraversal
+        from models import Entity, Connection, InvestigationMetadata
+
+        # Perform graph traversal
+        traversal = GraphTraversal(
+            driver=client.driver,
+            database_type=config.database.provider,
+            logger=logger
+        )
+
+        traversal_result = traversal.traverse(
+            start_entity_uuid=start_uuid,
+            max_depth=max_depth,
+            relationship_types=relationship_types,
+            group_ids=effective_group_ids
+        )
+
+        # Build InvestigateResult response
+        # Convert the primary entity
+        entity = Entity(
+            uuid=start_entity.uuid,
+            name=start_entity.name,
+            labels=list(start_entity.labels) if hasattr(start_entity, 'labels') else [],
+            summary=start_entity.summary if hasattr(start_entity, 'summary') else None,
+            created_at=start_entity.created_at.isoformat() if hasattr(start_entity, 'created_at') and start_entity.created_at else None,
+            group_id=start_entity.group_id if hasattr(start_entity, 'group_id') else None,
+            attributes=None  # Could extract from start_entity.attributes if needed
+        )
+
+        # Convert connections
+        connections = []
+        for conn in traversal_result.connections:
+            target_data = conn.get('target_entity', {})
+            target_entity = Entity(
+                uuid=target_data.get('uuid', ''),
+                name=target_data.get('name', ''),
+                labels=target_data.get('labels', []),
+                summary=target_data.get('summary'),
+                created_at=target_data.get('created_at'),
+                group_id=target_data.get('group_id'),
+                attributes=None
+            )
+
+            connection = Connection(
+                relationship=conn.get('relationship', 'RELATED_TO'),
+                direction=conn.get('direction', 'bidirectional'),
+                target_entity=target_entity,
+                hop_distance=conn.get('hop_distance', 1),
+                confidence=conn.get('confidence'),
+                fact=conn.get('fact')
+            )
+            connections.append(connection)
+
+        # Build metadata
+        metadata = InvestigationMetadata(
+            depth_explored=traversal_result.depth_explored,
+            total_connections_explored=traversal_result.total_connections_explored,
+            connections_returned=traversal_result.connections_returned,
+            cycles_detected=traversal_result.cycles_detected,
+            cycles_pruned=traversal_result.cycles_pruned,
+            entities_skipped=traversal_result.entities_skipped,
+            relationship_types_filtered=relationship_types,
+            query_duration_ms=traversal_result.query_duration_ms,
+            max_connections_exceeded=traversal_result.max_connections_exceeded
+        )
+
+        # Build final result
+        result = {
+            'entity': entity.model_dump(exclude_none=True),
+            'connections': [conn.model_dump(exclude_none=True) for conn in connections],
+            'metadata': metadata.model_dump(exclude_none=True),
+        }
+
+        # Add warning if present
+        if traversal_result.warning:
+            result['warning'] = traversal_result.warning
+
+        logger.info(
+            f'🔍 investigate_entity: entity={entity_name}, '
+            f'depth={max_depth}, connections={len(connections)}, '
+            f'cycles={traversal_result.cycles_detected}'
+        )
+
+        return result
+
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f'Error investigating entity: {error_msg}')
+        return ErrorResponse(error=f'Error investigating entity: {error_msg}')
+
+
+@mcp.tool()
 async def list_ontology_types(
     include_builtin: bool = False
 ) -> dict:
