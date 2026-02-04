@@ -744,7 +744,7 @@ class MCPWrapper {
     const result = await client.investigateEntity({
       entity_name: entityName,
       max_depth: depth,
-      relationship_types: relationshipTypes.length > 0 ? relationshipTypes : undefined,
+      relationship_types: relationshipTypes && relationshipTypes.length > 0 ? relationshipTypes : undefined,
     });
 
     return { ...result, query: entityName };
