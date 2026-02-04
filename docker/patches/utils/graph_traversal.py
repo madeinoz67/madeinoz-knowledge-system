@@ -286,7 +286,7 @@ class GraphTraversal:
             # Build relationship type pattern for each hop
             rel_pattern = "|".join(f":{rt}" for rt in relationship_types)
             query = f"""
-            MATCH path = (start)-[{rel_pattern}*1..{max_depth}}]-(end)
+            MATCH path = (start)-[:{{{rel_pattern}}}*1..{max_depth}]-(end)
             WHERE start.uuid = $start_uuid
             """
 
