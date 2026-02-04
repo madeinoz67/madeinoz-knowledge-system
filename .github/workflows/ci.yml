@@ -190,7 +190,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: docs
-          path: site/
+          path: site
+          if-no-files-found: error
 
   release:
     name: Release
@@ -310,7 +311,6 @@ jobs:
         with:
           name: docs
           path: ./site
-          pattern: "**"
 
       - name: Setup Python
         uses: actions/setup-python@v5
