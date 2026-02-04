@@ -21,7 +21,7 @@ import os
 from collections import deque
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional, Dict, List, Set, Tuple
+from typing import Any, Optional, Dict, List, Set, Tuple, Union
 
 import yaml
 from pydantic import BaseModel, Field, field_validator, model_validator
