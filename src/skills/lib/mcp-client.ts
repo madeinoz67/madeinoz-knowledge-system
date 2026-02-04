@@ -46,6 +46,14 @@ export const MCP_TOOLS = {
   RUN_DECAY_MAINTENANCE: 'run_decay_maintenance',
   CLASSIFY_MEMORY: 'classify_memory',
   RECOVER_SOFT_DELETED: 'recover_soft_deleted',
+  // Feature 018: OSINT/CTI Ontology support
+  LIST_ONTOLOGY_TYPES: 'list_ontology_types',
+  VALIDATE_ONTOLOGY: 'validate_ontology',
+  RELOAD_ONTOLOGY: 'reload_ontology',
+  // Feature 018: STIX 2.1 import
+  IMPORT_STIX_BUNDLE: 'import_stix_bundle',
+  GET_IMPORT_STATUS: 'get_import_status',
+  RESUME_IMPORT: 'resume_import',
 } as const;
 
 /**
@@ -883,6 +891,132 @@ export class MCPClient {
     return await this.callTool<unknown>(MCP_TOOLS.RECOVER_SOFT_DELETED, {
       uuid: params.uuid,
     });
+  }
+
+  /**
+   * Feature 018: List ontology types (entity and relationship types)
+   */
+  async listOntologyTypes(): Promise<
+    MCPClientResponse<{
+      entity_types: string[];
+      relationship_types: string[];
+      entity_type_count: number;
+      relationship_type_count: number;
+    }>
+  > {
+    return await this.callTool<{
+      entity_types: string[];
+      relationship_types: string[];
+      entity_type_count: number;
+      relationship_type_count: number;
+    }>(MCP_TOOLS.LIST_ONTOLOGY_TYPES, {});
+  }
+
+  /**
+   * Feature 018: Validate ontology configuration
+   */
+  async validateOntology(): Promise<
+    MCPClientResponse<{
+      valid: boolean;
+      errors: string[];
+      warnings: string[];
+      breaking_changes: string[];
+    }>
+  > {
+    return await this.callTool<{
+      valid: boolean;
+      errors: string[];
+      warnings: string[];
+      breaking_changes: string[];
+    }>(MCP_TOOLS.VALIDATE_ONTOLOGY, {});
+  }
+
+  /**
+   * Feature 018: Reload ontology configuration
+   */
+  async reloadOntology(): Promise<
+    MCPClientResponse<{
+      success: boolean;
+      message: string;
+      entity_types: string[];
+      relationship_types: string[];
+      entity_type_count: number;
+      relationship_type_count: number;
+      version: string;
+      name: string;
+      breaking_changes: string[];
+    }>
+  > {
+    return await this.callTool<{
+      success: boolean;
+      message: string;
+      entity_types: string[];
+      relationship_types: string[];
+      entity_type_count: number;
+      relationship_type_count: number;
+      version: string;
+      name: string;
+      breaking_changes: string[];
+    }>(MCP_TOOLS.RELOAD_ONTOLOGY, {});
+  }
+
+  /**
+   * Feature 018: Import STIX 2.1 bundle
+   */
+  async importStixBundle(params: {
+    bundle_data: Record<string, unknown>;
+    batch_size?: number;
+    continue_on_error?: boolean;
+  }): Promise<
+    MCPClientResponse<{
+      session_id: string;
+      entities_imported: number;
+      relationships_imported: number;
+      errors: number;
+      warnings: string[];
+    }>
+  > {
+    return await this.callTool<{
+      session_id: string;
+      entities_imported: number;
+      relationships_imported: number;
+      errors: number;
+      warnings: string[];
+    }>(MCP_TOOLS.IMPORT_STIX_BUNDLE, params as unknown as Record<string, unknown>);
+  }
+
+  /**
+   * Feature 018: Get STIX import status
+   */
+  /**
+   * Feature 018: Get STIX import status
+   */
+  async getImportStatus(params: { import_id: string }): Promise<
+    MCPClientResponse<{
+      import_id: string;
+      source_file: string;
+      started_at: string;
+      completed_at: string | null;
+      status: string;
+      total_objects: number;
+      imported_count: number;
+      failed_count: number;
+      failed_object_ids: string[];
+      error_messages: string[];
+    }>
+  > {
+    return await this.callTool<{
+      import_id: string;
+      source_file: string;
+      started_at: string;
+      completed_at: string | null;
+      status: string;
+      total_objects: number;
+      imported_count: number;
+      failed_count: number;
+      failed_object_ids: string[];
+      error_messages: string[];
+    }>(MCP_TOOLS.GET_IMPORT_STATUS, params as unknown as Record<string, unknown>);
   }
 
   /**

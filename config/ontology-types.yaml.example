@@ -1,0 +1,195 @@
+# Example Ontology Configuration
+# Feature: 018-osint-ontology
+#
+# This file demonstrates all available configuration options for defining custom
+# entity and relationship types in the Madeinoz Knowledge System.
+#
+# To use: Copy this file to config/ontology-types.yaml and modify for your domain.
+#
+# Environment Variable: ONTOLOGY_CONFIG_PATH (optional, defaults to config/ontology-types.yaml)
+
+version: "1.0.0"
+name: "Example Domain Ontology"
+description: "Example configuration showing all available ontology options"
+
+# ==============================================================================
+# Entity Types
+# ==============================================================================
+# Entity types define domain-specific entities that can be automatically
+# extracted from content and classified with these types.
+# ==============================================================================
+
+entity_types:
+  # -----------------------------------------------------------------------
+  # Example 1: Minimal entity type (name + description only)
+  # -----------------------------------------------------------------------
+  - name: "SimpleEntity"
+    description: "Minimal entity type with just name and description"
+
+  # -----------------------------------------------------------------------
+  # Example 2: Entity type with custom attributes
+  # -----------------------------------------------------------------------
+  - name: "Product"
+    description: "Commercial product or service"
+    icon: "box"  # Icon identifier for UI display (optional)
+    parent_type: null  # Parent entity type for inheritance (optional)
+    attributes:
+      - name: "sku"
+        type: "string"
+        required: true
+        description: "Stock keeping unit (product code)"
+      - name: "price"
+        type: "number"
+        required: false
+        description: "Current price"
+      - name: "in_stock"
+        type: "boolean"
+        required: false
+        description: "Whether product is in stock"
+      - name: "release_date"
+        type: "datetime"
+        required: false
+        description: "When product was released"
+      - name: "tags"
+        type: "list"
+        required: false
+        description: "Product category tags"
+
+  # -----------------------------------------------------------------------
+  # Example 3: Entity type with custom decay configuration
+  # -----------------------------------------------------------------------
+  - name: "KnowledgeBase"
+    description: "Knowledge base article or documentation"
+    permanent: false  # If true, never decays
+    decay_config:
+      half_life_days: 90  # Days for 50% decay (default: 180)
+      importance_floor: 0.4  # Minimum importance (0-5), slows decay
+      stability_multiplier: 1.1  # Stability multiplier (0.1-3.0)
+    attributes:
+      - name: "url"
+        type: "string"
+        required: false
+        description: "Link to knowledge base article"
+      - name: "category"
+        type: "string"
+        required: false
+        description: "Article category"
+
+  # -----------------------------------------------------------------------
+  # Example 4: Permanent entity type (never decays)
+  # -----------------------------------------------------------------------
+  - name: "CoreConcept"
+    description: "Core domain concept that should never be forgotten"
+    permanent: true  # Exempt from all decay calculations
+    decay_config: null  # Not used when permanent=true
+    attributes:
+      - name: "definition"
+        type: "string"
+        required: true
+        description: "Formal definition of the concept"
+
+  # -----------------------------------------------------------------------
+  # Example 5: Entity type with parent (inheritance)
+  # -----------------------------------------------------------------------
+  - name: "SoftwareProduct"
+    description: "Software application or tool"
+    parent_type: "Product"  # Inherits attributes from Product
+    attributes:
+      - name: "version"
+        type: "string"
+        required: false
+        description: "Current version"
+      - name: "license"
+        type: "string"
+        required: false
+        description: "Software license (MIT, Apache, GPL, etc.)"
+
+# ==============================================================================
+# Relationship Types
+# ==============================================================================
+# Relationship types define connections between entities with type safety.
+# Each relationship specifies valid source and target entity types.
+# ==============================================================================
+
+relationship_types:
+  # -----------------------------------------------------------------------
+  # Example 1: Simple relationship
+  # -----------------------------------------------------------------------
+  - name: "related_to"
+    description: "General relationship between entities"
+    source_entity_types: ["Product", "KnowledgeBase"]
+    target_entity_types: ["Product", "KnowledgeBase"]
+
+  # -----------------------------------------------------------------------
+  # Example 2: Bidirectional relationship with inverse
+  # -----------------------------------------------------------------------
+  - name: "depends_on"
+    description: "Source depends on target"
+    source_entity_types: ["Product", "SoftwareProduct"]
+    target_entity_types: ["Product", "SoftwareProduct"]
+    bidirectional: false  # If true, relationship works both ways
+    inverse_name: "required_by"  # Name of inverse relationship
+
+  # -----------------------------------------------------------------------
+  # Example 3: Relationship with custom attributes
+  # -----------------------------------------------------------------------
+  - name: "references"
+    description: "Entity references another entity"
+    source_entity_types: ["KnowledgeBase"]
+    target_entity_types: ["Product", "CoreConcept"]
+    attributes:
+      - name: "context"
+        type: "string"
+        required: false
+        description: "Context of the reference"
+      - name: "strength"
+        type: "string"
+        required: false
+        description: "Reference strength (strong, weak, tentative)"
+
+  # -----------------------------------------------------------------------
+  # Example 4: Multi-type relationship
+  # -----------------------------------------------------------------------
+  - name: "created_by"
+    description: "Entity was created by an agent"
+    source_entity_types: ["Product", "SoftwareProduct", "KnowledgeBase"]
+    target_entity_types: ["Person", "Organization"]
+
+# ==============================================================================
+# Configuration Notes
+# ==============================================================================
+#
+# Attribute Types:
+#   - string: Text value
+#   - number: Numeric value (integer or float)
+#   - boolean: True/false value
+#   - datetime: ISO 8601 datetime string
+#   - list: Array of values
+#
+# Reserved Attributes (do not use):
+#   - uuid, name, labels, created_at, summary, attributes, name_embedding
+#
+# Built-in Entity Types (always available, don't need to define):
+#   - Person, Organization, Location, Event, Object, Document, Topic,
+#     Preference, Requirement, Procedure
+#
+# Decay Configuration:
+#   - half_life_days: Days for 50% decay (higher = slower decay)
+#   - importance_floor: Minimum importance (0-5), entities above decay slower
+#   - stability_multiplier: Adjusts stability calculation (0.1-3.0)
+#   - permanent: If true, entity never decays (overrides decay_config)
+#
+# ==============================================================================
+# Hot Reload
+# ==============================================================================
+#
+# After editing this file, restart the MCP server:
+#   bun run server-cli stop
+#   bun run server-cli start --dev
+#
+# For production, rebuild the Docker image:
+#   docker build -f docker/Dockerfile -t madeinoz-knowledge-system:local .
+#   bun run server-cli stop
+#   bun run server-cli start
+#
+# ==============================================================================

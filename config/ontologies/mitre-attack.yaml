@@ -1,0 +1,199 @@
+# MITRE ATT&CK Ontology Template
+# Feature: 018-osint-ontology
+# Phase 6: User Story 4 - Pre-built CTI Templates
+#
+# This template extends CTI Base with MITRE ATT&CK tactic and technique entities.
+# Enable this template by merging with cti-base.yaml via merge_ontologies().
+
+version: "1.0.0"
+name: "MITRE ATT&CK Extension"
+description: "MITRE ATT&CK tactic and technique entities for CTI analysis"
+depends_on: ["cti-base"]  # Requires CTI base types
+
+# MITRE ATT&CK Entity Types (extensions to CTI base)
+entity_types:
+  - name: "Tactic"
+    description: "MITRE ATT&CK tactical objective representing the why of an attack technique"
+    icon: "crosshairs"
+    permanent: true  # Reference data
+    decay_config:
+      half_life_days: 365
+      importance_floor: 0.8
+      stability_multiplier: 1.5
+    attributes:
+      - name: "tactic_id"
+        type: "string"
+        required: true
+        description: "MITRE ATT&CK tactic ID (e.g., TA0042)"
+      - name: "tactic_name"
+        type: "string"
+        required: true
+        description: "MITRE ATT&CK tactic name (e.g., Resource Development)"
+      - name: "shortname"
+        type: "string"
+        required: false
+        description: "Tactic shortname for URL (e.g., resource-development)"
+      - name: "description"
+        type: "string"
+        required: false
+        description: "Description of the tactical objective"
+      - name: "mitre_url"
+        type: "string"
+        required: false
+        description: "URL to MITRE ATT&CK tactic reference"
+
+  - name: "Technique"
+    description: "MITRE ATT&CK technique representing how an adversary achieves a tactical objective"
+    icon: "wrench"
+    permanent: true  # Reference data
+    decay_config:
+      half_life_days: 365
+      importance_floor: 0.8
+      stability_multiplier: 1.5
+    attributes:
+      - name: "technique_id"
+        type: "string"
+        required: true
+        description: "MITRE ATT&CK technique ID (e.g., T1566)"
+      - name: "technique_name"
+        type: "string"
+        required: true
+        description: "MITRE ATT&CK technique name (e.g., Phishing)"
+      - name: "shortname"
+        type: "string"
+        required: false
+        description: "Technique shortname for URL (e.g., phishing)"
+      - name: "description"
+        type: "string"
+        required: false
+        description: "Description of the technique"
+      - name: "tactic_ids"
+        type: "list"
+        required: false
+        description: "List of tactic IDs this technique supports"
+      - name: "mitre_url"
+        type: "string"
+        required: false
+        description: "URL to MITRE ATT&CK technique reference"
+      - name: "is_subtechnique"
+        type: "boolean"
+        required: false
+        description: "Whether this is a sub-technique"
+      - name: "parent_technique_id"
+        type: "string"
+        required: false
+        description: "Parent technique ID if this is a sub-technique"
+
+  - name: "Mitigation"
+    description: "MITRE ATT&CK mitigation representing security measures to counter techniques"
+    icon: "shield-alt"
+    permanent: true  # Reference data
+    decay_config:
+      half_life_days: 365
+      importance_floor: 0.7
+      stability_multiplier: 1.3
+    attributes:
+      - name: "mitigation_id"
+        type: "string"
+        required: true
+        description: "MITRE ATT&CK mitigation ID (e.g., M1040)"
+      - name: "mitigation_name"
+        type: "string"
+        required: true
+        description: "MITRE ATT&CK mitigation name"
+      - name: "description"
+        type: "string"
+        required: false
+        description: "Description of the mitigation"
+      - name: "mitre_url"
+        type: "string"
+        required: false
+        description: "URL to MITRE ATT&CK mitigation reference"
+
+  - name: "DataSource"
+    description: "MITRE ATT&CK data source representing where detection data comes from"
+    icon: "database"
+    permanent: true  # Reference data
+    decay_config:
+      half_life_days: 365
+      importance_floor: 0.7
+      stability_multiplier: 1.3
+    attributes:
+      - name: "data_source_id"
+        type: "string"
+        required: true
+        description: "MITRE ATT&CK data source identifier"
+      - name: "data_source_name"
+        type: "string"
+        required: true
+        description: "MITRE ATT&CK data source name"
+      - name: "description"
+        type: "string"
+        required: false
+        description: "Description of the data source"
+      - name: "components"
+        type: "list"
+        required: false
+        description: "Data source components (e.g., process creation, network connection)"
+
+# MITRE ATT&CK Relationship Types
+relationship_types:
+  - name: "achieves_tactic"
+    description: "Technique achieves a tactical objective in the ATT&CK matrix"
+    source_entity_types: ["Technique"]
+    target_entity_types: ["Tactic"]
+    bidirectional: false
+    inverse_name: "achieved_by"
+    attributes:
+      - name: "is_primary"
+        type: "boolean"
+        required: false
+        description: "Whether this is the primary tactic for the technique"
+
+  - name: "mitigates"
+    description: "Mitigation addresses a specific attack technique"
+    source_entity_types: ["Mitigation"]
+    target_entity_types: ["Technique", "Tactic"]
+    bidirectional: false
+    inverse_name: "mitigated_by"
+    attributes:
+      - name: "effectiveness"
+        type: "string"
+        required: false
+        description: "Mitigation effectiveness (e.g., high, moderate, partial)"
+
+  - name: "detects"
+    description: "Data source can detect a specific technique"
+    source_entity_types: ["DataSource"]
+    target_entity_types: ["Technique"]
+    bidirectional: false
+    inverse_name: "detected_by"
+    attributes:
+      - name: "quality"
+        type: "string"
+        required: false
+        description: "Detection quality (e.g., high, medium, low)"
+
+  - name: "uses_technique"
+    description: "Threat actor or malware uses a specific ATT&CK technique"
+    source_entity_types: ["ThreatActor", "Malware", "Campaign"]
+    target_entity_types: ["Technique"]
+    bidirectional: false
+    inverse_name: "technique_used_by"
+    attributes:
+      - name: "confidence"
+        type: "string"
+        required: false
+        description: "Confidence in the technique usage"
+      - name: "first_observed"
+        type: "datetime"
+        required: false
+        description: "When technique usage was first observed"
+
+  - name: "subtechnique_of"
+    description: "Technique is a sub-technique of a parent technique"
+    source_entity_types: ["Technique"]
+    target_entity_types: ["Technique"]
+    bidirectional: false
+    inverse_name: "has_subtechnique"
+    attributes: []

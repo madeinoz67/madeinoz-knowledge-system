@@ -1,0 +1,354 @@
+# CTI Base Ontology Template
+# Feature: 018-osint-ontology
+# Phase 6: User Story 4 - Pre-built CTI Templates
+#
+# This template provides core Cyber Threat Intelligence (CTI) entity and relationship types.
+# Enable this template by copying it to config/ontology-types.yaml or via merge_ontologies().
+
+version: "1.0.0"
+name: "CTI Base Ontology"
+description: "Core Cyber Threat Intelligence entity and relationship types for CTI analysis"
+depends_on: []
+
+# CTI Entity Types
+entity_types:
+  - name: "ThreatActor"
+    description: "Actor responsible for cyber threats, including APT groups, threat actors, and malicious actors"
+    icon: "user-secret"
+    permanent: false
+    decay_config:
+      half_life_days: 180  # CTI data has long-term relevance
+      importance_floor: 0.5  # Maintain baseline importance
+      stability_multiplier: 1.2  # Boost stability for threat actors
+    attributes:
+      - name: "aliases"
+        type: "list"
+        required: false
+        description: "Alternative names or aliases for the threat actor (e.g., APT28, Fancy Bear, Sofacy)"
+      - name: "sophistication"
+        type: "string"
+        required: false
+        description: "Technical sophistication level (e.g., advanced, moderate, novice)"
+      - name: "country"
+        type: "string"
+        required: false
+        description: "Country of origin or attributed country"
+      - name: "motivation"
+        type: "string"
+        required: false
+        description: "Primary motivation (e.g., espionage, financial, political, sabotage)"
+      - name: "first_seen"
+        type: "datetime"
+        required: false
+        description: "Date when the threat actor was first observed"
+
+  - name: "Malware"
+    description: "Malicious software, including viruses, worms, trojans, ransomware, and other malicious code"
+    icon: "bug"
+    permanent: false
+    decay_config:
+      half_life_days: 90  # Malware evolves more quickly
+      importance_floor: 0.4
+      stability_multiplier: 0.9  # Slightly reduced stability
+    attributes:
+      - name: "family"
+        type: "string"
+        required: false
+        description: "Malware family name (e.g., LockBit, Cobalt Strike, Emotet)"
+      - name: "first_seen"
+        type: "datetime"
+        required: false
+        description: "When the malware was first observed"
+      - name: "capabilities"
+        type: "list"
+        required: false
+        description: "List of capabilities (e.g., ransomware, data exfiltration, remote access)"
+      - name: "platforms"
+        type: "list"
+        required: false
+        description: "Affected platforms (e.g., Windows, Linux, macOS)"
+      - name: "malware_type"
+        type: "string"
+        required: false
+        description: "Type of malware (e.g., ransomware, trojan, backdoor, spyware)"
+
+  - name: "Vulnerability"
+    description: "Security vulnerability, including CVE entries and security flaws"
+    icon: "shield-virus"
+    permanent: false
+    decay_config:
+      half_life_days: 180  # Vulnerabilities have long-term relevance
+      importance_floor: 0.5
+      stability_multiplier: 1.1
+    attributes:
+      - name: "cve_id"
+        type: "string"
+        required: false
+        description: "CVE identifier (e.g., CVE-2024-1234)"
+      - name: "cvss_score"
+        type: "number"
+        required: false
+        description: "CVSS severity score (0.0-10.0)"
+      - name: "cvss_vector"
+        type: "string"
+        required: false
+        description: "CVSS vector string"
+      - name: "description"
+        type: "string"
+        required: false
+        description: "Description of the vulnerability"
+      - name: "patched_versions"
+        type: "list"
+        required: false
+        description: "List of patched software versions"
+      - name: "exploit_available"
+        type: "boolean"
+        required: false
+        description: "Whether public exploit code is available"
+      - name: "published_date"
+        type: "datetime"
+        required: false
+        description: "Date the vulnerability was published"
+
+  - name: "Campaign"
+    description: "Coordinated set of malicious activities with a common goal, often attributed to specific threat actors"
+    icon: "project-diagram"
+    permanent: false
+    decay_config:
+      half_life_days: 120  # Campaigns have medium-term relevance
+      importance_floor: 0.4
+      stability_multiplier: 1.0
+    attributes:
+      - name: "first_seen"
+        type: "datetime"
+        required: false
+        description: "When the campaign was first observed"
+      - name: "last_seen"
+        type: "datetime"
+        required: false
+        description: "When the campaign was last observed"
+      - name: "description"
+        type: "string"
+        required: false
+        description: "Description of the campaign's objectives and activities"
+      - name: "status"
+        type: "string"
+        required: false
+        description: "Campaign status (e.g., active, dormant, ended)"
+      - name: "target_sector"
+        type: "string"
+        required: false
+        description: "Primary target sector (e.g., finance, healthcare, government)"
+
+  - name: "Indicator"
+    description: "IOCs (Indicators of Compromise) including file hashes, IP addresses, domain names, URLs"
+    icon: "fingerprint"
+    permanent: false
+    decay_config:
+      half_life_days: 90  # Indicators change frequently
+      importance_floor: 0.3  # Lower floor as indicators become stale quickly
+      stability_multiplier: 0.8  # Reduced stability
+    attributes:
+      - name: "pattern"
+        type: "string"
+        required: false
+        description: "Indicator pattern (e.g., IP address, domain, hash, URL)"
+      - name: "pattern_type"
+        type: "string"
+        required: false
+        description: "Indicator type (e.g., ipv4-addr, domain, file-hash, url)"
+      - name: "valid_from"
+        type: "datetime"
+        required: false
+        description: "Start of indicator validity period"
+      - name: "valid_until"
+        type: "datetime"
+        required: false
+        description: "End of indicator validity period"
+      - name: "confidence"
+        type: "string"
+        required: false
+        description: "Confidence level (e.g., high, medium, low)"
+      - name: "source"
+        type: "string"
+        required: false
+        description: "Source of the indicator"
+
+  - name: "Infrastructure"
+    description: "Infrastructure used by threat actors, including C2 servers, staging servers, and attack infrastructure"
+    icon: "server"
+    permanent: false
+    decay_config:
+      half_life_days: 60  # Infrastructure changes frequently
+      importance_floor: 0.3
+      stability_multiplier: 0.7  # Low stability - infrastructure is dynamic
+    attributes:
+      - name: "type"
+        type: "string"
+        required: false
+        description: "Infrastructure type (e.g., c2-server, staging-server, phishing-server)"
+      - name: "address"
+        type: "string"
+        required: false
+        description: "IP address, domain name, or URL"
+      - name: "is_active"
+        type: "boolean"
+        required: false
+        description: "Whether the infrastructure is currently active"
+      - name: "first_seen"
+        type: "datetime"
+        required: false
+        description: "When the infrastructure was first observed"
+      - name: "last_seen"
+        type: "datetime"
+        required: false
+        description: "When the infrastructure was last observed"
+      - name: "as_number"
+        type: "string"
+        required: false
+        description: "Autonomous System number"
+
+  - name: "TTP"
+    description: "Tactics, Techniques, and Procedures (TTPs) describing how threat actors operate, mapped to MITRE ATT&CK"
+    icon: "cogs"
+    permanent: true  # TTPs are reference data and should not decay
+    decay_config:
+      half_life_days: 365  # Long half-life for reference data
+      importance_floor: 0.8  # High floor for TTPs
+      stability_multiplier: 1.5  # High stability for reference data
+    attributes:
+      - name: "tactic_id"
+        type: "string"
+        required: false
+        description: "MITRE ATT&CK tactic ID (e.g., TA0042)"
+      - name: "tactic_name"
+        type: "string"
+        required: false
+        description: "MITRE ATT&CK tactic name (e.g., Resource Development)"
+      - name: "technique_id"
+        type: "string"
+        required: false
+        description: "MITRE ATT&CK technique ID (e.g., T1566)"
+      - name: "technique_name"
+        type: "string"
+        required: false
+        description: "MITRE ATT&CK technique name (e.g., Phishing)"
+      - name: "description"
+        type: "string"
+        required: false
+        description: "Description of the TTP"
+      - name: "mitre_url"
+        type: "string"
+        required: false
+        description: "URL to MITRE ATT&CK reference"
+
+# CTI Relationship Types
+relationship_types:
+  - name: "uses"
+    description: "Threat actor uses malware or tools in their operations"
+    source_entity_types: ["ThreatActor"]
+    target_entity_types: ["Malware", "TTP", "Infrastructure"]
+    bidirectional: false
+    attributes:
+      - name: "confidence"
+        type: "string"
+        required: false
+        description: "Confidence in the relationship"
+      - name: "first_observed"
+        type: "datetime"
+        required: false
+        description: "When the usage was first observed"
+
+  - name: "targets"
+    description: "Threat actor or campaign targets specific organizations or sectors"
+    source_entity_types: ["ThreatActor", "Campaign"]
+    target_entity_types: ["Organization", "Person", "Infrastructure"]
+    bidirectional: false
+    inverse_name: "targeted_by"
+    attributes:
+      - name: "motivation"
+        type: "string"
+        required: false
+        description: "Motivation for targeting (e.g., espionage, financial)"
+      - name: "intensity"
+        type: "string"
+        required: false
+        description: "Intensity of targeting (e.g., high, medium, low)"
+
+  - name: "associated_with"
+    description: "General association between entities (e.g., indicator associated with campaign)"
+    source_entity_types: ["Indicator", "Infrastructure", "Malware"]
+    target_entity_types: ["Campaign", "ThreatActor", "Malware"]
+    bidirectional: true
+    attributes:
+      - name: "confidence"
+        type: "string"
+        required: false
+        description: "Confidence level of the association"
+
+  - name: "attributed_to"
+    description: "Campaign or activity attributed to a specific threat actor"
+    source_entity_types: ["Campaign", "Infrastructure"]
+    target_entity_types: ["ThreatActor"]
+    bidirectional: false
+    inverse_name: "attributed_campaigns"
+    attributes:
+      - name: "confidence"
+        type: "string"
+        required: false
+        description: "Attribution confidence level"
+      - name: "attribution_method"
+        type: "string"
+        required: false
+        description: "Method of attribution (e.g., code-analysis, infrastructure-overlap)"
+
+  - name: "exploits"
+    description: "Malware exploits a specific vulnerability"
+    source_entity_types: ["Malware", "ThreatActor", "TTP"]
+    target_entity_types: ["Vulnerability"]
+    bidirectional: false
+    inverse_name: "exploited_by"
+    attributes:
+      - name: "exploit_type"
+        type: "string"
+        required: false
+        description: "Type of exploit (e.g., zero-day, known)"
+
+  - name: "variant_of"
+    description: "Malware is a variant of another malware family"
+    source_entity_types: ["Malware"]
+    target_entity_types: ["Malware"]
+    bidirectional: false
+    inverse_name: "has_variant"
+    attributes:
+      - name: "similarity_score"
+        type: "number"
+        required: false
+        description: "Similarity score (0.0-1.0)"
+
+  - name: "located_at"
+    description: "Infrastructure is located at a specific geographic location or hosted by an ISP"
+    source_entity_types: ["Infrastructure"]
+    target_entity_types: ["Location", "Organization"]
+    bidirectional: false
+    inverse_name: "hosts"
+    attributes:
+      - name: "is_primary"
+        type: "boolean"
+        required: false
+        description: "Whether this is the primary location"
+
+  - name: "communicates_with"
+    description: "Infrastructure communicates with other infrastructure (e.g., C2 beacons)"
+    source_entity_types: ["Infrastructure"]
+    target_entity_types: ["Infrastructure"]
+    bidirectional: true
+    attributes:
+      - name: "protocol"
+        type: "string"
+        required: false
+        description: "Communication protocol (e.g., HTTP, DNS, HTTPS)"
+      - name: "frequency"
+        type: "string"
+        required: false
+        description: "Communication frequency (e.g., daily, hourly)"

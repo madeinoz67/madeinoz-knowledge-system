@@ -9,7 +9,7 @@ ARG BUILD_VERSION
 ARG BUILD_COMMIT
 ARG BUILD_DATE
 
-LABEL description="Madeinoz Knowledge System - Graphiti MCP with Ollama/OpenRouter support, Neo4j + FalkorDB, Lucene sanitization, Prompt Caching, Memory Decay Scoring"
+LABEL description="Madeinoz Knowledge System - Graphiti MCP with Ollama/OpenRouter support, Neo4j + FalkorDB, Lucene sanitization, Prompt Caching, Memory Decay Scoring, OSINT/CTI Ontology Support"
 LABEL version="${BUILD_VERSION:-1.8.5}"
 
 # Apply patches by replacing original files
@@ -25,7 +25,7 @@ COPY docker/patches/falkordb_lucene.py /app/mcp/src/utils/falkordb_lucene.py
 # Install prompt caching dependencies (OpenTelemetry + Prometheus)
 # Add to uv project dependencies
 WORKDIR /app/mcp
-RUN uv add "opentelemetry-api>=1.20.0" "opentelemetry-sdk>=1.20.0" "opentelemetry-exporter-prometheus>=0.41b0" "prometheus-client>=0.17.0" "pyyaml>=6.0" "pydantic>=2.0"
+RUN uv add "opentelemetry-api>=1.20.0" "opentelemetry-sdk>=1.20.0" "opentelemetry-exporter-prometheus>=0.41b0" "prometheus-client>=0.17.0" "pyyaml>=6.0" "pydantic>=2.0" "stix2>=3.0.0"
 
 # Prompt caching implementation (Feature 006)
 COPY docker/patches/cache_metrics.py /app/mcp/src/utils/cache_metrics.py
@@ -49,6 +49,12 @@ COPY docker/patches/memory_decay.py /app/mcp/src/utils/memory_decay.py
 # Cache bust: 2026-02-02-v1.8.1-fix
 COPY docker/patches/metrics_exporter.py /app/mcp/src/utils/metrics_exporter.py
 
+# OSINT/CTI Ontology support (Feature 018)
+# Adds custom entity/relationship types, configuration loading, and hot-reload
+COPY docker/patches/ontology_config.py /app/mcp/src/utils/ontology_config.py
+# STIX 2.1 Importer (User Story 3)
+COPY docker/patches/stix_importer.py /app/mcp/src/utils/stix_importer.py
+
 # Copy both Neo4j and FalkorDB configs
 COPY src/skills/server/config-neo4j.yaml /tmp/config-neo4j.yaml
 COPY src/skills/server/config-falkordb.yaml /tmp/config-falkordb.yaml
@@ -59,6 +65,9 @@ RUN echo "${BUILD_VERSION:-unknown}" > /app/.madeinoz-version
 
 # Copy Feature 009 memory decay configuration
 COPY config/decay-config.yaml /tmp/decay-config.yaml
+
+# Copy Feature 018 OSINT/CTI ontology configuration
+COPY config/ontology-types.yaml /app/mcp/config/ontology-types.yaml
 
 # Copy and configure entrypoint script for config selection
 # Note: Environment variables are provided by docker compose via env_file

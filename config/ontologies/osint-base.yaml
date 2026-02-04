@@ -1,0 +1,447 @@
+# OSINT Base Ontology Template
+# Feature: 018-osint-ontology
+# Phase 6: User Story 4 - Pre-built OSINT Templates
+#
+# This template provides core Open Source Intelligence (OSINT) entity and relationship types.
+# Enable this template by copying it to config/ontology-types.yaml or via merge_ontologies().
+
+version: "1.0.0"
+name: "OSINT Base Ontology"
+description: "Core Open Source Intelligence entity and relationship types for OSINT analysis"
+depends_on: []
+
+# OSINT Entity Types
+entity_types:
+  - name: "Account"
+    description: "User accounts on social media platforms, forums, and other online services"
+    icon: "user"
+    permanent: false
+    decay_config:
+      half_life_days: 90  # Account activity changes moderately
+      importance_floor: 0.4
+      stability_multiplier: 0.9
+    attributes:
+      - name: "platform"
+        type: "string"
+        required: false
+        description: "Platform name (e.g., Twitter, Telegram, Facebook, Instagram)"
+      - name: "username"
+        type: "string"
+        required: false
+        description: "Username or handle on the platform"
+      - name: "user_id"
+        type: "string"
+        required: false
+        description: "Platform-specific user ID"
+      - name: "display_name"
+        type: "string"
+        required: false
+        description: "Display name or profile name"
+      - name: "verified"
+        type: "boolean"
+        required: false
+        description: "Whether the account is verified by the platform"
+      - name: "follower_count"
+        type: "number"
+        required: false
+        description: "Number of followers"
+      - name: "created_at"
+        type: "datetime"
+        required: false
+        description: "Account creation date"
+      - name: "last_active"
+        type: "datetime"
+        required: false
+        description: "Last activity timestamp"
+      - name: "profile_url"
+        type: "string"
+        required: false
+        description: "URL to the profile"
+      - name: "bio"
+        type: "string"
+        required: false
+        description: "Account biography or description"
+
+  - name: "Domain"
+    description: "Domain names including websites, registered domains, and DNS entries"
+    icon: "globe"
+    permanent: false
+    decay_config:
+      half_life_days: 120  # Domains have medium-term relevance
+      importance_floor: 0.4
+      stability_multiplier: 1.0
+    attributes:
+      - name: "domain_name"
+        type: "string"
+        required: false
+        description: "Fully qualified domain name (e.g., example.com)"
+      - name: "tld"
+        type: "string"
+        required: false
+        description: "Top-level domain (e.g., .com, .org, .io)"
+      - name: "registered_date"
+        type: "datetime"
+        required: false
+        description: "Domain registration date"
+      - name: "expiry_date"
+        type: "datetime"
+        required: false
+        description: "Domain expiration date"
+      - name: "registrar"
+        type: "string"
+        required: false
+        description: "Domain registrar"
+      - name: "nameservers"
+        type: "list"
+        required: false
+        description: "List of nameservers"
+      - name: "dns_records"
+        type: "list"
+        required: false
+        description: "DNS record types (A, AAAA, MX, TXT, etc.)"
+      - name: "status"
+        type: "string"
+        required: false
+        description: "Domain status (e.g., active, suspended, expired)"
+      - name: "ssl_valid"
+        type: "boolean"
+        required: false
+        description: "Whether SSL certificate is valid"
+
+  - name: "Email"
+    description: "Email addresses for communication and account association"
+    icon: "envelope"
+    permanent: false
+    decay_config:
+      half_life_days: 90  # Email addresses have moderate relevance
+      importance_floor: 0.3
+      stability_multiplier: 0.8
+    attributes:
+      - name: "email_address"
+        type: "string"
+        required: false
+        description: "Full email address"
+      - name: "domain"
+        type: "string"
+        required: false
+        description: "Email domain (e.g., gmail.com, protonmail.com)"
+      - name: "username"
+        type: "string"
+        required: false
+        description: "Email username (local part)"
+      - name: "verified"
+        type: "boolean"
+        required: false
+        description: "Whether the email is verified"
+      - name: "data_breach"
+        type: "boolean"
+        required: false
+        description: "Whether found in known data breaches"
+      - name: "breach_sources"
+        type: "list"
+        required: false
+        description: "List of data breach sources"
+      - name: "first_seen"
+        type: "datetime"
+        required: false
+        description: "First time this email was observed"
+
+  - name: "Phone"
+    description: "Phone numbers including mobile, landline, and VoIP"
+    icon: "phone"
+    permanent: false
+    decay_config:
+      half_life_days: 120  # Phone numbers have medium-term relevance
+      importance_floor: 0.4
+      stability_multiplier: 0.9
+    attributes:
+      - name: "phone_number"
+        type: "string"
+        required: false
+        description: "Phone number in E.164 format if possible"
+      - name: "country_code"
+        type: "string"
+        required: false
+        description: "Country calling code (e.g., +1, +44, +61)"
+      - name: "type"
+        type: "string"
+        required: false
+        description: "Phone type (e.g., mobile, landline, voip)"
+      - name: "carrier"
+        type: "string"
+        required: false
+        description: "Mobile carrier or service provider"
+      - name: "whatsapp_linked"
+        type: "boolean"
+        required: false
+        description: "Whether linked to WhatsApp account"
+      - name: "telegram_linked"
+        type: "boolean"
+        required: false
+        description: "Whether linked to Telegram account"
+      - name: "signal_linked"
+        type: "boolean"
+        required: false
+        description: "Whether linked to Signal account"
+
+  - name: "Image"
+    description: "Images and photos for OSINT analysis including EXIF data and reverse search"
+    icon: "image"
+    permanent: false
+    decay_config:
+      half_life_days: 90  # Images have moderate relevance
+      importance_floor: 0.3
+      stability_multiplier: 0.8
+    attributes:
+      - name: "url"
+        type: "string"
+        required: false
+        description: "Image URL"
+      - name: "filename"
+        type: "string"
+        required: false
+        description: "Image filename"
+      - name: "mime_type"
+        type: "string"
+        required: false
+        description: "MIME type (e.g., image/jpeg, image/png)"
+      - name: "width"
+        type: "number"
+        required: false
+        description: "Image width in pixels"
+      - name: "height"
+        type: "number"
+        required: false
+        description: "Image height in pixels"
+      - name: "exif_data"
+        type: "string"
+        required: false
+        description: "EXIF metadata (geolocation, device, timestamp)"
+      - name: "reverse_search_results"
+        type: "list"
+        required: false
+        description: "Results from reverse image search"
+      - name: "source"
+        type: "string"
+        required: false
+        description: "Source where image was found"
+      - name: "is_profile_photo"
+        type: "boolean"
+        required: false
+        description: "Whether image is used as a profile photo"
+      - name: "faces_detected"
+        type: "number"
+        required: false
+        description: "Number of faces detected in image"
+
+  - name: "Investigation"
+    description: "Investigation case or project tracking for OSINT/CTI research"
+    icon: "folder-open"
+    permanent: false
+    decay_config:
+      half_life_days: 365  # Investigations have long-term relevance
+      importance_floor: 0.6
+      stability_multiplier: 1.2
+    attributes:
+      - name: "case_number"
+        type: "string"
+        required: false
+        description: "Unique case or investigation identifier"
+      - name: "title"
+        type: "string"
+        required: false
+        description: "Investigation title"
+      - name: "description"
+        type: "string"
+        required: false
+        description: "Investigation description and objectives"
+      - name: "status"
+        type: "string"
+        required: false
+        description: "Investigation status (e.g., open, in_progress, closed, archived)"
+      - name: "priority"
+        type: "string"
+        required: false
+        description: "Priority level (e.g., critical, high, medium, low)"
+      - name: "classification"
+        type: "string"
+        required: false
+        description: "Classification level (e.g., public, confidential, secret)"
+      - name: "created_date"
+        type: "datetime"
+        required: false
+        description: "Investigation creation date"
+      - name: "closed_date"
+        type: "datetime"
+        required: false
+        description: "Investigation closure date"
+      - name: "assigned_to"
+        type: "string"
+        required: false
+        description: "Investigator or team assigned"
+      - name: "tags"
+        type: "list"
+        required: false
+        description: "Investigation tags for categorization"
+
+# OSINT Relationship Types
+relationship_types:
+  - name: "owns"
+    description: "Person or organization owns an account, domain, or phone number"
+    source_entity_types: ["Person", "Organization"]
+    target_entity_types: ["Account", "Domain", "Email", "Phone"]
+    bidirectional: false
+    inverse_name: "owned_by"
+    attributes:
+      - name: "verified"
+        type: "boolean"
+        required: false
+        description: "Whether ownership is verified"
+      - name: "since"
+        type: "datetime"
+        required: false
+        description: "When ownership started"
+      - name: "is_primary"
+        type: "boolean"
+        required: false
+        description: "Whether this is the primary ownership"
+
+  - name: "registered_to"
+    description: "Domain is registered to a person or organization"
+    source_entity_types: ["Domain"]
+    target_entity_types: ["Person", "Organization"]
+    bidirectional: false
+    inverse_name: "registered_domains"
+    attributes:
+      - name: "registrar"
+        type: "string"
+        required: false
+        description: "Domain registrar"
+      - name: "registered_date"
+        type: "datetime"
+        required: false
+        description: "Registration date"
+      - name: "privacy_protected"
+        type: "boolean"
+        required: false
+        description: "Whether WHOIS privacy is enabled"
+
+  - name: "hosted_on"
+    description: "Domain or account is hosted on infrastructure or platform"
+    source_entity_types: ["Domain", "Account"]
+    target_entity_types: ["Infrastructure", "Organization"]
+    bidirectional: false
+    inverse_name: "hosts"
+    attributes:
+      - name: "hosting_provider"
+        type: "string"
+        required: false
+        description: "Hosting provider name"
+      - name: "ip_address"
+        type: "string"
+        required: false
+        description: "IP address of hosting"
+      - name: "nameserver"
+        type: "string"
+        required: false
+        description: "Nameserver for domain"
+
+  - name: "contacted_via"
+    description: "Person contacted through specific channel (email, phone, account)"
+    source_entity_types: ["Person", "Organization"]
+    target_entity_types: ["Email", "Phone", "Account"]
+    bidirectional: false
+    inverse_name: "contacted"
+    attributes:
+      - name: "contact_date"
+        type: "datetime"
+        required: false
+        description: "When contact was made"
+      - name: "contact_type"
+        type: "string"
+        required: false
+        description: "Type of contact (e.g., inquiry, threat, solicitation)"
+      - name: "frequency"
+        type: "string"
+        required: false
+        description: "Contact frequency (e.g., once, recurring)"
+
+  - name: "contains"
+    description: "Entity contains or embeds other entities (e.g., account bio contains email, website contains phone)"
+    source_entity_types: ["Account", "Domain", "Image"]
+    target_entity_types: ["Email", "Phone", "Domain", "Account", "Image"]
+    bidirectional: false
+    inverse_name: "contained_in"
+    attributes:
+      - name: "location"
+        type: "string"
+        required: false
+        description: "Where the entity is contained (e.g., bio, description, metadata)"
+      - name: "extracted_date"
+        type: "datetime"
+        required: false
+        description: "When the containment was discovered"
+      - name: "confidence"
+        type: "string"
+        required: false
+        description: "Confidence in the extraction"
+
+  - name: "investigates"
+    description: "Investigation focuses on or investigates specific entities"
+    source_entity_types: ["Investigation"]
+    target_entity_types: ["Person", "Organization", "Account", "Domain", "Email", "Phone"]
+    bidirectional: false
+    inverse_name: "investigated_in"
+    attributes:
+      - name: "focus_area"
+        type: "string"
+        required: false
+        description: "Area of investigation focus"
+      - name: "relevance"
+        type: "string"
+        required: false
+        description: "Relevance to investigation (e.g., primary, secondary, background)"
+      - name: "added_date"
+        type: "datetime"
+        required: false
+        description: "When entity was added to investigation"
+
+  - name: "links_to"
+    description: "Account or domain links to another account, domain, or URL (outbound connection)"
+    source_entity_types: ["Account", "Domain"]
+    target_entity_types: ["Account", "Domain", "Infrastructure"]
+    bidirectional: false
+    inverse_name: "linked_from"
+    attributes:
+      - name: "link_type"
+        type: "string"
+        required: false
+        description: "Type of link (e.g., profile, post, redirect, shared)"
+      - name: "context"
+        type: "string"
+        required: false
+        description: "Context of the link"
+      - name: "discovered_date"
+        type: "datetime"
+        required: false
+        description: "When the link was discovered"
+
+  - name: "exposes"
+    description: "Entity exposes information about another entity (e.g., data breach exposes credentials, image exposes location)"
+    source_entity_types: ["Image", "Email", "Account", "Domain", "Investigation"]
+    target_entity_types: ["Person", "Phone", "Email", "Location", "Account"]
+    bidirectional: false
+    inverse_name: "exposed_by"
+    attributes:
+      - name: "exposure_type"
+        type: "string"
+        required: false
+        description: "Type of exposure (e.g., data_breach, exif leak, accidental disclosure)"
+      - name: "severity"
+        type: "string"
+        required: false
+        description: "Severity of exposure (e.g., critical, high, medium, low)"
+      - name: "exposure_date"
+        type: "datetime"
+        required: false
+        description: "When the exposure occurred"
