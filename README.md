@@ -76,6 +76,7 @@ See [INSTALL.md](INSTALL.md) for complete installation instructions, performance
 - **Grafana Dashboards** - Visualize knowledge, token usage, graph stats and memory health
 - **Temporal Tracking** - Know when knowledge was captured and how it evolves
 - **Memory Sync** - Auto-syncs learnings from PAI Memory System
+- **OSINT/CTI Ontology** - Custom entity types for threat intelligence (ThreatActor, Malware, Vulnerability, Indicator, etc.) with STIX 2.1 import support
 
 ## Usage
 
