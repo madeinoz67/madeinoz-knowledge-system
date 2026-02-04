@@ -43,8 +43,6 @@ keywords: [knowledge, graph, memory, semantic search, entity extraction, relatio
 
 ## Changelog
 
-**Latest: v1.8.5**
-
 See [CHANGELOG.md](CHANGELOG.md) for full version history.
 
 ## Documentation
