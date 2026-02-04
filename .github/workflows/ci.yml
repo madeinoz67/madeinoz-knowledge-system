@@ -190,7 +190,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: docs
-          path: site/.
+          path: site
           if-no-files-found: error
 
   release:
@@ -321,7 +321,7 @@ jobs:
         run: pip install mkdocs-material mkdocs-glightbox
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./site
