@@ -68,6 +68,7 @@ See [INSTALL.md](INSTALL.md) for complete installation instructions, performance
 - **Automatic Entity Extraction** - LLM-powered extraction of people, organizations, concepts, and more
 - **Relationship Mapping** - Automatically discovers connections between entities
 - **Semantic Search** - Find knowledge using natural language, not just keywords
+- **Investigative Search** - Find entity with all connected relationships in a single query (configurable depth 1-3 hops)
 - **Memory Decay Scoring** - Automatic memory prioritization with importance/stability classification
 - **Weighted Search** - Results ranked by semantic relevance, recency, and importance
 - **Lifecycle Management** - Automated memory transitions (ACTIVE → DORMANT → ARCHIVED → EXPIRED)
