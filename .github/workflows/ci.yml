@@ -187,7 +187,7 @@ jobs:
         run: mkdocs build --strict
 
       - name: Upload docs artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: docs
           path: site
@@ -307,7 +307,7 @@ jobs:
 
       # Publish documentation to GitHub Pages
       - name: Download docs artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v3
         with:
           name: docs
           path: ./site
