@@ -55,6 +55,12 @@ COPY docker/patches/ontology_config.py /app/mcp/src/utils/ontology_config.py
 # STIX 2.1 Importer (User Story 3)
 COPY docker/patches/stix_importer.py /app/mcp/src/utils/stix_importer.py
 
+# Investigative Search (Feature 020)
+# Adds response types for investigate_entity MCP tool
+COPY docker/patches/models/__init__.py /app/mcp/src/models/__init__.py
+# Graph traversal engine
+COPY docker/patches/utils/graph_traversal.py /app/mcp/src/utils/graph_traversal.py
+
 # Copy both Neo4j and FalkorDB configs
 COPY src/skills/server/config-neo4j.yaml /tmp/config-neo4j.yaml
 COPY src/skills/server/config-falkordb.yaml /tmp/config-falkordb.yaml
