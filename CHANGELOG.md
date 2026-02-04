@@ -22,6 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Extract docs artifact properly for GitHub Pages deployment
 - Correct artifact upload/download for docs deployment
+- Downgrade artifact actions to v3 for proper extraction
+- Use v4 artifact actions with directory-preserving path
+- Upgrade peaceiris/actions-gh-pages to v4
 
 ## [1.8.4] - 2026-02-02
 
