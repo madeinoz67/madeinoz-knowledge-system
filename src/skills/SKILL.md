@@ -1,7 +1,7 @@
 ---
 name: Knowledge
 version: 1.9.0
-description: Personal knowledge management using Graphiti knowledge graph with Neo4j/FalkorDB, supporting remote MCP access with connection profiles and TLS. USE WHEN 'store this', 'remember this', 'add to knowledge', 'search my knowledge', 'what do I know about', 'find in knowledge base', 'save to memory', 'graphiti', 'knowledge graph', 'entity extraction', 'relationship mapping', 'semantic search', 'episode', 'install knowledge', 'setup knowledge system', 'configure knowledge graph', 'remote knowledge server', 'connect to knowledge', 'knowledge profile', knowledge capture, retrieval, synthesis, memory decay, decay scoring, lifecycle state, importance classification, stability classification, health metrics, run maintenance, permanent memory, soft-delete.
+description: Personal knowledge management using Graphiti knowledge graph with Neo4j/FalkorDB, supporting remote MCP access with connection profiles and TLS, OSINT/CTI ontology, and investigative search. USE WHEN 'store this', 'remember this', 'add to knowledge', 'search my knowledge', 'what do I know about', 'find in knowledge base', 'save to memory', 'graphiti', 'knowledge graph', 'entity extraction', 'relationship mapping', 'semantic search', 'episode', 'install knowledge', 'setup knowledge system', 'configure knowledge graph', 'remote knowledge server', 'connect to knowledge', 'knowledge profile', knowledge capture, retrieval, synthesis, memory decay, decay scoring, lifecycle state, importance classification, stability classification, health metrics, run maintenance, permanent memory, soft-delete, 'investigate entity', 'find connections', 'graph traversal', 'threat hunting', 'list ontology', 'custom entity types', 'CTI entities', 'OSINT entities', 'import STIX', 'STIX bundle', 'threat intel import'.
 tools:
   # MCP Wrapper CLI (76%+ token savings vs direct MCP calls)
   - Bash(bun run */knowledge-cli.ts add_episode *)
@@ -19,6 +19,14 @@ tools:
   # Feature 010: Remote MCP access
   - Bash(bun run */knowledge-cli.ts status)
   - Bash(bun run */knowledge-cli.ts list_profiles)
+  # Feature 018: OSINT/CTI Ontology
+  - Bash(bun run */knowledge-cli.ts ontology:list)
+  - Bash(bun run */knowledge-cli.ts ontology:validate)
+  - Bash(bun run */knowledge-cli.ts ontology:reload)
+  - Bash(bun run */knowledge-cli.ts stix:import *)
+  - Bash(bun run */knowledge-cli.ts stix:status)
+  # Feature 020: Investigative Search
+  - Bash(bun run */knowledge-cli.ts investigate *)
   # Server management
   - Bash(bun run server-cli *)
 ---
@@ -42,6 +50,9 @@ Persistent personal knowledge system powered by Graphiti knowledge graph with Ne
 | **Run Maintenance** | "run knowledge maintenance", "update decay scores", "recalculate memory decay" | `workflows/RunMaintenance.md` |
 | **Clear Graph** | "clear knowledge", "reset graph", "delete all knowledge" | `workflows/ClearGraph.md` |
 | **Bulk Import** | "import these documents", "bulk knowledge import" | `workflows/BulkImport.md` |
+| **Investigate Entity** | "investigate entity", "find connections", "graph traversal", "threat hunting", "connected entities" | `workflows/InvestigateEntity.md` |
+| **Ontology Management** | "list ontology", "custom entity types", "CTI entities", "OSINT entities", "ontology config" | `workflows/OntologyManagement.md` |
+| **STIX Import** | "import STIX", "STIX bundle", "threat intel import", "CTI data" | `workflows/StixImport.md` |
 
 ## Core Capabilities
 
@@ -55,6 +66,7 @@ Persistent personal knowledge system powered by Graphiti knowledge graph with Ne
 
 **Built-in Entity Types:**
 
+**Standard Types:**
 - **Preferences** - User choices, opinions, configurations
 - **Requirements** - Features, needs, specifications
 - **Procedures** - SOPs, workflows, how-to guides
@@ -62,6 +74,21 @@ Persistent personal knowledge system powered by Graphiti knowledge graph with Ne
 - **Events** - Time-bound occurrences, experiences
 - **Organizations** - Companies, institutions, groups
 - **Documents** - Articles, reports, books, content
+
+**OSINT/CTI Types (Feature 018):**
+- **ThreatActor** - Malicious actors, APT groups, threat campaigns
+- **Malware** - Malicious software, viruses, ransomware
+- **Vulnerability** - CVE, security flaws, exploits
+- **Campaign** - Coordinated threat activities
+- **Indicator** - IoCs, hashes, IPs, domains (STIX Indicator)
+- **Infrastructure** - Command & control, attack infrastructure
+- **TTP** - Tactics, Techniques, and Procedures (MITRE ATT&CK)
+- **Account** - Social media, email, service accounts
+- **Domain** - Registered domains, DNS records
+- **Email** - Email addresses, mailboxes
+- **Phone** - Phone numbers, mobile devices
+- **Image** - Photos, screenshots, media files
+- **Investigation** - OSINT investigations, case files
 
 ## Prerequisites
 
@@ -149,6 +176,17 @@ bun run tools/knowledge-cli.ts run_maintenance
 bun run tools/knowledge-cli.ts run_maintenance --dry-run
 bun run tools/knowledge-cli.ts classify_memory "content" --source "description"
 bun run tools/knowledge-cli.ts recover_memory <uuid>
+
+# Feature 018: OSINT/CTI Ontology
+bun run tools/knowledge-cli.ts ontology:list
+bun run tools/knowledge-cli.ts ontology:validate
+bun run tools/knowledge-cli.ts ontology:reload
+bun run tools/knowledge-cli.ts stix:import <file-or-url>
+bun run tools/knowledge-cli.ts stix:status
+
+# Feature 020: Investigative Search
+bun run tools/knowledge-cli.ts investigate "entity-name" --depth 2
+bun run tools/knowledge-cli.ts investigate "apt28" --relationship-type attributed_to --relationship-type uses
 ```
 
 **Options:**
@@ -158,6 +196,9 @@ bun run tools/knowledge-cli.ts recover_memory <uuid>
 - `--metrics-file <path>` - Append metrics to JSONL file
 - `--since <date>` - Filter results created after this date
 - `--until <date>` - Filter results created before this date
+- `--weighted` - Apply weighted scoring (60% semantic + 25% recency + 15% importance)
+- `--depth <N>` - Investigation depth for graph traversal (1-3 hops, default: 1)
+- `--relationship-type <TYPE>` - Filter by relationship type (can specify multiple)
 
 **Temporal Search (date filtering):**
 
@@ -270,6 +311,11 @@ http://localhost:8000/mcp/
 | `run_decay_maintenance` | - | "Run decay maintenance cycle" |
 | `classify_memory` | - | "Classify memory importance and stability" |
 | `recover_soft_deleted` | - | "Recover soft-deleted memory" |
+| `investigate_entity` | - | "Investigate entity connections (graph traversal)" |
+| `list_ontology_types` | - | "List custom entity and relationship types" |
+| `validate_ontology` | - | "Validate ontology configuration" |
+| `reload_ontology` | - | "Reload ontology configuration (hot-reload)" |
+| `import_stix_bundle` | - | "Import STIX 2.1 bundle from file or URL" |
 
 **Naming Convention (Hybrid Approach):**
 
@@ -336,4 +382,4 @@ MADEINOZ_KNOWLEDGE_GRAPHITI_TELEMETRY_ENABLED=false
 - [Graphiti Documentation](https://help.getzep.com/graphiti)
 - [Podman Configuration](../README.md)
 
-**Last Updated:** 2026-01-28
+**Last Updated:** 2026-02-04
