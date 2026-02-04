@@ -498,20 +498,26 @@ class TestMultiHopTraversal:
         traversal = GraphTraversal(mock_driver, database_type="falkordb")
         traversal._get_falkordb_neighbors = mock_get_neighbors
 
-        # Test depth 1
+        # Test depth 1 - neighbors discovered but not processed further
         visited_entities.clear()
         result_1 = traversal.traverse("start-uuid", max_depth=1)
         assert result_1.depth_explored == 1
-        assert "entity-b" in visited_entities
-        assert "entity-c" not in visited_entities  # Should not reach depth 2
+        assert "start-uuid" in visited_entities
+        # entity-b is in connections but not processed (no further traversal)
+        assert len(result_1.connections) == 1
+        assert result_1.connections[0]["target_entity"]["uuid"] == "entity-b"
 
-        # Test depth 2
+        # Test depth 2 - entity-b is processed, entity-c is discovered
         visited_entities.clear()
         result_2 = traversal.traverse("start-uuid", max_depth=2)
         assert result_2.depth_explored == 2
+        assert "start-uuid" in visited_entities
         assert "entity-b" in visited_entities
-        assert "entity-c" in visited_entities
-        assert "entity-d" not in visited_entities  # Should not reach depth 3
+        # entity-c is in connections but not processed further
+        assert len(result_2.connections) == 2
+        connection_uuids = [c["target_entity"]["uuid"] for c in result_2.connections]
+        assert "entity-b" in connection_uuids
+        assert "entity-c" in connection_uuids
 
     @patch('utils.graph_traversal.NEO4J_AVAILABLE', True)
     def test_hop_distance_included_in_connections(self):
