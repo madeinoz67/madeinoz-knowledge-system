@@ -306,13 +306,24 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Publish documentation to GitHub Pages
-      # Use built-in artifact download (v4 feature) instead of separate download step
+      # Rebuild docs in Release job (artifact download is unreliable)
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install MkDocs Material
+        run: pip install mkdocs-material mkdocs-glightbox
+
+      - name: Build documentation
+        run: mkdocs build --strict
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
           publish_branch: gh-pages
-          artifact_name: docs
 
   update-unreleased:
     name: Update Unreleased Changes
