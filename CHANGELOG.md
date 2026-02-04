@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add OSINT/CTI ontology support with custom entities and CLI commands ([#64](https://github.com/madeinoz67/madeinoz-knowledge-system/issues/64))
 - Investigative search with connected entities (Feature 020) ([#65](https://github.com/madeinoz67/madeinoz-knowledge-system/issues/65))
 
+
+### Fixed
+
+
+- Extract docs artifact properly for GitHub Pages deployment
+
 ## [1.8.4] - 2026-02-02
 
 
