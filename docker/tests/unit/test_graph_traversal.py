@@ -364,8 +364,9 @@ class TestRelationshipTypeFiltering:
         )
 
         # Should include relationship type pattern
-        assert ":KNOWS|:WORKS_FOR" in query or "KNOWS" in query
-        assert "test-uuid" in query
+        assert "KNOWS" in query or "WORKS_FOR" in query
+        # Should use parameterized query (not literal values for security)
+        assert "$start_uuid" in query
 
     def test_neo4j_query_without_relationship_filter(self):
         """Should build query without relationship type filter."""
@@ -383,7 +384,8 @@ class TestRelationshipTypeFiltering:
 
         # Should not include relationship type pattern
         assert "KNOWS" not in query
-        assert "test-uuid" in query
+        # Should use parameterized query (not literal values for security)
+        assert "$start_uuid" in query
 
 
 class TestTraversalResult:

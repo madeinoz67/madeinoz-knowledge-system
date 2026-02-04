@@ -283,10 +283,10 @@ class GraphTraversal:
 
         # Add relationship type filter
         if relationship_types:
-            # Build relationship type pattern for each hop
+            # Build relationship type pattern for each hop (with leading colons)
             rel_pattern = "|".join(f":{rt}" for rt in relationship_types)
             query = f"""
-            MATCH path = (start)-[:{{{rel_pattern}}}*1..{max_depth}]-(end)
+            MATCH path = (start)-[{rel_pattern}*1..{max_depth}]-(end)
             WHERE start.uuid = $start_uuid
             """
 
