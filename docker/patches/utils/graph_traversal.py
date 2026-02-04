@@ -189,7 +189,7 @@ class GraphTraversal:
         )
 
         # Check if warning threshold exceeded
-        if result.total_connections_explored > self.WARNING_THRESHOLD:
+        if result.total_connections_explored >= self.WARNING_THRESHOLD:
             result.max_connections_exceeded = True
             result.warning = (
                 f"Found {result.total_connections_explored:,} connections "

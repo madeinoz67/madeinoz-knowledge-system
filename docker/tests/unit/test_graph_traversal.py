@@ -107,6 +107,7 @@ class TestDepthValidation:
 class TestCycleDetection:
     """Test cycle detection in graph traversal (T006, T016)."""
 
+    @patch('utils.graph_traversal.NEO4J_AVAILABLE', True)
     def test_cycle_detection_in_neo4j_traversal(self):
         """Should detect and skip already-visited entities in Neo4j."""
         mock_driver = MagicMock()
@@ -180,6 +181,7 @@ class TestCycleDetection:
         assert result.connections[1]["target_entity"]["uuid"] == "entity-2"
         assert result.connections[1]["target_entity"]["name"] == "Entity Two"
 
+    @patch('utils.graph_traversal.REDIS_AVAILABLE', True)
     def test_cycle_detection_in_falkordb_traversal(self):
         """Should detect and report cycles in FalkorDB BFS traversal."""
         mock_driver = MagicMock()
@@ -238,6 +240,7 @@ class TestCycleDetection:
         # Should still have connections from first hop
         assert len(result.connections) == 2
 
+    @patch('utils.graph_traversal.REDIS_AVAILABLE', True)
     def test_self_referential_relationship(self):
         """Should handle self-referential relationships (A → A)."""
         mock_driver = MagicMock()
@@ -331,6 +334,7 @@ class TestConnectionWarningThreshold:
 class TestEntityNotFound:
     """Test entity not found handling."""
 
+    @patch('utils.graph_traversal.NEO4J_AVAILABLE', True)
     def test_entity_not_found_in_neo4j(self):
         """Should raise EntityNotFoundError when start entity doesn't exist."""
         mock_driver = MagicMock()
@@ -464,6 +468,7 @@ class TestMultiHopTraversal:
         )
         assert "[r*1..3]" in query_3
 
+    @patch('utils.graph_traversal.REDIS_AVAILABLE', True)
     def test_falkorb_bfs_explores_by_depth(self):
         """FalkorDB BFS should respect max depth during traversal."""
         mock_driver = MagicMock()
@@ -508,6 +513,7 @@ class TestMultiHopTraversal:
         assert "entity-c" in visited_entities
         assert "entity-d" not in visited_entities  # Should not reach depth 3
 
+    @patch('utils.graph_traversal.NEO4J_AVAILABLE', True)
     def test_hop_distance_included_in_connections(self):
         """Should include hop_distance in all connection records."""
         mock_driver = MagicMock()
