@@ -1,0 +1,2870 @@
+<!DOCTYPE html><html lang="en" class="no-js"><head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Step-by-step solutions for common issues with the Madeinoz Knowledge System, organized by symptom">
+      
+      
+        <meta name="author" content="madeinoz67">
+      
+      
+        <link rel="canonical" href="https://madeinoz67.github.io/madeinoz-knowledge-system/troubleshooting/common-issues.html">
+      
+      
+        <link rel="prev" href="../concepts/hooks-integration.html">
+      
+      
+        <link rel="next" href="known-issues.html">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Troubleshooting Guide - Madeinoz Knowledge System (PAI Pack)</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+        <script src="https://unpkg.com/iframe-worker/shim"></script>
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  <link href="../assets/stylesheets/glightbox.min.css" rel="stylesheet"><script src="../assets/javascripts/glightbox.min.js"></script><style id="glightbox-style">
+            html.glightbox-open { overflow: initial; height: 100%; }
+            .gslide-title { margin-top: 0px; user-select: text; }
+            .gslide-desc { color: #666; user-select: text; }
+            .gslide-image img { background: white; }
+            .gscrollbar-fixer { padding-right: 15px; }
+            .gdesc-inner { font-size: 0.75rem; }
+            body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color); }
+            body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color); }
+            body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color); }
+        </style></head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="light-blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#troubleshooting-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../index.html" title="Madeinoz Knowledge System (PAI Pack)" class="md-header__button md-logo" aria-label="Madeinoz Knowledge System (PAI Pack)" data-md-component="logo">
+      
+  <img src="../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Madeinoz Knowledge System (PAI Pack)
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Troubleshooting Guide
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="light-blue" aria-label="Switch to dark mode" type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="light-blue" aria-label="Switch to light mode" type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/madeinoz67/madeinoz-knowledge-system" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+  </div>
+  <div class="md-source__repository">
+    madeinoz67/madeinoz-knowledge-system
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../index.html" title="Madeinoz Knowledge System (PAI Pack)" class="md-nav__button md-logo" aria-label="Madeinoz Knowledge System (PAI Pack)" data-md-component="logo">
+      
+  <img src="../assets/logo.png" alt="logo">
+
+    </a>
+    Madeinoz Knowledge System (PAI Pack)
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/madeinoz67/madeinoz-knowledge-system" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+  </div>
+  <div class="md-source__repository">
+    madeinoz67/madeinoz-knowledge-system
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2">
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/overview.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/quick-reference.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3">
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Installation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/requirements.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/verification.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/remote-deployment.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Remote Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../remote-access.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Remote Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4">
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Usage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/basic-usage.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Basic Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/advanced.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/memory-decay.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory Decay &amp; Lifecycle
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../weighted-search.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Weighted Search
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/monitoring.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/backup-restore.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backup &amp; Restore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/osint-workflows.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OSINT &amp; CTI Workflows
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5">
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/architecture.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/knowledge-graph.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Knowledge Graph
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/hooks-integration.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hooks &amp; Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Troubleshooting
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Common Issues
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="common-issues.html" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Common Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quick-diagnostics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Diagnostics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quick Diagnostics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-check-if-services-are-running" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Check if Services are Running
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-check-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Check Logs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-test-connectivity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Test Connectivity
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-problems" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Problems
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Problems">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cannot-connect-to-server-or-connection-refused" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Cannot connect to server" or "Connection refused"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-key-not-configured-or-invalid-api-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "API key not configured" or "Invalid API key"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-entities-extracted-or-poor-extraction-quality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "No entities extracted" or Poor Extraction Quality
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#container-wont-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Container Won't Start
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#search-returns-no-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Search Returns No Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vector-dimension-mismatch-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vector Dimension Mismatch Error
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rate-limit-exceeded-or-api-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Rate limit exceeded" or API Errors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sse-endpoint-not-responding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "SSE endpoint not responding"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#knowledge-not-syncing-from-memory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Knowledge Not Syncing from Memory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#high-api-costs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        High API Costs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database-web-ui-not-accessible" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database Web UI Not Accessible
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#memory-or-performance-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory or Performance Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgeduplicate-or-extractedentities-pydantic-validation-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        EdgeDuplicate or ExtractedEntities Pydantic Validation Errors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#initialization-not-complete-warning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Initialization not complete" Warning
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#query-syntax-errors-with-special-characters-falkordb-backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Query Syntax Errors with Special Characters (FalkorDB Backend)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#diagnostic-commands-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnostic Commands Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-more-help" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Getting More Help
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#still-stuck" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Still Stuck?
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="known-issues.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Known Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7">
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/cli.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/configuration.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/observability.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Observability &amp; Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/cache-implementation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cache Implementation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/model-guide.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/benchmarks.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmarks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/developer-notes.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/releases.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release Process
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../acknowledgments.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Acknowledgments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quick-diagnostics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Diagnostics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quick Diagnostics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-check-if-services-are-running" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Check if Services are Running
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-check-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Check Logs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-test-connectivity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Test Connectivity
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-problems" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Problems
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Problems">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cannot-connect-to-server-or-connection-refused" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Cannot connect to server" or "Connection refused"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-key-not-configured-or-invalid-api-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "API key not configured" or "Invalid API key"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-entities-extracted-or-poor-extraction-quality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "No entities extracted" or Poor Extraction Quality
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#container-wont-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Container Won't Start
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#search-returns-no-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Search Returns No Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vector-dimension-mismatch-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vector Dimension Mismatch Error
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rate-limit-exceeded-or-api-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Rate limit exceeded" or API Errors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sse-endpoint-not-responding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "SSE endpoint not responding"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#knowledge-not-syncing-from-memory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Knowledge Not Syncing from Memory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#high-api-costs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        High API Costs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database-web-ui-not-accessible" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database Web UI Not Accessible
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#memory-or-performance-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory or Performance Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgeduplicate-or-extractedentities-pydantic-validation-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        EdgeDuplicate or ExtractedEntities Pydantic Validation Errors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#initialization-not-complete-warning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Initialization not complete" Warning
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#query-syntax-errors-with-special-characters-falkordb-backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Query Syntax Errors with Special Characters (FalkorDB Backend)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#diagnostic-commands-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnostic Commands Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-more-help" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Getting More Help
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#still-stuck" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Still Stuck?
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="troubleshooting-guide">Troubleshooting Guide<a class="headerlink" href="#troubleshooting-guide" title="Permanent link">¶</a></h1>
+<p>This guide helps you fix common issues with the Madeinoz Knowledge System. Problems are organized by symptom with step-by-step solutions.</p>
+<h2 id="quick-diagnostics">Quick Diagnostics<a class="headerlink" href="#quick-diagnostics" title="Permanent link">¶</a></h2>
+<p>Before diving into specific problems, run these checks:</p>
+<h3 id="1-check-if-services-are-running">1. Check if Services are Running<a class="headerlink" href="#1-check-if-services-are-running" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nb">cd</span><span class="w"> </span>~/.config/pai/Packs/madeinoz-knowledge-system
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>status
+</span></code></pre></div>
+<p>Expected output:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Madeinoz Knowledge System Status:
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>Containers:
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  madeinoz-knowledge-graph-mcp: running
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  madeinoz-knowledge-neo4j: running
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>MCP Server: http://localhost:8000/sse
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>  Status: healthy
+</span></code></pre></div>
+<h3 id="2-check-logs">2. Check Logs<a class="headerlink" href="#2-check-logs" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>logs
+</span></code></pre></div>
+<p>Look for errors (lines with ERROR or WARN).</p>
+<h3 id="3-test-connectivity">3. Test Connectivity<a class="headerlink" href="#3-test-connectivity" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>curl<span class="w"> </span>http://localhost:8000/sse<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Accept: text/event-stream"</span>
+</span></code></pre></div>
+<p>Should see some response about the endpoint.</p>
+<h2 id="common-problems">Common Problems<a class="headerlink" href="#common-problems" title="Permanent link">¶</a></h2>
+<h3 id="cannot-connect-to-server-or-connection-refused">"Cannot connect to server" or "Connection refused"<a class="headerlink" href="#cannot-connect-to-server-or-connection-refused" title="Permanent link">¶</a></h3>
+<p><strong>Symptom:</strong> Commands fail with connection errors</p>
+<p><strong>Possible Causes:</strong></p>
+<ol>
+<li>Server not running</li>
+<li>Wrong port</li>
+<li>Firewall blocking connection</li>
+</ol>
+<p><strong>Solutions:</strong></p>
+<p><strong>Check if server is running:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>podman<span class="w"> </span>ps<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>madeinoz-knowledge
+</span></code></pre></div>
+<p>If nothing shows up, the server isn't running.</p>
+<p><strong>Start the server:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nb">cd</span><span class="w"> </span>~/.config/pai/Packs/madeinoz-knowledge-system
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>start
+</span></code></pre></div>
+<p><strong>Check if port 8000 is in use:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:8000
+</span></code></pre></div>
+<p>If another service is using port 8000, you need to either stop that service or change the knowledge system port.</p>
+<p><strong>To change the port:</strong></p>
+<p>Edit the Docker Compose files (<code>docker-compose-neo4j.yml</code> or <code>docker-compose-falkordb.yml</code>) and change the port number, then restart.</p>
+<h3 id="api-key-not-configured-or-invalid-api-key">"API key not configured" or "Invalid API key"<a class="headerlink" href="#api-key-not-configured-or-invalid-api-key" title="Permanent link">¶</a></h3>
+<p><strong>Symptom:</strong> Error messages about API keys</p>
+<p><strong>Check your configuration:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>cat<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">PAI_DIR</span><span class="k">:-</span><span class="nv">$HOME</span><span class="p">/.claude</span><span class="si">}</span><span class="s2">/.env"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>MADEINOZ_KNOWLEDGE_OPENAI_API_KEY
+</span></code></pre></div>
+<p><strong>If the key is missing or wrong:</strong></p>
+<ol>
+<li>Edit the config file:</li>
+</ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>nano<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">PAI_DIR</span><span class="k">:-</span><span class="nv">$HOME</span><span class="p">/.claude</span><span class="si">}</span><span class="s2">/.env"</span>
+</span></code></pre></div>
+<ol>
+<li>Add or fix your API key:</li>
+</ol>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=sk-your-actual-key-here
+</span></code></pre></div>
+<ol>
+<li>
+<p>Save (Ctrl+O, Enter, Ctrl+X)</p>
+</li>
+<li>
+<p>Restart the server:</p>
+</li>
+</ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>restart
+</span></code></pre></div>
+<p><strong>Verify your key has credits:</strong>
+Visit <a href="https://platform.openai.com/usage">https://platform.openai.com/usage</a> to check your API usage and credits.</p>
+<h3 id="no-entities-extracted-or-poor-extraction-quality">"No entities extracted" or Poor Extraction Quality<a class="headerlink" href="#no-entities-extracted-or-poor-extraction-quality" title="Permanent link">¶</a></h3>
+<p><strong>Symptom:</strong> System captures knowledge but extracts no or few entities</p>
+<p><strong>Causes:</strong></p>
+<ol>
+<li>Content too short or vague</li>
+<li>Model not powerful enough</li>
+<li>Content lacks clear concepts</li>
+</ol>
+<p><strong>Solutions:</strong></p>
+<p><strong>Add more detail:</strong></p>
+<p>Instead of:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>Remember Docker
+</span></code></pre></div>
+<p>Try:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>Remember that Docker is a container runtime that requires a daemon
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>process running as root, which manages container lifecycles and images.
+</span></code></pre></div>
+<p><strong>Use a better model:</strong></p>
+<p>Edit your PAI config (<code>$PAI_DIR/.env</code> or <code>~/.claude/.env</code>):</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nv">MADEINOZ_KNOWLEDGE_MODEL_NAME</span><span class="o">=</span>gpt-4o
+</span></code></pre></div>
+<p>Note: gpt-4o costs more but extracts entities better than gpt-4o-mini.</p>
+<p>Restart the server after changing.</p>
+<p><strong>Be explicit about relationships:</strong></p>
+<p>Instead of:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>Remember Podman and Docker
+</span></code></pre></div>
+<p>Try:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>Remember that Podman is an alternative to Docker, designed to be
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>daemonless and rootless for better security.
+</span></code></pre></div>
+<h3 id="container-wont-start">Container Won't Start<a class="headerlink" href="#container-wont-start" title="Permanent link">¶</a></h3>
+<p><strong>Symptom:</strong> Server fails to start, containers exit immediately</p>
+<p><strong>Check Docker/Podman is running:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>podman<span class="w"> </span>ps
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="c1"># or</span>
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>docker<span class="w"> </span>ps
+</span></code></pre></div>
+<p><strong>If "Cannot connect to Podman socket":</strong></p>
+<p>On macOS:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>podman<span class="w"> </span>machine<span class="w"> </span>start
+</span></code></pre></div>
+<p>Wait 30 seconds, then try starting the server again.</p>
+<p><strong>Check logs for specific errors:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>logs
+</span></code></pre></div>
+<p><strong>Common specific issues:</strong></p>
+<p><strong>Error: "port already in use"</strong>
+Another service is using port 8000 or 7687 (Neo4j) or 6379 (FalkorDB).</p>
+<p>Find what's using the port:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:8000
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:7687<span class="w">  </span><span class="c1"># Neo4j Bolt</span>
+</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:6379<span class="w">  </span><span class="c1"># FalkorDB/Redis</span>
+</span></code></pre></div>
+<p>Kill the process or change the knowledge system ports.</p>
+<p><strong>Error: "image not found"</strong>
+The container image needs to be pulled:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>podman<span class="w"> </span>pull<span class="w"> </span>falkordb/graphiti-knowledge-graph-mcp:latest
+</span></code></pre></div>
+<p><strong>Error: "network not found"</strong>
+Recreate the network:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>podman<span class="w"> </span>network<span class="w"> </span>rm<span class="w"> </span>madeinoz-knowledge-net
+</span></code></pre></div>
+<p>Then start the server again (it will recreate the network).</p>
+<h3 id="search-returns-no-results">Search Returns No Results<a class="headerlink" href="#search-returns-no-results" title="Permanent link">¶</a></h3>
+<p><strong>Symptom:</strong> Searches return empty or "No knowledge found"</p>
+<p><strong>Check if knowledge has been captured:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="c1"># In your AI assistant</span>
+</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>Show<span class="w"> </span>me<span class="w"> </span>recent<span class="w"> </span>knowledge<span class="w"> </span>additions
+</span></code></pre></div>
+<p>If nothing recent, you need to capture knowledge first.</p>
+<p><strong>Try a broader search:</strong></p>
+<p>Instead of:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>What do I know about Podman volume mounting syntax?
+</span></code></pre></div>
+<p>Try:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>What do I know about Podman?
+</span></code></pre></div>
+<p><strong>Check you're searching the right group:</strong></p>
+<p>If you've set a custom group ID, make sure searches use the same group.</p>
+<p>Verify your group setting:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>grep<span class="w"> </span>MADEINOZ_KNOWLEDGE_GROUP_ID<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">PAI_DIR</span><span class="k">:-</span><span class="nv">$HOME</span><span class="p">/.claude</span><span class="si">}</span><span class="s2">/.env"</span>
+</span></code></pre></div>
+<p><strong>Verify entities were extracted:</strong></p>
+<p>Look at a recent capture - did it show "Entities extracted: 0"? If so, see the "No entities extracted" section above.</p>
+<h3 id="vector-dimension-mismatch-error">Vector Dimension Mismatch Error<a class="headerlink" href="#vector-dimension-mismatch-error" title="Permanent link">¶</a></h3>
+<p><strong>Symptom:</strong> Search queries fail with error: <code>Invalid input for 'vector.similarity.cosine()': The supplied vectors do not have the same number of dimensions</code></p>
+<p><strong>Cause:</strong> Data was indexed with one embedding model, but searches use a different model with incompatible vector dimensions.</p>
+<p><strong>Common scenarios that cause this:</strong></p>
+<ol>
+<li>Changed <code>EMBEDDER_MODEL</code> in config after data was already indexed</li>
+<li>Tested multiple embedding models without clearing data between tests</li>
+<li>Migrated from one embedding provider to another</li>
+</ol>
+<p><strong>Embedding model dimensions:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Provider</th>
+<th>Dimensions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>mxbai-embed-large</td>
+<td>Ollama</td>
+<td>1024</td>
+</tr>
+<tr>
+<td>nomic-embed-text</td>
+<td>Ollama</td>
+<td>768</td>
+</tr>
+<tr>
+<td>text-embedding-3-small</td>
+<td>OpenAI</td>
+<td>1536</td>
+</tr>
+<tr>
+<td>text-embedding-3-large</td>
+<td>OpenAI</td>
+<td>3072</td>
+</tr>
+<tr>
+<td>text-embedding-ada-002</td>
+<td>OpenAI</td>
+<td>1536</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The fix: Clear mismatched data</strong></p>
+<p>Neo4j requires all vectors in an index to have the same dimensions. You must clear data indexed with the old model.</p>
+<p><strong>Option 1: Clear specific groups (preserves other data)</strong></p>
+<p>If you know which groups have mismatched embeddings:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="c1"># Via Claude Code / MCP</span>
+</span><span id="__span-26-2"><a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>clear_graph<span class="w"> </span>with<span class="w"> </span>group_ids:<span class="w"> </span><span class="o">[</span><span class="s2">"group1"</span>,<span class="w"> </span><span class="s2">"group2"</span><span class="o">]</span>
+</span></code></pre></div>
+<p>Or identify test groups by checking episodes:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="c1"># Via Claude Code / MCP</span>
+</span><span id="__span-27-2"><a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>get_episodes<span class="w"> </span>with<span class="w"> </span>max_episodes:<span class="w"> </span><span class="m">50</span>
+</span></code></pre></div>
+<p>Look for groups with different <code>group_id</code> values, then clear those specific groups.</p>
+<p><strong>Option 2: Clear entire graph (nuclear option)</strong></p>
+<p>If unsure which data is affected:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="c1"># Via Claude Code / MCP</span>
+</span><span id="__span-28-2"><a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>clear_graph
+</span></code></pre></div>
+<p>This deletes ALL data. You'll need to re-add any knowledge you want to keep.</p>
+<p><strong>Verify the fix:</strong></p>
+<p>After clearing, test that searches work:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="c1"># Via Claude Code / MCP</span>
+</span><span id="__span-29-2"><a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a>search_nodes<span class="w"> </span>with<span class="w"> </span>query:<span class="w"> </span><span class="s2">"test"</span>
+</span></code></pre></div>
+<p>Should return <code>"No relevant nodes found"</code> (empty but no error), not a dimension mismatch error.</p>
+<p><strong>Prevention:</strong></p>
+<ol>
+<li><strong>Choose an embedding model and stick with it</strong> - Changing models requires re-indexing all data</li>
+<li><strong>Use separate group_ids for testing</strong> - e.g., <code>test-llama</code>, <code>test-openai</code>, then clear test groups after</li>
+<li><strong>Document your embedding config</strong> - Note which model was used to index production data</li>
+<li><strong>Keep <code>EMBEDDER_DIMENSIONS</code> in sync</strong> - Must match your model:</li>
+</ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="c1"># Example for mxbai-embed-large</span>
+</span><span id="__span-30-2"><a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a><span class="nv">EMBEDDER_MODEL</span><span class="o">=</span>mxbai-embed-large
+</span><span id="__span-30-3"><a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a><span class="nv">EMBEDDER_DIMENSIONS</span><span class="o">=</span><span class="m">1024</span>
+</span></code></pre></div>
+<p><strong>If you MUST change embedding models:</strong></p>
+<ol>
+<li>Export important knowledge (manually note key facts)</li>
+<li>Clear the entire graph</li>
+<li>Update <code>EMBEDDER_MODEL</code> and <code>EMBEDDER_DIMENSIONS</code> in config</li>
+<li>Restart the server</li>
+<li>Re-add your knowledge</li>
+</ol>
+<p>There's no way to "migrate" vectors - the embeddings are fundamentally different representations.</p>
+<h3 id="rate-limit-exceeded-or-api-errors">"Rate limit exceeded" or API Errors<a class="headerlink" href="#rate-limit-exceeded-or-api-errors" title="Permanent link">¶</a></h3>
+<p><strong>Symptom:</strong> Errors about too many requests or rate limits</p>
+<p><strong>Immediate fix:</strong></p>
+<p>Reduce concurrent requests in your PAI config (<code>$PAI_DIR/.env</code> or <code>~/.claude/.env</code>):</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="nv">MADEINOZ_KNOWLEDGE_SEMAPHORE_LIMIT</span><span class="o">=</span><span class="m">3</span>
+</span></code></pre></div>
+<p>Lower number = fewer parallel requests.</p>
+<p>Restart the server after changing.</p>
+<p><strong>Permanent solution:</strong></p>
+<p>Check your OpenAI tier at <a href="https://platform.openai.com/account/rate-limits">https://platform.openai.com/account/rate-limits</a></p>
+<p>Adjust SEMAPHORE_LIMIT based on your tier:</p>
+<ul>
+<li>Free tier: 1-2</li>
+<li>Tier 1: 3-5</li>
+<li>Tier 2: 8</li>
+<li>Tier 3+: 10-15</li>
+</ul>
+<p><strong>If you're hitting rate limits constantly:</strong>
+Consider upgrading your OpenAI tier or capturing knowledge less frequently.</p>
+<h3 id="sse-endpoint-not-responding">"SSE endpoint not responding"<a class="headerlink" href="#sse-endpoint-not-responding" title="Permanent link">¶</a></h3>
+<p><strong>Symptom:</strong> MCP connection fails, mentions SSE</p>
+<p><strong>This is the MCP transport layer having issues.</strong></p>
+<p><strong>Quick fix:</strong></p>
+<ol>
+<li>Stop the server: <code>bun run server-cli stop</code></li>
+<li>Wait 10 seconds</li>
+<li>Start again: <code>bun run server-cli start</code></li>
+<li>Restart your AI assistant (Claude Code, etc.)</li>
+</ol>
+<p><strong>If that doesn't work:</strong></p>
+<p>Check if the SSE endpoint responds at all:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>curl<span class="w"> </span>-N<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Accept: text/event-stream"</span><span class="w"> </span>http://localhost:8000/sse
+</span></code></pre></div>
+<p>Should see event-stream data.</p>
+<p><strong>If curl fails:</strong>
+The MCP server isn't running properly. Check logs:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>logs
+</span></code></pre></div>
+<p>Look for startup errors.</p>
+<h3 id="knowledge-not-syncing-from-memory">Knowledge Not Syncing from Memory<a class="headerlink" href="#knowledge-not-syncing-from-memory" title="Permanent link">¶</a></h3>
+<p><strong>Symptom:</strong> Memory captures aren't appearing in knowledge graph</p>
+<p><strong>Check if the hook is installed:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>cat<span class="w"> </span>~/.claude/settings.json<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>sync-memory-to-knowledge
+</span></code></pre></div>
+<p>Should see a hook definition.</p>
+<p><strong>If nothing shows:</strong>
+The hook isn't installed. Install it:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="nb">cd</span><span class="w"> </span>~/.claude/skills/Knowledge
+</span><span id="__span-35-2"><a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a>bun<span class="w"> </span>run<span class="w"> </span>tools/install.ts
+</span></code></pre></div>
+<p><strong>Manually trigger sync:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-36-1"><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a>bun<span class="w"> </span>run<span class="w"> </span>~/.claude/hooks/sync-memory-to-knowledge.ts<span class="w"> </span>--verbose
+</span></code></pre></div>
+<p>This shows what's being synced (or why not).</p>
+<p><strong>Check sync state:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-37-1"><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>cat<span class="w"> </span>~/.claude/MEMORY/STATE/knowledge-sync/sync-state.json
+</span></code></pre></div>
+<p>Shows what's already been synced.</p>
+<p><strong>Force re-sync everything:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-38-1"><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a>rm<span class="w"> </span>~/.claude/MEMORY/STATE/knowledge-sync/sync-state.json
+</span><span id="__span-38-2"><a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a>bun<span class="w"> </span>run<span class="w"> </span>~/.claude/hooks/sync-memory-to-knowledge.ts<span class="w"> </span>--all<span class="w"> </span>--verbose
+</span></code></pre></div>
+<h3 id="high-api-costs">High API Costs<a class="headerlink" href="#high-api-costs" title="Permanent link">¶</a></h3>
+<p><strong>Symptom:</strong> Your OpenAI bill is higher than expected</p>
+<p><strong>Check usage:</strong>
+<a href="https://platform.openai.com/usage">https://platform.openai.com/usage</a></p>
+<p><strong>Reduce costs:</strong></p>
+<p><strong>1. Use cheaper model:</strong></p>
+<p>In your PAI config (<code>$PAI_DIR/.env</code> or <code>~/.claude/.env</code>):</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-39-1"><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a><span class="nv">MADEINOZ_KNOWLEDGE_MODEL_NAME</span><span class="o">=</span>gpt-4o-mini
+</span></code></pre></div>
+<p>(gpt-4o-mini is 10x cheaper than gpt-4o)</p>
+<p><strong>2. Capture less:</strong>
+Only capture truly valuable knowledge, not every conversation.</p>
+<p><strong>3. Reduce concurrency:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-40-1"><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a><span class="nv">MADEINOZ_KNOWLEDGE_SEMAPHORE_LIMIT</span><span class="o">=</span><span class="m">3</span>
+</span></code></pre></div>
+<p><strong>4. Monitor usage:</strong>
+Check your API usage weekly to catch cost spikes early.</p>
+<p><strong>Typical costs:</strong></p>
+<ul>
+<li>Light use: $0.50-1.00/month</li>
+<li>Moderate use: $1.00-3.00/month</li>
+<li>Heavy use: $3.00-10.00/month</li>
+</ul>
+<p>Using gpt-4o-mini, not gpt-4o.</p>
+<h3 id="database-web-ui-not-accessible">Database Web UI Not Accessible<a class="headerlink" href="#database-web-ui-not-accessible" title="Permanent link">¶</a></h3>
+<p><strong>Symptom:</strong> Can't access database UI (Neo4j: <a href="http://localhost:7474">http://localhost:7474</a>, FalkorDB: <a href="http://localhost:3000">http://localhost:3000</a>)</p>
+<p><strong>Check if database container is running:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-41-1"><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a><span class="c1"># For Neo4j (default)</span>
+</span><span id="__span-41-2"><a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a>podman<span class="w"> </span>ps<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>neo4j
+</span><span id="__span-41-3"><a id="__codelineno-41-3" name="__codelineno-41-3" href="#__codelineno-41-3"></a>
+</span><span id="__span-41-4"><a id="__codelineno-41-4" name="__codelineno-41-4" href="#__codelineno-41-4"></a><span class="c1"># For FalkorDB</span>
+</span><span id="__span-41-5"><a id="__codelineno-41-5" name="__codelineno-41-5" href="#__codelineno-41-5"></a>podman<span class="w"> </span>ps<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>falkordb
+</span></code></pre></div>
+<p><strong>If not running:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-42-1"><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>start
+</span></code></pre></div>
+<p><strong>Check ports aren't blocked:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-43-1"><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:7474<span class="w">  </span><span class="c1"># Neo4j Browser</span>
+</span><span id="__span-43-2"><a id="__codelineno-43-2" name="__codelineno-43-2" href="#__codelineno-43-2"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:3000<span class="w">  </span><span class="c1"># FalkorDB UI</span>
+</span></code></pre></div>
+<p><strong>Try accessing the graph directly:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-44-1"><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a><span class="c1"># For Neo4j (default)</span>
+</span><span id="__span-44-2"><a id="__codelineno-44-2" name="__codelineno-44-2" href="#__codelineno-44-2"></a>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>madeinoz-knowledge-neo4j<span class="w"> </span>cypher-shell<span class="w"> </span>-u<span class="w"> </span>neo4j<span class="w"> </span>-p<span class="w"> </span>password<span class="w"> </span><span class="s2">"RETURN 1"</span>
+</span><span id="__span-44-3"><a id="__codelineno-44-3" name="__codelineno-44-3" href="#__codelineno-44-3"></a>
+</span><span id="__span-44-4"><a id="__codelineno-44-4" name="__codelineno-44-4" href="#__codelineno-44-4"></a><span class="c1"># For FalkorDB</span>
+</span><span id="__span-44-5"><a id="__codelineno-44-5" name="__codelineno-44-5" href="#__codelineno-44-5"></a>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>madeinoz-knowledge-falkordb<span class="w"> </span>redis-cli<span class="w"> </span>PING
+</span></code></pre></div>
+<p>Should respond with <code>1</code> (Neo4j) or "PONG" (FalkorDB).</p>
+<h3 id="memory-or-performance-issues">Memory or Performance Issues<a class="headerlink" href="#memory-or-performance-issues" title="Permanent link">¶</a></h3>
+<p><strong>Symptom:</strong> System is slow or running out of memory</p>
+<p><strong>Check system resources:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-45-1"><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a>podman<span class="w"> </span>stats
+</span></code></pre></div>
+<p>Shows CPU and memory usage of containers.</p>
+<p><strong>If memory usage is high:</strong></p>
+<p><strong>Option 1: Restart containers</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-46-1"><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>restart
+</span></code></pre></div>
+<p><strong>Option 2: Clear old data</strong>
+If you have a lot of episodes you no longer need:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-47-1"><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a># In your AI assistant
+</span><span id="__span-47-2"><a id="__codelineno-47-2" name="__codelineno-47-2" href="#__codelineno-47-2"></a>Clear my knowledge graph
+</span></code></pre></div>
+<p>(Warning: This deletes everything!)</p>
+<p><strong>Option 3: Add memory limits</strong>
+Edit container configuration to limit memory usage.</p>
+<h3 id="edgeduplicate-or-extractedentities-pydantic-validation-errors">EdgeDuplicate or ExtractedEntities Pydantic Validation Errors<a class="headerlink" href="#edgeduplicate-or-extractedentities-pydantic-validation-errors" title="Permanent link">¶</a></h3>
+<p><strong>Symptom:</strong> Container logs show errors like:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-48-1"><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a>3 validation errors for EdgeDuplicate
+</span><span id="__span-48-2"><a id="__codelineno-48-2" name="__codelineno-48-2" href="#__codelineno-48-2"></a>duplicate_facts: Field required [type=missing, input_value={'properties': {'duplicat...}]
+</span><span id="__span-48-3"><a id="__codelineno-48-3" name="__codelineno-48-3" href="#__codelineno-48-3"></a>contradicted_facts: Field required [type=missing]
+</span><span id="__span-48-4"><a id="__codelineno-48-4" name="__codelineno-48-4" href="#__codelineno-48-4"></a>fact_type: Field required [type=missing]
+</span></code></pre></div>
+<p>Or similar errors for <code>ExtractedEntities</code>, <code>EntitySummary</code>, or other Pydantic models.</p>
+<p><strong>Root Cause:</strong></p>
+<p>The LLM returns a JSON schema definition instead of actual field values. This happens because:</p>
+<ol>
+<li>Some LLM providers don't fully support structured output/parse API</li>
+<li>The <code>OpenAIGenericClient</code> uses basic <code>json_object</code> mode which is less strict</li>
+<li>Complex multi-entity content triggers edge deduplication which is more prone to this error</li>
+</ol>
+<p><strong>Which models are affected:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>gpt-4o-mini</td>
+<td>✅ Works</td>
+<td>Occasional errors, retry recovers</td>
+</tr>
+<tr>
+<td>gpt-4o</td>
+<td>✅ Works</td>
+<td>Occasional errors, retry recovers</td>
+</tr>
+<tr>
+<td>gemini-2.0-flash</td>
+<td>✅ Works</td>
+<td>Occasional errors, retry recovers</td>
+</tr>
+<tr>
+<td>claude-3.5-haiku</td>
+<td>⚠️ Auth issues</td>
+<td>Requires different API routing</td>
+</tr>
+<tr>
+<td>llama/mistral variants</td>
+<td>❌ Fails</td>
+<td>Consistent Pydantic errors</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Solution: Use OpenAIClient for Cloud Providers</strong></p>
+<p>The Madeinoz Knowledge System v1.2.4+ includes a patch that uses <code>OpenAIClient</code> (with parse API) for cloud providers instead of <code>OpenAIGenericClient</code> (basic json_object mode).</p>
+<p><strong>Verify the patch is active:</strong></p>
+<p>Check container logs after startup:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-49-1"><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a>podman<span class="w"> </span>logs<span class="w"> </span>madeinoz-knowledge-graph-mcp<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">"Patch v3"</span>
+</span></code></pre></div>
+<p>Should show:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-50-1"><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a>Madeinoz Patch v3: Using OpenAIClient for cloud openrouter
+</span></code></pre></div>
+<p><strong>If errors persist:</strong></p>
+<ol>
+<li><strong>Check your model is supported</strong> - Llama and Mistral models consistently fail</li>
+<li><strong>Errors are expected occasionally</strong> - The built-in retry logic (2 attempts) usually recovers</li>
+<li><strong>Simpler content works better</strong> - Break very complex episodes into smaller chunks</li>
+</ol>
+<p><strong>Tracking:</strong></p>
+<p>This issue is tracked at: <a href="https://github.com/getzep/graphiti/issues/912">https://github.com/getzep/graphiti/issues/912</a></p>
+<p><strong>Technical Details:</strong></p>
+<p>The fix differentiates between:</p>
+<ul>
+<li><strong>Cloud providers</strong> (OpenRouter, Together, etc.) → Use <code>OpenAIClient</code> with parse API</li>
+<li><strong>Local endpoints</strong> (Ollama) → Use <code>OpenAIGenericClient</code> with json_object mode</li>
+</ul>
+<p>The parse API provides stricter schema enforcement, which prevents the LLM from returning JSON schema definitions instead of actual values.</p>
+<p><strong>Note:</strong> This fix is applied at Docker image build time as part of the container configuration.</p>
+<h3 id="initialization-not-complete-warning">"Initialization not complete" Warning<a class="headerlink" href="#initialization-not-complete-warning" title="Permanent link">¶</a></h3>
+<p><strong>Symptom:</strong> MCP logs show "Received request before initialization was complete"</p>
+<p><strong>Cause:</strong> This is a known issue with the Graphiti MCP server - Claude Code sometimes sends requests before the SSE session fully initializes.</p>
+<p><strong>Workaround:</strong>
+Restart your AI assistant (Claude Code). This resets the MCP connection.</p>
+<p><strong>Tracking:</strong>
+This issue is tracked at: <a href="https://github.com/getzep/graphiti/issues/840">https://github.com/getzep/graphiti/issues/840</a></p>
+<p><strong>Not a critical issue:</strong>
+This warning usually doesn't break functionality, but restarting helps if you see repeated failures.</p>
+<h3 id="query-syntax-errors-with-special-characters-falkordb-backend">Query Syntax Errors with Special Characters (FalkorDB Backend)<a class="headerlink" href="#query-syntax-errors-with-special-characters-falkordb-backend" title="Permanent link">¶</a></h3>
+<p><strong>Note:</strong> This issue is specific to the FalkorDB backend. Neo4j (the default) handles special characters more gracefully.</p>
+<p><strong>Symptom:</strong> Search queries fail with syntax errors, especially when searching for content containing hyphens, at-signs, or other special characters. Error messages may include "QuerySyntaxError" or mention unexpected tokens.</p>
+<p><strong>Root Cause:</strong></p>
+<p>FalkorDB uses RediSearch for fulltext indexing, which interprets certain characters as Lucene query operators:</p>
+<table>
+<thead>
+<tr>
+<th>Character</th>
+<th>Lucene Interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-</code></td>
+<td>Negation (NOT operator)</td>
+</tr>
+<tr>
+<td><code>+</code></td>
+<td>Required term (AND)</td>
+</tr>
+<tr>
+<td><code>@</code></td>
+<td>Field prefix</td>
+</tr>
+<tr>
+<td><code>#</code></td>
+<td>Tag field</td>
+</tr>
+<tr>
+<td><code>*</code> <code>?</code></td>
+<td>Wildcards</td>
+</tr>
+<tr>
+<td><code>"</code></td>
+<td>Phrase query</td>
+</tr>
+<tr>
+<td><code>( )</code></td>
+<td>Grouping</td>
+</tr>
+<tr>
+<td><code>{ }</code> <code>[ ]</code></td>
+<td>Range queries</td>
+</tr>
+<tr>
+<td><code>~</code></td>
+<td>Fuzzy/proximity</td>
+</tr>
+<tr>
+<td><code>:</code></td>
+<td>Field specifier</td>
+</tr>
+<tr>
+<td><code>\|</code></td>
+<td>OR operator</td>
+</tr>
+<tr>
+<td><code>&amp;</code></td>
+<td>AND operator</td>
+</tr>
+<tr>
+<td><code>!</code></td>
+<td>NOT operator</td>
+</tr>
+<tr>
+<td><code>%</code></td>
+<td>Fuzzy threshold</td>
+</tr>
+<tr>
+<td><code>&lt; &gt; =</code></td>
+<td>Comparison operators</td>
+</tr>
+<tr>
+<td><code>$</code></td>
+<td>Variable reference</td>
+</tr>
+<tr>
+<td><code>/</code></td>
+<td>Regex delimiter</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example of the bug:</strong></p>
+<p>When you search for <code>madeinoz-threat-intel</code>:</p>
+<ul>
+<li>RediSearch interprets this as: <code>pai AND NOT threat AND NOT intel</code></li>
+<li>This returns wrong results or a syntax error</li>
+</ul>
+<p><strong>The Graphiti Bug:</strong></p>
+<p>Graphiti's FalkorDB driver has a <code>sanitize()</code> method that replaces special characters with whitespace. However, this sanitization is <strong>not applied to group_ids</strong> in search queries. When you use a group_id like <code>my-knowledge-base</code>, the hyphen is passed directly to RediSearch and interpreted as negation.</p>
+<p><strong>Related Issues:</strong></p>
+<ul>
+<li><a href="https://github.com/RediSearch/RediSearch/issues/2628">RediSearch #2628</a> - Can't search text with hyphens</li>
+<li><a href="https://github.com/RediSearch/RediSearch/issues/4092">RediSearch #4092</a> - Escaping filter values</li>
+<li><a href="https://github.com/getzep/graphiti/issues/815">Graphiti #815</a> - FalkorDB query syntax errors</li>
+<li><a href="https://github.com/getzep/graphiti/pull/1118">Graphiti #1118</a> - Fix forward slash handling</li>
+</ul>
+<p><strong>Our Solution:</strong></p>
+<p>The Madeinoz Knowledge System Docker container handles sanitization automatically at runtime:</p>
+<ol>
+<li><strong>For group_ids:</strong> Special characters are properly escaped in queries</li>
+<li><code>madeinoz-threat-intel</code> → <code>pai_threat_intel</code></li>
+<li>
+<p>This avoids the Graphiti bug where group_ids aren't escaped</p>
+</li>
+<li>
+<p><strong>For search queries:</strong> Special characters are handled by the container's query processor</p>
+</li>
+</ol>
+<p><strong>Note:</strong> The sanitization is built into the Docker container and applied automatically.</p>
+<p><strong>If you encounter syntax errors:</strong></p>
+<ol>
+<li>Check if your group_id contains special characters:</li>
+</ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-51-1"><a id="__codelineno-51-1" name="__codelineno-51-1" href="#__codelineno-51-1"></a>grep<span class="w"> </span>MADEINOZ_KNOWLEDGE_GROUP_ID<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">PAI_DIR</span><span class="k">:-</span><span class="nv">$HOME</span><span class="p">/.claude</span><span class="si">}</span><span class="s2">/.env"</span>
+</span></code></pre></div>
+<ol>
+<li>Use underscores instead of hyphens in group_ids:</li>
+<li>Bad: <code>my-knowledge-base</code></li>
+<li>
+<p>Good: <code>my_knowledge_base</code></p>
+</li>
+<li>
+<p>The sanitization is automatic for MCP tool calls, but if you're calling Graphiti directly, ensure you sanitize inputs.</p>
+</li>
+</ol>
+<p><strong>Recommendation:</strong> For the best experience with special characters, consider using the Neo4j backend instead of FalkorDB, as Neo4j handles special characters natively.</p>
+<h2 id="diagnostic-commands-summary">Diagnostic Commands Summary<a class="headerlink" href="#diagnostic-commands-summary" title="Permanent link">¶</a></h2>
+<p>Quick reference for troubleshooting:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-52-1"><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a><span class="c1"># Check status</span>
+</span><span id="__span-52-2"><a id="__codelineno-52-2" name="__codelineno-52-2" href="#__codelineno-52-2"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>status
+</span><span id="__span-52-3"><a id="__codelineno-52-3" name="__codelineno-52-3" href="#__codelineno-52-3"></a>
+</span><span id="__span-52-4"><a id="__codelineno-52-4" name="__codelineno-52-4" href="#__codelineno-52-4"></a><span class="c1"># View logs</span>
+</span><span id="__span-52-5"><a id="__codelineno-52-5" name="__codelineno-52-5" href="#__codelineno-52-5"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>logs
+</span><span id="__span-52-6"><a id="__codelineno-52-6" name="__codelineno-52-6" href="#__codelineno-52-6"></a>
+</span><span id="__span-52-7"><a id="__codelineno-52-7" name="__codelineno-52-7" href="#__codelineno-52-7"></a><span class="c1"># Restart everything</span>
+</span><span id="__span-52-8"><a id="__codelineno-52-8" name="__codelineno-52-8" href="#__codelineno-52-8"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>restart
+</span><span id="__span-52-9"><a id="__codelineno-52-9" name="__codelineno-52-9" href="#__codelineno-52-9"></a>
+</span><span id="__span-52-10"><a id="__codelineno-52-10" name="__codelineno-52-10" href="#__codelineno-52-10"></a><span class="c1"># Check configuration</span>
+</span><span id="__span-52-11"><a id="__codelineno-52-11" name="__codelineno-52-11" href="#__codelineno-52-11"></a>cat<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">PAI_DIR</span><span class="k">:-</span><span class="nv">$HOME</span><span class="p">/.claude</span><span class="si">}</span><span class="s2">/.env"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>MADEINOZ_KNOWLEDGE
+</span><span id="__span-52-12"><a id="__codelineno-52-12" name="__codelineno-52-12" href="#__codelineno-52-12"></a>
+</span><span id="__span-52-13"><a id="__codelineno-52-13" name="__codelineno-52-13" href="#__codelineno-52-13"></a><span class="c1"># Test MCP endpoint</span>
+</span><span id="__span-52-14"><a id="__codelineno-52-14" name="__codelineno-52-14" href="#__codelineno-52-14"></a>curl<span class="w"> </span>http://localhost:8000/sse<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Accept: text/event-stream"</span>
+</span><span id="__span-52-15"><a id="__codelineno-52-15" name="__codelineno-52-15" href="#__codelineno-52-15"></a>
+</span><span id="__span-52-16"><a id="__codelineno-52-16" name="__codelineno-52-16" href="#__codelineno-52-16"></a><span class="c1"># Check containers</span>
+</span><span id="__span-52-17"><a id="__codelineno-52-17" name="__codelineno-52-17" href="#__codelineno-52-17"></a>podman<span class="w"> </span>ps<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>madeinoz-knowledge
+</span><span id="__span-52-18"><a id="__codelineno-52-18" name="__codelineno-52-18" href="#__codelineno-52-18"></a>
+</span><span id="__span-52-19"><a id="__codelineno-52-19" name="__codelineno-52-19" href="#__codelineno-52-19"></a><span class="c1"># Check ports</span>
+</span><span id="__span-52-20"><a id="__codelineno-52-20" name="__codelineno-52-20" href="#__codelineno-52-20"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:8000<span class="w">    </span><span class="c1"># MCP Server</span>
+</span><span id="__span-52-21"><a id="__codelineno-52-21" name="__codelineno-52-21" href="#__codelineno-52-21"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:7687<span class="w">    </span><span class="c1"># Neo4j Bolt (default)</span>
+</span><span id="__span-52-22"><a id="__codelineno-52-22" name="__codelineno-52-22" href="#__codelineno-52-22"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:7474<span class="w">    </span><span class="c1"># Neo4j Browser (default)</span>
+</span><span id="__span-52-23"><a id="__codelineno-52-23" name="__codelineno-52-23" href="#__codelineno-52-23"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:6379<span class="w">    </span><span class="c1"># FalkorDB/Redis</span>
+</span><span id="__span-52-24"><a id="__codelineno-52-24" name="__codelineno-52-24" href="#__codelineno-52-24"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:3000<span class="w">    </span><span class="c1"># FalkorDB UI</span>
+</span><span id="__span-52-25"><a id="__codelineno-52-25" name="__codelineno-52-25" href="#__codelineno-52-25"></a>
+</span><span id="__span-52-26"><a id="__codelineno-52-26" name="__codelineno-52-26" href="#__codelineno-52-26"></a><span class="c1"># Manual sync test</span>
+</span><span id="__span-52-27"><a id="__codelineno-52-27" name="__codelineno-52-27" href="#__codelineno-52-27"></a>bun<span class="w"> </span>run<span class="w"> </span>~/.claude/hooks/sync-memory-to-knowledge.ts<span class="w"> </span>--dry-run<span class="w"> </span>--verbose
+</span><span id="__span-52-28"><a id="__codelineno-52-28" name="__codelineno-52-28" href="#__codelineno-52-28"></a>
+</span><span id="__span-52-29"><a id="__codelineno-52-29" name="__codelineno-52-29" href="#__codelineno-52-29"></a><span class="c1"># View container logs directly</span>
+</span><span id="__span-52-30"><a id="__codelineno-52-30" name="__codelineno-52-30" href="#__codelineno-52-30"></a>podman<span class="w"> </span>logs<span class="w"> </span>madeinoz-knowledge-graph-mcp
+</span><span id="__span-52-31"><a id="__codelineno-52-31" name="__codelineno-52-31" href="#__codelineno-52-31"></a>podman<span class="w"> </span>logs<span class="w"> </span>madeinoz-knowledge-neo4j<span class="w">       </span><span class="c1"># Neo4j (default)</span>
+</span><span id="__span-52-32"><a id="__codelineno-52-32" name="__codelineno-52-32" href="#__codelineno-52-32"></a>podman<span class="w"> </span>logs<span class="w"> </span>madeinoz-knowledge-falkordb<span class="w">    </span><span class="c1"># FalkorDB backend</span>
+</span></code></pre></div>
+<h2 id="getting-more-help">Getting More Help<a class="headerlink" href="#getting-more-help" title="Permanent link">¶</a></h2>
+<p>If these solutions don't work:</p>
+<ol>
+<li>
+<p><strong>Check the main README:</strong>
+   <code>/Users/seaton/.config/pai/Packs/madeinoz-knowledge-system/README.md</code></p>
+</li>
+<li>
+<p><strong>Check installation guide:</strong>
+   <code>docs/installation.md</code></p>
+</li>
+<li>
+<p><strong>Review verification:</strong>
+   <code>/Users/seaton/.config/pai/Packs/madeinoz-knowledge-system/VERIFY.md</code></p>
+</li>
+<li>
+<p><strong>Check Graphiti documentation:</strong>
+   <a href="https://help.getzep.com/graphiti">https://help.getzep.com/graphiti</a></p>
+</li>
+<li>
+<p><strong>Check FalkorDB documentation:</strong>
+   <a href="https://docs.falkordb.com/">https://docs.falkordb.com/</a></p>
+</li>
+</ol>
+<h2 id="still-stuck">Still Stuck?<a class="headerlink" href="#still-stuck" title="Permanent link">¶</a></h2>
+<p>Create a diagnostic report:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-53-1"><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a><span class="nb">cd</span><span class="w"> </span>~/.config/pai/Packs/madeinoz-knowledge-system
+</span><span id="__span-53-2"><a id="__codelineno-53-2" name="__codelineno-53-2" href="#__codelineno-53-2"></a>
+</span><span id="__span-53-3"><a id="__codelineno-53-3" name="__codelineno-53-3" href="#__codelineno-53-3"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"=== System Status ==="</span><span class="w"> </span>&gt;<span class="w"> </span>diagnostic.txt
+</span><span id="__span-53-4"><a id="__codelineno-53-4" name="__codelineno-53-4" href="#__codelineno-53-4"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>status<span class="w"> </span>&gt;&gt;<span class="w"> </span>diagnostic.txt
+</span><span id="__span-53-5"><a id="__codelineno-53-5" name="__codelineno-53-5" href="#__codelineno-53-5"></a>
+</span><span id="__span-53-6"><a id="__codelineno-53-6" name="__codelineno-53-6" href="#__codelineno-53-6"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"\n=== Configuration ==="</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>diagnostic.txt
+</span><span id="__span-53-7"><a id="__codelineno-53-7" name="__codelineno-53-7" href="#__codelineno-53-7"></a>cat<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">PAI_DIR</span><span class="k">:-</span><span class="nv">$HOME</span><span class="p">/.claude</span><span class="si">}</span><span class="s2">/.env"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>MADEINOZ_KNOWLEDGE<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-v<span class="w"> </span>API_KEY<span class="w"> </span>&gt;&gt;<span class="w"> </span>diagnostic.txt
+</span><span id="__span-53-8"><a id="__codelineno-53-8" name="__codelineno-53-8" href="#__codelineno-53-8"></a>
+</span><span id="__span-53-9"><a id="__codelineno-53-9" name="__codelineno-53-9" href="#__codelineno-53-9"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"\n=== Recent Logs ==="</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>diagnostic.txt
+</span><span id="__span-53-10"><a id="__codelineno-53-10" name="__codelineno-53-10" href="#__codelineno-53-10"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>logs<span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-100<span class="w"> </span>&gt;&gt;<span class="w"> </span>diagnostic.txt
+</span><span id="__span-53-11"><a id="__codelineno-53-11" name="__codelineno-53-11" href="#__codelineno-53-11"></a>
+</span><span id="__span-53-12"><a id="__codelineno-53-12" name="__codelineno-53-12" href="#__codelineno-53-12"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"\n=== Container Info ==="</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>diagnostic.txt
+</span><span id="__span-53-13"><a id="__codelineno-53-13" name="__codelineno-53-13" href="#__codelineno-53-13"></a>podman<span class="w"> </span>ps<span class="w"> </span>--all<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>madeinoz-knowledge<span class="w"> </span>&gt;&gt;<span class="w"> </span>diagnostic.txt
+</span><span id="__span-53-14"><a id="__codelineno-53-14" name="__codelineno-53-14" href="#__codelineno-53-14"></a>
+</span><span id="__span-53-15"><a id="__codelineno-53-15" name="__codelineno-53-15" href="#__codelineno-53-15"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"\n=== Port Status ==="</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>diagnostic.txt
+</span><span id="__span-53-16"><a id="__codelineno-53-16" name="__codelineno-53-16" href="#__codelineno-53-16"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:8000<span class="w"> </span>&gt;&gt;<span class="w"> </span>diagnostic.txt
+</span><span id="__span-53-17"><a id="__codelineno-53-17" name="__codelineno-53-17" href="#__codelineno-53-17"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:6379<span class="w"> </span>&gt;&gt;<span class="w"> </span>diagnostic.txt
+</span><span id="__span-53-18"><a id="__codelineno-53-18" name="__codelineno-53-18" href="#__codelineno-53-18"></a>
+</span><span id="__span-53-19"><a id="__codelineno-53-19" name="__codelineno-53-19" href="#__codelineno-53-19"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"Diagnostic report saved to diagnostic.txt"</span>
+</span></code></pre></div>
+<p>Share <code>diagnostic.txt</code> when asking for help (remove any sensitive info first!).</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"></path></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer">
+        
+          
+          <a href="../concepts/hooks-integration.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Hooks &amp; Integration">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Hooks &amp; Integration
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="known-issues.html" class="md-footer__link md-footer__link--next" aria-label="Next: Known Issues">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Known Issues
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"></path></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/madeinoz67/madeinoz-knowledge-system" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"></path></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "search.suggest", "search.highlight", "content.code.copy", "content.tabs.link", "content.lightbox"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  
+<script id="init-glightbox">const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});
+document$.subscribe(()=>{ lightbox.reload(); });
+</script></body></html>

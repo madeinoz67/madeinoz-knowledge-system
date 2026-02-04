@@ -1,0 +1,4596 @@
+<!DOCTYPE html><html lang="en" class="no-js"><head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete configuration guide for the Madeinoz Knowledge System">
+      
+      
+        <meta name="author" content="madeinoz67">
+      
+      
+        <link rel="canonical" href="https://madeinoz67.github.io/madeinoz-knowledge-system/reference/configuration.html">
+      
+      
+        <link rel="prev" href="cli.html">
+      
+      
+        <link rel="next" href="observability.html">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Configuration Reference - Madeinoz Knowledge System (PAI Pack)</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+        <script src="https://unpkg.com/iframe-worker/shim"></script>
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  <link href="../assets/stylesheets/glightbox.min.css" rel="stylesheet"><script src="../assets/javascripts/glightbox.min.js"></script><style id="glightbox-style">
+            html.glightbox-open { overflow: initial; height: 100%; }
+            .gslide-title { margin-top: 0px; user-select: text; }
+            .gslide-desc { color: #666; user-select: text; }
+            .gslide-image img { background: white; }
+            .gscrollbar-fixer { padding-right: 15px; }
+            .gdesc-inner { font-size: 0.75rem; }
+            body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color); }
+            body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color); }
+            body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color); }
+        </style></head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="light-blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#configuration-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../index.html" title="Madeinoz Knowledge System (PAI Pack)" class="md-header__button md-logo" aria-label="Madeinoz Knowledge System (PAI Pack)" data-md-component="logo">
+      
+  <img src="../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Madeinoz Knowledge System (PAI Pack)
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Configuration Reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="light-blue" aria-label="Switch to dark mode" type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="light-blue" aria-label="Switch to light mode" type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/madeinoz67/madeinoz-knowledge-system" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+  </div>
+  <div class="md-source__repository">
+    madeinoz67/madeinoz-knowledge-system
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../index.html" title="Madeinoz Knowledge System (PAI Pack)" class="md-nav__button md-logo" aria-label="Madeinoz Knowledge System (PAI Pack)" data-md-component="logo">
+      
+  <img src="../assets/logo.png" alt="logo">
+
+    </a>
+    Madeinoz Knowledge System (PAI Pack)
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/madeinoz67/madeinoz-knowledge-system" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+  </div>
+  <div class="md-source__repository">
+    madeinoz67/madeinoz-knowledge-system
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2">
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/overview.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/quick-reference.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3">
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Installation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/requirements.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/verification.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/remote-deployment.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Remote Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../remote-access.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Remote Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4">
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Usage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/basic-usage.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Basic Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/advanced.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/memory-decay.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory Decay &amp; Lifecycle
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../weighted-search.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Weighted Search
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/monitoring.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/backup-restore.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backup &amp; Restore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/osint-workflows.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OSINT &amp; CTI Workflows
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5">
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/architecture.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/knowledge-graph.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Knowledge Graph
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/hooks-integration.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hooks &amp; Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6">
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Troubleshooting
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/common-issues.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Common Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/known-issues.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Known Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="cli.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="configuration.html" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-location" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Location
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-file-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration File Format
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#llm-provider-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LLM Provider Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="LLM Provider Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#provider-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Provider Selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model Selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-keys" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Keys
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-base-url-openai-compatible-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Base URL (OpenAI-Compatible Providers)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#embedder-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Embedder Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Embedder Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#embedder-provider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Embedder Provider
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#embedding-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Embedding Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#embedding-dimensions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Embedding Dimensions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#embedder-base-url" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Embedder Base URL
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#database-backend-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database Backend Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Database Backend Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#database-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database Type
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#neo4j-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Neo4j Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changing-neo4j-password" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changing Neo4j Password
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Changing Neo4j Password">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-this-process-is-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why This Process Is Required
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#method-1-using-neo4j-browser-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method 1: Using Neo4j Browser (Recommended)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#method-2-using-cypher-shell-command-line" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method 2: Using Cypher Shell (Command Line)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#method-3-admin-changing-another-users-password-enterprise" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method 3: Admin Changing Another User's Password (Enterprise)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#password-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Password Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#critical-never-delete-data-volumes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⚠️ CRITICAL: Never Delete Data Volumes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#troubleshooting-password-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting Password Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#falkordb-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FalkorDB Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#knowledge-graph-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Knowledge Graph Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Knowledge Graph Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#group-id" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Group ID
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rate Limiting
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#concurrencysemaphore-limit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concurrency/Semaphore Limit
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#neo4j-specific-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Neo4j-Specific Features
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Neo4j-Specific Features">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#search-all-groups-neo4j-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Search All Groups (Neo4j only)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#telemetry-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Telemetry Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Telemetry Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#telemetry-enabled" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Telemetry Enabled
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#metrics-observability-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Metrics &amp; Observability Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Metrics &amp; Observability Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#metrics-collection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Metrics Collection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debug-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Debug Logging
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prompt-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prompt Caching
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#memory-decay-configuration-feature-009" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory Decay Configuration (Feature 009)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Memory Decay Configuration (Feature 009)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration File
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decay-thresholds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decay Thresholds
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maintenance-schedule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Maintenance Schedule
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#search-weights" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Search Weights
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#classification-defaults" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Classification Defaults
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#permanent-memory-thresholds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Permanent Memory Thresholds
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#half-life-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Half-Life Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retention-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Retention Policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#query-sanitization-falkordb-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Query Sanitization (FalkorDB Only)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#legacy-configuration-deprecated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Legacy Configuration (Deprecated)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#minimal-setup-ollama-llm-local-embeddings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Minimal Setup (Ollama LLM + Local Embeddings)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#premium-setup-all-cloud" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Premium Setup (All Cloud)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-group-cti-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-Group CTI Setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changing-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changing Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#invalid-api-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Invalid API key"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unknown-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Unknown model"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connection-refused" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Connection refused"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rate-limit-exceeded" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Rate limit exceeded"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vector-dimension-mismatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Vector dimension mismatch"
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#system-limits-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System Limits Summary
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="System Limits Summary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#content-size-guidelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Content Size Guidelines
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variable-precedence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Variable Precedence
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ontology-configuration-feature-018" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ontology Configuration (Feature 018)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Ontology Configuration (Feature 018)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration-file_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration File
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#entity-type-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Entity Type Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-scope-what-you-can-vs-cannot-change" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Scope: What You CAN vs CANNOT Change
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Scope: What You CAN vs CANNOT Change">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-you-can-configure-in-yaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What You CAN Configure in YAML
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-requires-code-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Requires CODE Changes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-customizing-an-existing-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Customizing an Existing Type
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-what-requires-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: What Requires Code
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#relationship-type-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Relationship Type Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decay-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decay Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reserved-attributes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reserved Attributes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#built-in-entity-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Built-in Entity Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pre-built-ctiosint-ontology" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pre-built CTI/OSINT Ontology
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="observability.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Observability &amp; Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="cache-implementation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cache Implementation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="model-guide.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="benchmarks.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmarks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="developer-notes.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="releases.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release Process
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../acknowledgments.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Acknowledgments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-location" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Location
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-file-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration File Format
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#llm-provider-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LLM Provider Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="LLM Provider Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#provider-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Provider Selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model Selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-keys" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Keys
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-base-url-openai-compatible-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Base URL (OpenAI-Compatible Providers)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#embedder-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Embedder Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Embedder Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#embedder-provider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Embedder Provider
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#embedding-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Embedding Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#embedding-dimensions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Embedding Dimensions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#embedder-base-url" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Embedder Base URL
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#database-backend-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database Backend Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Database Backend Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#database-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database Type
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#neo4j-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Neo4j Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changing-neo4j-password" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changing Neo4j Password
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Changing Neo4j Password">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-this-process-is-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why This Process Is Required
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#method-1-using-neo4j-browser-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method 1: Using Neo4j Browser (Recommended)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#method-2-using-cypher-shell-command-line" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method 2: Using Cypher Shell (Command Line)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#method-3-admin-changing-another-users-password-enterprise" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method 3: Admin Changing Another User's Password (Enterprise)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#password-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Password Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#critical-never-delete-data-volumes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⚠️ CRITICAL: Never Delete Data Volumes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#troubleshooting-password-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting Password Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#falkordb-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FalkorDB Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#knowledge-graph-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Knowledge Graph Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Knowledge Graph Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#group-id" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Group ID
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rate Limiting
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#concurrencysemaphore-limit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concurrency/Semaphore Limit
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#neo4j-specific-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Neo4j-Specific Features
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Neo4j-Specific Features">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#search-all-groups-neo4j-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Search All Groups (Neo4j only)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#telemetry-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Telemetry Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Telemetry Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#telemetry-enabled" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Telemetry Enabled
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#metrics-observability-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Metrics &amp; Observability Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Metrics &amp; Observability Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#metrics-collection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Metrics Collection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debug-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Debug Logging
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prompt-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prompt Caching
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#memory-decay-configuration-feature-009" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory Decay Configuration (Feature 009)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Memory Decay Configuration (Feature 009)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration File
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decay-thresholds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decay Thresholds
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maintenance-schedule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Maintenance Schedule
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#search-weights" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Search Weights
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#classification-defaults" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Classification Defaults
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#permanent-memory-thresholds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Permanent Memory Thresholds
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#half-life-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Half-Life Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retention-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Retention Policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#query-sanitization-falkordb-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Query Sanitization (FalkorDB Only)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#legacy-configuration-deprecated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Legacy Configuration (Deprecated)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#minimal-setup-ollama-llm-local-embeddings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Minimal Setup (Ollama LLM + Local Embeddings)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#premium-setup-all-cloud" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Premium Setup (All Cloud)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-group-cti-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-Group CTI Setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changing-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changing Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#invalid-api-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Invalid API key"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unknown-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Unknown model"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connection-refused" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Connection refused"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rate-limit-exceeded" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Rate limit exceeded"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vector-dimension-mismatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Vector dimension mismatch"
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#system-limits-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System Limits Summary
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="System Limits Summary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#content-size-guidelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Content Size Guidelines
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variable-precedence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Variable Precedence
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ontology-configuration-feature-018" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ontology Configuration (Feature 018)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Ontology Configuration (Feature 018)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration-file_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration File
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#entity-type-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Entity Type Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-scope-what-you-can-vs-cannot-change" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Scope: What You CAN vs CANNOT Change
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Scope: What You CAN vs CANNOT Change">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-you-can-configure-in-yaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What You CAN Configure in YAML
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-requires-code-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Requires CODE Changes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-customizing-an-existing-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Customizing an Existing Type
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-what-requires-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: What Requires Code
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#relationship-type-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Relationship Type Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decay-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decay Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reserved-attributes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reserved Attributes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#built-in-entity-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Built-in Entity Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pre-built-ctiosint-ontology" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pre-built CTI/OSINT Ontology
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<!-- AI-FRIENDLY SUMMARY
+System: Madeinoz Knowledge System Configuration
+Purpose: Complete reference for all configuration options and environment variables
+Configuration File: ~/.claude/.env (or $PAI_DIR/.env) - single source of truth
+Reference Template: config/.env.example in the pack (NOT used directly)
+
+Environment Prefix: MADEINOZ_KNOWLEDGE_*
+
+Key Configuration Sections:
+- LLM Provider: PROVIDER, MODEL_NAME, API_KEY, BASE_URL
+- Database: BACKEND (neo4j/falkordb), NEO4J_URI, FALKORDB_URI
+- Memory Decay (Feature 009): DECAY_CONFIG_FILE, MAINTENANCE_SCHEDULE, SEARCH_WEIGHTS
+- Cache: CACHE_ENABLED, CACHE_MAX_SIZE, CACHE_TTL_SECONDS
+- Memory Sync: SYNC_LEARNING_ALGORITHM, SYNC_LEARNING_SYSTEM, SYNC_RESEARCH
+
+LLM Providers: openai, anthropic, gemini, groq, ollama
+Database Backends: neo4j (default, ports 7474/7687), falkordb (ports 3000/6379)
+
+Feature 009 Configuration: config/decay-config.yaml (copied into container at build time)
+Requires rebuild: Yes, after modifying docker/patches/ or config/decay-config.yaml
+
+Default Ports:
+- MCP Server: 8000
+- Neo4j Browser: 7474, Bolt: 7687
+- FalkorDB UI: 3000, Redis: 6379
+- Metrics: 9090 (prod) / 9091 (dev)
+- Grafana: 3001 (prod) / 3002 (dev)
+--><h1 id="configuration-reference">Configuration Reference<a class="headerlink" href="#configuration-reference" title="Permanent link">¶</a></h1>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">¶</a></h2>
+<p>All Knowledge System configuration is managed through your PAI environment file. This document describes every available configuration option.</p>
+<h2 id="configuration-location">Configuration Location<a class="headerlink" href="#configuration-location" title="Permanent link">¶</a></h2>
+<p><strong>Primary:</strong> <code>~/.claude/.env</code> (or <code>$PAI_DIR/.env</code>)</p>
+<p>This is the single source of truth for all Madeinoz Knowledge System settings. The <code>config/.env.example</code> file in the pack is a reference template only.</p>
+<h2 id="configuration-file-format">Configuration File Format<a class="headerlink" href="#configuration-file-format" title="Permanent link">¶</a></h2>
+<p>The configuration file uses standard shell environment variable syntax:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Comments start with #</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nv">VARIABLE_NAME</span><span class="o">=</span>value
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nv">MULTI_LINE_VALUE</span><span class="o">=</span><span class="s2">"can span lines with quotes"</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="nv">NUMERIC_VALUE</span><span class="o">=</span><span class="m">123</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="nv">BOOLEAN_VALUE</span><span class="o">=</span><span class="nb">true</span>
+</span></code></pre></div>
+<h2 id="llm-provider-configuration">LLM Provider Configuration<a class="headerlink" href="#llm-provider-configuration" title="Permanent link">¶</a></h2>
+<h3 id="provider-selection">Provider Selection<a class="headerlink" href="#provider-selection" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nv">MADEINOZ_KNOWLEDGE_LLM_PROVIDER</span><span class="o">=</span>openai
+</span></code></pre></div>
+<p><strong>Valid values:</strong></p>
+<ul>
+<li><code>openai</code> - OpenAI API or OpenAI-compatible providers (OpenRouter, Together, etc.)</li>
+<li><code>anthropic</code> - Anthropic Claude API</li>
+<li><code>gemini</code> - Google Gemini API</li>
+<li><code>groq</code> - Groq API</li>
+<li><code>ollama</code> - Local Ollama server or Ollama-compatible provider (apikey required)</li>
+</ul>
+<h3 id="model-selection">Model Selection<a class="headerlink" href="#model-selection" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nv">MADEINOZ_KNOWLEDGE_MODEL_NAME</span><span class="o">=</span>gpt-4o-mini
+</span></code></pre></div>
+<p><strong>Recommended models:</strong></p>
+<ul>
+<li><code>arcee-ai/trinity-large-preview:free</code> (OpenRouter) - <strong>FREE model that passes all tests</strong></li>
+<li><code>arcee-ai/trinity-mini:free</code> (OpenRouter) - <strong>FREE alternative that passes all tests</strong></li>
+<li><code>gpt-4o-mini</code> (OpenAI) - Best balance of cost and quality</li>
+<li><code>google/gemini-2.0-flash-001</code> (OpenRouter) - Fast, reliable, NOT being retired</li>
+<li><code>openai/gpt-4o</code> (OpenRouter) - Fastest extraction</li>
+<li><code>meta-llama/llama-3.1-8b-instruct</code> (OpenRouter) - Lowest cost (may have validation issues)</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Gemini Retirement Notice</p>
+<p><code>google/gemini-2.0-flash-001</code> <strong>will be retired in March 2026</strong>. Switch to either Trinity model as free alternatives:
+- <code>arcee-ai/trinity-large-preview:free</code> (recommended)
+- <code>arcee-ai/trinity-mini:free</code> (faster)</p>
+</div>
+<div class="admonition success">
+<p class="admonition-title">Free Trinity Models</p>
+<p>Both Trinity models are <strong>free</strong> via OpenRouter and successfully pass all Graphiti entity extraction tests:
+- <code>arcee-ai/trinity-large-preview:free</code> - Larger model, more detailed extraction
+- <code>arcee-ai/trinity-mini:free</code> - Smaller model, faster processing (~16s)</p>
+<p>These are excellent options for cost-conscious users, especially with Gemini retiring in March 2026.</p>
+</div>
+<h3 id="api-keys">API Keys<a class="headerlink" href="#api-keys" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nv">MADEINOZ_KNOWLEDGE_OPENAI_API_KEY</span><span class="o">=</span>sk-your-openai-key-here
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nv">MADEINOZ_KNOWLEDGE_ANTHROPIC_API_KEY</span><span class="o">=</span>sk-ant-your-anthropic-key-here
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="nv">MADEINOZ_KNOWLEDGE_GOOGLE_API_KEY</span><span class="o">=</span>your-google-api-key
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="nv">MADEINOZ_KNOWLEDGE_GROQ_API_KEY</span><span class="o">=</span>gsk-your-groq-key
+</span></code></pre></div>
+<p><strong>Important:</strong> Only include the API key for your chosen provider.</p>
+<h3 id="custom-base-url-openai-compatible-providers">Custom Base URL (OpenAI-Compatible Providers)<a class="headerlink" href="#custom-base-url-openai-compatible-providers" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nv">MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL</span><span class="o">=</span>https://openrouter.ai/api/v1
+</span></code></pre></div>
+<p><strong>Common values:</strong></p>
+<ul>
+<li><code>https://openrouter.ai/api/v1</code> - OpenRouter</li>
+<li><code>https://api.together.xyz/v1</code> - Together AI</li>
+<li><code>https://api.fireworks.ai/inference/v1</code> - Fireworks AI</li>
+<li><code>https://api.deepinfra.com/v1/openai</code> - DeepInfra</li>
+<li><code>http://localhost:11434/v1</code> - Local Ollama</li>
+</ul>
+<p><strong>For Ollama, use:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nv">MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL</span><span class="o">=</span>http://host.docker.internal:11434/v1
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="c1"># On Linux, replace host.docker.internal with your Ollama server IP</span>
+</span></code></pre></div>
+<h2 id="embedder-configuration">Embedder Configuration<a class="headerlink" href="#embedder-configuration" title="Permanent link">¶</a></h2>
+<h3 id="embedder-provider">Embedder Provider<a class="headerlink" href="#embedder-provider" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nv">MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER</span><span class="o">=</span>openai
+</span></code></pre></div>
+<p><strong>Valid values:</strong></p>
+<ul>
+<li><code>openai</code> - OpenAI API or OpenAI-compatible providers</li>
+<li><code>anthropic</code> - Anthropic (limited embedding support)</li>
+<li><code>ollama</code> - Local Ollama embeddings (recommended for cost)</li>
+</ul>
+<h3 id="embedding-model">Embedding Model<a class="headerlink" href="#embedding-model" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nv">MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL</span><span class="o">=</span>mxbai-embed-large
+</span></code></pre></div>
+<p><strong>Recommended models:</strong></p>
+<ul>
+<li><code>mxbai-embed-large</code> (Ollama) - FREE, 87ms, 73.9% quality</li>
+<li><code>text-embedding-3-small</code> (OpenAI) - $0.02/1M, 78.2% quality</li>
+<li><code>BAAI/bge-large-en-v1.5</code> (Together AI) - Fast, high quality</li>
+</ul>
+<h3 id="embedding-dimensions">Embedding Dimensions<a class="headerlink" href="#embedding-dimensions" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nv">MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS</span><span class="o">=</span><span class="m">1024</span>
+</span></code></pre></div>
+<p><strong>Important:</strong> Must match the embedding model's output dimensions:</p>
+<ul>
+<li><code>mxbai-embed-large</code> → <code>1024</code></li>
+<li><code>text-embedding-3-small</code> → <code>1536</code></li>
+<li><code>text-embedding-3-large</code> → <code>3072</code></li>
+<li><code>nomic-embed-text</code> → <code>768</code></li>
+</ul>
+<p><strong>⚠️ CRITICAL:</strong> Changing embedding models breaks existing data. All vectors must have identical dimensions for Neo4j vector search to work. If you change embedding models, you must clear the graph and re-add all knowledge.</p>
+<h3 id="embedder-base-url">Embedder Base URL<a class="headerlink" href="#embedder-base-url" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nv">MADEINOZ_KNOWLEDGE_EMBEDDER_BASE_URL</span><span class="o">=</span>http://host.docker.internal:11434/v1
+</span></code></pre></div>
+<p>Set only if using Ollama or another OpenAI-compatible embedder provider.</p>
+<h2 id="database-backend-configuration">Database Backend Configuration<a class="headerlink" href="#database-backend-configuration" title="Permanent link">¶</a></h2>
+<h3 id="database-type">Database Type<a class="headerlink" href="#database-type" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nv">MADEINOZ_KNOWLEDGE_DATABASE_TYPE</span><span class="o">=</span>neo4j
+</span></code></pre></div>
+<p><strong>Valid values:</strong></p>
+<ul>
+<li><code>neo4j</code> (default) - Native graph database, better special character handling</li>
+<li><code>falkordb</code> - Redis-based, simpler setup, lower resources</li>
+</ul>
+<h3 id="neo4j-configuration">Neo4j Configuration<a class="headerlink" href="#neo4j-configuration" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nv">MADEINOZ_KNOWLEDGE_NEO4J_URI</span><span class="o">=</span>bolt://neo4j:7687
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="nv">MADEINOZ_KNOWLEDGE_NEO4J_USER</span><span class="o">=</span>neo4j
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="nv">MADEINOZ_KNOWLEDGE_NEO4J_PASSWORD</span><span class="o">=</span>madeinozknowledge
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="nv">MADEINOZ_KNOWLEDGE_NEO4J_DATABASE</span><span class="o">=</span>neo4j
+</span></code></pre></div>
+<p><strong>Default values work with docker-compose setup.</strong></p>
+<p><strong>For external Neo4j:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nv">MADEINOZ_KNOWLEDGE_NEO4J_URI</span><span class="o">=</span>bolt://neo4j:7687
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="nv">MADEINOZ_KNOWLEDGE_NEO4J_USER</span><span class="o">=</span>neo4j
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="nv">MADEINOZ_KNOWLEDGE_NEO4J_PASSWORD</span><span class="o">=</span>madeinozknowledge
+</span></code></pre></div>
+<h3 id="changing-neo4j-password">Changing Neo4j Password<a class="headerlink" href="#changing-neo4j-password" title="Permanent link">¶</a></h3>
+<h4 id="why-this-process-is-required">Why This Process Is Required<a class="headerlink" href="#why-this-process-is-required" title="Permanent link">¶</a></h4>
+<p>Neo4j's security architecture stores credentials <strong>inside the persistent data volume</strong>, not in environment variables. Understanding this is critical:</p>
+<ol>
+<li>
+<p><strong>First Startup Behavior</strong>: The <code>NEO4J_AUTH</code> environment variable is only read on <strong>first startup</strong> when no user data exists. Neo4j uses it to create the initial <code>neo4j</code> user with the specified password.</p>
+</li>
+<li>
+<p><strong>Password Persistence</strong>: After initialization, the password is stored encrypted in the <code>/data</code> volume as part of the <code>system</code> database. The <code>NEO4J_AUTH</code> environment variable is <strong>ignored on subsequent startups</strong>.</p>
+</li>
+<li>
+<p><strong>Why Environment Variables Don't Work</strong>: Many users expect changing <code>NEO4J_AUTH</code> to update the password—this is a common misconception. Since the password lives in the data volume, changing environment variables has no effect on existing databases.</p>
+</li>
+<li>
+<p><strong>The Correct Approach</strong>: You must use Cypher commands (<code>ALTER CURRENT USER</code> or <code>ALTER USER</code>) to modify passwords in a running database. This ensures the change is written to the <code>system</code> database where credentials are actually stored.</p>
+</li>
+</ol>
+<p>This design ensures that your credentials remain consistent with your data, and that accidentally changing an environment variable cannot lock you out of your database.</p>
+<p><strong>Reference</strong>: <a href="https://neo4j.com/docs/operations-manual/current/authentication-authorization/manage-users/">Neo4j Operations Manual - Manage Users</a></p>
+<h4 id="method-1-using-neo4j-browser-recommended">Method 1: Using Neo4j Browser (Recommended)<a class="headerlink" href="#method-1-using-neo4j-browser-recommended" title="Permanent link">¶</a></h4>
+<p>The Neo4j Browser provides a web interface for database administration.</p>
+<ol>
+<li><strong>Open Neo4j Browser:</strong></li>
+</ol>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>http://localhost:7474
+</span></code></pre></div>
+<ol>
+<li><strong>Login with current credentials:</strong></li>
+<li>Username: <code>neo4j</code></li>
+<li>
+<p>Password: (your current password, default: <code>madeinozknowledge</code>)</p>
+</li>
+<li>
+<p><strong>Run the official password change command:</strong></p>
+</li>
+</ol>
+<div class="language-cypher highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="n">ALTER</span><span class="w"> </span><span class="n">CURRENT</span><span class="w"> </span><span class="n">USER</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">PASSWORD</span><span class="w"> </span><span class="n">FROM</span><span class="w"> </span><span class="s">'current-password'</span><span class="w"> </span><span class="n">TO</span><span class="w"> </span><span class="s">'new-password'</span>
+</span></code></pre></div>
+<p>This command requires you to know your current password and changes it atomically in the <code>system</code> database.</p>
+<ol>
+<li><strong>Update your <code>.env</code> file to match:</strong></li>
+</ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="c1"># Edit ~/.claude/.env</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="nv">MADEINOZ_KNOWLEDGE_NEO4J_PASSWORD</span><span class="o">=</span>new-password
+</span></code></pre></div>
+<p><strong>Important:</strong> The <code>.env</code> file must match the database password for the MCP server to connect.</p>
+<ol>
+<li><strong>Restart the MCP server to apply the new password:</strong></li>
+</ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>stop
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>start
+</span></code></pre></div>
+<h4 id="method-2-using-cypher-shell-command-line">Method 2: Using Cypher Shell (Command Line)<a class="headerlink" href="#method-2-using-cypher-shell-command-line" title="Permanent link">¶</a></h4>
+<p>For users who prefer command-line administration.</p>
+<ol>
+<li><strong>Connect to the Neo4j container:</strong></li>
+</ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>madeinoz-knowledge-neo4j<span class="w"> </span>cypher-shell<span class="w"> </span>-u<span class="w"> </span>neo4j<span class="w"> </span>-p<span class="w"> </span><span class="s1">'current-password'</span>
+</span></code></pre></div>
+<ol>
+<li><strong>Run the official password change command:</strong></li>
+</ol>
+<div class="language-cypher highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="n">ALTER</span><span class="w"> </span><span class="n">CURRENT</span><span class="w"> </span><span class="n">USER</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">PASSWORD</span><span class="w"> </span><span class="n">FROM</span><span class="w"> </span><span class="s">'current-password'</span><span class="w"> </span><span class="n">TO</span><span class="w"> </span><span class="s">'new-password'</span><span class="p">;</span>
+</span></code></pre></div>
+<p>Then exit the shell:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>:exit
+</span></code></pre></div>
+<ol>
+<li><strong>Update <code>.env</code> and restart</strong> (same as Method 1, steps 4-5)</li>
+</ol>
+<h4 id="method-3-admin-changing-another-users-password-enterprise">Method 3: Admin Changing Another User's Password (Enterprise)<a class="headerlink" href="#method-3-admin-changing-another-users-password-enterprise" title="Permanent link">¶</a></h4>
+<p>If you have admin privileges, you can change any user's password:</p>
+<div class="language-cypher highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="n">ALTER</span><span class="w"> </span><span class="n">USER</span><span class="w"> </span><span class="n">username</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">PASSWORD</span><span class="w"> </span><span class="s">'new-password'</span>
+</span></code></pre></div>
+<p>Optionally force a password change on next login:</p>
+<div class="language-cypher highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="n">ALTER</span><span class="w"> </span><span class="n">USER</span><span class="w"> </span><span class="n">username</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">PASSWORD</span><span class="w"> </span><span class="s">'new-password'</span><span class="w"> </span><span class="n">CHANGE</span><span class="w"> </span><span class="n">REQUIRED</span>
+</span></code></pre></div>
+<h4 id="password-requirements">Password Requirements<a class="headerlink" href="#password-requirements" title="Permanent link">¶</a></h4>
+<ul>
+<li>Minimum 8 characters (Neo4j default)</li>
+<li>Avoid special characters that may cause shell escaping issues</li>
+<li>Store securely - this password protects your knowledge graph</li>
+</ul>
+<h4 id="critical-never-delete-data-volumes">⚠️ CRITICAL: Never Delete Data Volumes<a class="headerlink" href="#critical-never-delete-data-volumes" title="Permanent link">¶</a></h4>
+<p><strong>NEVER use <code>docker compose down -v</code> or <code>podman compose down -v</code> to "reset" a forgotten password.</strong> The <code>-v</code> flag deletes all data volumes, permanently destroying your knowledge graph. This data is irreplaceable.</p>
+<p>If you've forgotten your password:</p>
+<ol>
+<li>Try the default password: <code>madeinozknowledge</code></li>
+<li>Check your <code>~/.claude/.env</code> for <code>MADEINOZ_KNOWLEDGE_NEO4J_PASSWORD</code></li>
+<li>Use Method 1 or Method 2 above with a password you remember having set</li>
+<li>If all else fails, contact the community for recovery assistance before considering any destructive action</li>
+</ol>
+<h4 id="troubleshooting-password-issues">Troubleshooting Password Issues<a class="headerlink" href="#troubleshooting-password-issues" title="Permanent link">¶</a></h4>
+<p><strong>"AuthenticationRateLimit" error:</strong>
+Neo4j blocks connections after too many failed attempts. Wait 30 seconds or restart the Neo4j container:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>docker<span class="w"> </span>restart<span class="w"> </span>madeinoz-knowledge-neo4j
+</span></code></pre></div>
+<p><strong>"Authentication failed" after password change:</strong>
+The MCP server is using the old password. Ensure:</p>
+<ol>
+<li><code>.env</code> file has the new password</li>
+<li>MCP server was restarted after the change</li>
+<li>No shell environment variable is overriding the <code>.env</code> value</li>
+</ol>
+<h3 id="falkordb-configuration">FalkorDB Configuration<a class="headerlink" href="#falkordb-configuration" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="nv">MADEINOZ_KNOWLEDGE_FALKORDB_HOST</span><span class="o">=</span>madeinoz-knowledge-falkordb
+</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="nv">MADEINOZ_KNOWLEDGE_FALKORDB_PORT</span><span class="o">=</span><span class="m">6379</span>
+</span></code></pre></div>
+<p><strong>For external FalkorDB:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="nv">MADEINOZ_KNOWLEDGE_FALKORDB_HOST</span><span class="o">=</span>your-redis-server
+</span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="nv">MADEINOZ_KNOWLEDGE_FALKORDB_PORT</span><span class="o">=</span><span class="m">6379</span>
+</span></code></pre></div>
+<h2 id="knowledge-graph-configuration">Knowledge Graph Configuration<a class="headerlink" href="#knowledge-graph-configuration" title="Permanent link">¶</a></h2>
+<h3 id="group-id">Group ID<a class="headerlink" href="#group-id" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="nv">MADEINOZ_KNOWLEDGE_GROUP_ID</span><span class="o">=</span>main
+</span></code></pre></div>
+<p>Organizes knowledge into logical groups. Enables multiple isolated knowledge graphs:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="c1"># Create separate groups for different domains</span>
+</span><span id="__span-26-2"><a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="nv">MADEINOZ_KNOWLEDGE_GROUP_ID</span><span class="o">=</span>main<span class="w">          </span><span class="c1"># Default personal knowledge</span>
+</span><span id="__span-26-3"><a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a><span class="nv">MADEINOZ_KNOWLEDGE_GROUP_ID</span><span class="o">=</span>research<span class="w">      </span><span class="c1"># Research findings</span>
+</span><span id="__span-26-4"><a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a><span class="nv">MADEINOZ_KNOWLEDGE_GROUP_ID</span><span class="o">=</span>osint-intel<span class="w">   </span><span class="c1"># OSINT/CTI data</span>
+</span></code></pre></div>
+<p>Multiple groups can be searched together using the search workflows.</p>
+<h2 id="performance-configuration">Performance Configuration<a class="headerlink" href="#performance-configuration" title="Permanent link">¶</a></h2>
+<h3 id="rate-limiting">Rate Limiting<a class="headerlink" href="#rate-limiting" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="nv">RATE_LIMIT_MAX_REQUESTS</span><span class="o">=</span><span class="m">60</span>
+</span><span id="__span-27-2"><a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a><span class="nv">RATE_LIMIT_WINDOW_SECONDS</span><span class="o">=</span><span class="m">60</span>
+</span><span id="__span-27-3"><a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a><span class="nv">RATE_LIMIT_ENABLED</span><span class="o">=</span><span class="nb">true</span>
+</span></code></pre></div>
+<p>Controls request rate limiting per IP address. Protects against abuse and DoS attacks.</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>RATE_LIMIT_MAX_REQUESTS</code></td>
+<td>60</td>
+<td>Maximum requests per time window per IP</td>
+</tr>
+<tr>
+<td><code>RATE_LIMIT_WINDOW_SECONDS</code></td>
+<td>60</td>
+<td>Time window in seconds</td>
+</tr>
+<tr>
+<td><code>RATE_LIMIT_ENABLED</code></td>
+<td>true</td>
+<td>Set to <code>false</code> to disable (not recommended for production)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Note:</strong> Rate limiting only applies to HTTP transport mode. SSE/stdio modes do not use rate limiting.</p>
+<h3 id="concurrencysemaphore-limit">Concurrency/Semaphore Limit<a class="headerlink" href="#concurrencysemaphore-limit" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="nv">MADEINOZ_KNOWLEDGE_SEMAPHORE_LIMIT</span><span class="o">=</span><span class="m">10</span>
+</span></code></pre></div>
+<p>Controls concurrent API requests to LLM provider. Tune based on API rate limits:</p>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Rate Limit</th>
+<th>Recommended</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Free</td>
+<td>0 RPM</td>
+<td>1-2</td>
+<td>$0/month</td>
+</tr>
+<tr>
+<td>Tier 1</td>
+<td>10 RPM</td>
+<td>3-5</td>
+<td>$5/month</td>
+</tr>
+<tr>
+<td>Tier 2</td>
+<td>60 RPM</td>
+<td>8-10</td>
+<td>$20/month</td>
+</tr>
+<tr>
+<td>Tier 3</td>
+<td>500 RPM</td>
+<td>10-15</td>
+<td>$100/month</td>
+</tr>
+<tr>
+<td>Tier 4</td>
+<td>5000+ RPM</td>
+<td>20-50</td>
+<td>$250/month</td>
+</tr>
+</tbody>
+</table>
+<p><strong>If experiencing rate limit errors:</strong></p>
+<ol>
+<li>Lower this value (e.g., 5)</li>
+<li>Upgrade your API tier</li>
+<li>Check <code>MADEINOZ_KNOWLEDGE_OPENAI_API_KEY</code> has credits/quota</li>
+</ol>
+<h2 id="neo4j-specific-features">Neo4j-Specific Features<a class="headerlink" href="#neo4j-specific-features" title="Permanent link">¶</a></h2>
+<h3 id="search-all-groups-neo4j-only">Search All Groups (Neo4j only)<a class="headerlink" href="#search-all-groups-neo4j-only" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="nv">GRAPHITI_SEARCH_ALL_GROUPS</span><span class="o">=</span><span class="nb">true</span>
+</span></code></pre></div>
+<p>When enabled, searches automatically query all available group_ids without explicitly specifying them. This ensures knowledge stored in different groups is discoverable:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="c1"># With SEARCH_ALL_GROUPS=true:</span>
+</span><span id="__span-30-2"><a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a><span class="c1"># Finds knowledge in: main, research, osint-intel, etc.</span>
+</span><span id="__span-30-3"><a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a>
+</span><span id="__span-30-4"><a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a><span class="c1"># With SEARCH_ALL_GROUPS=false:</span>
+</span><span id="__span-30-5"><a id="__codelineno-30-5" name="__codelineno-30-5" href="#__codelineno-30-5"></a><span class="c1"># Only searches specified group_ids (original behavior)</span>
+</span></code></pre></div>
+<p><strong>Default:</strong> <code>true</code> (enabled)</p>
+<p><strong>Cache duration:</strong> 30 seconds (balance between performance and freshness)</p>
+<h2 id="telemetry-configuration">Telemetry Configuration<a class="headerlink" href="#telemetry-configuration" title="Permanent link">¶</a></h2>
+<h3 id="telemetry-enabled">Telemetry Enabled<a class="headerlink" href="#telemetry-enabled" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="nv">MADEINOZ_KNOWLEDGE_GRAPHITI_TELEMETRY_ENABLED</span><span class="o">=</span><span class="nb">false</span>
+</span></code></pre></div>
+<p>Controls whether Graphiti sends anonymous telemetry. Default is <code>false</code> (disabled).</p>
+<h2 id="metrics-observability-configuration">Metrics &amp; Observability Configuration<a class="headerlink" href="#metrics-observability-configuration" title="Permanent link">¶</a></h2>
+<h3 id="metrics-collection">Metrics Collection<a class="headerlink" href="#metrics-collection" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="nv">MADEINOZ_KNOWLEDGE_PROMPT_CACHE_METRICS_ENABLED</span><span class="o">=</span><span class="nb">true</span>
+</span></code></pre></div>
+<p>Controls whether Prometheus metrics are collected and exported. Default is <code>true</code> (enabled).</p>
+<p><strong>Metrics endpoint:</strong> <code>http://localhost:9091/metrics</code> (dev) or <code>http://localhost:9090/metrics</code> (prod)</p>
+<h3 id="debug-logging">Debug Logging<a class="headerlink" href="#debug-logging" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a><span class="nv">MADEINOZ_KNOWLEDGE_PROMPT_CACHE_LOG_REQUESTS</span><span class="o">=</span><span class="nb">false</span>
+</span></code></pre></div>
+<p>Enables detailed per-request metrics logging. When <code>true</code> and <code>LOG_LEVEL=DEBUG</code>, logs show:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>📊 Metrics: prompt=1234, completion=567, cost=$0.000089
+</span></code></pre></div>
+<p>Default is <code>false</code> (disabled).</p>
+<h3 id="prompt-caching">Prompt Caching<a class="headerlink" href="#prompt-caching" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="c1"># Prompt caching is DISABLED by default - set to true to enable</span>
+</span><span id="__span-35-2"><a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a><span class="nv">MADEINOZ_KNOWLEDGE_PROMPT_CACHE_ENABLED</span><span class="o">=</span><span class="nb">true</span>
+</span></code></pre></div>
+<p><strong>Default:</strong> <code>false</code> (disabled)</p>
+<p>Controls prompt caching for Gemini models via OpenRouter. When enabled, the system uses explicit <code>cache_control</code> markers in requests (similar to Anthropic's approach), not implicit caching. The <code>/chat/completions</code> endpoint supports multipart format with cache control markers.</p>
+<div class="admonition success">
+<p class="admonition-title">Now Available for Gemini</p>
+<p>Prompt caching is now functional for Gemini models on OpenRouter. The system routes Gemini models through the <code>/chat/completions</code> endpoint which supports multipart format with cache control markers. Set to <code>true</code> to enable caching and reduce costs on repeated prompts.</p>
+</div>
+<p>For detailed metrics documentation, see the <a href="observability.html">Observability &amp; Metrics</a> reference.</p>
+<h2 id="memory-decay-configuration-feature-009">Memory Decay Configuration (Feature 009)<a class="headerlink" href="#memory-decay-configuration-feature-009" title="Permanent link">¶</a></h2>
+<div class="admonition info">
+<p class="admonition-title">Feature 009: Memory Decay Scoring</p>
+<p>The memory decay system automatically prioritizes important memories, allows stale information to fade, and maintains sustainable graph growth. See <a href="../usage/memory-decay.html">Memory Decay &amp; Lifecycle Management</a> for complete user guide.</p>
+</div>
+<h3 id="configuration-file">Configuration File<a class="headerlink" href="#configuration-file" title="Permanent link">¶</a></h3>
+<p><strong>Location:</strong> <code>config/decay-config.yaml</code></p>
+<p>This YAML file controls all memory decay behavior. It is copied into the Docker container at build time.</p>
+<p><strong>To modify configuration:</strong></p>
+<ol>
+<li>Edit <code>config/decay-config.yaml</code></li>
+<li>Rebuild the Docker image: <code>docker build -f docker/Dockerfile -t madeinoz-knowledge-system:local .</code></li>
+<li>Restart containers: <code>bun run server-cli stop &amp;&amp; bun run server-cli start --dev</code></li>
+</ol>
+<h3 id="decay-thresholds">Decay Thresholds<a class="headerlink" href="#decay-thresholds" title="Permanent link">¶</a></h3>
+<p>Control when memories transition between lifecycle states:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-36-1"><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="nt">decay</span><span class="p">:</span>
+</span><span id="__span-36-2"><a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a><span class="w">  </span><span class="nt">thresholds</span><span class="p">:</span>
+</span><span id="__span-36-3"><a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a><span class="w">    </span><span class="nt">dormant</span><span class="p">:</span>
+</span><span id="__span-36-4"><a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a><span class="w">      </span><span class="nt">days</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w">           </span><span class="c1"># Days inactive before ACTIVE → DORMANT</span>
+</span><span id="__span-36-5"><a id="__codelineno-36-5" name="__codelineno-36-5" href="#__codelineno-36-5"></a><span class="w">      </span><span class="nt">decay_score</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.3</span><span class="w">   </span><span class="c1"># Decay score threshold for transition</span>
+</span><span id="__span-36-6"><a id="__codelineno-36-6" name="__codelineno-36-6" href="#__codelineno-36-6"></a><span class="w">    </span><span class="nt">archived</span><span class="p">:</span>
+</span><span id="__span-36-7"><a id="__codelineno-36-7" name="__codelineno-36-7" href="#__codelineno-36-7"></a><span class="w">      </span><span class="nt">days</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">90</span><span class="w">           </span><span class="c1"># Days inactive before DORMANT → ARCHIVED</span>
+</span><span id="__span-36-8"><a id="__codelineno-36-8" name="__codelineno-36-8" href="#__codelineno-36-8"></a><span class="w">      </span><span class="nt">decay_score</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.6</span><span class="w">   </span><span class="c1"># Decay score threshold for transition</span>
+</span><span id="__span-36-9"><a id="__codelineno-36-9" name="__codelineno-36-9" href="#__codelineno-36-9"></a><span class="w">    </span><span class="nt">expired</span><span class="p">:</span>
+</span><span id="__span-36-10"><a id="__codelineno-36-10" name="__codelineno-36-10" href="#__codelineno-36-10"></a><span class="w">      </span><span class="nt">days</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">180</span><span class="w">          </span><span class="c1"># Days inactive before ARCHIVED → EXPIRED</span>
+</span><span id="__span-36-11"><a id="__codelineno-36-11" name="__codelineno-36-11" href="#__codelineno-36-11"></a><span class="w">      </span><span class="nt">decay_score</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.9</span><span class="w">   </span><span class="c1"># Decay score threshold for transition</span>
+</span><span id="__span-36-12"><a id="__codelineno-36-12" name="__codelineno-36-12" href="#__codelineno-36-12"></a><span class="w">      </span><span class="nt">max_importance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w">  </span><span class="c1"># Only expire if importance ≤ 3</span>
+</span></code></pre></div>
+<p><strong>Lifecycle states:</strong></p>
+<ul>
+<li><strong>ACTIVE</strong> - Recently accessed, full relevance</li>
+<li><strong>DORMANT</strong> - Not accessed 30+ days, lower search priority</li>
+<li><strong>ARCHIVED</strong> - Not accessed 90+ days, much lower priority</li>
+<li><strong>EXPIRED</strong> - Marked for deletion (soft-delete)</li>
+<li><strong>SOFT_DELETED</strong> - Deleted but recoverable for 90 days</li>
+</ul>
+<p>See <a href="../usage/memory-decay.html#lifecycle-states">Memory Decay Guide</a> for details.</p>
+<h3 id="maintenance-schedule">Maintenance Schedule<a class="headerlink" href="#maintenance-schedule" title="Permanent link">¶</a></h3>
+<p>Configure automatic maintenance operations:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-37-1"><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a><span class="nt">decay</span><span class="p">:</span>
+</span><span id="__span-37-2"><a id="__codelineno-37-2" name="__codelineno-37-2" href="#__codelineno-37-2"></a><span class="w">  </span><span class="nt">maintenance</span><span class="p">:</span>
+</span><span id="__span-37-3"><a id="__codelineno-37-3" name="__codelineno-37-3" href="#__codelineno-37-3"></a><span class="w">    </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">500</span><span class="w">             </span><span class="c1"># Memories to process per batch</span>
+</span><span id="__span-37-4"><a id="__codelineno-37-4" name="__codelineno-37-4" href="#__codelineno-37-4"></a><span class="w">    </span><span class="nt">max_duration_minutes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w">    </span><span class="c1"># Maximum maintenance run time</span>
+</span><span id="__span-37-5"><a id="__codelineno-37-5" name="__codelineno-37-5" href="#__codelineno-37-5"></a><span class="w">    </span><span class="nt">schedule_interval_hours</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">24</span><span class="w"> </span><span class="c1"># Hours between automatic runs (0 = disabled)</span>
+</span></code></pre></div>
+<p><strong>What maintenance does:</strong></p>
+<ul>
+<li>Recalculates decay scores for all memories</li>
+<li>Transitions memories between lifecycle states</li>
+<li>Soft-deletes expired memories (90-day retention)</li>
+<li>Generates health metrics for Grafana</li>
+</ul>
+<p><strong>To disable automatic maintenance:</strong> Set <code>schedule_interval_hours: 0</code></p>
+<h3 id="search-weights">Search Weights<a class="headerlink" href="#search-weights" title="Permanent link">¶</a></h3>
+<p>Configure how search results are ranked:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-38-1"><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a><span class="nt">decay</span><span class="p">:</span>
+</span><span id="__span-38-2"><a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a><span class="w">  </span><span class="nt">weights</span><span class="p">:</span>
+</span><span id="__span-38-3"><a id="__codelineno-38-3" name="__codelineno-38-3" href="#__codelineno-38-3"></a><span class="w">    </span><span class="nt">semantic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.60</span><span class="w">    </span><span class="c1"># Vector similarity weight (0.0-1.0)</span>
+</span><span id="__span-38-4"><a id="__codelineno-38-4" name="__codelineno-38-4" href="#__codelineno-38-4"></a><span class="w">    </span><span class="nt">recency</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.25</span><span class="w">     </span><span class="c1"># Temporal freshness weight (0.0-1.0)</span>
+</span><span id="__span-38-5"><a id="__codelineno-38-5" name="__codelineno-38-5" href="#__codelineno-38-5"></a><span class="w">    </span><span class="nt">importance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.15</span><span class="w">  </span><span class="c1"># Importance score weight (0.0-1.0)</span>
+</span></code></pre></div>
+<p><strong>Must sum to 1.0</strong></p>
+<p><strong>Formula:</strong> <code>weighted_score = (semantic × 0.60) + (recency × 0.25) + (importance × 0.15)</code></p>
+<p><strong>Tuning guidelines:</strong></p>
+<ul>
+<li>Want recent stuff more? Increase <code>recency</code></li>
+<li>Only care about accuracy? Increase <code>semantic</code></li>
+<li>Always show important stuff? Increase <code>importance</code></li>
+</ul>
+<p>See <a href="../usage/memory-decay.html#weighted-search-results">Weighted Search Results</a> for examples.</p>
+<h3 id="classification-defaults">Classification Defaults<a class="headerlink" href="#classification-defaults" title="Permanent link">¶</a></h3>
+<p>Configure fallback values when LLM is unavailable:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-39-1"><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a><span class="nt">classification</span><span class="p">:</span>
+</span><span id="__span-39-2"><a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a><span class="w">  </span><span class="nt">default_importance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w">  </span><span class="c1"># MODERATE (1-5)</span>
+</span><span id="__span-39-3"><a id="__codelineno-39-3" name="__codelineno-39-3" href="#__codelineno-39-3"></a><span class="w">  </span><span class="nt">default_stability</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w">   </span><span class="c1"># MODERATE (1-5)</span>
+</span></code></pre></div>
+<p><strong>Importance levels:</strong> 1=TRIVIAL, 2=LOW, 3=MODERATE, 4=HIGH, 5=CORE
+<strong>Stability levels:</strong> 1=VOLATILE, 2=LOW, 3=MODERATE, 4=HIGH, 5=PERMANENT</p>
+<h3 id="permanent-memory-thresholds">Permanent Memory Thresholds<a class="headerlink" href="#permanent-memory-thresholds" title="Permanent link">¶</a></h3>
+<p>Configure which memories are exempt from decay:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-40-1"><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a><span class="nt">permanent</span><span class="p">:</span>
+</span><span id="__span-40-2"><a id="__codelineno-40-2" name="__codelineno-40-2" href="#__codelineno-40-2"></a><span class="w">  </span><span class="nt">importance_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span><span class="w">  </span><span class="c1"># Minimum importance for permanent</span>
+</span><span id="__span-40-3"><a id="__codelineno-40-3" name="__codelineno-40-3" href="#__codelineno-40-3"></a><span class="w">  </span><span class="nt">stability_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span><span class="w">   </span><span class="c1"># Minimum stability for permanent</span>
+</span></code></pre></div>
+<p>Memories with <strong>importance ≥4 AND stability ≥4</strong> are classified as <strong>PERMANENT</strong>:</p>
+<ul>
+<li>Never accumulate decay</li>
+<li>Never transition lifecycle states</li>
+<li>Exempt from archival and deletion</li>
+<li>Always prioritized in search</li>
+</ul>
+<h3 id="half-life-configuration">Half-Life Configuration<a class="headerlink" href="#half-life-configuration" title="Permanent link">¶</a></h3>
+<p>Base decay rate (adjusted by stability factor):</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-41-1"><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a><span class="nt">decay</span><span class="p">:</span>
+</span><span id="__span-41-2"><a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a><span class="w">  </span><span class="nt">base_half_life_days</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">180</span><span class="w">  </span><span class="c1"># Base half-life in days (1-365)</span>
+</span></code></pre></div>
+<p><strong>How it works:</strong></p>
+<ul>
+<li>Stability 1 (VOLATILE): 0.33× half-life (60 days)</li>
+<li>Stability 3 (MODERATE): 1.0× half-life (180 days)</li>
+<li>Stability 5 (PERMANENT): ∞ half-life (never decays)</li>
+</ul>
+<p>Higher values = slower decay. See <a href="../usage/memory-decay.html#decay-score-00-10">Decay Score</a> for details.</p>
+<h3 id="retention-policy">Retention Policy<a class="headerlink" href="#retention-policy" title="Permanent link">¶</a></h3>
+<p>Configure soft-delete retention period:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-42-1"><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a><span class="nt">decay</span><span class="p">:</span>
+</span><span id="__span-42-2"><a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a><span class="w">  </span><span class="nt">retention</span><span class="p">:</span>
+</span><span id="__span-42-3"><a id="__codelineno-42-3" name="__codelineno-42-3" href="#__codelineno-42-3"></a><span class="w">    </span><span class="nt">soft_delete_days</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">90</span><span class="w">  </span><span class="c1"># Days to retain soft-deleted memories</span>
+</span></code></pre></div>
+<p>Soft-deleted memories are permanently purged after this period. Recovery only possible within the retention window.</p>
+<h2 id="query-sanitization-falkordb-only">Query Sanitization (FalkorDB Only)<a class="headerlink" href="#query-sanitization-falkordb-only" title="Permanent link">¶</a></h2>
+<p>For FalkorDB backend, special characters in group_ids and search queries are automatically sanitized to prevent Lucene query syntax errors.</p>
+<p><strong>Escaped characters:</strong> <code>+ - &amp;&amp; || ! ( ) { } [ ] ^ " ~ * ? : \ /</code></p>
+<p>Example:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-43-1"><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a>Input:  group_id:madeinoz-threat-intel
+</span><span id="__span-43-2"><a id="__codelineno-43-2" name="__codelineno-43-2" href="#__codelineno-43-2"></a>Output: group_id:"madeinoz-threat-intel"
+</span></code></pre></div>
+<p>This is automatic and transparent.</p>
+<h2 id="legacy-configuration-deprecated">Legacy Configuration (Deprecated)<a class="headerlink" href="#legacy-configuration-deprecated" title="Permanent link">¶</a></h2>
+<p>These variables are deprecated in favor of <code>MADEINOZ_KNOWLEDGE_*</code> prefixed versions:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-44-1"><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a><span class="c1"># Old style (still supported as fallback)</span>
+</span><span id="__span-44-2"><a id="__codelineno-44-2" name="__codelineno-44-2" href="#__codelineno-44-2"></a><span class="nv">OPENAI_API_KEY</span><span class="o">=</span>sk-your-key
+</span><span id="__span-44-3"><a id="__codelineno-44-3" name="__codelineno-44-3" href="#__codelineno-44-3"></a><span class="nv">ANTHROPIC_API_KEY</span><span class="o">=</span>sk-ant-your-key
+</span><span id="__span-44-4"><a id="__codelineno-44-4" name="__codelineno-44-4" href="#__codelineno-44-4"></a>
+</span><span id="__span-44-5"><a id="__codelineno-44-5" name="__codelineno-44-5" href="#__codelineno-44-5"></a><span class="c1"># New style (preferred)</span>
+</span><span id="__span-44-6"><a id="__codelineno-44-6" name="__codelineno-44-6" href="#__codelineno-44-6"></a><span class="nv">MADEINOZ_KNOWLEDGE_OPENAI_API_KEY</span><span class="o">=</span>sk-your-key
+</span><span id="__span-44-7"><a id="__codelineno-44-7" name="__codelineno-44-7" href="#__codelineno-44-7"></a><span class="nv">MADEINOZ_KNOWLEDGE_ANTHROPIC_API_KEY</span><span class="o">=</span>sk-ant-your-key
+</span></code></pre></div>
+<p><strong>Benefits of migration:</strong></p>
+<ul>
+<li>Isolated configuration per pack</li>
+<li>No conflicts with other tools</li>
+<li>Better organization in .env file</li>
+</ul>
+<h2 id="configuration-examples">Configuration Examples<a class="headerlink" href="#configuration-examples" title="Permanent link">¶</a></h2>
+<h3 id="minimal-setup-ollama-llm-local-embeddings">Minimal Setup (Ollama LLM + Local Embeddings)<a class="headerlink" href="#minimal-setup-ollama-llm-local-embeddings" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-45-1"><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a><span class="c1"># LLM - must use cloud provider due to Graphiti limitations</span>
+</span><span id="__span-45-2"><a id="__codelineno-45-2" name="__codelineno-45-2" href="#__codelineno-45-2"></a><span class="nv">MADEINOZ_KNOWLEDGE_LLM_PROVIDER</span><span class="o">=</span>openai
+</span><span id="__span-45-3"><a id="__codelineno-45-3" name="__codelineno-45-3" href="#__codelineno-45-3"></a><span class="nv">MADEINOZ_KNOWLEDGE_MODEL_NAME</span><span class="o">=</span>openai/gpt-4o-mini
+</span><span id="__span-45-4"><a id="__codelineno-45-4" name="__codelineno-45-4" href="#__codelineno-45-4"></a><span class="nv">MADEINOZ_KNOWLEDGE_OPENAI_API_KEY</span><span class="o">=</span>sk-or-v1-your-key
+</span><span id="__span-45-5"><a id="__codelineno-45-5" name="__codelineno-45-5" href="#__codelineno-45-5"></a><span class="nv">MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL</span><span class="o">=</span>https://openrouter.ai/api/v1
+</span><span id="__span-45-6"><a id="__codelineno-45-6" name="__codelineno-45-6" href="#__codelineno-45-6"></a>
+</span><span id="__span-45-7"><a id="__codelineno-45-7" name="__codelineno-45-7" href="#__codelineno-45-7"></a><span class="c1"># Embeddings - free local Ollama</span>
+</span><span id="__span-45-8"><a id="__codelineno-45-8" name="__codelineno-45-8" href="#__codelineno-45-8"></a><span class="nv">MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER</span><span class="o">=</span>openai
+</span><span id="__span-45-9"><a id="__codelineno-45-9" name="__codelineno-45-9" href="#__codelineno-45-9"></a><span class="nv">MADEINOZ_KNOWLEDGE_EMBEDDER_BASE_URL</span><span class="o">=</span>http://host.docker.internal:11434/v1
+</span><span id="__span-45-10"><a id="__codelineno-45-10" name="__codelineno-45-10" href="#__codelineno-45-10"></a><span class="nv">MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL</span><span class="o">=</span>mxbai-embed-large
+</span><span id="__span-45-11"><a id="__codelineno-45-11" name="__codelineno-45-11" href="#__codelineno-45-11"></a><span class="nv">MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS</span><span class="o">=</span><span class="m">1024</span>
+</span><span id="__span-45-12"><a id="__codelineno-45-12" name="__codelineno-45-12" href="#__codelineno-45-12"></a>
+</span><span id="__span-45-13"><a id="__codelineno-45-13" name="__codelineno-45-13" href="#__codelineno-45-13"></a><span class="c1"># Database</span>
+</span><span id="__span-45-14"><a id="__codelineno-45-14" name="__codelineno-45-14" href="#__codelineno-45-14"></a><span class="nv">MADEINOZ_KNOWLEDGE_DATABASE_TYPE</span><span class="o">=</span>neo4j
+</span><span id="__span-45-15"><a id="__codelineno-45-15" name="__codelineno-45-15" href="#__codelineno-45-15"></a>
+</span><span id="__span-45-16"><a id="__codelineno-45-16" name="__codelineno-45-16" href="#__codelineno-45-16"></a><span class="c1"># Group</span>
+</span><span id="__span-45-17"><a id="__codelineno-45-17" name="__codelineno-45-17" href="#__codelineno-45-17"></a><span class="nv">MADEINOZ_KNOWLEDGE_GROUP_ID</span><span class="o">=</span>main
+</span></code></pre></div>
+<h3 id="premium-setup-all-cloud">Premium Setup (All Cloud)<a class="headerlink" href="#premium-setup-all-cloud" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-46-1"><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a><span class="c1"># LLM</span>
+</span><span id="__span-46-2"><a id="__codelineno-46-2" name="__codelineno-46-2" href="#__codelineno-46-2"></a><span class="nv">MADEINOZ_KNOWLEDGE_LLM_PROVIDER</span><span class="o">=</span>openai
+</span><span id="__span-46-3"><a id="__codelineno-46-3" name="__codelineno-46-3" href="#__codelineno-46-3"></a><span class="nv">MADEINOZ_KNOWLEDGE_MODEL_NAME</span><span class="o">=</span>gpt-4o
+</span><span id="__span-46-4"><a id="__codelineno-46-4" name="__codelineno-46-4" href="#__codelineno-46-4"></a><span class="nv">MADEINOZ_KNOWLEDGE_OPENAI_API_KEY</span><span class="o">=</span>sk-your-openai-key
+</span><span id="__span-46-5"><a id="__codelineno-46-5" name="__codelineno-46-5" href="#__codelineno-46-5"></a>
+</span><span id="__span-46-6"><a id="__codelineno-46-6" name="__codelineno-46-6" href="#__codelineno-46-6"></a><span class="c1"># Embeddings</span>
+</span><span id="__span-46-7"><a id="__codelineno-46-7" name="__codelineno-46-7" href="#__codelineno-46-7"></a><span class="nv">MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER</span><span class="o">=</span>openai
+</span><span id="__span-46-8"><a id="__codelineno-46-8" name="__codelineno-46-8" href="#__codelineno-46-8"></a><span class="nv">MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL</span><span class="o">=</span>text-embedding-3-small
+</span><span id="__span-46-9"><a id="__codelineno-46-9" name="__codelineno-46-9" href="#__codelineno-46-9"></a>
+</span><span id="__span-46-10"><a id="__codelineno-46-10" name="__codelineno-46-10" href="#__codelineno-46-10"></a><span class="c1"># Database</span>
+</span><span id="__span-46-11"><a id="__codelineno-46-11" name="__codelineno-46-11" href="#__codelineno-46-11"></a><span class="nv">MADEINOZ_KNOWLEDGE_DATABASE_TYPE</span><span class="o">=</span>neo4j
+</span><span id="__span-46-12"><a id="__codelineno-46-12" name="__codelineno-46-12" href="#__codelineno-46-12"></a>
+</span><span id="__span-46-13"><a id="__codelineno-46-13" name="__codelineno-46-13" href="#__codelineno-46-13"></a><span class="c1"># Performance</span>
+</span><span id="__span-46-14"><a id="__codelineno-46-14" name="__codelineno-46-14" href="#__codelineno-46-14"></a><span class="nv">MADEINOZ_KNOWLEDGE_SEMAPHORE_LIMIT</span><span class="o">=</span><span class="m">20</span>
+</span></code></pre></div>
+<h3 id="multi-group-cti-setup">Multi-Group CTI Setup<a class="headerlink" href="#multi-group-cti-setup" title="Permanent link">¶</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-47-1"><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a><span class="c1"># LLM with special character support (Neo4j)</span>
+</span><span id="__span-47-2"><a id="__codelineno-47-2" name="__codelineno-47-2" href="#__codelineno-47-2"></a><span class="nv">MADEINOZ_KNOWLEDGE_LLM_PROVIDER</span><span class="o">=</span>openai
+</span><span id="__span-47-3"><a id="__codelineno-47-3" name="__codelineno-47-3" href="#__codelineno-47-3"></a><span class="nv">MADEINOZ_KNOWLEDGE_MODEL_NAME</span><span class="o">=</span>gpt-4o
+</span><span id="__span-47-4"><a id="__codelineno-47-4" name="__codelineno-47-4" href="#__codelineno-47-4"></a><span class="nv">MADEINOZ_KNOWLEDGE_OPENAI_API_KEY</span><span class="o">=</span>sk-your-key
+</span><span id="__span-47-5"><a id="__codelineno-47-5" name="__codelineno-47-5" href="#__codelineno-47-5"></a>
+</span><span id="__span-47-6"><a id="__codelineno-47-6" name="__codelineno-47-6" href="#__codelineno-47-6"></a><span class="c1"># Embeddings</span>
+</span><span id="__span-47-7"><a id="__codelineno-47-7" name="__codelineno-47-7" href="#__codelineno-47-7"></a><span class="nv">MADEINOZ_KNOWLEDGE_EMBEDDER_BASE_URL</span><span class="o">=</span>http://host.docker.internal:11434/v1
+</span><span id="__span-47-8"><a id="__codelineno-47-8" name="__codelineno-47-8" href="#__codelineno-47-8"></a><span class="nv">MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL</span><span class="o">=</span>mxbai-embed-large
+</span><span id="__span-47-9"><a id="__codelineno-47-9" name="__codelineno-47-9" href="#__codelineno-47-9"></a>
+</span><span id="__span-47-10"><a id="__codelineno-47-10" name="__codelineno-47-10" href="#__codelineno-47-10"></a><span class="c1"># Database - Neo4j for hyphenated identifiers</span>
+</span><span id="__span-47-11"><a id="__codelineno-47-11" name="__codelineno-47-11" href="#__codelineno-47-11"></a><span class="nv">MADEINOZ_KNOWLEDGE_DATABASE_TYPE</span><span class="o">=</span>neo4j
+</span><span id="__span-47-12"><a id="__codelineno-47-12" name="__codelineno-47-12" href="#__codelineno-47-12"></a><span class="nv">MADEINOZ_KNOWLEDGE_NEO4J_URI</span><span class="o">=</span>bolt://neo4j:7687
+</span><span id="__span-47-13"><a id="__codelineno-47-13" name="__codelineno-47-13" href="#__codelineno-47-13"></a>
+</span><span id="__span-47-14"><a id="__codelineno-47-14" name="__codelineno-47-14" href="#__codelineno-47-14"></a><span class="c1"># Multiple groups for CTI domains</span>
+</span><span id="__span-47-15"><a id="__codelineno-47-15" name="__codelineno-47-15" href="#__codelineno-47-15"></a><span class="nv">MADEINOZ_KNOWLEDGE_GROUP_ID</span><span class="o">=</span>main
+</span><span id="__span-47-16"><a id="__codelineno-47-16" name="__codelineno-47-16" href="#__codelineno-47-16"></a><span class="c1"># Create additional groups by using different group_id in workflows</span>
+</span><span id="__span-47-17"><a id="__codelineno-47-17" name="__codelineno-47-17" href="#__codelineno-47-17"></a>
+</span><span id="__span-47-18"><a id="__codelineno-47-18" name="__codelineno-47-18" href="#__codelineno-47-18"></a><span class="c1"># Search all groups automatically</span>
+</span><span id="__span-47-19"><a id="__codelineno-47-19" name="__codelineno-47-19" href="#__codelineno-47-19"></a><span class="nv">GRAPHITI_SEARCH_ALL_GROUPS</span><span class="o">=</span><span class="nb">true</span>
+</span></code></pre></div>
+<h2 id="verification">Verification<a class="headerlink" href="#verification" title="Permanent link">¶</a></h2>
+<p>To verify your configuration is correct:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-48-1"><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a><span class="c1"># Check configuration is loaded</span>
+</span><span id="__span-48-2"><a id="__codelineno-48-2" name="__codelineno-48-2" href="#__codelineno-48-2"></a>grep<span class="w"> </span>MADEINOZ_KNOWLEDGE<span class="w"> </span>~/.claude/.env
+</span><span id="__span-48-3"><a id="__codelineno-48-3" name="__codelineno-48-3" href="#__codelineno-48-3"></a>
+</span><span id="__span-48-4"><a id="__codelineno-48-4" name="__codelineno-48-4" href="#__codelineno-48-4"></a><span class="c1"># Verify API key is set (don't expose the value)</span>
+</span><span id="__span-48-5"><a id="__codelineno-48-5" name="__codelineno-48-5" href="#__codelineno-48-5"></a>grep<span class="w"> </span>-c<span class="w"> </span>MADEINOZ_KNOWLEDGE_OPENAI_API_KEY<span class="w"> </span>~/.claude/.env
+</span><span id="__span-48-6"><a id="__codelineno-48-6" name="__codelineno-48-6" href="#__codelineno-48-6"></a>
+</span><span id="__span-48-7"><a id="__codelineno-48-7" name="__codelineno-48-7" href="#__codelineno-48-7"></a><span class="c1"># Test connectivity</span>
+</span><span id="__span-48-8"><a id="__codelineno-48-8" name="__codelineno-48-8" href="#__codelineno-48-8"></a>curl<span class="w"> </span>http://localhost:8000/health
+</span></code></pre></div>
+<h2 id="changing-configuration">Changing Configuration<a class="headerlink" href="#changing-configuration" title="Permanent link">¶</a></h2>
+<p>To update configuration after installation:</p>
+<ol>
+<li><strong>Edit PAI .env file:</strong></li>
+</ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-49-1"><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a>nano<span class="w"> </span>~/.claude/.env
+</span><span id="__span-49-2"><a id="__codelineno-49-2" name="__codelineno-49-2" href="#__codelineno-49-2"></a><span class="c1"># or: vim ~/.claude/.env</span>
+</span></code></pre></div>
+<ol>
+<li><strong>Restart the server:</strong></li>
+</ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-50-1"><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>stop
+</span><span id="__span-50-2"><a id="__codelineno-50-2" name="__codelineno-50-2" href="#__codelineno-50-2"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>start
+</span></code></pre></div>
+<ol>
+<li><strong>Verify changes:</strong></li>
+</ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-51-1"><a id="__codelineno-51-1" name="__codelineno-51-1" href="#__codelineno-51-1"></a>curl<span class="w"> </span>http://localhost:8000/health
+</span></code></pre></div>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">¶</a></h2>
+<h3 id="invalid-api-key">"Invalid API key"<a class="headerlink" href="#invalid-api-key" title="Permanent link">¶</a></h3>
+<ul>
+<li>Verify key is correctly copied (no spaces, correct prefix)</li>
+<li>Check key has available credits/quota</li>
+<li>Confirm key is for the right provider</li>
+</ul>
+<h3 id="unknown-model">"Unknown model"<a class="headerlink" href="#unknown-model" title="Permanent link">¶</a></h3>
+<ul>
+<li>Verify model name matches provider's catalog</li>
+<li>Check provider base URL is correct</li>
+<li>Confirm API key can access the model</li>
+</ul>
+<h3 id="connection-refused">"Connection refused"<a class="headerlink" href="#connection-refused" title="Permanent link">¶</a></h3>
+<ul>
+<li>Verify <code>MADEINOZ_KNOWLEDGE_*_BASE_URL</code> is correct</li>
+<li>Check firewall allows connection to provider</li>
+<li>Ensure Ollama server is running (if using local embeddings)</li>
+</ul>
+<h3 id="rate-limit-exceeded">"Rate limit exceeded"<a class="headerlink" href="#rate-limit-exceeded" title="Permanent link">¶</a></h3>
+<ul>
+<li>Lower <code>MADEINOZ_KNOWLEDGE_SEMAPHORE_LIMIT</code></li>
+<li>Upgrade API tier</li>
+<li>Wait for rate limit window to reset</li>
+</ul>
+<h3 id="vector-dimension-mismatch">"Vector dimension mismatch"<a class="headerlink" href="#vector-dimension-mismatch" title="Permanent link">¶</a></h3>
+<ul>
+<li>Verify <code>MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS</code> matches your embedding model</li>
+<li>Cannot change embedding models without clearing the graph</li>
+<li>See "Database Backend Configuration" section for model-to-dimension mapping</li>
+</ul>
+<h2 id="system-limits-summary">System Limits Summary<a class="headerlink" href="#system-limits-summary" title="Permanent link">¶</a></h2>
+<p>All configurable limits in one place:</p>
+<table>
+<thead>
+<tr>
+<th>Limit</th>
+<th>Default</th>
+<th>Variable</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Rate limit</strong></td>
+<td>60 req/60s per IP</td>
+<td><code>RATE_LIMIT_MAX_REQUESTS</code>, <code>RATE_LIMIT_WINDOW_SECONDS</code></td>
+<td>HTTP mode only</td>
+</tr>
+<tr>
+<td><strong>Concurrent LLM requests</strong></td>
+<td>10</td>
+<td><code>SEMAPHORE_LIMIT</code></td>
+<td>Tune based on API tier</td>
+</tr>
+<tr>
+<td><strong>Search results (nodes)</strong></td>
+<td>10</td>
+<td>MCP <code>max_nodes</code> param</td>
+<td>Per-request</td>
+</tr>
+<tr>
+<td><strong>Search results (facts)</strong></td>
+<td>10</td>
+<td>MCP <code>max_facts</code> param</td>
+<td>Per-request</td>
+</tr>
+<tr>
+<td><strong>Search results (episodes)</strong></td>
+<td>10</td>
+<td>MCP <code>max_episodes</code> param</td>
+<td>Per-request</td>
+</tr>
+<tr>
+<td><strong>Cache minimum tokens</strong></td>
+<td>1024</td>
+<td>N/A</td>
+<td>Requests &lt; 1024 tokens skip caching</td>
+</tr>
+<tr>
+<td><strong>Episode body size</strong></td>
+<td>No limit</td>
+<td>N/A</td>
+<td>Bounded by LLM context window</td>
+</tr>
+</tbody>
+</table>
+<h3 id="content-size-guidelines">Content Size Guidelines<a class="headerlink" href="#content-size-guidelines" title="Permanent link">¶</a></h3>
+<p>While there's no hard limit on episode body size, consider these guidelines:</p>
+<table>
+<thead>
+<tr>
+<th>Content Size</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&lt; 10 KB</td>
+<td>Optimal - fast processing, reliable extraction</td>
+</tr>
+<tr>
+<td>10-50 KB</td>
+<td>Good - may take longer to process</td>
+</tr>
+<tr>
+<td>50-100 KB</td>
+<td>Acceptable - consider chunking for bulk import</td>
+</tr>
+<tr>
+<td>&gt; 100 KB</td>
+<td>Not recommended - may hit LLM context limits or timeout</td>
+</tr>
+</tbody>
+</table>
+<p><strong>For large documents:</strong> Use the bulk import workflow which automatically handles chunking. See <a href="../usage/advanced.html">Advanced Usage</a>.</p>
+<h2 id="environment-variable-precedence">Environment Variable Precedence<a class="headerlink" href="#environment-variable-precedence" title="Permanent link">¶</a></h2>
+<p>Configuration is loaded in this order (later values override earlier):</p>
+<ol>
+<li><code>.env.example</code> in pack (reference only)</li>
+<li>PAI .env file (<code>~/.claude/.env</code> or <code>$PAI_DIR/.env</code>)</li>
+<li>Shell environment variables (if set directly)</li>
+</ol>
+<p>Recommended: Keep all configuration in PAI .env file for consistency.</p>
+<h2 id="ontology-configuration-feature-018">Ontology Configuration (Feature 018)<a class="headerlink" href="#ontology-configuration-feature-018" title="Permanent link">¶</a></h2>
+<p>The Knowledge System supports custom entity and relationship types through ontology configuration. This enables domain-specific knowledge modeling for Cyber Threat Intelligence (CTI), Open Source Intelligence (OSINT), and other specialized domains.</p>
+<h3 id="configuration-file_1">Configuration File<a class="headerlink" href="#configuration-file_1" title="Permanent link">¶</a></h3>
+<p><strong>Location:</strong> <code>config/ontology-types.yaml</code></p>
+<p>This file is copied into the Docker container at build time. Rebuild after changes:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-52-1"><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a><span class="c1"># 1. Edit configuration</span>
+</span><span id="__span-52-2"><a id="__codelineno-52-2" name="__codelineno-52-2" href="#__codelineno-52-2"></a>nano<span class="w"> </span>config/ontology-types.yaml
+</span><span id="__span-52-3"><a id="__codelineno-52-3" name="__codelineno-52-3" href="#__codelineno-52-3"></a>
+</span><span id="__span-52-4"><a id="__codelineno-52-4" name="__codelineno-52-4" href="#__codelineno-52-4"></a><span class="c1"># 2. Rebuild Docker image</span>
+</span><span id="__span-52-5"><a id="__codelineno-52-5" name="__codelineno-52-5" href="#__codelineno-52-5"></a>docker<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </span>docker/Dockerfile<span class="w"> </span>-t<span class="w"> </span>madeinoz-knowledge-system:local<span class="w"> </span>.
+</span><span id="__span-52-6"><a id="__codelineno-52-6" name="__codelineno-52-6" href="#__codelineno-52-6"></a>
+</span><span id="__span-52-7"><a id="__codelineno-52-7" name="__codelineno-52-7" href="#__codelineno-52-7"></a><span class="c1"># 3. Restart containers</span>
+</span><span id="__span-52-8"><a id="__codelineno-52-8" name="__codelineno-52-8" href="#__codelineno-52-8"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>stop
+</span><span id="__span-52-9"><a id="__codelineno-52-9" name="__codelineno-52-9" href="#__codelineno-52-9"></a>bun<span class="w"> </span>run<span class="w"> </span>server-cli<span class="w"> </span>start<span class="w"> </span>--dev
+</span></code></pre></div>
+<h3 id="entity-type-configuration">Entity Type Configuration<a class="headerlink" href="#entity-type-configuration" title="Permanent link">¶</a></h3>
+<p>Entity types define domain-specific entities (ThreatActor, Malware, Vulnerability, etc.):</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-53-1"><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a><span class="nt">entity_types</span><span class="p">:</span>
+</span><span id="__span-53-2"><a id="__codelineno-53-2" name="__codelineno-53-2" href="#__codelineno-53-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"ThreatActor"</span>
+</span><span id="__span-53-3"><a id="__codelineno-53-3" name="__codelineno-53-3" href="#__codelineno-53-3"></a><span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"Actor</span><span class="nv"> </span><span class="s">responsible</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">cyber</span><span class="nv"> </span><span class="s">threats"</span>
+</span><span id="__span-53-4"><a id="__codelineno-53-4" name="__codelineno-53-4" href="#__codelineno-53-4"></a><span class="w">    </span><span class="nt">permanent</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</span><span id="__span-53-5"><a id="__codelineno-53-5" name="__codelineno-53-5" href="#__codelineno-53-5"></a><span class="w">    </span><span class="nt">decay_config</span><span class="p">:</span>
+</span><span id="__span-53-6"><a id="__codelineno-53-6" name="__codelineno-53-6" href="#__codelineno-53-6"></a><span class="w">      </span><span class="nt">half_life_days</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">180</span><span class="w">  </span><span class="c1"># Longer half-life for slow-changing CTI data</span>
+</span><span id="__span-53-7"><a id="__codelineno-53-7" name="__codelineno-53-7" href="#__codelineno-53-7"></a><span class="w">      </span><span class="nt">importance_floor</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
+</span><span id="__span-53-8"><a id="__codelineno-53-8" name="__codelineno-53-8" href="#__codelineno-53-8"></a><span class="w">      </span><span class="nt">stability_multiplier</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.2</span>
+</span><span id="__span-53-9"><a id="__codelineno-53-9" name="__codelineno-53-9" href="#__codelineno-53-9"></a><span class="w">    </span><span class="nt">attributes</span><span class="p">:</span>
+</span><span id="__span-53-10"><a id="__codelineno-53-10" name="__codelineno-53-10" href="#__codelineno-53-10"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"aliases"</span>
+</span><span id="__span-53-11"><a id="__codelineno-53-11" name="__codelineno-53-11" href="#__codelineno-53-11"></a><span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">"list"</span>
+</span><span id="__span-53-12"><a id="__codelineno-53-12" name="__codelineno-53-12" href="#__codelineno-53-12"></a><span class="w">        </span><span class="nt">required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</span><span id="__span-53-13"><a id="__codelineno-53-13" name="__codelineno-53-13" href="#__codelineno-53-13"></a><span class="w">        </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"Alternative</span><span class="nv"> </span><span class="s">names</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">the</span><span class="nv"> </span><span class="s">threat</span><span class="nv"> </span><span class="s">actor"</span>
+</span><span id="__span-53-14"><a id="__codelineno-53-14" name="__codelineno-53-14" href="#__codelineno-53-14"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"country"</span>
+</span><span id="__span-53-15"><a id="__codelineno-53-15" name="__codelineno-53-15" href="#__codelineno-53-15"></a><span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">"string"</span>
+</span><span id="__span-53-16"><a id="__codelineno-53-16" name="__codelineno-53-16" href="#__codelineno-53-16"></a><span class="w">        </span><span class="nt">required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</span></code></pre></div>
+<p><strong>Entity Type Properties:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>Yes</td>
+<td>Unique identifier for the entity type</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>string</td>
+<td>Yes</td>
+<td>Human-readable description</td>
+</tr>
+<tr>
+<td><code>permanent</code></td>
+<td>boolean</td>
+<td>No</td>
+<td>If true, entities exempt from decay (default: false)</td>
+</tr>
+<tr>
+<td><code>decay_config</code></td>
+<td>object</td>
+<td>No</td>
+<td>Custom decay settings (half_life_days, importance_floor, stability_multiplier)</td>
+</tr>
+<tr>
+<td><code>attributes</code></td>
+<td>list</td>
+<td>No</td>
+<td>Custom attributes for this entity type</td>
+</tr>
+</tbody>
+</table>
+<h3 id="configuration-scope-what-you-can-vs-cannot-change">Configuration Scope: What You CAN vs CANNOT Change<a class="headerlink" href="#configuration-scope-what-you-can-vs-cannot-change" title="Permanent link">¶</a></h3>
+<p><strong>IMPORTANT:</strong> The ontology configuration file allows customization of <strong>existing</strong> entity and relationship types. Creating entirely <strong>new</strong> entity types requires Python code changes.</p>
+<h4 id="what-you-can-configure-in-yaml">What You CAN Configure in YAML<a class="headerlink" href="#what-you-can-configure-in-yaml" title="Permanent link">¶</a></h4>
+<p>✅ <strong>Customize Existing Entity Types:</strong></p>
+<ul>
+<li>Modify <code>decay_config</code> - Adjust half-life, importance floor, stability</li>
+<li>Add/remove <code>attributes</code> - Custom fields within existing types</li>
+<li>Change <code>permanent</code> flag - Mark types as exempt from decay</li>
+<li>Update <code>description</code>, <code>icon</code> - Display properties</li>
+</ul>
+<p>✅ <strong>Customize Existing Relationship Types:</strong></p>
+<ul>
+<li>Modify <code>description</code>, <code>forward_name</code>, <code>reverse_name</code></li>
+<li>Change <code>permanent</code> flag</li>
+<li>Adjust <code>decay_config</code> for relationship types</li>
+</ul>
+<h4 id="what-requires-code-changes">What Requires CODE Changes<a class="headerlink" href="#what-requires-code-changes" title="Permanent link">¶</a></h4>
+<p>❌ <strong>Creating New Entity Types (Requires Python):</strong></p>
+<ul>
+<li>New entity types (like <code>ThreatActor</code>, <code>Malware</code>) must be defined in code</li>
+<li>Modify <code>docker/patches/ontology_config.py</code> to add new <code>EntityTypeConfig</code> classes</li>
+<li>Update Pydantic models and validation logic</li>
+<li>Rebuild Docker container after code changes</li>
+</ul>
+<p>❌ <strong>Creating New Relationship Types (Requires Python):</strong></p>
+<ul>
+<li>New relationship types must be defined in code</li>
+<li>Update relationship type definitions in the ontology module</li>
+</ul>
+<h4 id="example-customizing-an-existing-type">Example: Customizing an Existing Type<a class="headerlink" href="#example-customizing-an-existing-type" title="Permanent link">¶</a></h4>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-54-1"><a id="__codelineno-54-1" name="__codelineno-54-1" href="#__codelineno-54-1"></a><span class="c1"># You CAN customize existing ThreatActor type</span>
+</span><span id="__span-54-2"><a id="__codelineno-54-2" name="__codelineno-54-2" href="#__codelineno-54-2"></a><span class="nt">entity_types</span><span class="p">:</span>
+</span><span id="__span-54-3"><a id="__codelineno-54-3" name="__codelineno-54-3" href="#__codelineno-54-3"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"ThreatActor"</span>
+</span><span id="__span-54-4"><a id="__codelineno-54-4" name="__codelineno-54-4" href="#__codelineno-54-4"></a><span class="w">    </span><span class="nt">decay_config</span><span class="p">:</span>
+</span><span id="__span-54-5"><a id="__codelineno-54-5" name="__codelineno-54-5" href="#__codelineno-54-5"></a><span class="w">      </span><span class="nt">half_life_days</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">365</span><span class="w">  </span><span class="c1"># Changed from default 180</span>
+</span><span id="__span-54-6"><a id="__codelineno-54-6" name="__codelineno-54-6" href="#__codelineno-54-6"></a><span class="w">    </span><span class="nt">attributes</span><span class="p">:</span>
+</span><span id="__span-54-7"><a id="__codelineno-54-7" name="__codelineno-54-7" href="#__codelineno-54-7"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"aliases"</span>
+</span><span id="__span-54-8"><a id="__codelineno-54-8" name="__codelineno-54-8" href="#__codelineno-54-8"></a><span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">"list"</span>
+</span><span id="__span-54-9"><a id="__codelineno-54-9" name="__codelineno-54-9" href="#__codelineno-54-9"></a><span class="w">      </span><span class="c1"># Adding custom attributes is OK</span>
+</span><span id="__span-54-10"><a id="__codelineno-54-10" name="__codelineno-54-10" href="#__codelineno-54-10"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"last_seen"</span>
+</span><span id="__span-54-11"><a id="__codelineno-54-11" name="__codelineno-54-11" href="#__codelineno-54-11"></a><span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">"datetime"</span>
+</span><span id="__span-54-12"><a id="__codelineno-54-12" name="__codelineno-54-12" href="#__codelineno-54-12"></a><span class="w">        </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"Most</span><span class="nv"> </span><span class="s">recent</span><span class="nv"> </span><span class="s">activity"</span>
+</span></code></pre></div>
+<h4 id="example-what-requires-code">Example: What Requires Code<a class="headerlink" href="#example-what-requires-code" title="Permanent link">¶</a></h4>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-55-1"><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a><span class="c1"># You CANNOT add entirely new entity types via YAML</span>
+</span><span id="__span-55-2"><a id="__codelineno-55-2" name="__codelineno-55-2" href="#__codelineno-55-2"></a><span class="nt">entity_types</span><span class="p">:</span>
+</span><span id="__span-55-3"><a id="__codelineno-55-3" name="__codelineno-55-3" href="#__codelineno-55-3"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"MyCustomType"</span><span class="w">  </span><span class="c1"># ❌ This won't work!</span>
+</span><span id="__span-55-4"><a id="__codelineno-55-4" name="__codelineno-55-4" href="#__codelineno-55-4"></a><span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"Requires</span><span class="nv"> </span><span class="s">code</span><span class="nv"> </span><span class="s">changes"</span>
+</span></code></pre></div>
+<p>To add <code>MyCustomType</code>, you would need to:</p>
+<ol>
+<li>Edit <code>docker/patches/ontology_config.py</code></li>
+<li>Define the new entity type class</li>
+<li>Add validation logic</li>
+<li>Rebuild the Docker image</li>
+</ol>
+<h3 id="relationship-type-configuration">Relationship Type Configuration<a class="headerlink" href="#relationship-type-configuration" title="Permanent link">¶</a></h3>
+<p>Relationship types define connections between entities:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-56-1"><a id="__codelineno-56-1" name="__codelineno-56-1" href="#__codelineno-56-1"></a><span class="nt">relationship_types</span><span class="p">:</span>
+</span><span id="__span-56-2"><a id="__codelineno-56-2" name="__codelineno-56-2" href="#__codelineno-56-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"uses"</span>
+</span><span id="__span-56-3"><a id="__codelineno-56-3" name="__codelineno-56-3" href="#__codelineno-56-3"></a><span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"Source</span><span class="nv"> </span><span class="s">uses</span><span class="nv"> </span><span class="s">target</span><span class="nv"> </span><span class="s">(e.g.,</span><span class="nv"> </span><span class="s">ThreatActor</span><span class="nv"> </span><span class="s">uses</span><span class="nv"> </span><span class="s">Malware)"</span>
+</span><span id="__span-56-4"><a id="__codelineno-56-4" name="__codelineno-56-4" href="#__codelineno-56-4"></a><span class="w">    </span><span class="nt">source_entity_types</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"ThreatActor"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"Campaign"</span><span class="p p-Indicator">]</span>
+</span><span id="__span-56-5"><a id="__codelineno-56-5" name="__codelineno-56-5" href="#__codelineno-56-5"></a><span class="w">    </span><span class="nt">target_entity_types</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"Malware"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"Infrastructure"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"TTP"</span><span class="p p-Indicator">]</span>
+</span><span id="__span-56-6"><a id="__codelineno-56-6" name="__codelineno-56-6" href="#__codelineno-56-6"></a><span class="w">    </span><span class="nt">bidirectional</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</span><span id="__span-56-7"><a id="__codelineno-56-7" name="__codelineno-56-7" href="#__codelineno-56-7"></a><span class="w">    </span><span class="nt">inverse_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+</span></code></pre></div>
+<p><strong>Relationship Type Properties:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>Yes</td>
+<td>Relationship name (e.g., uses, targets)</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>string</td>
+<td>Yes</td>
+<td>Human-readable description</td>
+</tr>
+<tr>
+<td><code>source_entity_types</code></td>
+<td>list</td>
+<td>Yes</td>
+<td>Valid source entity types</td>
+</tr>
+<tr>
+<td><code>target_entity_types</code></td>
+<td>list</td>
+<td>Yes</td>
+<td>Valid target entity types</td>
+</tr>
+<tr>
+<td><code>bidirectional</code></td>
+<td>boolean</td>
+<td>No</td>
+<td>Works in both directions (default: false)</td>
+</tr>
+<tr>
+<td><code>inverse_name</code></td>
+<td>string</td>
+<td>No</td>
+<td>Name of inverse relationship</td>
+</tr>
+<tr>
+<td><code>attributes</code></td>
+<td>list</td>
+<td>No</td>
+<td>Custom attributes</td>
+</tr>
+</tbody>
+</table>
+<h3 id="decay-configuration">Decay Configuration<a class="headerlink" href="#decay-configuration" title="Permanent link">¶</a></h3>
+<p>Custom entity types can have type-specific decay settings:</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>half_life_days</code></td>
+<td>float</td>
+<td>180</td>
+<td>Days for 50% decay (higher = slower decay)</td>
+</tr>
+<tr>
+<td><code>importance_floor</code></td>
+<td>float</td>
+<td>null</td>
+<td>Minimum importance (0-5), slows decay</td>
+</tr>
+<tr>
+<td><code>stability_multiplier</code></td>
+<td>float</td>
+<td>null</td>
+<td>Multiplier for stability (0.1-3.0)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example decay configurations:</strong></p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-57-1"><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a><span class="c1"># Slow-changing CTI data (180-day half-life)</span>
+</span><span id="__span-57-2"><a id="__codelineno-57-2" name="__codelineno-57-2" href="#__codelineno-57-2"></a><span class="nt">ThreatActor</span><span class="p">:</span>
+</span><span id="__span-57-3"><a id="__codelineno-57-3" name="__codelineno-57-3" href="#__codelineno-57-3"></a><span class="w">  </span><span class="nt">half_life_days</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">180</span>
+</span><span id="__span-57-4"><a id="__codelineno-57-4" name="__codelineno-57-4" href="#__codelineno-57-4"></a><span class="w">  </span><span class="nt">importance_floor</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
+</span><span id="__span-57-5"><a id="__codelineno-57-5" name="__codelineno-57-5" href="#__codelineno-57-5"></a><span class="w">  </span><span class="nt">stability_multiplier</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.2</span>
+</span><span id="__span-57-6"><a id="__codelineno-57-6" name="__codelineno-57-6" href="#__codelineno-57-6"></a>
+</span><span id="__span-57-7"><a id="__codelineno-57-7" name="__codelineno-57-7" href="#__codelineno-57-7"></a><span class="c1"># Fast-changing indicators (90-day half-life)</span>
+</span><span id="__span-57-8"><a id="__codelineno-57-8" name="__codelineno-57-8" href="#__codelineno-57-8"></a><span class="nt">Indicator</span><span class="p">:</span>
+</span><span id="__span-57-9"><a id="__codelineno-57-9" name="__codelineno-57-9" href="#__codelineno-57-9"></a><span class="w">  </span><span class="nt">half_life_days</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">90</span>
+</span><span id="__span-57-10"><a id="__codelineno-57-10" name="__codelineno-57-10" href="#__codelineno-57-10"></a><span class="w">  </span><span class="nt">importance_floor</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.3</span>
+</span><span id="__span-57-11"><a id="__codelineno-57-11" name="__codelineno-57-11" href="#__codelineno-57-11"></a><span class="w">  </span><span class="nt">stability_multiplier</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.8</span>
+</span><span id="__span-57-12"><a id="__codelineno-57-12" name="__codelineno-57-12" href="#__codelineno-57-12"></a>
+</span><span id="__span-57-13"><a id="__codelineno-57-13" name="__codelineno-57-13" href="#__codelineno-57-13"></a><span class="c1"># Infrastructure changes quickly (60-day half-life)</span>
+</span><span id="__span-57-14"><a id="__codelineno-57-14" name="__codelineno-57-14" href="#__codelineno-57-14"></a><span class="nt">Infrastructure</span><span class="p">:</span>
+</span><span id="__span-57-15"><a id="__codelineno-57-15" name="__codelineno-57-15" href="#__codelineno-57-15"></a><span class="w">  </span><span class="nt">half_life_days</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">60</span>
+</span><span id="__span-57-16"><a id="__codelineno-57-16" name="__codelineno-57-16" href="#__codelineno-57-16"></a><span class="w">  </span><span class="nt">importance_floor</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.3</span>
+</span><span id="__span-57-17"><a id="__codelineno-57-17" name="__codelineno-57-17" href="#__codelineno-57-17"></a><span class="w">  </span><span class="nt">stability_multiplier</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.7</span>
+</span></code></pre></div>
+<h3 id="reserved-attributes">Reserved Attributes<a class="headerlink" href="#reserved-attributes" title="Permanent link">¶</a></h3>
+<p>The following attribute names are reserved and cannot be used in custom entity or relationship types:</p>
+<ul>
+<li><code>uuid</code> - Unique identifier</li>
+<li><code>name</code> - Entity/relationship name</li>
+<li><code>labels</code> - Neo4j node labels</li>
+<li><code>created_at</code> - Creation timestamp</li>
+<li><code>summary</code> - Entity summary text</li>
+<li><code>attributes</code> - Attributes dictionary</li>
+<li><code>name_embedding</code> - Vector embedding</li>
+</ul>
+<h3 id="built-in-entity-types">Built-in Entity Types<a class="headerlink" href="#built-in-entity-types" title="Permanent link">¶</a></h3>
+<p>These entity types are always available and don't need to be defined:</p>
+<ul>
+<li><code>Person</code> - Individuals</li>
+<li><code>Organization</code> - Companies, groups</li>
+<li><code>Location</code> - Places, geographic areas</li>
+<li><code>Event</code> - Time-bounded occurrences</li>
+<li><code>Object</code> - Physical or virtual objects</li>
+<li><code>Document</code> - Documents, files</li>
+<li><code>Topic</code> - Subjects, themes</li>
+<li><code>Preference</code> - User preferences</li>
+<li><code>Requirement</code> - Requirements, specifications</li>
+<li><code>Procedure</code> - Processes, methods</li>
+</ul>
+<h3 id="pre-built-ctiosint-ontology">Pre-built CTI/OSINT Ontology<a class="headerlink" href="#pre-built-ctiosint-ontology" title="Permanent link">¶</a></h3>
+<p>The system includes a pre-built ontology for CTI/OSINT work with these entity types:</p>
+<p><strong>CTI Entity Types:</strong></p>
+<ul>
+<li><code>ThreatActor</code> - APT groups, threat actors (180-day half-life)</li>
+<li><code>Malware</code> - Malicious software families (90-day half-life)</li>
+<li><code>Vulnerability</code> - CVE entries, security flaws (180-day half-life)</li>
+<li><code>Campaign</code> - Coordinated attack campaigns (120-day half-life)</li>
+<li><code>Indicator</code> - IOCs, hashes, IPs, domains (90-day half-life)</li>
+<li><code>Infrastructure</code> - C2 servers, attack infrastructure (60-day half-life)</li>
+<li><code>TTP</code> - Tactics, techniques, procedures (365-day half-life)</li>
+</ul>
+<p><strong>OSINT Entity Types:</strong></p>
+<ul>
+<li><code>Account</code> - User accounts, social media profiles</li>
+<li><code>Domain</code> - Domain names</li>
+<li><code>Email</code> - Email addresses</li>
+<li><code>Phone</code> - Phone numbers</li>
+<li><code>Image</code> - Images, media files</li>
+<li><code>Investigation</code> - OSINT investigations</li>
+</ul>
+<p><strong>Relationship Types:</strong></p>
+<ul>
+<li><code>uses</code> - ThreatActor uses Malware</li>
+<li><code>targets</code> - Campaign targets Organization</li>
+<li><code>exploits</code> - Malware exploits Vulnerability</li>
+<li><code>variant_of</code> - Malware is variant of another</li>
+<li><code>attributed_to</code> - Campaign attributed to ThreatActor</li>
+<li><code>located_at</code> - Infrastructure located at Location</li>
+<li><code>owns</code> - Person owns Account</li>
+<li><code>communicates_with</code> - ThreatActor communicates with ThreatActor</li>
+</ul>
+<p>For a complete example, see <code>config/ontology-types.yaml</code> in the repository.</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"></path></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer">
+        
+          
+          <a href="cli.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: CLI">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                CLI
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="observability.html" class="md-footer__link md-footer__link--next" aria-label="Next: Observability &amp; Metrics">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Observability &amp; Metrics
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"></path></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/madeinoz67/madeinoz-knowledge-system" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"></path></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "navigation.footer", "search.suggest", "search.highlight", "content.code.copy", "content.tabs.link", "content.lightbox"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  
+<script id="init-glightbox">const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});
+document$.subscribe(()=>{ lightbox.reload(); });
+</script></body></html>
