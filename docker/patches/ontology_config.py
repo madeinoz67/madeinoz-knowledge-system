@@ -399,7 +399,7 @@ def reset_ontology_cache() -> None:
 
 
 def check_circular_dependencies(
-    config: Optional[OntologyConfig] = None
+    config: Optional[Union[OntologyConfig, Dict[str, List[str]]]] = None
 ) -> Tuple[bool, Optional[List[str]]]:
     """
     Check for circular dependencies in entity type inheritance.
@@ -407,25 +407,36 @@ def check_circular_dependencies(
     Uses topological sort to detect cycles in the parent_type dependency graph.
 
     Args:
-        config: Ontology config to check. If None, loads from default path.
+        config: Ontology config to check, or a pre-built dependency graph.
+                If OntologyConfig, extracts parent_type relationships.
+                If Dict[str, List[str]], treats as direct dependency graph {parent: [children]}.
+                If None, loads from default path.
 
     Returns:
         Tuple of (has_cycle, cycle_path). If no cycle, cycle_path is None.
         If cycle detected, cycle_path is a list of type names forming the cycle.
     """
-    if config is None:
-        config = load_ontology_config()
-
     # Build dependency graph: parent -> children
     graph: Dict[str, List[str]] = {}
     all_types: Set[str] = set()
 
-    # Collect all entity types
-    for entity_type in config.entity_types:
-        all_types.add(entity_type.name)
-        if entity_type.parent_type:
-            graph[entity_type.parent_type] = graph.get(entity_type.parent_type, [])
-            graph[entity_type.parent_type].append(entity_type.name)
+    # Handle different input types
+    if config is None:
+        config = load_ontology_config()
+
+    if isinstance(config, dict):
+        # Input is already a dependency graph
+        graph = config.copy()
+        all_types = set(graph.keys())
+        for children in graph.values():
+            all_types.update(children)
+    else:
+        # Input is OntologyConfig, extract parent_type relationships
+        for entity_type in config.entity_types:
+            all_types.add(entity_type.name)
+            if entity_type.parent_type:
+                graph[entity_type.parent_type] = graph.get(entity_type.parent_type, [])
+                graph[entity_type.parent_type].append(entity_type.name)
 
     # Add types with no dependencies as empty lists
     for entity_type in all_types:
@@ -467,11 +478,30 @@ def check_circular_dependencies(
         # Build the cycle path
         max_iterations = len(all_types) + 1
         for _ in range(max_iterations):
-            # Find a parent that leads to an unvisited node
-            for entity_type in config.entity_types:
-                if entity_type.name == current and entity_type.parent_type:
-                    current = entity_type.parent_type
-                    cycle_path.append(current)
+            # For dict input, trace directly through graph
+            if isinstance(config, dict):
+                # Find a child that points to current as parent
+                found = False
+                for parent, children in graph.items():
+                    if current in children:
+                        current = parent
+                        if current != start:  # Don't add start twice
+                            cycle_path.append(current)
+                        found = True
+                        break
+                if not found:
+                    break
+            else:
+                # For OntologyConfig input, use entity_types
+                found = False
+                for entity_type in config.entity_types:
+                    if entity_type.name == current and entity_type.parent_type:
+                        current = entity_type.parent_type
+                        if current != start:  # Don't add start twice
+                            cycle_path.append(current)
+                        found = True
+                        break
+                if not found:
                     break
             if current == start:
                 break

@@ -666,12 +666,15 @@ def complete_import_session(session: Dict[str, Any]) -> Dict[str, Any]:
         session: Import session entity
 
     Returns:
-        Updated session with COMPLETED status
+        Updated session with COMPLETED status and completion timestamp
     """
-    return update_import_session(
+    updated = update_import_session(
         session,
         status="COMPLETED"
     )
+    # Add completion timestamp
+    updated["attributes"]["completed_at"] = datetime.now().isoformat() + "Z"
+    return updated
 
 
 def fail_import_session(session: Dict[str, Any], error_message: str) -> Dict[str, Any]:

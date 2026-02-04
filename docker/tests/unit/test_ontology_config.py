@@ -354,7 +354,10 @@ class TestYamlLoader:
 
     def test_load_valid_yaml(self, tmp_path):
         """Test loading valid ontology YAML file."""
-        from utils.ontology_config import load_ontology_config
+        from utils.ontology_config import load_ontology_config, reset_ontology_cache
+
+        # Reset cache to ensure clean state
+        reset_ontology_cache()
 
         yaml_content = """
         version: "1.0.0"
@@ -368,7 +371,7 @@ class TestYamlLoader:
         config_file = tmp_path / "ontology.yaml"
         config_file.write_text(yaml_content)
 
-        config = load_ontology_config(config_file)
+        config = load_ontology_config(config_file, force_reload=True)
 
         assert config.version == "1.0.0"
         assert config.name == "Test Ontology"
@@ -431,18 +434,24 @@ class TestYamlLoader:
 
     def test_load_invalid_yaml(self, tmp_path):
         """Test loading invalid YAML raises error."""
-        from utils.ontology_config import load_ontology_config
-        import yaml
+        from utils.ontology_config import load_ontology_config, reset_ontology_cache
+
+        # Reset cache to ensure clean state
+        reset_ontology_cache()
 
         config_file = tmp_path / "invalid.yaml"
-        config_file.write_text("invalid: yaml: content: [unclosed")
+        # Use truly invalid YAML (unquoted colon in flow collection)
+        config_file.write_text("invalid: {unclosed: bracket:")
 
         with pytest.raises(ValueError):
             load_ontology_config(config_file)
 
     def test_load_nonexistent_file_returns_default(self, tmp_path):
         """Test that nonexistent file returns default empty config."""
-        from utils.ontology_config import load_ontology_config
+        from utils.ontology_config import load_ontology_config, reset_ontology_cache
+
+        # Reset cache to ensure clean state
+        reset_ontology_cache()
 
         nonexistent = tmp_path / "does_not_exist.yaml"
 
@@ -611,7 +620,10 @@ class TestDecayConfigRetrieval:
 
     def test_get_decay_for_entity_type(self, tmp_path):
         """Test retrieving decay config for specific entity type."""
-        from utils.ontology_config import load_ontology_config, get_decay_config_for_type
+        from utils.ontology_config import load_ontology_config, get_decay_config_for_type, reset_ontology_cache
+
+        # Reset cache to ensure clean state
+        reset_ontology_cache()
 
         yaml_content = """
         version: "1.0.0"
@@ -631,7 +643,7 @@ class TestDecayConfigRetrieval:
         config_file = tmp_path / "ontology.yaml"
         config_file.write_text(yaml_content)
 
-        load_ontology_config(config_file)
+        load_ontology_config(config_file, force_reload=True)
 
         threat_actor_decay = get_decay_config_for_type("ThreatActor")
         indicator_decay = get_decay_config_for_type("Indicator")
@@ -647,7 +659,10 @@ class TestDecayConfigRetrieval:
 
     def test_permanent_flag_handling(self, tmp_path):
         """Test that entities can be marked as permanent (T079, T087)."""
-        from utils.ontology_config import load_ontology_config, is_entity_type_permanent
+        from utils.ontology_config import load_ontology_config, is_entity_type_permanent, reset_ontology_cache
+
+        # Reset cache to ensure clean state
+        reset_ontology_cache()
 
         yaml_content = """
         version: "1.0.0"
@@ -663,7 +678,7 @@ class TestDecayConfigRetrieval:
         config_file = tmp_path / "ontology.yaml"
         config_file.write_text(yaml_content)
 
-        load_ontology_config(config_file)
+        load_ontology_config(config_file, force_reload=True)
 
         assert is_entity_type_permanent("CriticalAPT") is True
         assert is_entity_type_permanent("ThreatActor") is False
@@ -844,12 +859,17 @@ class TestTemplateMerging:
 
     def test_merge_relationship_types(self, tmp_path):
         """Test that merge combines relationship types from multiple templates."""
-        from utils.ontology_config import OntologyConfig, merge_ontologies
+        from utils.ontology_config import OntologyConfig, merge_ontologies, EntityTypeConfig
+
+        # Define entity types that relationships will reference
+        entity_a = EntityTypeConfig(name="EntityA", description="Entity A")
+        entity_b = EntityTypeConfig(name="EntityB", description="Entity B")
+        entity_c = EntityTypeConfig(name="EntityC", description="Entity C")
 
         base = OntologyConfig(
             version="1.0.0",
             name="Base",
-            entity_types=[],
+            entity_types=[entity_a, entity_b, entity_c],
             relationship_types=[
                 {
                     "name": "relates_to",
@@ -863,7 +883,7 @@ class TestTemplateMerging:
         extension = OntologyConfig(
             version="1.0.0",
             name="Extension",
-            entity_types=[],
+            entity_types=[entity_a, entity_b, entity_c],
             relationship_types=[
                 {
                     "name": "connects_to",
