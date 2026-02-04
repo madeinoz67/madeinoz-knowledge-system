@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use v4 artifact actions with directory-preserving path
 - Upgrade peaceiris/actions-gh-pages to v4
 - Use peaceiris/actions-gh-pages@v4 built-in artifact download
+- Rebuild docs in Release job instead of artifact download
 
 ## [1.8.4] - 2026-02-02
 
