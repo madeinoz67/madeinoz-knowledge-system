@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.8.5] - 2026-02-03
+## [Unreleased]
 
 
 ### Added
@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add weighted search support to Knowledge CLI ([#59](https://github.com/madeinoz67/madeinoz-knowledge-system/issues/59))
 - Add queue processing metrics for input monitoring ([#62](https://github.com/madeinoz67/madeinoz-knowledge-system/issues/62))
+- Add OSINT/CTI ontology support with custom entities and CLI commands ([#64](https://github.com/madeinoz67/madeinoz-knowledge-system/issues/64))
 
 ## [1.8.4] - 2026-02-02
 
