@@ -3,10 +3,10 @@
 name: Madeinoz Knowledge System
 
 # pack-id: (format) {author}-{pack-name}-{variant}-v{version}
-pack-id: madeinoz67-madeinoz-knowledge-system-core-v1.8.5
+pack-id: madeinoz67-madeinoz-knowledge-system-core-v1.9.0
 
 # version: (format) SemVer major.minor.patch
-version: 1.8.5
+version: 1.9.0
 
 # author: (1 word) GitHub username or organization
 author: madeinoz67
