@@ -131,7 +131,7 @@ class GraphTraversal:
                 "Supported types: neo4j, falkordb"
             )
 
-    def traverse(
+    async def traverse(
         self,
         start_entity_uuid: str,
         max_depth: int = 1,
@@ -174,11 +174,11 @@ class GraphTraversal:
 
         # Route to database-specific implementation
         if self.database_type == "neo4j":
-            result = self._traverse_neo4j(
+            result = await self._traverse_neo4j_async(
                 start_entity_uuid, max_depth, relationship_types, group_ids
             )
         else:  # falkordb
-            result = self._traverse_falkordb(
+            result = await self._traverse_falkordb_async(
                 start_entity_uuid, max_depth, relationship_types, group_ids
             )
 
@@ -208,7 +208,7 @@ class GraphTraversal:
     # Neo4j Implementation
     # ========================================================================
 
-    def _traverse_neo4j(
+    async def _traverse_neo4j_async(
         self,
         start_entity_uuid: str,
         max_depth: int,
@@ -216,10 +216,76 @@ class GraphTraversal:
         group_ids: Optional[List[str]]
     ) -> TraversalResult:
         """
-        Traverse graph using Neo4j Cypher variable-length paths.
+        Traverse graph using Neo4j Cypher variable-length paths (async version).
 
         Uses native Cypher path queries for efficient multi-hop traversal.
         Cycle detection is handled by tracking visited entities.
+
+        This is the async implementation required for AsyncSession compatibility.
+        """
+        if not NEO4J_AVAILABLE:
+            raise GraphTraversalError(
+                "Neo4j driver not available. Install neo4j package."
+            )
+
+        result = TraversalResult(depth_explored=max_depth)
+        visited: Set[str] = {start_entity_uuid}
+
+        # Build Cypher query
+        query = self._build_neo4j_query(
+            start_entity_uuid, max_depth, relationship_types, group_ids
+        )
+
+        try:
+            # Use async with for AsyncSession context manager protocol
+            async with self.driver.session() as session:
+                # First, verify the starting entity exists
+                entity_check_result = await session.run(
+                    "MATCH (n) WHERE n.uuid = $uuid RETURN n.name, n.labels",
+                    uuid=start_entity_uuid
+                )
+                # Consume the result to check if entity exists
+                entity_check_records = [record async for record in entity_check_result]
+                if not entity_check_records:
+                    raise EntityNotFoundError(
+                        f"Entity with UUID {start_entity_uuid} not found"
+                    )
+
+                # Execute traversal query
+                records = await session.run(query)
+
+                # Process results using async comprehension
+                async for record in records:
+                    connection = self._process_neo4j_record(record, visited)
+                    if connection:
+                        result.connections.append(connection)
+
+                # Get total count for metadata
+                result.total_connections_explored = len(result.connections) + result.cycles_detected
+                result.connections_returned = len(result.connections)
+
+        except Exception as e:
+            if isinstance(e, GraphTraversalError):
+                raise
+            raise GraphTraversalError(f"Neo4j traversal failed: {e}") from e
+
+        return result
+
+    def _traverse_neo4j_sync(
+        self,
+        start_entity_uuid: str,
+        max_depth: int,
+        relationship_types: Optional[List[str]],
+        group_ids: Optional[List[str]]
+    ) -> TraversalResult:
+        """
+        Traverse graph using Neo4j Cypher variable-length paths (sync version).
+
+        Uses native Cypher path queries for efficient multi-hop traversal.
+        Cycle detection is handled by tracking visited entities.
+
+        Note: This synchronous version is kept for reference but should not
+        be used with async Neo4j drivers (AsyncSession compatibility issue).
         """
         if not NEO4J_AVAILABLE:
             raise GraphTraversalError(
@@ -276,9 +342,10 @@ class GraphTraversal:
         """Build Cypher query for variable-length path traversal."""
 
         # Base query with variable-length path
+        # Note: start_uuid is embedded directly (UUIDs are safe from injection)
         query = f"""
         MATCH path = (start)-[r*1..{max_depth}]-(end)
-        WHERE start.uuid = $start_uuid
+        WHERE start.uuid = '{start_uuid}'
         """
 
         # Add relationship type filter
@@ -287,7 +354,7 @@ class GraphTraversal:
             rel_pattern = "|".join(f":{rt}" for rt in relationship_types)
             query = f"""
             MATCH path = (start)-[{rel_pattern}*1..{max_depth}]-(end)
-            WHERE start.uuid = $start_uuid
+            WHERE start.uuid = '{start_uuid}'
             """
 
         # Add group ID filter
@@ -330,6 +397,17 @@ class GraphTraversal:
 
         visited.add(uuid)
 
+        # Extract and convert created_at from Neo4j DateTime to string if needed
+        created_at = record.get("created_at")
+        if created_at is not None:
+            # Convert Neo4j DateTime to ISO string
+            if hasattr(created_at, "iso_format"):
+                created_at = created_at.iso_format()
+            elif hasattr(created_at, "isoformat"):
+                created_at = created_at.isoformat()
+            else:
+                created_at = str(created_at)
+
         # Determine direction (simplified - Neo4j paths are bidirectional)
         # A more sophisticated implementation would track actual direction
         direction = "bidirectional"
@@ -342,7 +420,7 @@ class GraphTraversal:
                 "name": record.get("name", ""),
                 "labels": record.get("labels", []),
                 "summary": record.get("summary"),
-                "created_at": record.get("created_at"),
+                "created_at": created_at,
                 "group_id": record.get("group_id"),
                 "attributes": self._extract_entity_attributes(record)
             },
@@ -357,7 +435,26 @@ class GraphTraversal:
     # FalkorDB Implementation
     # ========================================================================
 
-    def _traverse_falkordb(
+    async def _traverse_falkordb_async(
+        self,
+        start_entity_uuid: str,
+        max_depth: int,
+        relationship_types: Optional[List[str]],
+        group_ids: Optional[List[str]]
+    ) -> TraversalResult:
+        """
+        Async wrapper for FalkorDB traversal.
+
+        FalkorDB currently uses synchronous redis client, so we wrap
+        the sync implementation in an async function to maintain API
+        compatibility with the async traverse() method.
+        """
+        # Call the sync implementation directly (FalkorDB doesn't have async client)
+        return self._traverse_falkordb_sync(
+            start_entity_uuid, max_depth, relationship_types, group_ids
+        )
+
+    def _traverse_falkordb_sync(
         self,
         start_entity_uuid: str,
         max_depth: int,
