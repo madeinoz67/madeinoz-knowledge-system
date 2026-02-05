@@ -10,7 +10,7 @@ ARG BUILD_COMMIT
 ARG BUILD_DATE
 
 LABEL description="Madeinoz Knowledge System - Graphiti MCP with Ollama/OpenRouter support, Neo4j + FalkorDB, Lucene sanitization, Prompt Caching, Memory Decay Scoring, OSINT/CTI Ontology Support"
-LABEL version="${BUILD_VERSION:-1.9.0}"
+LABEL version="${BUILD_VERSION:-1.9.1}"
 
 # Apply patches by replacing original files
 # factories.py - Adds Ollama/OpenRouter support (fixes GitHub #1116)
