@@ -1,0 +1,202 @@
+name: investigate_entity
+title: Investigate Entity Connections
+description: |
+  Performs graph traversal starting from a matched entity to find all connected
+  entities up to a specified depth. Returns entities with their names, types,
+  and UUIDs along with relationship information.
+version: 1.0.0
+tool: mcp
+
+input:
+  entity_name:
+    type: string
+    required: true
+    description: |
+      The name or identifier of the entity to investigate (e.g., "+1-555-0199", "APT28").
+      The system performs semantic search to find the best matching entity.
+    example: "Apollo 11"
+
+  max_depth:
+    type: integer
+    required: false
+    default: 1
+    minimum: 1
+    maximum: 3
+    description: |
+      Maximum number of hops to traverse from the starting entity (1-3).
+      Higher values return more connections but take longer.
+    example: 2
+
+  relationship_types:
+    type: array
+    items:
+      type: string
+    required: false
+    description: |
+      Optional filter for specific relationship types (e.g., ["USES", "OWNS"]).
+      If not specified, all relationship types are included.
+    example: ["USES", "TARGETS"]
+
+  group_ids:
+    type: array
+    items:
+      type: string
+    required: false
+    description: |
+      Optional list of group IDs to search within. If not specified,
+      searches across all available groups.
+    example: ["main", "cti"]
+
+  include_attributes:
+    type: boolean
+    required: false
+    default: true
+    description: |
+      Include full entity attributes in the response. Set to false to reduce
+      response size for large traversals.
+    example: true
+
+output:
+  entity:
+    type: object
+    description: The starting entity that was investigated.
+    properties:
+      uuid:
+        type: string
+        description: Unique identifier of the entity
+      name:
+        type: string
+        description: Human-readable name
+      labels:
+        type: array
+        items:
+          type: string
+        description: Type labels assigned to the entity
+      summary:
+        type: string
+        nullable: true
+        description: Text summary of the entity
+      created_at:
+        type: string
+        nullable: true
+        description: ISO timestamp of entity creation
+      group_id:
+        type: string
+        nullable: true
+        description: Knowledge graph group identifier
+      attributes:
+        type: object
+        nullable: true
+        description: Additional entity attributes (if include_attributes=true)
+
+  connections:
+    type: array
+    description: List of connected entities found during traversal.
+    items:
+      type: object
+      properties:
+        relationship:
+          type: string
+          description: Type of relationship (e.g., "USES", "OWNS")
+        direction:
+          type: string
+          description: Direction of relationship ("bidirectional" for undirected graphs)
+        target_entity:
+          type: object
+          description: The connected entity
+          properties:
+            uuid:
+              type: string
+            name:
+              type: string
+            labels:
+              type: array
+              items:
+                type: string
+            summary:
+              type: string
+              nullable: true
+            created_at:
+              type: string
+              nullable: true
+            group_id:
+              type: string
+              nullable: true
+            attributes:
+              type: object
+              nullable: true
+        hop_distance:
+          type: integer
+          description: Number of hops from start entity (1 = direct connection)
+        fact:
+          type: string
+          description: Human-readable fact description
+        confidence:
+          type: number
+          nullable: true
+          description: Confidence score for the connection (if available)
+
+  metadata:
+    type: object
+    description: Metadata about the traversal operation
+    properties:
+      depth_explored:
+        type: integer
+        description: Maximum depth reached during traversal
+      total_connections_explored:
+        type: integer
+        description: Total connections examined (including cycles pruned)
+      connections_returned:
+        type: integer
+        description: Number of unique connections returned after cycle pruning
+      cycles_detected:
+        type: integer
+        description: Count of cycles detected during traversal
+      cycles_pruned:
+        type: array
+        items:
+          type: string
+        description: UUIDs of entities pruned due to cycle detection
+      entities_skipped:
+        type: integer
+        description: Count of entities skipped for any reason
+      relationship_types_filtered:
+        type: array
+        items:
+          type: string
+        nullable: true
+        description: Relationship types that were filtered (if any)
+      query_duration_ms:
+        type: number
+        nullable: true
+        description: Time taken for traversal in milliseconds
+      max_connections_exceeded:
+        type: boolean
+        description: Whether connection count exceeded the 500-connection warning threshold
+
+  warning:
+    type: string
+    nullable: true
+    description: |
+      Warning message if traversal returned extensive results.
+      Present when total_connections_explored ≥ 500.
+
+errors:
+  - code: GRAPHITI_SERVICE_NOT_INITIALIZED
+    message: Graphiti service not initialized
+    description: The knowledge graph service is not available
+
+  - code: INVALID_DEPTH
+    message: Invalid depth: {depth}. Must be between 1 and 3.
+    description: The requested depth exceeds the maximum allowed value
+
+  - code: ENTITY_NOT_FOUND
+    message: Entity not found: {entity_name}
+    description: No entity matches the provided name
+    details:
+      query: The search query that was used
+      suggestion: Use search_nodes to find the exact entity name first
+
+  - code: NEO4J_TRAVERSAL_FAILED
+    message: Error investigating entity: {error details}
+    description: An error occurred during graph traversal

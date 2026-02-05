@@ -1753,7 +1753,7 @@ async def investigate_entity(
             logger=logger
         )
 
-        traversal_result = traversal.traverse(
+        traversal_result = await traversal.traverse(
             start_entity_uuid=start_uuid,
             max_depth=max_depth,
             relationship_types=relationship_types,
