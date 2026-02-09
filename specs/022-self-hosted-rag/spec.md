@@ -27,21 +27,21 @@ The Local Knowledge Augmentation Platform (LKAP) is a local-first, self-hosted k
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Automatic Document Ingestion (Priority: P1)
+### User Story 1 - RAGFlow UI Document Management (Priority: P1)
 
-User drops technical documents (PDFs, SDK docs, standards, detections, reports) into an inbox folder. System automatically classifies them by domain, type, vendor, and component with minimal user intervention.
+User manages documents through RAGFlow's built-in web interface. They upload technical documents (PDFs, SDK docs, standards, detections, reports) to datasets, configure chunking templates, and review parsing results visually. RAGFlow handles all ingestion, chunking, and embedding automatically.
 
-**Why this priority**: Ingestion is the foundation. Without automatic document processing, the system has no content to index or retrieve.
+**Why this priority**: RAGFlow provides a production-ready UI for document management. Rebuilding this functionality is redundant when RAGFlow already supports upload, chunking, parsing, and visualization.
 
-**Independent Test**: Can be fully tested by dropping sample documents into the inbox, verifying automatic classification occurs, and confirming files are moved to processed storage with proper metadata.
+**Independent Test**: Can be fully tested by accessing RAGFlow UI at `http://localhost:9380`, creating a dataset, uploading documents via web interface, and verifying chunks are created and searchable.
 
 **Acceptance Scenarios**:
 
-1. **Given** a PDF document in the inbox, **When** the filesystem watcher triggers, **Then** document is converted to structured format, classified by domain/type/vendor, and moved to processed storage
-2. **Given** a document with high-confidence classification (≥0.85), **When** processed, **Then** system auto-accepts without user prompt
-3. **Given** a document with low-confidence classification (<0.70), **When** processed, **Then** system presents one-screen review UI for confirmation
-4. **Given** a document that was already ingested (same hash), **When** detected again, **Then** system skips re-processing (idempotent)
-5. **Given** 100 documents dropped simultaneously, **When** processed, **Then** all complete within 5 minutes with proper concurrency handling
+1. **Given** access to RAGFlow UI, **When** user creates a dataset, **Then** dataset is created with configurable embedding model and chunking template
+2. **Given** a dataset in RAGFlow, **When** user uploads PDFs via web UI, **Then** documents are automatically parsed, chunked, and embedded
+3. **Given** parsed documents, **When** user views chunks, **Then** they can see chunk text, add keywords, and make manual edits
+4. **Given** the RAGFlow retrieval testing interface, **When** user runs test queries, **Then** they can verify search results and tune retrieval parameters
+5. **Given** RAGFlow's file size limits, **When** user needs to upload large files, **Then** they can configure limits via environment variables (default: 1GB per upload, 32 files per batch)
 
 ---
 
@@ -79,20 +79,20 @@ User promotes high-value facts from document evidence into the durable Knowledge
 
 ---
 
-### User Story 4 - Ingestion Review and Classification Override (Priority: P2)
+### User Story 4 - Chunk Review and Manual Intervention (Priority: P2)
 
-System presents a calm, single-screen review interface when classification confidence is low. User can review evidence, override classifications, and provide corrections that the system learns from.
+RAGFlow provides visual chunk preview and editing capabilities. Users can review parsed chunks, add important keywords, and manually correct content when needed. This is built into RAGFlow's web interface.
 
-**Why this priority**: Reduces friction for high-confidence cases while providing oversight when needed. Works without it, but UX suffers.
+**Why this priority**: RAGFlow's built-in chunk editor provides oversight without custom development. Users can improve search quality by adding keywords and questions to chunks.
 
-**Independent Test**: Can be tested by triggering low-confidence classifications, verifying review UI appears with correct information, and confirming corrections are applied and remembered.
+**Independent Test**: Can be tested by uploading a document to RAGFlow, viewing the parsed chunks, adding keywords to a chunk, and verifying the keywords improve search relevance.
 
 **Acceptance Scenarios**:
 
-1. **Given** a document with classification confidence 0.65, **When** processed, **Then** system shows review UI with document summary, classification, confidence band, evidence preview, and action buttons
-2. **Given** the review UI, **When** user overrides classification, **Then** system applies new metadata and remembers correction for future documents from same source
-3. **Given** the review UI, **When** user clicks "Accept and Ingest", **Then** system proceeds with ingestion using suggested metadata
-4. **Given** the review UI, **When** user clicks "Cancel", **Then** system leaves document in inbox for manual intervention
+1. **Given** a parsed document in RAGFlow, **When** user views chunks, **Then** they see chunk text with position and page/section information
+2. **Given** a chunk in RAGFlow, **When** user adds important keywords, **Then** those keywords improve ranking for queries containing those terms
+3. **Given** a chunk with incorrect parsing, **When** user double-clicks to edit, **Then** they can manually correct the content
+4. **Given** RAGFlow's retrieval testing interface, **When** user runs test queries, **Then** they can verify retrieval quality and adjust as needed
 
 ---
 
@@ -130,17 +130,17 @@ User reviews conflicting facts in the Knowledge Graph, traces provenance to sour
 
 ### Functional Requirements
 
-#### Ingestion (FR-001 to FR-004)
-- **FR-001**: System MUST automatically classify documents by domain, document type, vendor, and component using progressive classification (hard signals, content analysis, LLM-assisted, user confirmation)
-- **FR-002**: System MUST assign confidence scores to each classification and trigger review UI when confidence <0.70
-- **FR-002a**: System MUST split documents into chunks of 512-768 tokens, respecting document heading boundaries for semantic coherence
-- **FR-003**: System MUST auto-accept classifications with confidence ≥0.85 without user intervention
-- **FR-004**: System MUST freeze metadata after successful ingestion and move files from inbox to processed storage
-- **FR-005**: System MUST support idempotent ingestion based on document hash (skip if already processed)
-- **FR-006**: System MUST convert PDFs to structured format (Markdown/JSON) preserving tables, sections, and errata
-- **FR-007**: System MUST watch the inbox folder for new files and trigger ingestion on detection
-- **FR-008**: System MUST support scheduled reconciliation (e.g., nightly) as secondary ingestion trigger
-- **FR-009**: System MUST handle ingestion atomically (all-or-nothing per document with rollback on failure)
+#### Ingestion (FR-001 to FR-004) - RAGFlow-Native
+- **FR-001**: System MUST use RAGFlow's built-in UI for document upload and dataset management
+- **FR-002**: System MUST leverage RAGFlow's 14 built-in chunking templates for different document types and layouts
+- **FR-002a**: System MUST support RAGFlow's visual chunk preview for manual intervention (add keywords, edit content)
+- **FR-003**: System MUST integrate with RAGFlow's parsing backends (MinerU, PaddleOCR) for PDF extraction
+- **FR-004**: System MUST expose RAGFlow datasets for semantic search via RAGFlow Python SDK or REST API
+- **FR-005**: System MUST use RAGFlow's retrieval testing interface for verifying search quality
+- **FR-006**: RAGFlow handles document parsing, chunking, and embedding automatically with configurable templates
+- **FR-007**: System MUST provide RAGFlow client wrapper for search operations (rag.search, rag.getChunk)
+- **FR-008**: System MUST support RAGFlow's batch upload limits (32 files per batch via UI, unlimited via API)
+- **FR-009**: System MUST configure RAGFlow embedding model and chunking method per dataset
 
 #### Retrieval (FR-010 to FR-013)
 - **FR-010**: System MUST support semantic search queries that return top-k most similar document chunks
@@ -210,48 +210,59 @@ User reviews conflicting facts in the Knowledge Graph, traces provenance to sour
 
 ## Assumptions
 
-- Docling will be used for PDF-to-structured conversion (tables, sections, errata preservation)
-- RAGFlow will provide RAG indexing and retrieval capabilities
-- Ollama (optional/out-of-scope) can provide local embeddings, but external APIs (OpenRouter) are preferred for MVP
+- RAGFlow (self-hosted Docker) provides document management, chunking, embedding, and search
+- RAGFlow's web UI is the primary interface for document upload and management
+- RAGFlow Python SDK provides programmatic access to datasets, documents, and chunks
+- RAGFlow supports 14 built-in chunking templates for different document types
 - Existing Graphiti knowledge graph system will be extended for Knowledge Memory tier
-- Bun-based MCP server will wrap all capabilities for Claude integration
+- Bun-based MCP server will wrap RAGFlow search and Graphiti promotion capabilities
 - Single-user workflows initially (multi-user support out of MVP scope)
-- Documents are primarily text-based (OCR for scanned images out of MVP scope)
+- Ollama (optional) can provide local embeddings/LLM, but external APIs (OpenRouter) are acceptable
 - Domain classification follows technical domains: embedded, software, security, cloud, standards
+- Documents uploaded via RAGFlow UI are stored in MinIO (RAGFlow's object storage)
 
 ## Dependencies
 
 - Existing Graphiti knowledge graph system (Neo4j/FalkorDB backend)
 - MCP server infrastructure for tool exposure
-- Docling for PDF ingestion and conversion
-- RAGFlow for vector storage and semantic search
-- Ollama for local embeddings and classification
-- Filesystem watcher for inbox monitoring
+- RAGFlow (self-hosted Docker) for document management, chunking, embedding, and semantic search
+- RAGFlow Python SDK for dataset and document operations
+- Ollama (optional) for local embeddings and LLM inference
 - Bun runtime for MCP server
+
+## Removed Dependencies
+
+- ~~Docling for PDF ingestion~~ - Replaced by RAGFlow's built-in parsing (MinerU, PaddleOCR)
+- ~~Filesystem watcher for inbox monitoring~~ - Replaced by RAGFlow's web UI upload
+- ~~knowledge/inbox/ folder~~ - Documents managed via RAGFlow datasets instead
+- ~~chunking_service.py~~ - RAGFlow handles chunking with 14 built-in templates
+- ~~docling_ingester.py~~ - Documents uploaded via RAGFlow UI instead
 
 ## Scope Boundaries
 
 ### In Scope (MVP)
-- Automatic document ingestion with classification
-- Docling-based PDF conversion to structured format
-- RAGFlow for semantic search and retrieval
-- MCP wrapper exposing all capabilities
-- One-screen ingestion review UI for low-confidence cases
-- Knowledge promotion with evidence links
-- Typed facts: Constraint, Erratum, API (additional types post-MVP)
+- **RAGFlow-native document management**: Upload, chunking, and embedding via RAGFlow web UI
+- RAGFlow Python SDK integration for search operations
+- Semantic search via RAGFlow API (rag.search, rag.getChunk)
+- Knowledge promotion with evidence links to RAGFlow chunks
+- MCP wrapper exposing search and promotion capabilities
+- Typed facts: Constraint, Erratum, API, Workaround, BuildFlag, ProtocolRule, Detection, Indicator
 - Conflict detection and manual resolution
-- Provenance tracking for all facts
-- Local-first, self-hosted deployment
+- Provenance tracking for all facts (Fact → RAGFlow Chunk → Document)
+- Local-first, self-hosted deployment (RAGFlow + Graphiti on-premise)
 - Single-user workflows
 
 ### Out of Scope (Post-MVP)
+- ~~Automatic document ingestion via filesystem watcher~~ - Use RAGFlow UI instead
+- ~~Docling-based PDF conversion~~ - Use RAGFlow's built-in parsers (MinerU, PaddleOCR)
+- ~~knowledge/inbox/ folder~~ - Documents managed via RAGFlow datasets
+- Custom chunking service - RAGFlow provides 14 built-in templates
 - Visual diagram semantic understanding
 - Autonomous conflict resolution without human oversight
 - Multi-user workflows and collaboration
-- OCR for scanned PDFs or images
-- Web-based document management UI (CLI + review screen only)
+- OCR for scanned PDFs or images (RAGFlow supports this via PaddleOCR)
+- Custom web-based document management UI (RAGFlow provides this)
 - Real-time document synchronization from external sources
 - Distributed deployment for high availability
-- Advanced retrieval (reranking, hybrid search, query expansion)
-- Additional fact types beyond Constraint, Erratum, API (Workaround, BuildFlag, ProtocolRule, Detection, Indicator)
-- Ollama local container (MVP uses external APIs like OpenRouter for embeddings/LLM; docker-compose-ollama.yml provided as optional convenience)
+- Advanced retrieval (reranking beyond RAGFlow's capabilities)
+- Ollama local container (optional, docker-compose-ollama.yml provided as convenience)
