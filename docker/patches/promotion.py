@@ -515,7 +515,10 @@ async def get_provenance(fact_id: str) -> Dict[str, Any]:
     Returns:
         Provenance graph with fact, evidence chain, and documents
     """
+    from .ragflow_client import get_ragflow_client
+
     graphiti = get_graphiti()
+    ragflow = get_ragflow_client()
 
     # Search for the fact
     results = await graphiti.search(
@@ -532,19 +535,47 @@ async def get_provenance(fact_id: str) -> Dict[str, Any]:
     fact_result = results[0]
     fact_data = fact_result.get("source_data", {})
 
-    # Build provenance chain
+    # Build provenance chain with actual RAGFlow data
     evidence_chain = []
     documents = {}
 
-    for evidence_id in fact_data.get("evidence_ids", []):
-        # In a real implementation, would query evidence nodes
-        # For now, create a placeholder
-        evidence_chain.append({
-            "evidence_id": evidence_id,
-            "chunk_id": evidence_id,
-            "chunk_text": f"Chunk text for {evidence_id}",
-            "confidence": 0.85,
-        })
+    for chunk_id in fact_data.get("evidence_ids", []):
+        try:
+            # Query RAGFlow for actual chunk data
+            chunk_data = await ragflow.get_chunk(chunk_id)
+
+            # Extract document info from chunk metadata
+            source_doc = chunk_data.get("source_document", "Unknown")
+            doc_id = chunk_data.get("doc_id", source_doc)
+
+            evidence_chain.append({
+                "evidence_id": chunk_id,
+                "chunk_id": chunk_id,
+                "chunk_text": chunk_data.get("text", ""),
+                "page_section": chunk_data.get("page_section", ""),
+                "confidence": chunk_data.get("confidence", 0.85),
+                "source_document": source_doc,
+                "metadata": chunk_data.get("metadata", {}),
+            })
+
+            # Track unique documents
+            if doc_id not in documents:
+                documents[doc_id] = {
+                    "doc_id": doc_id,
+                    "filename": chunk_data.get("filename", source_doc),
+                    "source_document": source_doc,
+                }
+
+        except Exception as e:
+            logger.warning(f"Failed to retrieve chunk {chunk_id} from RAGFlow: {e}")
+            # Fallback to placeholder if RAGFlow query fails
+            evidence_chain.append({
+                "evidence_id": chunk_id,
+                "chunk_id": chunk_id,
+                "chunk_text": f"[Chunk data unavailable: {str(e)}]",
+                "confidence": 0.0,
+                "error": str(e),
+            })
 
     return {
         "fact": {
@@ -555,7 +586,7 @@ async def get_provenance(fact_id: str) -> Dict[str, Any]:
             "created_at": fact_data.get("created_at"),
         },
         "evidence_chain": evidence_chain,
-        "documents": documents,
+        "documents": list(documents.values()),
     }
 
 
@@ -587,12 +618,34 @@ async def _create_evidence_fact_link(evidence_id: str, fact_id: str):
     Create evidence-to-fact link in Knowledge Graph.
 
     T068: Evidence-to-fact linking implementation.
+    Creates a PROVENANCE edge from Evidence to Fact node.
     """
+    from datetime import datetime, timezone
+
     graphiti = get_graphiti()
 
-    # Create edge between evidence and fact
-    # In real implementation, would use Graphiti's edge creation
-    logger.debug(f"Creating evidence-fact link: {evidence_id} → {fact_id}")
+    # Get the graph driver to execute Cypher query directly
+    # Graphiti doesn't expose high-level edge creation, so we use Cypher
+    driver = graphiti.driver
+
+    # Create PROVENANCE edge between evidence and fact
+    query = """
+    MATCH (evidence {uuid: $evidence_id})
+    MATCH (fact {uuid: $fact_id})
+    MERGE (evidence)-[r:PROVENANCE]->(fact)
+    ON CREATE SET
+        r.created_at = datetime(),
+        r.created_at_timestamp = timestamp()
+    RETURN r
+    """
+
+    try:
+        async with driver.session() as session:
+            await session.run(query, {"evidence_id": evidence_id, "fact_id": fact_id})
+        logger.info(f"Created evidence-fact PROVENANCE edge: {evidence_id} → {fact_id}")
+    except Exception as e:
+        logger.error(f"Failed to create evidence-fact link: {e}")
+        # Don't raise - linking is non-critical for fact creation
 
 
 async def flag_affected_facts(doc_id: str, new_version: str) -> List[str]:

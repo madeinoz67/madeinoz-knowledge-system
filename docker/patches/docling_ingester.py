@@ -111,7 +111,7 @@ async def ingest_document(file_path: str) -> Dict[str, Any]:
         # Step 3: Idempotency check (T037)
         if await _is_already_ingested(content_hash):
             logger.info(f"Document already ingested (hash match): {filename}")
-            return {"status": "skipped", "reason": "already_ingested", "doc_id": _get_doc_id_by_hash(content_hash)}
+            return {"status": "skipped", "reason": "already_ingested", "doc_id": await _get_doc_id_by_hash(content_hash)}
 
         # Step 4: Classify document
         doc_type = _detect_document_type(file_path)
@@ -220,14 +220,32 @@ async def _is_already_ingested(content_hash: str) -> bool:
         True if document with this hash already exists, False otherwise
 
     Note:
-        Currently returns False pending database implementation.
-        TODO: Query ingestion state database for existing hashes.
+        Queries RAGFlow for documents with matching content_hash in metadata.
     """
-    # TODO: Query database for existing documents with this hash
-    return False
+    from .ragflow_client import get_ragflow_client
+
+    try:
+        ragflow = get_ragflow_client()
+
+        # List all documents and check metadata for content_hash match
+        # Note: RAGFlow doesn't have a direct query by hash, so we filter
+        documents = await ragflow.list_documents(limit=1000)
+
+        for doc in documents:
+            metadata = doc.get("metadata", {})
+            if metadata.get("content_hash") == content_hash:
+                logger.debug(f"Duplicate document detected: hash {content_hash[:8]}...")
+                return True
+
+        return False
+
+    except Exception as e:
+        logger.warning(f"Failed to check for duplicate document (allowing ingestion): {e}")
+        # On error, allow ingestion (better to have duplicate than miss document)
+        return False
 
 
-def _get_doc_id_by_hash(content_hash: str) -> Optional[str]:
+async def _get_doc_id_by_hash(content_hash: str) -> Optional[str]:
     """
     Get doc_id by content hash for idempotency.
 
@@ -238,11 +256,26 @@ def _get_doc_id_by_hash(content_hash: str) -> Optional[str]:
         Document ID if found, None otherwise
 
     Note:
-        Currently returns None pending database implementation.
-        TODO: Implement lookup in ingestion state database.
+        Queries RAGFlow for documents with matching content_hash in metadata.
     """
-    # TODO: Implement lookup
-    return None
+    from .ragflow_client import get_ragflow_client
+
+    try:
+        ragflow = get_ragflow_client()
+
+        # List all documents and check metadata for content_hash match
+        documents = await ragflow.list_documents(limit=1000)
+
+        for doc in documents:
+            metadata = doc.get("metadata", {})
+            if metadata.get("content_hash") == content_hash:
+                return doc.get("doc_id")
+
+        return None
+
+    except Exception as e:
+        logger.warning(f"Failed to lookup document by hash: {e}")
+        return None
 
 
 def _validate_file(file_path: str) -> str:
