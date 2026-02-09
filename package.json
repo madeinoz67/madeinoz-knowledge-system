@@ -47,7 +47,7 @@
     "diagnose": "bun run src/skills/server/diagnose.ts"
   },
   "devDependencies": {
-    "@eslint/js": "^9.0.0",
+    "@eslint/js": "^10.0.1",
     "@types/bun": "latest",
     "@types/js-yaml": "^4.0.9",
     "@typescript-eslint/eslint-plugin": "^8.54.0",
