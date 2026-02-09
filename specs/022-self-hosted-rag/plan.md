@@ -7,18 +7,18 @@
 
 ## Summary
 
-LKAP is a local-first, self-hosted knowledge platform combining RAG (Retrieval-Augmented Generation) with a durable Knowledge Graph. The system automatically ingests technical documents (PDFs, markdown, text), performs confidence-based classification, provides semantic search with citations, and enables evidence-bound promotion of facts into long-lived knowledge. Key technical approach: Docling for PDF conversion, RAGFlow for vector storage, Ollama/OpenRouter for embeddings and LLM, existing Graphiti knowledge graph for durable facts, Bun-based MCP server for Claude integration.
+LKAP is a local-first, self-hosted knowledge platform combining RAG (Retrieval-Augmented Generation) with a durable Knowledge Graph. The system uses RAGFlow's built-in web UI for document management (upload, chunking, parsing), provides semantic search with citations via RAGFlow API, and enables evidence-bound promotion of facts into long-lived knowledge. Key technical approach: RAGFlow for document management and vector storage (with built-in UI), Ollama/OpenRouter for embeddings and LLM, existing Graphiti knowledge graph for durable facts, Bun-based MCP server for Claude integration.
 
 ## Technical Context
 
 **Language/Version**: Python 3.11+ (Docker container for MCP server), Bun/TypeScript (CLI tools)
-**Primary Dependencies**: Docling (PDF ingestion), RAGFlow (vector DB + search), Ollama (local embeddings/LLM, optional), Graphiti (knowledge graph), FastMCP (MCP protocol)
-**Storage**: Neo4j (default) or FalkorDB (knowledge graph), RAGFlow vector DB (embeddings), Local filesystem (documents: inbox/, processed/)
+**Primary Dependencies**: RAGFlow (document management + vector DB + search + UI), Ollama (local embeddings/LLM, optional), Graphiti (knowledge graph), FastMCP (MCP protocol)
+**Storage**: Neo4j (default) or FalkorDB (knowledge graph), RAGFlow/MinIO (documents + embeddings + vector search)
 **Testing**: pytest (Python), bun test (TypeScript), integration tests with running containers
 **Target Platform**: Linux/macOS (self-hosted containers via Podman/Docker)
 **Project Type**: Web service (MCP server) + CLI tools
-**Performance Goals**: Ingestion: 100 docs in 5 min; Search: <500ms typical queries; Classification: ≥85% auto-accept rate
-**Constraints**: ALL data stored locally on-premise; Models use external APIs (OpenRouter) for embeddings/LLM; Chunk size: 512-768 tokens by heading; Embeddings: 1024+ dimensions
+**Performance Goals**: Search: <500ms typical queries; Document management via RAGFlow UI; Classification: RAGFlow handles document metadata
+**Constraints**: ALL data stored locally on-premise (RAGFlow MinIO for documents); Models flexible (Ollama local or OpenRouter external); RAGFlow handles chunking with 14 built-in templates; Embeddings: 1024+ dimensions
 **Scale/Scope**: Single-user MVP; 10k+ document chunks; 100k facts in knowledge graph
 
 ## Constitution Check
@@ -40,8 +40,8 @@ LKAP is a local-first, self-hosted knowledge platform combining RAG (Retrieval-A
 ### III. Zero-Friction Knowledge Capture ✅ PASS
 
 - **Requirement**: Automatic entity extraction, no manual organization
-- **Compliance**: Ingestion automatically classifies by domain/type/vendor/component; Promotion from evidence preserves provenance
-- **Evidence**: FR-001 (progressive classification), FR-016 (provenance links), User Stories 1 & 3
+- **Compliance**: RAGFlow UI provides drag-and-drop document upload; Promotion from evidence preserves provenance
+- **Evidence**: FR-001 (RAGFlow UI document management), FR-016 (provenance links), User Stories 1 & 3
 
 ### IV. Query Resilience ✅ PASS
 
@@ -103,45 +103,33 @@ specs/022-self-hosted-rag/
 ```text
 docker/                              # Python ecosystem (existing)
 ├── patches/
-│   ├── graphiti_mcp_server.py      # [MODIFY] Add RAG tools
-│   ├── ragflow_client.py           # [NEW] RAGFlow integration
-│   ├── docling_ingester.py         # [NEW] PDF ingestion with Docling
-│   ├── classification.py            # [NEW] Progressive classification
+│   ├── graphiti_mcp_server.py      # [MODIFY] Add RAG search tools + KG promotion tools
+│   ├── ragflow_client.py           # [NEW] RAGFlow HTTP client (search-only)
 │   ├── promotion.py                # [NEW] Evidence-to-KG promotion
+│   ├── lkap_models.py              # [NEW] Entity models for RAG + KG tiers
 │   └── tests/
 │       ├── integration/
-│       │   ├── test_rag_ingestion.py
-│       │   ├── test_classification.py
+│       │   ├── test_ragflow_search.py
 │       │   ├── test_promotion.py
 │       │   └── test_conflict_detection.py
 │       └── unit/
-│           ├── test_chunking.py
-│           ├── test_confidence.py
 │           └── test_provenance.py
 
 docker/
-├── docker-compose-ragflow.yml      # [NEW] RAGFlow container
-└── Dockerfile                       # [MODIFY] Add Docling, RAGFlow client deps
+├── docker-compose-ragflow.yml      # [NEW] RAGFlow container (with MinIO)
+├── docker-compose-ollama.yml       # [NEW] Optional Ollama for local embeddings
+└── Dockerfile                       # [MODIFY] Add RAGFlow client deps (Docling REMOVED)
 
 src/                                 # TypeScript ecosystem (existing)
 ├── server/
-│   ├── rag-cli.ts                   # [NEW] RAG management CLI
-│   ├── lib/
-│   │   ├── ragflow.ts              # [NEW] RAGFlow client wrapper
-│   │   └── types.ts                # [MODIFY] Add RAG types
-└── hooks/
-    └── sync-rag-to-knowledge.ts     # [NEW] Sync RAG metadata to PAI memory
+│   └── lib/
+│       ├── rag-cli.ts              # [NEW] RAGFlow CLI wrapper (search, get-chunk, health)
+│       └── types.ts                # [MODIFY] Add RAG-specific types
 
 config/
 ├── ragflow.yaml                     # [NEW] RAGFlow configuration
 └── ontologies/
     └── rag-fact-types.yaml          # [NEW] Fact type definitions
-
-knowledge/                            # [NEW] Document storage
-├── inbox/                           # Watch folder for ingestion
-└── processed/                       # Canonical document storage
-    └── <doc_id>/
-        └── <version>/
 
 tests/                               # TypeScript tests
 └── integration/

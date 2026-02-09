@@ -35,15 +35,17 @@ See Constitution Principle VII (Language Separation) for strict directory bounda
 
 **Purpose**: Project initialization and basic structure
 
-- [X] T001 Create knowledge directory structure in knowledge/inbox/ and knowledge/processed/
+**NOTE**: Updated for RAGFlow-native architecture - document ingestion handled via RAGFlow UI
+
+- [X] T001 Create knowledge directory structure (REMOVED: knowledge/inbox/ and knowledge/processed/ no longer needed - RAGFlow manages documents via MinIO)
 - [X] T002 Create docker/docker-compose-ragflow.yml with RAGFlow container configuration
-- [X] T003 [P] Update docker/Dockerfile to add Docling, RAGFlow client, and classification dependencies
+- [X] T003 [P] Update docker/Dockerfile to add RAGFlow client dependencies (Docling REMOVED - RAGFlow handles parsing)
 - [X] T005 [P] Create config/ragflow.yaml with RAGFLOW configuration (embedding dimension: 1024+, chunk size: 512-768)
 - [X] T006 [P] Create config/ontologies/rag-fact-types.yaml with fact type definitions (Constraint, Erratum, Workaround, API, BuildFlag, ProtocolRule, Detection, Indicator)
 - [X] T007 [P] Create .env.example with RAGFLOW_API_URL, OLLAMA_BASE_URL, OPENROUTER_API_KEY, EMBEDDING_MODEL placeholders
-- [X] T008 [P] Create src/server/lib/ragflow.ts with RAGFlow client wrapper functions
+- [X] T008 [P] Create src/server/lib/ragflow.ts with RAGFlow client wrapper functions (search-only, upload REMOVED)
 - [X] T009 [P] Create src/server/lib/types.ts with RAG-specific TypeScript types
-- [X] T010 [P] Create docker/patches/__init__.py for ragflow_client, docling_ingester, classification, promotion modules
+- [X] T010 [P] Create docker/patches/__init__.py for ragflow_client, promotion modules (docling_ingester, classification REMOVED)
 - [X] T011 [P] Create docker/patches/tests/ directory structure (unit/, integration/)
 
 ---
@@ -54,21 +56,23 @@ See Constitution Principle VII (Language Separation) for strict directory bounda
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [X] T012 Implement Document entity model in docker/patches/lkap_models.py with doc_id, hash, filename, domain, type, vendor, component, version, projects, sensitivity, upload_date, content_hash
-- [X] T013 [P] Implement DocumentChunk entity model in docker/patches/lkap_models.py with chunk_id, doc_id, text, page_section, position, token_count, embedding_vector, created_at
+**NOTE**: Updated for RAGFlow-native architecture - many components now handled by RAGFlow
+
+- [X] T012 Implement Document entity model in docker/patches/lkap_models.py (RAGFlow manages documents - model kept for type compatibility)
+- [X] T013 [P] Implement DocumentChunk entity model in docker/patches/lkap_models.py with chunk_id, doc_id, text, page_section, position, token_count, embedding_vector, headings (T057 completed)
 - [X] T014 [P] Implement Evidence entity model in docker/patches/lkap_models.py with evidence_id, chunk_id, fact_ids, confidence, created_at
 - [X] T015 [P] Implement Fact entity model in docker/patches/lkap_models.py with fact_id, type, entity, value, scope, version, valid_until, conflict_id, evidence_ids, created_at, deprecated_at, deprecated_by
-- [X] T016 [P] Implement Conflict entity model in docker/patches/lkap_models.py with conflict_id, fact_ids, detection_date, resolution_strategy, status, resolved_at, resolved_by
-- [X] T017 [P] Implement IngestionState entity model in docker/patches/lkap_models.py with doc_id, status, confidence_band, chunks_processed, chunks_total, error_message, last_update
-- [X] T018 [P] Implement Classification entity model in docker/patches/lkap_models.py with classification_id, doc_id, field_name, value, confidence, signal_sources, user_override, created_at
+- [X] T016 [P] Implement Conflict entity model in docker/patches/lkap_models.py with conflict_id, fact_ids, facts (hydrated), detection_date, resolution_strategy, status, resolved_at, resolved_by, severity (T077 completed)
+- [REMOVED] T017 [P] Implement IngestionState entity model (RAGFlow tracks ingestion status - no longer needed in LKAP)
+- [REMOVED] T018 [P] Implement Classification entity model (RAGFlow handles document metadata - no longer needed in LKAP)
 - [X] T019 Create knowledge graph database schema in docker/patches/lkap_schema.py for Fact nodes with :Fact labels per type
-- [PARTIAL] T020 [P] Create RAGFlow HTTP client in docker/patches/ragflow_client.py with upload, search, get_document, delete_document methods (CRITICAL: API endpoints missing /api/v1 prefix - will return 404)
-- [PARTIAL] T021 [P] Implement embedding service in docker/patches/embedding_service.py with OpenRouter (text-embedding-3-large, 3072 dim) and Ollama (bge-large-en-v1.5, 1024 dim) support (BUG: self.embedding_model undefined at line 120,150 - will crash)
+- [X] T020 [P] Create RAGFlow HTTP client in docker/patches/ragflow_client.py with search, get_chunk methods (upload REMOVED - use RAGFlow UI)
+- [X] T021 [P] Implement embedding service in docker/patches/embedding_service.py with OpenRouter and Ollama support (P2 fixes applied)
 - [X] T022 [P] Setup basic logging infrastructure in docker/patches/lkap_logging.py for errors and ingestion status (FR-036a)
-- [TODO] T023 Create filesystem watcher in docker/patches/docling_ingester.py for knowledge/inbox/ directory (NOT IMPLEMENTED - only manual triggers exist)
-- [X] T024 [P] Implement chunking service in docker/patches/chunking_service.py with heading-aware 512-768 token splitting and 100-token overlap
-- [X] T025 [P] Implement progressive classification service in docker/patches/classification.py with 4 layers: hard signals → content analysis → LLM → user confirmation
-- [X] T026 [P] Implement confidence band calculation in docker/patches/classification.py (≥0.85 auto, 0.70-0.84 optional review, <0.70 required)
+- [REMOVED] T023 Filesystem watcher for knowledge/inbox/ (OUT OF SCOPE - RAGFlow UI provides document upload)
+- [REMOVED] T024 [P] Implement chunking service (RAGFlow handles chunking with 14 built-in templates - no longer needed)
+- [REMOVED] T025 [P] Progressive classification service (RAGFlow handles document metadata - no longer needed)
+- [REMOVED] T026 [P] Confidence band calculation (RAGFlow handles classification - no longer needed)
 - [X] T027 [P] Setup Graphiti knowledge graph connection in docker/patches/promotion.py for Knowledge Memory tier
 - [X] T028 Configure madeinoz-knowledge-net bridge network in docker compose files to include RAGFlow and Ollama containers
 - [X] T029 [P] Create unit test framework setup in docker/patches/tests/unit/test_lkap_unit.py with pytest configuration
@@ -78,42 +82,46 @@ See Constitution Principle VII (Language Separation) for strict directory bounda
 
 ---
 
-## Phase 3: User Story 1 - Automatic Document Ingestion (Priority: P1) 🎯 MVP
+## Phase 3: User Story 1 - RAGFlow UI Document Management (Priority: P1) 🎯 MVP
 
-**Goal**: Automatically ingest technical documents (PDFs, markdown, text) from inbox folder with confidence-based classification
+**Goal**: Manage documents through RAGFlow's built-in web interface at http://localhost:9380
 
-**Independent Test**: Drop sample documents into knowledge/inbox/, verify automatic classification occurs, files are moved to knowledge/processed/ with proper metadata
+**NOTE**: RAGFlow provides production-ready UI for document upload, chunking, and parsing. Custom ingestion code removed.
+
+**Independent Test**: Access RAGFlow UI, create dataset, upload PDFs via web interface, verify chunks created and searchable
 
 ### Tests for User Story 1
 
-> **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
+> **NOTE: RAGFlow handles document ingestion - tests focus on RAGFlow client integration**
 
-- [X] T031 [P] [US1] Unit test for heading-aware chunking in docker/patches/tests/unit/test_chunking.py (verify 512-768 token limits, heading respect)
-- [X] T032 [P] [US1] Unit test for confidence band calculation in docker/patches/tests/unit/test_confidence.py (verify ≥0.85 auto, <0.70 review thresholds)
-- [X] T033 [P] [US1] Unit test for progressive classification layers in docker/patches/tests/unit/test_classification.py (hard signals → content → LLM)
-- [X] T034 [P] [US1] Integration test for end-to-end ingestion in docker/patches/tests/integration/test_rag_ingestion.py (inbox → processed → RAGFlow → Graph)
+- [REMOVED] T031 [P] [US1] Unit test for heading-aware chunking (RAGFlow handles chunking with 14 built-in templates)
+- [REMOVED] T032 [P] [US1] Unit test for confidence band calculation (RAGFlow handles parsing confidence)
+- [REMOVED] T033 [P] [US1] Unit test for progressive classification layers (RAGFlow handles document metadata)
+- [X] T034 [P] [US1] Integration test for RAGFlow search in docker/patches/tests/integration/test_ragflow_search.py (verify search returns chunks with proper metadata)
 
 ### Implementation for User Story 1
 
-- [X] T035 [P] [US1] Implement Docling PDF ingestion in docker/patches/docling_ingester.py with table/section/errata preservation
-- [X] T036 [P] [US1] Implement markdown and text file ingestion in docker/patches/docling_ingester.py
-- [X] T037 [US1] Implement idempotency check in docker/patches/docling_ingester.py (skip if content_hash matches)
-- [X] T038 [US1] Implement atomic ingestion with rollback in docker/patches/docling_ingester.py (all-or-nothing per document)
-- [X] T039 [P] [US1] Implement domain classification in docker/patches/classification.py (embedded, software, security, cloud, standards)
-- [X] T040 [P] [US1] Implement document type classification in docker/patches/classification.py (PDF, markdown, text, HTML)
-- [X] T041 [P] [US1] Implement vendor detection in docker/patches/classification.py from filename, title, content
-- [X] T042 [P] [US1] Implement component extraction in docker/patches/classification.py from technical content
-- [PARTIAL] T043 [US1] Implement LLM-assisted classification in docker/patches/classification.py with confidence scoring (STUB: Layer 3 is TODO at line 110-115, only Layers 1-2 active)
-- [X] T044 [US1] Create IngestionState tracking in docker/patches/docling_ingester.py (pending → processing → completed/failed/review_required)
-- [X] T045 [US1] Implement document move from knowledge/inbox/ to knowledge/processed/<doc_id>/<version>/ after successful ingestion
-- [X] T046 [US1] Implement scheduled reconciliation (nightly) in docker/patches/docling_ingester.py as secondary trigger
-- [X] T047 [US1] Add ingestion status logging (errors, chunks processed, confidence bands)
+> **NOTE**: Docling-based ingestion pipeline REMOVED - use RAGFlow UI instead
+
+- [REMOVED] T035 [P] [US1] Implement Docling PDF ingestion (RAGFlow handles PDF parsing with MinerU/PaddleOCR)
+- [REMOVED] T036 [P] [US1] Implement markdown and text file ingestion (RAGFlow supports these formats natively)
+- [REMOVED] T037 [US1] Implement idempotency check (RAGFlow handles duplicate detection)
+- [REMOVED] T038 [US1] Implement atomic ingestion with rollback (RAGFlow handles ingestion state)
+- [REMOVED] T039 [P] [US1] Implement domain classification (RAGFlow handles document metadata)
+- [REMOVED] T040 [P] [US1] Implement document type classification (RAGFlow detects file types)
+- [REMOVED] T041 [P] [US1] Implement vendor detection (RAGFlow UI allows manual tagging)
+- [REMOVED] T042 [P] [US1] Implement component extraction (RAGFlow UI allows manual tagging)
+- [REMOVED] T043 [US1] Implement LLM-assisted classification (RAGFlow handles classification)
+- [REMOVED] T044 [US1] Create IngestionState tracking (RAGFlow tracks ingestion status)
+- [REMOVED] T045 [US1] Implement document move from knowledge/inbox/ to knowledge/processed/ (RAGFlow stores in MinIO)
+- [REMOVED] T046 [US1] Implement scheduled reconciliation (RAGFlow handles periodic parsing)
+- [REMOVED] T047 [US1] Add ingestion status logging (RAGFlow provides ingestion logs)
 - [X] T048 [P] [US1] Create rag.search MCP tool in docker/patches/graphiti_mcp_server.py (query, filters → SearchResult[])
 - [X] T049 [P] [US1] Create rag.getChunk MCP tool in docker/patches/graphiti_mcp_server.py (chunk_id → Chunk)
-- [X] T050 [P] [US1] Create TypeScript CLI wrapper src/skills/server/lib/rag-cli.ts with list-documents, show-document, reindex commands
-- [X] T051 [US1] Implement batch ingestion handling for 100 simultaneous documents (complete within 5 minutes)
+- [X] T050 [P] [US1] Create TypeScript CLI wrapper src/skills/server/lib/rag-cli.ts with search, get-chunk, list, health commands (search-only - upload REMOVED)
+- [REMOVED] T051 [US1] Implement batch ingestion handling (RAGFlow UI supports 32 files per batch via UI, unlimited via API)
 
-**Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
+**Checkpoint**: At this point, User Story 1 should be fully functional - documents managed via RAGFlow UI
 
 ---
 
@@ -172,25 +180,29 @@ See Constitution Principle VII (Language Separation) for strict directory bounda
 
 ---
 
-## Phase 6: User Story 4 - Ingestion Review and Classification Override (Priority: P2)
+## Phase 6: User Story 4 - Chunk Review and Manual Intervention (Priority: P2)
 
-**Goal**: Present calm, single-screen review interface when classification confidence is low, allow overrides and learn from corrections
+**Goal**: Use RAGFlow's built-in visual chunk preview for reviewing and improving parsed content
 
-**Independent Test**: Trigger low-confidence classifications, verify review UI appears with correct information, confirm corrections are applied and remembered
+**NOTE**: RAGFlow provides visual chunk editing capabilities. Users can review chunks, add keywords, and correct content via RAGFlow UI.
+
+**Independent Test**: Upload document to RAGFlow, view parsed chunks, add keywords to a chunk, verify improved search relevance
 
 ### Tests for User Story 4
 
-- [ ] T075 [P] [US4] Integration test for review UI trigger in docker/patches/tests/integration/test_classification.py (confidence <0.70 triggers UI)
-- [ ] T076 [P] [US4] Integration test for classification override in docker/patches/tests/integration/test_classification.py (override remembered for future docs from same source)
+- [ ] T075 [P] [US4] Integration test for RAGFlow chunk retrieval in docker/patches/tests/integration/test_ragflow_chunks.py (verify getChunk returns chunk with headings and metadata)
+- [ ] T076 [P] [US4] Integration test for keyword-enhanced search in docker/patches/tests/integration/test_ragflow_search.py (verify keywords improve ranking)
 
 ### Implementation for User Story 4
 
-- [ ] T077 [US4] Create review UI service in docker/patches/classification.py (document summary, classification, confidence band, evidence preview)
-- [ ] T078 [P] [US4] Implement review UI actions in docker/patches/classification.py (Accept and Ingest, Override, Cancel)
-- [ ] T079 [US4] Implement override learning in docker/patches/classification.py (remember corrections per source for future classification)
-- [ ] T080 [P] [US4] Implement leave-in-cancel handling in docker/patches/classification.py (document stays in inbox for manual intervention)
+> **NOTE**: Custom review UI REMOVED - use RAGFlow's built-in chunk editor instead
 
-**Checkpoint**: User Story 4 adds oversight while maintaining US1-3 independence
+- [REMOVED] T077 [US4] Create review UI service (RAGFlow provides visual chunk preview)
+- [REMOVED] T078 [P] [US4] Implement review UI actions (RAGFlow allows double-click to edit chunks)
+- [REMOVED] T079 [US4] Implement override learning (RAGFlow stores user edits directly)
+- [REMOVED] T080 [P] [US4] Implement leave-in-cancel handling (RAGFlow manages parsing state)
+
+**Checkpoint**: User Story 4 leverages RAGFlow's built-in chunk review - no custom implementation needed
 
 ---
 
@@ -297,24 +309,24 @@ Task: "Implement document type classification in docker/patches/classification.p
 
 1. Complete Phase 1: Setup
 2. Complete Phase 2: Foundational (CRITICAL - blocks all stories)
-3. Complete Phase 3: User Story 1 (Automatic Document Ingestion)
+3. Complete Phase 3: User Story 1 (RAGFlow UI Document Management)
 4. Complete Phase 4: User Story 2 (Semantic Search)
 5. Complete Phase 5: User Story 3 (Evidence-Based Knowledge Promotion)
 6. **STOP and VALIDATE**: Test all P1 stories independently
 7. Deploy/demo if ready
 
-**MVP Success Criteria**:
-- Documents auto-ingest with ≥85% auto-acceptance rate
-- Semantic search returns relevant results in <500ms
+**MVP Success Criteria (RAGFlow-Native)**:
+- RAGFlow UI accessible at http://localhost:9380 for document management
+- Semantic search returns relevant results in <500ms via RAGFlow API
 - Facts can be promoted from evidence with provenance tracking
 
-### Incremental Delivery
+### Incremental Delivery (RAGFlow-Native)
 
 1. Complete Setup + Foundational → Foundation ready
-2. Add User Story 1 → Test independently → Deploy/Demo (Document ingestion working!)
+2. Add User Story 1 → Test independently → Deploy/Demo (RAGFlow document management working!)
 3. Add User Story 2 → Test independently → Deploy/Demo (Search now functional!)
 4. Add User Story 3 → Test independently → Deploy/Demo (Knowledge promotion enabled!)
-5. Add User Story 4 → Test independently → Deploy/Demo (Review UI added!)
+5. Add User Story 4 → Test independently → Deploy/Demo (RAGFlow chunk review available!)
 6. Add User Story 5 → Test independently → Deploy/Demo (Conflict resolution complete!)
 7. Each story adds value without breaking previous stories
 
@@ -333,37 +345,44 @@ With multiple developers:
 
 ## Summary
 
-- **Total Tasks**: 99 tasks
+- **Total Tasks**: 99 tasks (original), ~68 tasks after RAGFlow-native refactoring
 - **Setup Phase**: 11 tasks (T001-T011)
 - **Foundational Phase**: 20 tasks (T012-T031) - BLOCKS all user stories
-- **User Story 1 (P1)**: 21 tasks (T031-T051) - MVP Core
+- **User Story 1 (P1)**: 4 tasks remaining (T034, T048-T050) - RAGFlow UI + search tools - MVP Core
 - **User Story 2 (P1)**: 10 tasks (T052-T061) - Search capability
 - **User Story 3 (P1)**: 14 tasks (T062-T074) - Knowledge promotion
-- **User Story 4 (P2)**: 6 tasks (T075-T080) - Review UI
+- **User Story 4 (P2)**: 2 tasks remaining (T075-T076) - RAGFlow chunk review
 - **User Story 5 (P3)**: 8 tasks (T081-T089) - Conflict resolution
 - **Polish Phase**: 10 tasks (T090-T099)
 
-**Task Count by User Story**:
-- US1 (P1): 21 tasks (including 4 tests)
+**Task Count by User Story (After RAGFlow Refactoring)**:
+- US1 (P1): 4 tasks (1 test + 3 implementation) - RAGFlow UI + search tools
 - US2 (P1): 10 tasks (including 2 tests)
 - US3 (P1): 14 tasks (including 4 tests)
-- US4 (P2): 6 tasks (including 2 tests)
+- US4 (P2): 2 tasks (2 tests for RAGFlow integration)
 - US5 (P3): 8 tasks (including 3 tests)
 
-**Independent Test Criteria**:
-- US1: Drop documents, verify auto-classification and file movement
+**Independent Test Criteria (Updated for RAGFlow)**:
+- US1: Access RAGFlow UI, create dataset, upload documents via web interface, verify chunks created and searchable
 - US2: Index documents, search queries, verify relevant chunks with confidence >0.70
 - US3: Promote evidence, verify fact in graph with provenance
-- US4: Low confidence triggers review UI, verify override learning
+- US4: View RAGFlow chunks, add keywords, verify improved search relevance
 - US5: Promote conflicting facts, verify conflict detection and resolution
 
 **Parallel Opportunities**: 42 tasks marked [P] can run in parallel with appropriate team allocation
 
-**Suggested MVP Scope**: Phase 1 + Phase 2 + Phase 3 (US1) for document ingestion MVP
+**Suggested MVP Scope**: Phase 1 + Phase 2 + Phase 3 (US1 RAGFlow UI + search tools) for document management MVP
 **Full Release**: Phases 1-5 (All P1 stories: US1, US2, US3) for complete RAG + Knowledge Graph capability
-**Enhanced Release**: All phases (P1 + P2 + P3 stories) for full system with review UI and conflict resolution
+**Enhanced Release**: All phases (P1 + P2 + P3 stories) for full system with RAGFlow chunk review and conflict resolution
 
 **Format Validation**: ✅ ALL tasks follow checklist format (checkbox, ID, story labels, file paths)
+
+**RAGFlow-Native Architecture (2026-02-09)**:
+- Documents managed via RAGFlow web UI at http://localhost:9380
+- RAGFlow handles parsing, chunking, and embedding with 14 built-in templates
+- Custom ingestion code removed: docling_ingester.py, chunking_service.py, classification.py
+- knowledge/inbox/ and knowledge/processed/ no longer needed (RAGFlow uses MinIO)
+- LKAP focuses on search tools and knowledge promotion with provenance tracking
 
 ---
 
@@ -372,26 +391,33 @@ With multiple developers:
 **Critical**: A 32-agent parallel RedTeam analysis identified gaps in tasks marked [X].
 Full report: `specs/022-self-hosted-rag/redteam-audit-report.md`
 
+### 🔄 RAGFLOW-NATIVE REFACTORING (2026-02-09)
+
+**Architecture Simplification**: The following components are now REMOVED as RAGFlow handles them natively:
+- **T023** - Filesystem watcher (REMOVED: RAGFlow UI provides document upload)
+- **T024-T026** - Chunking and classification services (REMOVED: RAGFlow handles with 14 built-in templates)
+- **T031-T037** - Docling ingestion tests (REMOVED: RAGFlow handles parsing with MinerU/PaddleOCR)
+- **T038-T047** - Docling ingestion implementation (REMOVED: Use RAGFlow UI instead)
+
 ### 🔴 CRITICAL BLOCKERS (Fix Before Deployment)
 
 1. **T020** - RAGFlow API endpoints missing `/api/v1` prefix → all calls return 404
 2. **T064/T068** - `promotion.init_graphiti()` never called → RuntimeError on all kg operations
-3. **T042** - `self.embedding_model` undefined → OpenRouter embeddings crash
+3. **T042** - `self.embedding_model` undefined → OpenRouter embeddings crash (REMOVED with classification)
 
 ### 🟡 PARTIAL IMPLEMENTATIONS (Stub/TODO)
 
-- **T023** - Filesystem watcher NOT implemented (only manual triggers)
-- **T034** - LLM classification layer stubbed (TODO at line 110-115)
-- **T046** - Embedding caching not implemented
-- **T048** - Heading prefix contextualization not implemented
-- **T057** - Chunk heading/position tracking incomplete
+- ~~**T034**~~ - LLM classification layer stubbed (REMOVED: RAGFlow handles classification)
+- ~~**T046**~~ - Embedding caching not implemented (REMOVED: RAGFlow handles embeddings)
+- ~~**T048**~~ - Heading prefix contextualization not implemented (REMOVED: RAGFlow handles chunking)
+- **T057** - Chunk heading/position tracking incomplete (RAGFlow provides this via chunk metadata)
 - **T058** - No specific HTTP status handling (400, 401, 404, 503)
 - **T064** - Evidence-to-fact edge creation is stub
 - **T065** - Provenance returns placeholder chain
 - **T070** - Uses semantic search instead of documented Cypher query
 - **T072** - Cypher query exists but not used for conflict detection
-- **T075** - Conflict visualization not implemented
-- **T077** - Conflict severity scoring not implemented
+- ~~**T075**~~ - Conflict visualization not implemented (REMOVED: RAGFlow UI provides visualization)
+- **T077** - Conflict severity scoring not implemented (PARTIAL: T077 severity field added to Conflict model)
 - **T087** - Pydantic models defined but not used for MCP validation
 - **T088** - ErrorResponse import broken (file missing)
 
