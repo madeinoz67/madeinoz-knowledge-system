@@ -28,8 +28,9 @@ WORKDIR /app/mcp
 RUN uv add "opentelemetry-api>=1.20.0" "opentelemetry-sdk>=1.20.0" "opentelemetry-exporter-prometheus>=0.41b0" "prometheus-client>=0.17.0" "pyyaml>=6.0" "pydantic>=2.0" "stix2>=3.0.0"
 
 # LKAP (Feature 022): Self-Hosted RAG dependencies
-# Docling for PDF ingestion, requests for RAGFlow HTTP client, watchdog for filesystem monitoring
-RUN uv add "docling>=2.0.0" "requests>=2.31.0" "watchdog>=4.0.0" "aiohttp>=3.9.0"
+# RAGFlow-native architecture: requests for RAGFlow HTTP client, aiohttp for async operations
+# NOTE: Docling and watchdog REMOVED - RAGFlow handles document ingestion via web UI
+RUN uv add "requests>=2.31.0" "aiohttp>=3.9.0"
 
 # Prompt caching implementation (Feature 006)
 COPY docker/patches/cache_metrics.py /app/mcp/src/utils/cache_metrics.py
