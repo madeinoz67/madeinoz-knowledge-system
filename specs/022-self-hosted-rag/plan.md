@@ -12,13 +12,13 @@ LKAP is a local-first, self-hosted knowledge platform combining RAG (Retrieval-A
 ## Technical Context
 
 **Language/Version**: Python 3.11+ (Docker container for MCP server), Bun/TypeScript (CLI tools)
-**Primary Dependencies**: Docling (PDF ingestion), RAGFlow (vector DB + search), Ollama (local embeddings/LLM), Graphiti (knowledge graph), FastMCP (MCP protocol)
+**Primary Dependencies**: Docling (PDF ingestion), RAGFlow (vector DB + search), Ollama (local embeddings/LLM, optional), Graphiti (knowledge graph), FastMCP (MCP protocol)
 **Storage**: Neo4j (default) or FalkorDB (knowledge graph), RAGFlow vector DB (embeddings), Local filesystem (documents: inbox/, processed/)
 **Testing**: pytest (Python), bun test (TypeScript), integration tests with running containers
 **Target Platform**: Linux/macOS (self-hosted containers via Podman/Docker)
 **Project Type**: Web service (MCP server) + CLI tools
 **Performance Goals**: Ingestion: 100 docs in 5 min; Search: <500ms typical queries; Classification: ≥85% auto-accept rate
-**Constraints**: ALL data stored locally on-premise; Models flexible (OpenRouter external or Ollama local); Chunk size: 512-768 tokens by heading; Embeddings: 1024+ dimensions
+**Constraints**: ALL data stored locally on-premise; Models use external APIs (OpenRouter) for embeddings/LLM; Chunk size: 512-768 tokens by heading; Embeddings: 1024+ dimensions
 **Scale/Scope**: Single-user MVP; 10k+ document chunks; 100k facts in knowledge graph
 
 ## Constitution Check
@@ -121,7 +121,6 @@ docker/                              # Python ecosystem (existing)
 
 docker/
 ├── docker-compose-ragflow.yml      # [NEW] RAGFlow container
-├── docker-compose-ollama.yml       # [NEW] Ollama container (optional)
 └── Dockerfile                       # [MODIFY] Add Docling, RAGFlow client deps
 
 src/                                 # TypeScript ecosystem (existing)
@@ -159,8 +158,9 @@ tests/                               # TypeScript tests
 |-----------|--------|-------|
 | VI. Codanna-First | Partial | Will use Codanna during Phase 0 research; no new complexity added |
 | IX. Observability | Deferred | Basic logging in MVP (FR-036a); Full metrics/dashboards post-MVP |
+| X. Environment Variables | Pass | All .env variables use MADEINOZ_KNOWLEDGE_ prefix per Technical Constraints |
 
-**No blocking violations.** LKAP extends existing architecture without violating core principles. Observability deferred to post-MVP per scope boundaries (Out of Scope: "Advanced retrieval", "Distributed deployment").
+**No blocking violations.** LKAP extends existing architecture without violating core principles. Observability deferred to post-MVP per scope boundaries (Out of Scope: "Advanced retrieval", "Distributed deployment"). Environment variables follow MADEINOZ_KNOWLEDGE_ prefix convention per constitution Technical Constraints section.
 
 ## Phase 0: Research & Technical Decisions
 

@@ -212,7 +212,7 @@ User reviews conflicting facts in the Knowledge Graph, traces provenance to sour
 
 - Docling will be used for PDF-to-structured conversion (tables, sections, errata preservation)
 - RAGFlow will provide RAG indexing and retrieval capabilities
-- Ollama will provide local embeddings and optional local LLM for classification
+- Ollama (optional/out-of-scope) can provide local embeddings, but external APIs (OpenRouter) are preferred for MVP
 - Existing Graphiti knowledge graph system will be extended for Knowledge Memory tier
 - Bun-based MCP server will wrap all capabilities for Claude integration
 - Single-user workflows initially (multi-user support out of MVP scope)
@@ -254,3 +254,4 @@ User reviews conflicting facts in the Knowledge Graph, traces provenance to sour
 - Distributed deployment for high availability
 - Advanced retrieval (reranking, hybrid search, query expansion)
 - Additional fact types beyond Constraint, Erratum, API (Workaround, BuildFlag, ProtocolRule, Detection, Indicator)
+- Ollama local container (MVP uses external APIs like OpenRouter for embeddings/LLM; docker-compose-ollama.yml provided as optional convenience)

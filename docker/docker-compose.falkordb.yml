@@ -24,7 +24,8 @@ services:
     volumes:
       - falkordb-data:/data
     environment:
-      - FALKORDB_PASSWORD=
+      # CONSTITUTION: Map from MADEINOZ_KNOWLEDGE_* prefixed vars
+      - FALKORDB_PASSWORD=${MADEINOZ_KNOWLEDGE_FALKORDB_PASSWORD:-}
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -48,9 +49,10 @@ services:
       - MADEINOZ_KNOWLEDGE_DATABASE_TYPE=falkordb
       # Config path (not in .env, set here)
       - CONFIG_PATH=/app/mcp/config/config.yaml
-      # FalkorDB connection (container-to-container, UNPREFIXED)
+      # FalkorDB connection (container-to-container)
+      # CONSTITUTION: Map from MADEINOZ_KNOWLEDGE_* prefixed vars
       - FALKORDB_URI=redis://falkordb:6379
-      - FALKORDB_PASSWORD=
+      - FALKORDB_PASSWORD=${MADEINOZ_KNOWLEDGE_FALKORDB_PASSWORD:-}
     env_file:
       - .env
     depends_on:

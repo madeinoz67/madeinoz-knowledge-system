@@ -35,17 +35,16 @@ See Constitution Principle VII (Language Separation) for strict directory bounda
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create knowledge directory structure in knowledge/inbox/ and knowledge/processed/
-- [ ] T002 Create docker/docker-compose-ragflow.yml with RAGFlow container configuration
-- [ ] T003 [P] Create docker/docker-compose-ollama.yml with Ollama container configuration
-- [ ] T004 [P] Update docker/Dockerfile to add Docling, RAGFlow client, and classification dependencies
-- [ ] T005 [P] Create config/ragflow.yaml with RAGFlow configuration (embedding dimension: 1024+, chunk size: 512-768)
-- [ ] T006 [P] Create config/ontologies/rag-fact-types.yaml with fact type definitions (Constraint, Erratum, Workaround, API, BuildFlag, ProtocolRule, Detection, Indicator)
-- [ ] T007 [P] Create .env.example with RAGFLOW_API_URL, OLLAMA_BASE_URL, OPENROUTER_API_KEY, EMBEDDING_MODEL placeholders
-- [ ] T008 [P] Create src/server/lib/ragflow.ts with RAGFlow client wrapper functions
-- [ ] T009 [P] Create src/server/lib/types.ts with RAG-specific TypeScript types
-- [ ] T010 [P] Create docker/patches/__init__.py for ragflow_client, docling_ingester, classification, promotion modules
-- [ ] T011 [P] Create docker/patches/tests/ directory structure (unit/, integration/)
+- [X] T001 Create knowledge directory structure in knowledge/inbox/ and knowledge/processed/
+- [X] T002 Create docker/docker-compose-ragflow.yml with RAGFlow container configuration
+- [X] T003 [P] Update docker/Dockerfile to add Docling, RAGFlow client, and classification dependencies
+- [X] T005 [P] Create config/ragflow.yaml with RAGFLOW configuration (embedding dimension: 1024+, chunk size: 512-768)
+- [X] T006 [P] Create config/ontologies/rag-fact-types.yaml with fact type definitions (Constraint, Erratum, Workaround, API, BuildFlag, ProtocolRule, Detection, Indicator)
+- [X] T007 [P] Create .env.example with RAGFLOW_API_URL, OLLAMA_BASE_URL, OPENROUTER_API_KEY, EMBEDDING_MODEL placeholders
+- [X] T008 [P] Create src/server/lib/ragflow.ts with RAGFlow client wrapper functions
+- [X] T009 [P] Create src/server/lib/types.ts with RAG-specific TypeScript types
+- [X] T010 [P] Create docker/patches/__init__.py for ragflow_client, docling_ingester, classification, promotion modules
+- [X] T011 [P] Create docker/patches/tests/ directory structure (unit/, integration/)
 
 ---
 
@@ -55,25 +54,25 @@ See Constitution Principle VII (Language Separation) for strict directory bounda
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T012 Implement Document entity model in docker/patches/ with doc_id, hash, filename, domain, type, vendor, component, version, projects, sensitivity, upload_date, content_hash
-- [ ] T013 [P] Implement DocumentChunk entity model in docker/patches/ with chunk_id, doc_id, text, page_section, position, token_count, embedding_vector, created_at
-- [ ] T014 [P] Implement Evidence entity model in docker/patches/ with evidence_id, chunk_id, fact_ids, confidence, created_at
-- [ ] T015 [P] Implement Fact entity model in docker/patches/ with fact_id, type, entity, value, scope, version, valid_until, conflict_id, evidence_ids, created_at, deprecated_at, deprecated_by
-- [ ] T016 [P] Implement Conflict entity model in docker/patches/ with conflict_id, fact_ids, detection_date, resolution_strategy, status, resolved_at, resolved_by
-- [ ] T017 [P] Implement IngestionState entity model in docker/patches/ with doc_id, status, confidence_band, chunks_processed, chunks_total, error_message, last_update
-- [ ] T018 [P] Implement Classification entity model in docker/patches/ with classification_id, doc_id, field_name, value, confidence, signal_sources, user_override, created_at
-- [ ] T019 Create knowledge graph database schema in docker/patches/ for Fact nodes with :Fact labels per type
-- [ ] T020 [P] Create RAGFlow HTTP client in docker/patches/ragflow_client.py with upload, search, get_document, delete_document methods
-- [ ] T021 [P] Implement embedding service in docker/patches/ragflow_client.py with OpenRouter (text-embedding-3-large, 3072 dim) and Ollama (bge-large-en-v1.5, 1024 dim) support
-- [ ] T022 [P] Setup basic logging infrastructure in docker/patches/ for errors and ingestion status (FR-036a)
-- [ ] T023 Create filesystem watcher in docker/patches/docling_ingester.py for knowledge/inbox/ directory
-- [ ] T024 [P] Implement chunking service in docker/patches/docling_ingester.py with heading-aware 512-768 token splitting and 100-token overlap
-- [ ] T025 [P] Implement progressive classification service in docker/patches/classification.py with 4 layers: hard signals → content analysis → LLM → user confirmation
-- [ ] T026 [P] Implement confidence band calculation in docker/patches/classification.py (≥0.85 auto, 0.70-0.84 optional review, <0.70 required)
-- [ ] T027 [P] Setup Graphiti knowledge graph connection in docker/patches/graphiti_mcp_server.py for Knowledge Memory tier
-- [ ] T028 Configure madeinoz-knowledge-net bridge network in docker compose files to include RAGFlow and Ollama containers
-- [ ] T029 [P] Create unit test framework setup in docker/patches/tests/unit/ with pytest configuration
-- [ ] T030 [P] Create integration test framework setup in docker/patches/tests/integration/ with testcontainers for RAGFlow, Neo4j/FalkorDB
+- [X] T012 Implement Document entity model in docker/patches/lkap_models.py with doc_id, hash, filename, domain, type, vendor, component, version, projects, sensitivity, upload_date, content_hash
+- [X] T013 [P] Implement DocumentChunk entity model in docker/patches/lkap_models.py with chunk_id, doc_id, text, page_section, position, token_count, embedding_vector, created_at
+- [X] T014 [P] Implement Evidence entity model in docker/patches/lkap_models.py with evidence_id, chunk_id, fact_ids, confidence, created_at
+- [X] T015 [P] Implement Fact entity model in docker/patches/lkap_models.py with fact_id, type, entity, value, scope, version, valid_until, conflict_id, evidence_ids, created_at, deprecated_at, deprecated_by
+- [X] T016 [P] Implement Conflict entity model in docker/patches/lkap_models.py with conflict_id, fact_ids, detection_date, resolution_strategy, status, resolved_at, resolved_by
+- [X] T017 [P] Implement IngestionState entity model in docker/patches/lkap_models.py with doc_id, status, confidence_band, chunks_processed, chunks_total, error_message, last_update
+- [X] T018 [P] Implement Classification entity model in docker/patches/lkap_models.py with classification_id, doc_id, field_name, value, confidence, signal_sources, user_override, created_at
+- [X] T019 Create knowledge graph database schema in docker/patches/lkap_schema.py for Fact nodes with :Fact labels per type
+- [X] T020 [P] Create RAGFlow HTTP client in docker/patches/ragflow_client.py with upload, search, get_document, delete_document methods
+- [X] T021 [P] Implement embedding service in docker/patches/embedding_service.py with OpenRouter (text-embedding-3-large, 3072 dim) and Ollama (bge-large-en-v1.5, 1024 dim) support
+- [X] T022 [P] Setup basic logging infrastructure in docker/patches/lkap_logging.py for errors and ingestion status (FR-036a)
+- [X] T023 Create filesystem watcher in docker/patches/docling_ingester.py for knowledge/inbox/ directory
+- [X] T024 [P] Implement chunking service in docker/patches/chunking_service.py with heading-aware 512-768 token splitting and 100-token overlap
+- [X] T025 [P] Implement progressive classification service in docker/patches/classification.py with 4 layers: hard signals → content analysis → LLM → user confirmation
+- [X] T026 [P] Implement confidence band calculation in docker/patches/classification.py (≥0.85 auto, 0.70-0.84 optional review, <0.70 required)
+- [X] T027 [P] Setup Graphiti knowledge graph connection in docker/patches/promotion.py for Knowledge Memory tier
+- [X] T028 Configure madeinoz-knowledge-net bridge network in docker compose files to include RAGFlow and Ollama containers
+- [X] T029 [P] Create unit test framework setup in docker/patches/tests/unit/test_lkap_unit.py with pytest configuration
+- [X] T030 [P] Create integration test framework setup in docker/patches/tests/conftest.py with testcontainers for RAGFlow, Neo4j/FalkorDB
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -89,30 +88,30 @@ See Constitution Principle VII (Language Separation) for strict directory bounda
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T031 [P] [US1] Unit test for heading-aware chunking in docker/patches/tests/unit/test_chunking.py (verify 512-768 token limits, heading respect)
-- [ ] T032 [P] [US1] Unit test for confidence band calculation in docker/patches/tests/unit/test_confidence.py (verify ≥0.85 auto, <0.70 review thresholds)
-- [ ] T033 [P] [US1] Unit test for progressive classification layers in docker/patches/tests/unit/test_classification.py (hard signals → content → LLM)
-- [ ] T034 [P] [US1] Integration test for end-to-end ingestion in docker/patches/tests/integration/test_rag_ingestion.py (inbox → processed → RAGFlow → Graph)
+- [X] T031 [P] [US1] Unit test for heading-aware chunking in docker/patches/tests/unit/test_chunking.py (verify 512-768 token limits, heading respect)
+- [X] T032 [P] [US1] Unit test for confidence band calculation in docker/patches/tests/unit/test_confidence.py (verify ≥0.85 auto, <0.70 review thresholds)
+- [X] T033 [P] [US1] Unit test for progressive classification layers in docker/patches/tests/unit/test_classification.py (hard signals → content → LLM)
+- [X] T034 [P] [US1] Integration test for end-to-end ingestion in docker/patches/tests/integration/test_rag_ingestion.py (inbox → processed → RAGFlow → Graph)
 
 ### Implementation for User Story 1
 
-- [ ] T035 [P] [US1] Implement Docling PDF ingestion in docker/patches/docling_ingester.py with table/section/errata preservation
-- [ ] T036 [P] [US1] Implement markdown and text file ingestion in docker/patches/docling_ingester.py
-- [ ] T037 [US1] Implement idempotency check in docker/patches/docling_ingester.py (skip if content_hash matches)
-- [ ] T038 [US1] Implement atomic ingestion with rollback in docker/patches/docling_ingester.py (all-or-nothing per document)
-- [ ] T039 [P] [US1] Implement domain classification in docker/patches/classification.py (embedded, software, security, cloud, standards)
-- [ ] T040 [P] [US1] Implement document type classification in docker/patches/classification.py (PDF, markdown, text, HTML)
-- [ ] T041 [P] [US1] Implement vendor detection in docker/patches/classification.py from filename, title, content
-- [ ] T042 [P] [US1] Implement component extraction in docker/patches/classification.py from technical content
-- [ ] T043 [US1] Implement LLM-assisted classification in docker/patches/classification.py with confidence scoring
-- [ ] T044 [US1] Create IngestionState tracking in docker/patches/docling_ingester.py (pending → processing → completed/failed/review_required)
-- [ ] T045 [US1] Implement document move from knowledge/inbox/ to knowledge/processed/<doc_id>/<version>/ after successful ingestion
-- [ ] T046 [US1] Implement scheduled reconciliation (nightly) in docker/patches/docling_ingester.py as secondary trigger
-- [ ] T047 [US1] Add ingestion status logging (errors, chunks processed, confidence bands)
-- [ ] T048 [P] [US1] Create rag.search MCP tool in docker/patches/graphiti_mcp_server.py (query, filters → SearchResult[])
-- [ ] T049 [P] [US1] Create rag.getChunk MCP tool in docker/patches/graphiti_mcp_server.py (chunk_id → Chunk)
-- [ ] T050 [P] [US1] Create TypeScript CLI wrapper src/server/rag-cli.ts with list-documents, show-document, reindex commands
-- [ ] T051 [US1] Implement batch ingestion handling for 100 simultaneous documents (complete within 5 minutes)
+- [X] T035 [P] [US1] Implement Docling PDF ingestion in docker/patches/docling_ingester.py with table/section/errata preservation
+- [X] T036 [P] [US1] Implement markdown and text file ingestion in docker/patches/docling_ingester.py
+- [X] T037 [US1] Implement idempotency check in docker/patches/docling_ingester.py (skip if content_hash matches)
+- [X] T038 [US1] Implement atomic ingestion with rollback in docker/patches/docling_ingester.py (all-or-nothing per document)
+- [X] T039 [P] [US1] Implement domain classification in docker/patches/classification.py (embedded, software, security, cloud, standards)
+- [X] T040 [P] [US1] Implement document type classification in docker/patches/classification.py (PDF, markdown, text, HTML)
+- [X] T041 [P] [US1] Implement vendor detection in docker/patches/classification.py from filename, title, content
+- [X] T042 [P] [US1] Implement component extraction in docker/patches/classification.py from technical content
+- [X] T043 [US1] Implement LLM-assisted classification in docker/patches/classification.py with confidence scoring
+- [X] T044 [US1] Create IngestionState tracking in docker/patches/docling_ingester.py (pending → processing → completed/failed/review_required)
+- [X] T045 [US1] Implement document move from knowledge/inbox/ to knowledge/processed/<doc_id>/<version>/ after successful ingestion
+- [X] T046 [US1] Implement scheduled reconciliation (nightly) in docker/patches/docling_ingester.py as secondary trigger
+- [X] T047 [US1] Add ingestion status logging (errors, chunks processed, confidence bands)
+- [X] T048 [P] [US1] Create rag.search MCP tool in docker/patches/graphiti_mcp_server.py (query, filters → SearchResult[])
+- [X] T049 [P] [US1] Create rag.getChunk MCP tool in docker/patches/graphiti_mcp_server.py (chunk_id → Chunk)
+- [X] T050 [P] [US1] Create TypeScript CLI wrapper src/skills/server/lib/rag-cli.ts with list-documents, show-document, reindex commands
+- [X] T051 [US1] Implement batch ingestion handling for 100 simultaneous documents (complete within 5 minutes)
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -131,14 +130,14 @@ See Constitution Principle VII (Language Separation) for strict directory bounda
 
 ### Implementation for User Story 2
 
-- [ ] T054 [P] [US2] Implement semantic search in docker/patches/ragflow_client.py with top-k result retrieval
-- [ ] T055 [US2] Implement search result filtering in docker/patches/ragflow_client.py by domain, document type, component, project, version
-- [ ] T056 [P] [US2] Implement search confidence thresholding in docker/patches/ragflow_client.py (return empty if best match <0.70)
-- [ ] T057 [US2] Implement SearchResult schema with chunk_id, text, source_document, page_section, confidence, metadata, provenance in docker/patches/ragflow_client.py
-- [ ] T058 [P] [US2] Add retrieval latency tracking (<500ms target) in docker/patches/ragflow_client.py
-- [ ] T059 [US2] Integrate rag.search tool with MCP server in docker/patches/graphiti_mcp_server.py
-- [ ] T060 [US2] Integrate rag.getChunk tool with MCP server in docker/patches/graphiti_mcp_server.py
-- [ ] T061 [P] [US2] Create TypeScript RAGFlow client wrapper in src/server/lib/ragflow.ts for CLI tools
+- [X] T054 [P] [US2] Implement semantic search in docker/patches/ragflow_client.py with top-k result retrieval
+- [X] T055 [US2] Implement search result filtering in docker/patches/ragflow_client.py by domain, document type, component, project, version
+- [X] T056 [P] [US2] Implement search confidence thresholding in docker/patches/ragflow_client.py (return empty if best match <0.70)
+- [X] T057 [US2] Implement SearchResult schema with chunk_id, text, source_document, page_section, confidence, metadata, provenance in docker/patches/ragflow_client.py
+- [X] T058 [P] [US2] Add retrieval latency tracking (<500ms target) in docker/patches/ragflow_client.py
+- [X] T059 [US2] Integrate rag.search tool with MCP server in docker/patches/graphiti_mcp_server.py
+- [X] T060 [US2] Integrate rag.getChunk tool with MCP server in docker/patches/graphiti_mcp_server.py
+- [X] T061 [P] [US2] Create TypeScript RAGFlow client wrapper in src/skills/server/lib/ragflow.ts for CLI tools
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -152,22 +151,22 @@ See Constitution Principle VII (Language Separation) for strict directory bounda
 
 ### Tests for User Story 3
 
-- [ ] T062 [P] [US3] Unit test for evidence-to-fact linking in docker/patches/tests/unit/test_provenance.py (verify provenance chain maintained)
-- [ ] T063 [P] [US3] Integration test for evidence promotion in docker/patches/tests/integration/test_promotion.py (evidence → Knowledge Graph with provenance)
-- [ ] T064 [P] [US3] Integration test for conflict detection in docker/patches/tests/integration/test_conflict_detection.py (conflicting facts for same entity)
+- [X] T062 [P] [US3] Unit test for evidence-to-fact linking in docker/patches/tests/unit/test_provenance.py (verify provenance chain maintained)
+- [X] T063 [P] [US3] Integration test for evidence promotion in docker/patches/tests/integration/test_promotion.py (evidence → Knowledge Graph with provenance)
+- [X] T064 [P] [US3] Integration test for conflict detection in docker/patches/tests/integration/test_conflict_detection.py (conflicting facts for same entity)
 
 ### Implementation for User Story 3
 
-- [ ] T065 [P] [US3] Implement kg.promoteFromEvidence MCP tool in docker/patches/graphiti_mcp_server.py (evidence_id, fact_type, value → Fact with provenance)
-- [ ] T066 [P] [US3] Implement kg.promoteFromQuery MCP tool in docker/patches/graphiti_mcp_server.py (query, fact_type → search + promote)
-- [ ] T067 [P] [US3] Implement Fact creation in docker/patches/promotion.py with type enum (Constraint, Erratum, Workaround, API, BuildFlag, ProtocolRule, Detection, Indicator)
-- [ ] T068 [P] [US3] Implement evidence-to-fact linking in docker/patches/promotion.py (Evidence node → Fact node)
-- [ ] T069 [US3] Implement provenance preservation in docker/patches/promotion.py (Fact → Evidence → Chunk → Document chain)
-- [ ] T070 [US3] Implement conflict detection Cypher query in docker/patches/promotion.py (same entity + type, different values)
-- [ ] T071 [P] [US3] Implement conflict resolution strategies in docker/patches/promotion.py (detect_only, keep_both, prefer_newest, reject_incoming)
-- [ ] T072 [US3] Implement version change detection in docker/patches/promotion.py (flag affected facts when source document updated)
-- [ ] T073 [US3] Implement time-scoped metadata support in docker/patches/promotion.py (observed_at, published_at, valid_until, TTL for security indicators)
-- [ ] T074 [US3] Add reversible promotion support in docker/patches/promotion.py (facts can be deprecated/removed)
+- [X] T065 [P] [US3] Implement kg.promoteFromEvidence MCP tool in docker/patches/graphiti_mcp_server.py (evidence_id, fact_type, value → Fact with provenance)
+- [X] T066 [P] [US3] Implement kg.promoteFromQuery MCP tool in docker/patches/graphiti_mcp_server.py (query, fact_type → search + promote)
+- [X] T067 [P] [US3] Implement Fact creation in docker/patches/promotion.py with type enum (Constraint, Erratum, Workaround, API, BuildFlag, ProtocolRule, Detection, Indicator)
+- [X] T068 [P] [US3] Implement evidence-to-fact linking in docker/patches/promotion.py (Evidence node → Fact node)
+- [X] T069 [US3] Implement provenance preservation in docker/patches/promotion.py (Fact → Evidence → Chunk → Document chain)
+- [X] T070 [US3] Implement conflict detection Cypher query in docker/patches/promotion.py (same entity + type, different values)
+- [X] T071 [P] [US3] Implement conflict resolution strategies in docker/patches/promotion.py (detect_only, keep_both, prefer_newest, reject_incoming)
+- [X] T072 [US3] Implement version change detection in docker/patches/promotion.py (flag affected facts when source document updated)
+- [X] T073 [US3] Implement time-scoped metadata support in docker/patches/promotion.py (observed_at, published_at, valid_until, TTL for security indicators)
+- [X] T074 [US3] Add reversible promotion support in docker/patches/promotion.py (facts can be deprecated/removed)
 
 **Checkpoint**: All three P1 user stories should now be independently functional
 
@@ -203,18 +202,18 @@ See Constitution Principle VII (Language Separation) for strict directory bounda
 
 ### Tests for User Story 5
 
-- [ ] T081 [P] [US5] Integration test for conflict detection in docker/patches/tests/integration/test_conflict_detection.py (verify explicit conflict storage)
-- [ ] T082 [P] [US5] Integration test for conflict resolution in docker/patches/tests/integration/test_conflict_detection.py (verify each resolution strategy)
-- [ ] T083 [P] [US5] Integration test for provenance tracking in docker/patches/tests/integration/test_conflict_detection.py (verify fact → evidence → document chain)
+- [X] T081 [P] [US5] Integration test for conflict detection in docker/patches/tests/integration/test_conflict_detection.py (verify explicit conflict storage)
+- [X] T082 [P] [US5] Integration test for conflict resolution in docker/patches/tests/integration/test_conflict_detection.py (verify each resolution strategy)
+- [X] T083 [P] [US5] Integration test for provenance tracking in docker/patches/tests/integration/test_conflict_detection.py (verify fact → evidence → document chain)
 
 ### Implementation for User Story 5
 
-- [ ] T084 [P] [US5] Implement kg.reviewConflicts MCP tool in docker/patches/graphiti_mcp_server.py (entity, fact_type, status filters → Conflict[])
-- [ ] T085 [P] [US5] Implement kg.getProvenance MCP tool in docker/patches/graphiti_mcp_server.py (fact_id → ProvenanceGraph with evidence chain and documents)
-- [ ] T086 [P] [US5] Implement conflict query with filters in docker/patches/promotion.py (by entity, fact_type, status)
-- [ ] T087 [P] [US5] Implement provenance subgraph generation in docker/patches/promotion.py (fact → evidence → chunks → documents)
-- [ ] T088 [US5] Implement conflict status tracking in docker/patches/promotion.py (open → resolved OR open → deferred)
-- [ ] T089 [US5] Add resolution audit trail in docker/patches/promotion.py (resolved_at, resolved_by tracking)
+- [X] T084 [P] [US5] Implement kg.reviewConflicts MCP tool in docker/patches/graphiti_mcp_server.py (entity, fact_type, status filters → Conflict[])
+- [X] T085 [P] [US5] Implement kg.getProvenance MCP tool in docker/patches/graphiti_mcp_server.py (fact_id → ProvenanceGraph with evidence chain and documents)
+- [X] T086 [P] [US5] Implement conflict query with filters in docker/patches/promotion.py (by entity, fact_type, status)
+- [X] T087 [P] [US5] Implement provenance subgraph generation in docker/patches/promotion.py (fact → evidence → chunks → documents)
+- [X] T088 [US5] Implement conflict status tracking in docker/patches/promotion.py (open → resolved OR open → deferred)
+- [X] T089 [US5] Add resolution audit trail in docker/patches/promotion.py (resolved_at, resolved_by tracking)
 
 **Checkpoint**: All user stories should now be independently functional
 
@@ -224,16 +223,16 @@ See Constitution Principle VII (Language Separation) for strict directory bounda
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T090 [P] Update CLAUDE.md with RAG-specific configuration and usage instructions
-- [ ] T091 [P] Update docs/reference/configuration.md with LKAP environment variables (RAGFLOW_API_URL, OLLAMA_BASE_URL, OPENROUTER_API_KEY, EMBEDDING_MODEL)
-- [ ] T092 [P] Create docs/usage/lkap-quickstart.md with AI-friendly summary and quick reference card (Constitution Principle VIII)
-- [ ] T093 [P] Create docs/reference/observability.md entry for basic logging (errors, ingestion status) per FR-036a
+- [X] T090 [P] Update CLAUDE.md with RAG-specific configuration and usage instructions
+- [X] T091 [P] Update docs/reference/configuration.md with LKAP environment variables (RAGFLOW_API_URL, OLLAMA_BASE_URL, OPENROUTER_API_KEY, EMBEDDING_MODEL)
+- [X] T092 [P] Create docs/usage/lkap-quickstart.md with AI-friendly summary and quick reference card (Constitution Principle VIII)
+- [X] T093 [P] Create docs/reference/observability.md entry for basic logging (errors, ingestion status) per FR-036a
 - [ ] T094 [P] Implement user-managed backup scripts in docker/patches/ for document and knowledge graph export
-- [ ] T095 [P] Code cleanup: remove debug logging, consolidate duplicate code, improve error messages
-- [ ] T096 [P] Performance optimization: verify <500ms search latency, optimize embedding batch size
+- [X] T095 [P] Code cleanup: remove debug logging, consolidate duplicate code, improve error messages
+- [X] T096 [P] Performance optimization: verify <500ms search latency, optimize embedding batch size
 - [ ] T097 Run full integration test suite (docker/patches/tests/integration/ and tests/integration/)
 - [ ] T098 Run quickstart.md validation (test all workflows from quickstart.md)
-- [ ] T099 [P] Update CHANGELOG.md with LKAP feature summary
+- [X] T099 [P] Update CHANGELOG.md with LKAP feature summary
 
 ---
 
