@@ -5,7 +5,7 @@ description: "Quick start guide for the Local Knowledge Augmentation Platform"
 
 <!-- AI-FRIENDLY SUMMARY
 System: Local Knowledge Augmentation Platform (LKAP)
-Purpose: Self-hosted RAG with automatic document ingestion and knowledge promotion
+Purpose: Self-hosted RAG with RAGFlow document management and knowledge promotion
 Feature: 022-self-hosted-rag
 
 Two-Tier Memory Model:
@@ -13,16 +13,17 @@ Two-Tier Memory Model:
 2. Knowledge Memory (Graphiti) - Low-volume, high-signal, typed, version-aware, long-lived
 
 Key Concepts:
-- Documents are evidence (transient, noisy, versioned)
+- Documents are evidence (transient, noisy, versioned) - managed via RAGFlow web UI
 - Knowledge is curated truth (durable, typed, conflict-aware)
 - Users are validators, not data entry clerks
 - System is fast when confident, careful when uncertain, always explicit about provenance
 
 Core Workflows:
-1. Drop documents in knowledge/inbox/ for automatic ingestion
-2. Search with rag.search() for semantic retrieval with citations
-3. Promote facts to knowledge graph with kg.promoteFromEvidence()
-4. Trace provenance with kg.getProvenance()
+1. Access RAGFlow UI at http://localhost:9380 for document management
+2. Create datasets and upload documents via drag-and-drop
+3. Search with rag.search() for semantic retrieval with citations
+4. Promote facts to knowledge graph with kg.promoteFromEvidence()
+5. Trace provenance with kg.getProvenance()
 
 MCP Tools:
 - rag.search(query, filters, topK) - Semantic search across documents
@@ -32,31 +33,39 @@ MCP Tools:
 - kg.getProvenance(factId) - Trace fact to source documents
 
 Configuration Prefix: MADEINOZ_KNOWLEDGE_*
+
+RAGFlow Features:
+- Web UI at http://localhost:9380 for document upload and management
+- 14 built-in chunking templates for different document types
+- Visual chunk preview with editing capabilities
+- PDF parsing via MinerU/PaddleOCR
+- Documents stored in MinIO (object storage)
 -->
 
 # LKAP Quickstart Guide
 
-**Local Knowledge Augmentation Platform** - Self-hosted RAG with automatic document ingestion and evidence-based knowledge promotion. Uses external APIs (OpenRouter) for embeddings and LLM - no local model container required.
+**Local Knowledge Augmentation Platform** - Self-hosted RAG with RAGFlow document management and evidence-based knowledge promotion. Documents are managed via RAGFlow's built-in web interface at http://localhost:9380.
 
 ## What is LKAP?
 
 LKAP extends the knowledge graph system with a two-tier memory model:
 
-1. **Document Memory (RAG)** - Fast semantic search across PDFs, markdown, and text documents
+1. **Document Memory (RAG)** - Fast semantic search across PDFs, markdown, and text documents (managed via RAGFlow UI)
 2. **Knowledge Memory (KG)** - Durable, typed facts with provenance links to source documents
 
 **Key Value Proposition**: Documents are evidence (transient, noisy). Knowledge is curated truth (durable, typed). You validate facts, the system tracks provenance.
 
 ## Quick Reference Card
 
-| Task | Command |
-|------|---------|
+| Task | Command/Action |
+|------|----------------|
 | **Start LKAP** | `docker compose -f docker/docker-compose-ragflow.yml up -d` |
-| **Search documents** | `bun run rag-cli.ts search "<query>"` |
-| **Get chunk details** | `bun run rag-cli.ts get-chunk <id>` |
-| **List documents** | `bun run rag-cli.ts list` |
-| **Check health** | `bun run rag-cli.ts health` |
-| **Drop documents** | Copy files to `knowledge/inbox/` |
+| **Access RAGFlow UI** | Open http://localhost:9380 in browser |
+| **Search documents** | `bun run src/skills/server/lib/rag-cli.ts search "<query>"` |
+| **Get chunk details** | `bun run src/skills/server/lib/rag-cli.ts get-chunk <id>` |
+| **List documents** | `bun run src/skills/server/lib/rag-cli.ts list` |
+| **Check health** | `bun run src/skills/server/lib/rag-cli.ts health` |
+| **Upload documents** | Use RAGFlow UI at http://localhost:9380 |
 
 ## Architecture Overview
 
@@ -66,12 +75,13 @@ LKAP extends the knowledge graph system with a two-tier memory model:
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
 │  ┌──────────────────────────────────────────────────────────────┐  │
-│  │  Document Memory (RAGFlow)                                   │  │
-│  │  - High-volume storage for PDFs, markdown, text              │  │
-│  │  - Semantic search with confidence scores                    │  │
-│  │  - Heading-aware chunking (512-768 tokens)                   │  │
-│  │  - Citation-centric retrieval                                │  │
-│  │  - Fast, versioned, short-lived relevance                    │  │
+│  │  Document Memory (RAGFlow Web UI)                           │  │
+│  │  - Access at http://localhost:9380                          │  │
+│  │  - Drag-and-drop document upload                            │  │
+│  │  - Visual chunk preview and editing                         │  │
+│  │  - 14 built-in chunking templates                           │  │
+│  │  - PDF parsing via MinerU/PaddleOCR                         │  │
+│  │  - Documents stored in MinIO                                │  │
 │  └──────────────────────────────────────────────────────────────┘  │
 │                              ▲                                      │
 │                              │ Promote with evidence               │
@@ -93,55 +103,75 @@ LKAP extends the knowledge graph system with a two-tier memory model:
 ### 1. Start Services
 
 ```bash
-# Start RAGFlow vector database
+# Start RAGFlow vector database with web UI
 docker compose -f docker/docker-compose-ragflow.yml up -d
 
 # Verify services are healthy
-bun run rag-cli.ts health
+bun run src/skills/server/lib/rag-cli.ts health
 ```
 
-### 2. Configure Environment
+### 2. Access RAGFlow UI
 
-Add to `~/.claude/.env`:
+Open your browser and navigate to:
 
-```bash
-# RAGFlow Configuration
-MADEINOZ_KNOWLEDGE_RAGFLOW_API_URL=http://ragflow:9380
-MADEINOZ_KNOWLEDGE_RAGFLOW_CONFIDENCE_THRESHOLD=0.70
-
-# Embedding Configuration (reuses existing Graphiti variables)
-# LKAP uses the same embedding provider as the Knowledge Graph
-MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER=ollama
-MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL=mxbai-embed-large
-MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS=1024
-MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER_URL=http://host.containers.internal:11434
+```
+http://localhost:9380
 ```
 
-### 3. Drop Documents
+The RAGFlow UI provides:
+- **Dataset Management** - Create and manage document collections
+- **Document Upload** - Drag-and-drop PDFs, markdown, and text files
+- **Chunk Preview** - Visual review of parsed chunks with editing
+- **Search Testing** - Test retrieval quality before integration
 
-Copy documents to the inbox for automatic ingestion:
+### 3. Create a Dataset
 
-```bash
-cp ~/Documents/technical-spec.pdf knowledge/inbox/
-cp ~/docs/api-reference.md knowledge/inbox/
-```
+In the RAGFlow UI:
 
-Documents are automatically:
-- Converted to structured format (PDFs via Docling)
-- Classified by domain, type, vendor, component
-- Split into heading-aware chunks (512-768 tokens)
-- Moved to `knowledge/processed/`
+1. Click **"Create Dataset"**
+2. Configure embedding model and chunking method:
+   - **Embedding Model**: `ollama` (local) or `openai` (external API)
+   - **Chunking Method**: Choose from 14 built-in templates
+   - **Chunk Size**: 512-768 tokens (recommended)
+3. Save the dataset
 
-### 4. Search Documents
+### 4. Upload Documents
+
+In the RAGFlow UI:
+
+1. Select your dataset
+2. Click **"Upload Documents"**
+3. Drag and drop files or click to browse:
+   - **PDF**: `.pdf` files (parsed via MinerU/PaddleOCR)
+   - **Markdown**: `.md`, `.mdx` files
+   - **Text**: `.txt` files
+   - **Office**: `.docx`, `.xlsx`, `.pptx` files
+4. Documents are automatically:
+   - Parsed and extracted
+   - Split into chunks (respecting heading boundaries)
+   - Embedded with your chosen model
+   - Stored in MinIO for retrieval
+
+### 5. Review and Edit Chunks (Optional)
+
+In the RAGFlow UI:
+
+1. Navigate to **Documents** → select your document
+2. View parsed chunks with page/section references
+3. **Add Keywords** - Improve search relevance for specific chunks
+4. **Edit Content** - Double-click any chunk to correct parsing errors
+5. **Add Questions** - Define test queries for retrieval validation
+
+### 6. Search Documents
 
 Use the CLI or MCP tools:
 
 ```bash
 # CLI search
-bun run rag-cli.ts search "GPIO configuration"
+bun run src/skills/server/lib/rag-cli.ts search "GPIO configuration"
 
 # Search with filters
-bun run rag-cli.ts search "interrupt handlers" --domain=embedded --top-k=5
+bun run src/skills/server/lib/rag-cli.ts search "interrupt handlers" --domain=embedded --top-k=5
 ```
 
 Results include:
@@ -150,7 +180,7 @@ Results include:
 - Confidence score
 - Metadata filters (domain, type, component, version)
 
-### 5. Promote to Knowledge
+### 7. Promote to Knowledge
 
 Promote high-value facts from evidence to the durable knowledge graph:
 
@@ -186,8 +216,9 @@ Promoted facts are:
 - Understanding context
 
 **Access**:
-- `rag.search(query, filters, topK)` - Semantic search
-- `rag.getChunk(chunkId)` - Retrieve specific chunk
+- **RAGFlow UI**: http://localhost:9380 (document management)
+- **MCP Tools**: `rag.search(query, filters, topK)` for semantic search
+- **MCP Tools**: `rag.getChunk(chunkId)` for specific chunk retrieval
 
 ### Knowledge Memory (KG)
 
@@ -298,6 +329,7 @@ kg.getProvenance(factId="fact-456")
 ### Required Variables
 
 ```bash
+# RAGFlow API endpoint
 MADEINOZ_KNOWLEDGE_RAGFLOW_API_URL=http://ragflow:9380
 ```
 
@@ -305,7 +337,7 @@ MADEINOZ_KNOWLEDGE_RAGFLOW_API_URL=http://ragflow:9380
 - `MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER` (ollama, openai)
 - `MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL` (mxbai-embed-large, text-embedding-3-large)
 - `MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS` (1024+ required)
-- `MADEINOZ_KNOWLEDGE_OPENROUTER_API_KEY` (if using OpenAI embeddings)
+- `MADEINOZ_KNOWLEDGE_OPENROUTER_API_KEY` (if using OpenAI embeddings via OpenRouter)
 
 ### Optional Variables
 
@@ -317,6 +349,10 @@ MADEINOZ_KNOWLEDGE_RAGFLOW_CHUNK_SIZE_MIN=512
 MADEINOZ_KNOWLEDGE_RAGFLOW_CHUNK_SIZE_MAX=768
 MADEINOZ_KNOWLEDGE_RAGFLOW_CHUNK_OVERLAP=100
 MADEINOZ_KNOWLEDGE_RAGFLOW_LOG_LEVEL=INFO
+
+# Ollama Configuration (for local embeddings)
+MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL=http://ollama:11434
+MADEINOZ_KNOWLEDGE_OLLAMA_EMBEDDING_MODEL=bge-large-en-v1.5
 MADEINOZ_KNOWLEDGE_OLLAMA_NUM_THREAD=4
 ```
 
@@ -324,37 +360,65 @@ MADEINOZ_KNOWLEDGE_OLLAMA_NUM_THREAD=4
 
 ```bash
 # Search documents
-bun run rag-cli.ts search "<query>"
+bun run src/skills/server/lib/rag-cli.ts search "<query>"
 
 # Search with filters
-bun run rag-cli.ts search "<query>" --domain=embedded --type=pdf --component=gpio
+bun run src/skills/server/lib/rag-cli.ts search "<query>" --domain=embedded --type=pdf --component=gpio
 
 # Get chunk details
-bun run rag-cli.ts get-chunk <chunk-id>
+bun run src/skills/server/lib/rag-cli.ts get-chunk <chunk-id>
 
 # List all documents
-bun run rag-cli.ts list
+bun run src/skills/server/lib/rag-cli.ts list
 
 # List with limit
-bun run rag-cli.ts list --limit=50
+bun run src/skills/server/lib/rag-cli.ts list --limit=50
 
 # Check health
-bun run rag-cli.ts health
+bun run src/skills/server/lib/rag-cli.ts health
 
 # Show help
-bun run rag-cli.ts help
+bun run src/skills/server/lib/rag-cli.ts help
 ```
 
-## Document Storage
+## RAGFlow UI Features
 
-```
-knowledge/
-├── inbox/          # Drop documents here for automatic ingestion
-│   └── *.pdf       # PDFs, markdown, text files
-│
-└── processed/      # Canonical storage after successful ingestion
-    └── <doc-id>/   # Document with metadata and chunks
-```
+### Document Upload
+
+- **Drag-and-Drop**: Drop multiple files at once (32 files per batch via UI)
+- **File Size**: Default 1GB per upload (configurable)
+- **Supported Formats**: PDF, DOC, DOCX, TXT, MD, MDX, CSV, XLSX, XLS, JPEG, JPG, PNG, TIF, GIF, PPT, PPTX
+
+### Chunking Templates
+
+RAGFlow provides 14 built-in chunking templates:
+- **General** - Balanced chunking for most documents
+- **Legal** - Preserves legal document structure
+- **Finance** - Optimized for financial reports
+- **Technical** - Handles technical documentation
+- **Paper** - For academic papers
+- **Manual** - For user manuals
+- **Book** - Long-form content
+- **Laws** - Legal statutes and regulations
+- **Presentation** - Slide decks (PPT, PPTX)
+- **QA** - Question-answer pairs
+- **Knowledge Graph** - Entity-relationship extraction
+- **Resume** - CV parsing
+- **Table** - Preserves table structures
+- **One** - Single chunk per document
+
+### Chunk Editing
+
+- **Visual Preview**: See how documents were chunked
+- **Add Keywords**: Improve search relevance
+- **Edit Content**: Fix parsing errors
+- **Test Retrieval**: Validate search quality
+
+### Storage
+
+- **MinIO**: Object storage for uploaded files
+- **Vector Database**: Embedded chunks for semantic search
+- **Persistent**: Survives container restarts
 
 ## Fact Types
 
@@ -386,17 +450,24 @@ docker logs madeinoz-knowledge-ragflow
 docker compose -f docker/docker-compose-ragflow.yml restart
 ```
 
-### Documents not ingesting
+### RAGFlow UI not accessible
 
 ```bash
-# Check inbox exists
-ls -la knowledge/inbox/
+# Verify port 9380 is available
+curl http://localhost:9380
 
-# Check ingestion logs
-docker logs madeinoz-knowledge-mcp-server
+# Check browser console for errors
+# Try accessing from different browser or incognito mode
+```
 
-# Verify document permissions
-chmod 644 knowledge/inbox/*
+### Documents not parsing
+
+```bash
+# Check RAGFlow logs for parsing errors
+docker logs madeinoz-knowledge-ragflow
+
+# Verify file format is supported
+# File size under limit (default 1GB)
 ```
 
 ### Search returns no results
@@ -406,10 +477,20 @@ chmod 644 knowledge/inbox/*
 MADEINOZ_KNOWLEDGE_RAGFLOW_CONFIDENCE_THRESHOLD=0.60
 
 # Check documents are indexed
-bun run rag-cli.ts list
+bun run src/skills/server/lib/rag-cli.ts list
 
-# Re-index if needed
-docker compose -f docker/docker-compose-ragflow.yml restart
+# Verify embedding model is working
+docker logs madeinoz-knowledge-ragflow | grep -i embedding
+```
+
+### Knowledge promotion fails
+
+```bash
+# Check Graphiti connection
+bun run ~/.claude/skills/Knowledge/tools/knowledge-cli.ts health
+
+# Verify evidence ID exists
+bun run src/skills/server/lib/rag-cli.ts search <chunk-text>
 ```
 
 ## Next Steps
