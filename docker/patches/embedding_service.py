@@ -16,13 +16,67 @@ Performance targets:
 
 import os
 import logging
-from typing import List, Optional
+import hashlib
+from typing import List, Optional, Dict, Tuple
 import requests
 from dotenv import load_dotenv
+from functools import lru_cache
 
 load_dotenv()
 
 logger = logging.getLogger(__name__)
+
+# T046: Embedding cache configuration
+# Cache size: 1000 most recent embeddings (adjust based on memory constraints)
+# Cache key: hash(text + model) to ensure different models don't share cache
+EMBEDDING_CACHE_SIZE = 1000
+
+_embedding_cache: Dict[str, List[float]] = {}
+_cache_hits = 0
+_cache_misses = 0
+
+
+def _cache_key(text: str, model: str) -> str:
+    """Generate cache key from text and model name"""
+    content = f"{model}:{text}"
+    return hashlib.sha256(content.encode()).hexdigest()
+
+
+def _get_cached_embedding(text: str, model: str) -> Optional[List[float]]:
+    """Get embedding from cache if available"""
+    global _cache_hits
+    key = _cache_key(text, model)
+    if key in _embedding_cache:
+        _cache_hits += 1
+        return _embedding_cache[key]
+    _cache_misses += 1
+    return None
+
+
+def _set_cached_embedding(text: str, model: str, embedding: List[float]) -> None:
+    """Store embedding in cache with LRU eviction"""
+    key = _cache_key(text, model)
+
+    # Simple LRU: remove oldest if cache is full
+    if len(_embedding_cache) >= EMBEDDING_CACHE_SIZE:
+        # Remove first (oldest) entry
+        oldest_key = next(iter(_embedding_cache))
+        del _embedding_cache[oldest_key]
+
+    _embedding_cache[key] = embedding
+
+
+def get_cache_stats() -> Dict[str, int]:
+    """Get embedding cache statistics"""
+    total = _cache_hits + _cache_misses
+    hit_rate = _cache_hits / total if total > 0 else 0
+    return {
+        "cache_size": len(_embedding_cache),
+        "cache_hits": _cache_hits,
+        "cache_misses": _cache_misses,
+        "hit_rate": round(hit_rate * 100, 1),
+    }
+
 
 # Configuration (reuses existing Graphiti variables per Constitution Principle X)
 EMBEDDING_PROVIDER = os.getenv("MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER", "ollama")
@@ -75,6 +129,8 @@ class EmbeddingService:
         """
         Generate embeddings for a list of texts.
 
+        T046: Checks cache before generating embeddings to avoid redundant API calls.
+
         Automatically batches requests for optimal throughput. Large lists
         are split into batches based on provider-specific batch sizes.
 
@@ -87,22 +143,65 @@ class EmbeddingService:
         Raises:
             RuntimeError: If embedding generation fails
         """
-        # Process in batches for optimal throughput
-        if len(texts) <= self.batch_size:
-            if self.provider == "openrouter":
-                return self._embed_openrouter(texts)
-            else:
-                return self._embed_ollama(texts)
+        # Check cache for each text, collect misses
+        cached_embeddings: Dict[int, List[float]] = {}
+        uncached_texts: List[Tuple[int, str]] = []  # (original_index, text)
 
-        # Split into batches and process
-        all_embeddings = []
-        for i in range(0, len(texts), self.batch_size):
-            batch = texts[i:i + self.batch_size]
-            if self.provider == "openrouter":
-                batch_embeddings = self._embed_openrouter(batch)
+        for i, text in enumerate(texts):
+            cached = _get_cached_embedding(text, self.model)
+            if cached is not None:
+                cached_embeddings[i] = cached
             else:
-                batch_embeddings = self._embed_ollama(batch)
-            all_embeddings.extend(batch_embeddings)
+                uncached_texts.append((i, text))
+
+        # If all cached, return immediately
+        if not uncached_texts:
+            logger.debug(f"Cache hit: all {len(texts)} embeddings retrieved from cache")
+            return [cached_embeddings[i] for i in range(len(texts))]
+
+        # Generate embeddings for uncached texts
+        uncached_text_list = [text for _, text in uncached_texts]
+
+        # Process in batches for optimal throughput
+        new_embeddings: List[List[float]] = []
+        if len(uncached_text_list) <= self.batch_size:
+            if self.provider == "openrouter":
+                new_embeddings = self._embed_openrouter(uncached_text_list)
+            else:
+                new_embeddings = self._embed_ollama(uncached_text_list)
+        else:
+            # Split into batches and process
+            for i in range(0, len(uncached_text_list), self.batch_size):
+                batch = uncached_text_list[i:i + self.batch_size]
+                if self.provider == "openrouter":
+                    batch_embeddings = self._embed_openrouter(batch)
+                else:
+                    batch_embeddings = self._embed_ollama(batch)
+                new_embeddings.extend(batch_embeddings)
+
+        # Cache new embeddings
+        for (_, text), embedding in zip(uncached_texts, new_embeddings):
+            _set_cached_embedding(text, self.model, embedding)
+
+        # Combine cached and new embeddings in original order
+        all_embeddings = []
+        for i in range(len(texts)):
+            if i in cached_embeddings:
+                all_embeddings.append(cached_embeddings[i])
+            else:
+                # Find corresponding new embedding
+                for j, (orig_idx, _) in enumerate(uncached_texts):
+                    if orig_idx == i:
+                        all_embeddings.append(new_embeddings[j])
+                        break
+
+        cache_stats = get_cache_stats()
+        if uncached_texts:
+            logger.debug(
+                f"Embedding cache: {cache_stats['cache_hits']} hits, "
+                f"{cache_stats['cache_misses']} misses, "
+                f"{cache_stats['hit_rate']}% hit rate"
+            )
 
         return all_embeddings
 
@@ -174,6 +273,38 @@ class EmbeddingService:
     def get_dimension(self) -> int:
         """Return the embedding dimension"""
         return self.dimension
+
+    def embed_chunks(self, chunks: List[Dict[str, Any]]) -> List[List[float]]:
+        """
+        Generate embeddings for chunks with heading contextualization.
+
+        T048: Contextualize chunks with heading prefixes before embedding.
+        This prepends document hierarchy to chunk text so embeddings capture
+        section context for better semantic retrieval.
+
+        Args:
+            chunks: List of chunk dictionaries with 'text' and optional 'headings' keys
+
+        Returns:
+            List of embedding vectors
+
+        Note:
+            If chunks have 'headings' metadata, prepends them to text.
+            Example: "Embedded Systems > GPIO: The GPIO port supports..."
+        """
+        from .chunking_service import contextualize_chunk
+
+        # Contextualize chunks before embedding
+        contextualized_texts = []
+        for chunk in chunks:
+            if isinstance(chunk, dict):
+                contextualized = contextualize_chunk(chunk)
+                contextualized_texts.append(contextualized)
+            else:
+                # Plain string, use as-is
+                contextualized_texts.append(chunk)
+
+        return self.embed(contextualized_texts)
 
     def health_check(self) -> bool:
         """

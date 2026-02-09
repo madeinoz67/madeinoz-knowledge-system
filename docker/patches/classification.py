@@ -108,11 +108,9 @@ class ProgressiveClassifier:
             sources.append("content_analysis")
 
         # Layer 3: LLM classification (weight: 0.6-0.9 * 0.7 = 0.42-0.63)
-        # TODO: Integrate LLM classification when available
-        # llm_domain = self._classify_with_llm(title, content)
-        # if llm_domain:
-        #     scores.append(llm_domain.confidence * 0.7)
-        #     sources.append("llm_classification")
+        # Note: This is async and requires the method to be async
+        # For synchronous calls, we skip LLM classification here
+        # Full LLM integration available via async classify_domain_async method
 
         # Layer 4: User override (checked separately)
         user_override = self._get_user_override(path, "domain")
@@ -223,6 +221,80 @@ class ProgressiveClassifier:
             f"Saved user override: {source_key} {field}: "
             f"{original_value} → {new_value}"
         )
+
+    async def _classify_with_llm(
+        self, title: str, content: str
+    ) -> Optional[ClassificationResult]:
+        """
+        Layer 3: LLM-based classification using Graphiti LLM client.
+
+        Uses LLM to classify document domain when hard signals and content
+        analysis are insufficient.
+
+        Args:
+            title: Document title
+            content: Document content (truncated to avoid token limits)
+
+        Returns:
+            ClassificationResult with confidence, or None if LLM unavailable
+
+        Note:
+            LLM classification has weight 0.6-0.9, multiplied by 0.7 for
+            final confidence score (0.42-0.63 range).
+        """
+        try:
+            from .promotion import get_graphiti
+
+            graphiti = get_graphiti()
+            if not graphiti or not graphiti.llm_client:
+                logger.debug("LLM client not available for classification")
+                return None
+
+            # Prepare classification prompt
+            domain_list = ", ".join([d.value for d in Domain])
+
+            prompt = f"""Classify the following technical document into ONE of these domains: {domain_list}
+
+Title: {title}
+
+Content (first 2000 characters):
+{content[:2000]}
+
+Respond with ONLY the domain name. Choose the best match based on the document's primary focus."""
+
+            # Call LLM
+            from graphiti.llm_client import LLMClient
+            llm_client: LLMClient = graphiti.llm_client
+
+            response = await llm_client.generate_user_response(
+                prompt=prompt,
+                response_type="text",
+            )
+
+            # Extract domain from response
+            response_text = response.strip().lower()
+
+            # Map response to Domain enum
+            for domain in Domain:
+                if domain.value in response_text or response_text in domain.value:
+                    # Base confidence on LLM certainty (0.6-0.9 range)
+                    confidence = 0.75  # Medium-high confidence for LLM
+                    logger.info(f"LLM classified as {domain.value} (confidence: {confidence})")
+                    return ClassificationResult(
+                        value=domain,
+                        confidence=confidence,
+                        signal_sources=["llm_classification"],
+                    )
+
+            logger.warning(f"LLM returned unrecognized domain: {response_text}")
+            return None
+
+        except ImportError:
+            logger.debug("Graphiti not available for LLM classification")
+            return None
+        except Exception as e:
+            logger.warning(f"LLM classification failed (non-critical): {e}")
+            return None
 
     def get_confidence_band(self, confidence: float) -> ConfidenceBand:
         """
