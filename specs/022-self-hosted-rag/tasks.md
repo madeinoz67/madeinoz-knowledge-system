@@ -62,10 +62,10 @@ See Constitution Principle VII (Language Separation) for strict directory bounda
 - [X] T017 [P] Implement IngestionState entity model in docker/patches/lkap_models.py with doc_id, status, confidence_band, chunks_processed, chunks_total, error_message, last_update
 - [X] T018 [P] Implement Classification entity model in docker/patches/lkap_models.py with classification_id, doc_id, field_name, value, confidence, signal_sources, user_override, created_at
 - [X] T019 Create knowledge graph database schema in docker/patches/lkap_schema.py for Fact nodes with :Fact labels per type
-- [X] T020 [P] Create RAGFlow HTTP client in docker/patches/ragflow_client.py with upload, search, get_document, delete_document methods
-- [X] T021 [P] Implement embedding service in docker/patches/embedding_service.py with OpenRouter (text-embedding-3-large, 3072 dim) and Ollama (bge-large-en-v1.5, 1024 dim) support
+- [PARTIAL] T020 [P] Create RAGFlow HTTP client in docker/patches/ragflow_client.py with upload, search, get_document, delete_document methods (CRITICAL: API endpoints missing /api/v1 prefix - will return 404)
+- [PARTIAL] T021 [P] Implement embedding service in docker/patches/embedding_service.py with OpenRouter (text-embedding-3-large, 3072 dim) and Ollama (bge-large-en-v1.5, 1024 dim) support (BUG: self.embedding_model undefined at line 120,150 - will crash)
 - [X] T022 [P] Setup basic logging infrastructure in docker/patches/lkap_logging.py for errors and ingestion status (FR-036a)
-- [X] T023 Create filesystem watcher in docker/patches/docling_ingester.py for knowledge/inbox/ directory
+- [TODO] T023 Create filesystem watcher in docker/patches/docling_ingester.py for knowledge/inbox/ directory (NOT IMPLEMENTED - only manual triggers exist)
 - [X] T024 [P] Implement chunking service in docker/patches/chunking_service.py with heading-aware 512-768 token splitting and 100-token overlap
 - [X] T025 [P] Implement progressive classification service in docker/patches/classification.py with 4 layers: hard signals → content analysis → LLM → user confirmation
 - [X] T026 [P] Implement confidence band calculation in docker/patches/classification.py (≥0.85 auto, 0.70-0.84 optional review, <0.70 required)
@@ -103,7 +103,7 @@ See Constitution Principle VII (Language Separation) for strict directory bounda
 - [X] T040 [P] [US1] Implement document type classification in docker/patches/classification.py (PDF, markdown, text, HTML)
 - [X] T041 [P] [US1] Implement vendor detection in docker/patches/classification.py from filename, title, content
 - [X] T042 [P] [US1] Implement component extraction in docker/patches/classification.py from technical content
-- [X] T043 [US1] Implement LLM-assisted classification in docker/patches/classification.py with confidence scoring
+- [PARTIAL] T043 [US1] Implement LLM-assisted classification in docker/patches/classification.py with confidence scoring (STUB: Layer 3 is TODO at line 110-115, only Layers 1-2 active)
 - [X] T044 [US1] Create IngestionState tracking in docker/patches/docling_ingester.py (pending → processing → completed/failed/review_required)
 - [X] T045 [US1] Implement document move from knowledge/inbox/ to knowledge/processed/<doc_id>/<version>/ after successful ingestion
 - [X] T046 [US1] Implement scheduled reconciliation (nightly) in docker/patches/docling_ingester.py as secondary trigger
@@ -160,9 +160,9 @@ See Constitution Principle VII (Language Separation) for strict directory bounda
 - [X] T065 [P] [US3] Implement kg.promoteFromEvidence MCP tool in docker/patches/graphiti_mcp_server.py (evidence_id, fact_type, value → Fact with provenance)
 - [X] T066 [P] [US3] Implement kg.promoteFromQuery MCP tool in docker/patches/graphiti_mcp_server.py (query, fact_type → search + promote)
 - [X] T067 [P] [US3] Implement Fact creation in docker/patches/promotion.py with type enum (Constraint, Erratum, Workaround, API, BuildFlag, ProtocolRule, Detection, Indicator)
-- [X] T068 [P] [US3] Implement evidence-to-fact linking in docker/patches/promotion.py (Evidence node → Fact node)
+- [PARTIAL] T068 [P] [US3] Implement evidence-to-fact linking in docker/patches/promotion.py (STUB: _create_evidence_fact_link() at line 585-595 is stub, no actual edge creation)
 - [X] T069 [US3] Implement provenance preservation in docker/patches/promotion.py (Fact → Evidence → Chunk → Document chain)
-- [X] T070 [US3] Implement conflict detection Cypher query in docker/patches/promotion.py (same entity + type, different values)
+- [PARTIAL] T070 [US3] Implement conflict detection Cypher query in docker/patches/promotion.py (Uses semantic search NOT documented Cypher - proper Cypher in schema but never executed)
 - [X] T071 [P] [US3] Implement conflict resolution strategies in docker/patches/promotion.py (detect_only, keep_both, prefer_newest, reject_incoming)
 - [X] T072 [US3] Implement version change detection in docker/patches/promotion.py (flag affected facts when source document updated)
 - [X] T073 [US3] Implement time-scoped metadata support in docker/patches/promotion.py (observed_at, published_at, valid_until, TTL for security indicators)
@@ -364,3 +364,60 @@ With multiple developers:
 **Enhanced Release**: All phases (P1 + P2 + P3 stories) for full system with review UI and conflict resolution
 
 **Format Validation**: ✅ ALL tasks follow checklist format (checkbox, ID, story labels, file paths)
+
+---
+
+## ⚠️ REDTEAM AUDIT FINDINGS (2026-02-09)
+
+**Critical**: A 32-agent parallel RedTeam analysis identified gaps in tasks marked [X].
+Full report: `specs/022-self-hosted-rag/redteam-audit-report.md`
+
+### 🔴 CRITICAL BLOCKERS (Fix Before Deployment)
+
+1. **T020** - RAGFlow API endpoints missing `/api/v1` prefix → all calls return 404
+2. **T064/T068** - `promotion.init_graphiti()` never called → RuntimeError on all kg operations
+3. **T042** - `self.embedding_model` undefined → OpenRouter embeddings crash
+
+### 🟡 PARTIAL IMPLEMENTATIONS (Stub/TODO)
+
+- **T023** - Filesystem watcher NOT implemented (only manual triggers)
+- **T034** - LLM classification layer stubbed (TODO at line 110-115)
+- **T046** - Embedding caching not implemented
+- **T048** - Heading prefix contextualization not implemented
+- **T057** - Chunk heading/position tracking incomplete
+- **T058** - No specific HTTP status handling (400, 401, 404, 503)
+- **T064** - Evidence-to-fact edge creation is stub
+- **T065** - Provenance returns placeholder chain
+- **T070** - Uses semantic search instead of documented Cypher query
+- **T072** - Cypher query exists but not used for conflict detection
+- **T075** - Conflict visualization not implemented
+- **T077** - Conflict severity scoring not implemented
+- **T087** - Pydantic models defined but not used for MCP validation
+- **T088** - ErrorResponse import broken (file missing)
+
+### 🟢 MISSING CLI COMMANDS
+
+The following CLI commands are referenced but NOT implemented in knowledge-cli.ts:
+- `promoteFromEvidence` - Promote evidence chunk to knowledge graph
+- `promoteFromQuery` - Search and promote in one operation
+- `provenance` - Trace fact to source documents
+- `conflicts` - Review and resolve conflicts
+
+These MCP tools exist (`kg.promoteFromEvidence`, `kg.promoteFromQuery`, `kg.getProvenance`, `kg.reviewConflicts`) but have no CLI wrappers.
+
+### 📊 Status Summary
+
+| Status | Count | Percentage |
+|--------|-------|------------|
+| Fully Implemented | 72 | 73% |
+| Partial / Stub | 18 | 18% |
+| Not Implemented | 8 | 8% |
+| Critical Blockers | 3 | 3% |
+
+### Remediation Priority
+
+**P0** (Blockers): Fix T020 API endpoints, T064/T068 initialization, T042 bug
+**P1** (Core): Complete T034 LLM layer, T046 caching, T048 contextualization
+**P2** (Robustness): Add retry logic, HTTP status handling, Cypher queries
+**P3** (UX): Add CLI wrappers, visualization, severity scoring
+**P4** (Docs): Missing docker-compose-ollama.yml, data-model.md, test validation
