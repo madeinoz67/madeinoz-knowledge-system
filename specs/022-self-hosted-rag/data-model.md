@@ -56,8 +56,15 @@ This document defines the core entities, attributes, and relationships for the L
 | page_section | string | No | Page number or section identifier |
 | position | int | Yes | Position in document (sequence) |
 | token_count | int | Yes | Token count (512-768 range) |
+| headings | list[string] | No | Parent headings for provenance (T057) |
 | embedding_vector | vector[1024+] | Yes | Embedding vector (1024+ dimensions) |
 | created_at | datetime | Yes | Timestamp of chunk creation |
+
+**Heading Awareness (T057)**:
+- Docling HybridChunker automatically tracks document hierarchy
+- `headings` list contains parent headings: `["H1", "H2", "H3"]`
+- Used for contextualization: `"Embedded Systems > GPIO Configuration: The GPIO port supports..."`
+- Enables more precise semantic search with section context
 
 **Relationships**:
 - `DocumentChunk N:1 Document` (belongs to one document)
@@ -145,11 +152,18 @@ This document defines the core entities, attributes, and relationships for the L
 |------|------|----------|-------------|
 | conflict_id | string | Yes | Unique conflict identifier (UUID) |
 | fact_ids | list[string] (FK) | Yes | Conflicting fact references (2+) |
+| facts | list[Fact] | Yes | Conflicting fact objects (hydrated, for visualization) |
 | detection_date | datetime | Yes | Timestamp of conflict detection |
 | resolution_strategy | enum | Yes | detect_only, keep_both, prefer_newest, reject_incoming |
 | status | enum | Yes | open, resolved, deferred |
 | resolved_at | datetime | No | Timestamp of resolution |
 | resolved_by | string | No | User who resolved conflict |
+| severity | string | No | Severity level: critical, major, minor (T077) |
+
+**Severity Scoring (T077)**:
+- **CRITICAL**: Constraint or API conflicts (breaks system behavior)
+- **MAJOR**: Erratum, Detection, Indicator conflicts (affects correctness)
+- **MINOR**: Workaround, BuildFlag, ProtocolRule conflicts (informational)
 
 **Relationships**:
 - `Conflict 1:N Fact` (one conflict involves multiple facts)
@@ -331,3 +345,112 @@ knowledge/
 - RAGFlow vector index on `DocumentChunk.embedding_vector`
 - Dimension: 1024+ (configurable)
 - Metric: Cosine similarity
+
+---
+
+## Provenance Chain (T069)
+
+Full provenance chain from fact to source document:
+
+```
+Fact → Evidence → Chunk → Document
+```
+
+**ProvenanceReference Model**:
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| fact_id | string | Yes | Fact identifier |
+| evidence_id | string | Yes | Evidence identifier |
+| chunk_id | string | Yes | Chunk identifier |
+| chunk_text | string | Yes | Chunk text content |
+| chunk_confidence | float | Yes | RAG search confidence (0.0-1.0) |
+| doc_id | string | Yes | Document identifier |
+| doc_filename | string | Yes | Document filename |
+| doc_path | string | Yes | Document storage path |
+| page_section | string | No | Page or section identifier |
+
+---
+
+## Neo4j Indexes
+
+```cypher
+-- Fact indexes
+CREATE INDEX ON :Fact(fact_id);
+CREATE INDEX ON :Fact(entity);
+CREATE INDEX ON :Fact(type);
+CREATE INDEX ON :Fact(conflict_id);
+
+-- Evidence indexes
+CREATE INDEX ON :Evidence(evidence_id);
+CREATE INDEX ON :Evidence(chunk_id);
+
+-- Conflict indexes
+CREATE INDEX ON :Conflict(conflict_id);
+```
+
+---
+
+## Conflict Detection Cypher (T070)
+
+```cypher
+-- Find conflicting facts (same entity + type, different values)
+MATCH (f1:Fact), (f2:Fact)
+WHERE f1.entity = f2.entity
+  AND f1.type = f2.type
+  AND f1.value <> f2.value
+  AND (f1.valid_until IS NULL OR f1.valid_until > datetime())
+  AND (f2.valid_until IS NULL OR f2.valid_until > datetime())
+  AND f1 <> f2
+OPTIONAL MATCH (f1)-[:PROVES]->(e1:Evidence)
+OPTIONAL MATCH (f2)-[:PROVES]->(e2:Evidence)
+RETURN f1, f2, e1, e2
+```
+
+---
+
+## API Request/Response Models (T087)
+
+### PromoteFromEvidenceRequest
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| evidence_id | string | Yes | Source evidence/chunk identifier from RAGFlow |
+| fact_type | FactType | Yes | Type of fact to create |
+| value | string | Yes | Fact value (e.g., "120MHz", "Enable FIFO flush") |
+| entity | string | No | Optional entity name (e.g., "STM32H7.GPIO.max_speed") |
+| scope | string | No | Optional scope constraint for fact applicability |
+| version | string | No | Optional version this fact applies to |
+| valid_until | string | No | Optional expiration timestamp (ISO 8601) |
+| resolution_strategy | ResolutionStrategy | No | How to handle conflicts (default: detect_only) |
+
+### PromoteFromQueryRequest
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| query | string | Yes | Natural language search query for finding evidence |
+| fact_type | FactType | Yes | Type of facts to create |
+| top_k | int | No | Maximum number of evidence chunks to promote (1-100, default: 5) |
+| scope | string | No | Optional scope constraint for facts |
+| version | string | No | Optional version facts apply to |
+| valid_until | string | No | Optional expiration timestamp (ISO 8601) |
+
+### ReviewConflictsRequest
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| entity | string | No | Optional entity filter (e.g., "STM32H7.GPIO.max_speed") |
+| fact_type | FactType | No | Optional fact type filter |
+| status | ConflictStatus | No | Optional status filter (open, resolved, deferred) |
+| limit | int | No | Maximum results to return (1-1000, default: 50) |
+
+### GetProvenanceRequest
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| fact_id | string | Yes | Fact identifier (UUID) |
+
+---
+
+## Confidence Bands (T033)
+
+| Band | Range | Action |
+|------|-------|--------|
+| HIGH | ≥0.85 | Auto-classify |
+| MEDIUM | 0.70-0.84 | Review recommended |
+| LOW | <0.70 | Manual confirmation required |
