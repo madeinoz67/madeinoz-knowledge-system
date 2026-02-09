@@ -14,6 +14,7 @@ API Endpoints:
 
 import os
 import logging
+import time
 from typing import List, Optional, Dict, Any
 from dataclasses import dataclass
 import requests
@@ -74,21 +75,101 @@ class RAGFlowClient:
             self.session.headers.update({"X-API-Key": self.api_key})
 
     def _request(
-        self, method: str, endpoint: str, **kwargs
+        self, method: str, endpoint: str, max_retries: int = 3, **kwargs
     ) -> requests.Response:
-        """Make HTTP request with error handling"""
-        url = f"{self.api_url}{endpoint}"
+        """
+        Make HTTP request with retry logic and specific error handling.
 
-        try:
-            response = self.session.request(method, url, **kwargs)
-            response.raise_for_status()
-            return response
-        except requests.RequestException as e:
-            logger.error(f"RAGFlow request failed to {url}: {e}")
-            raise RuntimeError(
-                f"RAGFlow API request failed. Check that RAGFlow service is running "
-                f"and accessible at {self.api_url}. Original error: {e}"
-            ) from e
+        T047: Retry logic with exponential backoff.
+        T058: Specific HTTP status error handling.
+
+        Args:
+            method: HTTP method (GET, POST, DELETE, etc.)
+            endpoint: API endpoint path
+            max_retries: Maximum number of retry attempts (default: 3)
+            **kwargs: Additional arguments passed to requests
+
+        Returns:
+            requests.Response object
+
+        Raises:
+            RuntimeError: With specific error message based on HTTP status
+        """
+        url = f"{self.api_url}{endpoint}"
+        last_exception = None
+
+        for attempt in range(max_retries):
+            try:
+                response = self.session.request(method, url, **kwargs)
+
+                # Handle specific HTTP status codes with actionable messages
+                if response.status_code == 400:
+                    raise RuntimeError(
+                        f"RAGFlow API bad request (400): Invalid request parameters. "
+                        f"Endpoint: {endpoint}. Check your request format and parameters."
+                    )
+                elif response.status_code == 401:
+                    raise RuntimeError(
+                        f"RAGFlow API authentication failed (401): Invalid or missing API key. "
+                        f"Check MADEINOZ_KNOWLEDGE_RAGFLOW_API_KEY environment variable."
+                    )
+                elif response.status_code == 403:
+                    raise RuntimeError(
+                        f"RAGFlow API forbidden (403): Insufficient permissions. "
+                        f"Your API key may not have access to this resource."
+                    )
+                elif response.status_code == 404:
+                    raise RuntimeError(
+                        f"RAGFlow API not found (404): Resource does not exist. "
+                        f"Endpoint: {endpoint}. Verify the resource ID is correct."
+                    )
+                elif response.status_code == 429:
+                    # Rate limited - wait and retry
+                    retry_after = int(response.headers.get("Retry-After", 5))
+                    logger.warning(f"RAGFlow rate limited (429), waiting {retry_after}s")
+                    time.sleep(retry_after)
+                    last_exception = Exception("Rate limited")
+                    continue
+                elif response.status_code >= 500:
+                    # Server error - retry with exponential backoff
+                    if attempt < max_retries - 1:
+                        wait_time = 2 ** attempt  # Exponential backoff: 1s, 2s, 4s
+                        logger.warning(
+                            f"RAGFlow server error ({response.status_code}), "
+                            f"retrying in {wait_time}s (attempt {attempt + 1}/{max_retries})"
+                        )
+                        time.sleep(wait_time)
+                        last_exception = Exception(f"Server error {response.status_code}")
+                        continue
+                    else:
+                        raise RuntimeError(
+                            f"RAGFlow API server error ({response.status_code}): "
+                            f"Service may be temporarily unavailable. "
+                            f"Check RAGFlow service logs for details."
+                        )
+
+                # Success for other status codes
+                response.raise_for_status()
+                return response
+
+            except requests.RequestException as e:
+                last_exception = e
+                if attempt < max_retries - 1:
+                    wait_time = 2 ** attempt
+                    logger.warning(
+                        f"RAGFlow request failed (attempt {attempt + 1}/{max_retries}): {e}. "
+                        f"Retrying in {wait_time}s..."
+                    )
+                    time.sleep(wait_time)
+                else:
+                    logger.error(f"RAGFlow request failed after {max_retries} attempts: {e}")
+
+        # All retries exhausted
+        raise RuntimeError(
+            f"RAGFlow API request failed after {max_retries} attempts. "
+            f"Check that RAGFlow service is running and accessible at {self.api_url}. "
+            f"Original error: {last_exception}"
+        ) from last_exception
 
     def upload_document(
         self, file_path: str, metadata: Optional[Dict[str, Any]] = None

@@ -358,10 +358,11 @@ async def detect_conflicts(
     """
     Detect conflicts for a given entity and fact type.
 
-    T070: Conflict detection Cypher query implementation.
+    T070: Conflict detection using Cypher query (exact match).
     T084: kg.reviewConflicts query support.
 
     Uses Cypher query to find facts with same entity + type but different values.
+    This is more accurate than semantic search for conflict detection.
 
     Args:
         entity: Entity name
@@ -372,9 +373,107 @@ async def detect_conflicts(
         List of Conflict records
     """
     graphiti = get_graphiti()
+    driver = graphiti.driver
 
-    # Search for existing facts with same entity
-    search_filter = SearchFilters()
+    # Cypher query for conflict detection (from lkap_schema.py)
+    # Finds facts with same entity + type but different values
+    query = """
+    MATCH (f1:Fact), (f2:Fact)
+    WHERE f1.entity = $entity
+      AND f1.fact_type = $fact_type
+      AND f2.entity = $entity
+      AND f2.fact_type = $fact_type
+      AND f1.uuid <> f2.uuid
+      AND f1.value <> f2.value
+      AND (f1.valid_until IS NULL OR f1.valid_until > datetime())
+      AND (f2.valid_until IS NULL OR f2.valid_until > datetime())
+    RETURN f1, f2
+    """
+
+    # Add status filter if specified
+    if status:
+        status_filter = """
+        AND (f1.conflict_status = $status OR f1.conflict_status IS NULL)
+        AND (f2.conflict_status = $status OR f2.conflict_status IS NULL)
+        """
+        # Insert status filter before RETURN
+        query = query.replace("AND f1.value <> f2.value", status_filter + "\n      AND f1.value <> f2.value")
+
+    try:
+        async with driver.session() as session:
+            result = await session.run(
+                query,
+                {
+                    "entity": entity,
+                    "fact_type": fact_type.value,
+                    "status": status.value if status else None
+                }
+            )
+
+            conflicts: List[Conflict] = []
+            seen_fact_pairs: set = set()
+
+            async for record in result:
+                f1_node = record["f1"]
+                f2_node = record["f2"]
+
+                # Create unique pair identifier to avoid duplicates
+                pair_id = tuple(sorted([f1_node["uuid"], f2_node["uuid"]]))
+                if pair_id in seen_fact_pairs:
+                    continue
+                seen_fact_pairs.add(pair_id)
+
+                # Create Fact objects
+                fact1 = Fact(
+                    fact_id=f1_node["uuid"],
+                    type=FactType(f1_node["fact_type"]),
+                    entity=f1_node["entity"],
+                    value=f1_node["value"],
+                    created_at=datetime.fromisoformat(f1_node["created_at"]),
+                    valid_until=datetime.fromisoformat(f1_node["valid_until"]) if f1_node.get("valid_until") else None,
+                    evidence_ids=f1_node.get("evidence_ids", []),
+                )
+
+                fact2 = Fact(
+                    fact_id=f2_node["uuid"],
+                    type=FactType(f2_node["fact_type"]),
+                    entity=f2_node["entity"],
+                    value=f2_node["value"],
+                    created_at=datetime.fromisoformat(f2_node["created_at"]),
+                    valid_until=datetime.fromisoformat(f2_node["valid_until"]) if f2_node.get("valid_until") else None,
+                    evidence_ids=f2_node.get("evidence_ids", []),
+                )
+
+                conflict = Conflict(
+                    conflict_id=str(uuid.uuid4()),
+                    facts=[fact1, fact2],
+                    detection_date=datetime.now(),
+                    resolution_strategy=DEFAULT_RESOLUTION_STRATEGY,
+                    status=status or ConflictStatus.OPEN,
+                )
+                conflicts.append(conflict)
+
+            logger.info(f"Detected {len(conflicts)} conflicts for {entity}/{fact_type}")
+            return conflicts
+
+    except Exception as e:
+        logger.error(f"Conflict detection Cypher query failed: {e}")
+        # Fallback to semantic search if Cypher fails
+        logger.warning("Falling back to semantic search for conflict detection")
+        return await _detect_conflicts_fallback(entity, fact_type, status)
+
+
+async def _detect_conflicts_fallback(
+    entity: str,
+    fact_type: FactType,
+    status: Optional[ConflictStatus] = None,
+) -> List[Conflict]:
+    """
+    Fallback conflict detection using semantic search.
+
+    Used when Cypher query fails (e.g., database not properly initialized).
+    """
+    graphiti = get_graphiti()
 
     results = await graphiti.search(
         query=entity,
@@ -425,7 +524,7 @@ async def detect_conflicts(
                     ],
                     detection_date=datetime.now(),
                     resolution_strategy=DEFAULT_RESOLUTION_STRATEGY,
-                    status=ConflictStatus.OPEN,
+                    status=status or ConflictStatus.OPEN,
                 )
                 conflicts.append(conflict)
 

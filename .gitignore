@@ -95,3 +95,4 @@ env/
 
 #testing tools
 docker/patches/utils/
+.fastembed_cache
