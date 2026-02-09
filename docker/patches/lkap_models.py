@@ -118,6 +118,8 @@ class DocumentChunk(BaseModel):
 
     Storage: RAGFlow vector database
     Relationships: N:1 Document, 1:N Evidence
+
+    T057: Added headings field for heading-aware chunk tracking via Docling HybridChunker.
     """
     chunk_id: str = Field(..., description="Unique chunk identifier (UUID)")
     doc_id: str = Field(..., description="Parent document reference")
@@ -125,6 +127,7 @@ class DocumentChunk(BaseModel):
     page_section: Optional[str] = Field(None, description="Page number or section identifier")
     position: int = Field(..., description="Position in document (sequence)")
     token_count: int = Field(..., ge=256, le=1024, description="Token count (256-1024 range)")
+    headings: List[str] = Field(default_factory=list, description="Parent headings for provenance (H1 > H2 > H3)")
     embedding_vector: Optional[List[float]] = Field(None, description="Embedding vector (1024+ dimensions)")
     created_at: datetime = Field(default_factory=datetime.now, description="Timestamp of chunk creation")
 
@@ -174,14 +177,18 @@ class Conflict(BaseModel):
 
     Storage: Neo4j/FalkorDB (as :Conflict nodes)
     Relationships: 1:N Fact
+
+    T077: Added severity field for conflict prioritization.
     """
     conflict_id: str = Field(..., description="Unique conflict identifier (UUID)")
     fact_ids: List[str] = Field(..., min_items=2, description="Conflicting fact references (2+)")
+    facts: List[Fact] = Field(..., min_items=2, description="Conflicting fact objects (hydrated)")
     detection_date: datetime = Field(default_factory=datetime.now, description="Timestamp of conflict detection")
     resolution_strategy: ResolutionStrategy = Field(..., description="Resolution strategy")
     status: ConflictStatus = Field(..., description="Conflict status")
     resolved_at: Optional[datetime] = Field(None, description="Timestamp of resolution")
     resolved_by: Optional[str] = Field(None, description="User who resolved conflict")
+    severity: Optional[str] = Field(None, description="Severity level: critical, major, or minor")
 
 
 # ============================================================================
@@ -262,3 +269,106 @@ class ProvenanceGraph(BaseModel):
     fact: Fact
     evidence_chain: List[Evidence]
     documents: List[Document]
+
+
+class ProvenanceReference(BaseModel):
+    """
+    Provenance chain link for a fact (T069).
+
+    Represents one link in the provenance chain:
+    Fact → Evidence → Chunk → Document
+    """
+    fact_id: str = Field(..., description="Fact identifier")
+    evidence_id: str = Field(..., description="Evidence identifier")
+    chunk_id: str = Field(..., description="Chunk identifier")
+    chunk_text: str = Field(..., description="Chunk text content")
+    chunk_confidence: float = Field(..., ge=0.0, le=1.0, description="RAG search confidence")
+    doc_id: str = Field(..., description="Document identifier")
+    doc_filename: str = Field(..., description="Document filename")
+    doc_path: str = Field(..., description="Document storage path")
+    page_section: Optional[str] = Field(None, description="Page or section identifier")
+
+
+# ============================================================================
+# Complete MCP Tool Request Models (T087)
+# ============================================================================
+
+class PromoteFromEvidenceRequest(BaseModel):
+    """
+    Complete request model for kg_promoteFromEvidence MCP tool.
+
+    T087: Pydantic model for MCP tool input validation.
+    """
+    evidence_id: str = Field(..., min_length=1, description="Source evidence/chunk identifier from RAGFlow")
+    fact_type: FactType = Field(..., description="Type of fact to create")
+    value: str = Field(..., min_length=1, description="Fact value (e.g., '120MHz', 'Enable FIFO flush')")
+    entity: Optional[str] = Field(None, description="Optional entity name (e.g., 'STM32H7.GPIO.max_speed')")
+    scope: Optional[str] = Field(None, description="Optional scope constraint for fact applicability")
+    version: Optional[str] = Field(None, description="Optional version this fact applies to")
+    valid_until: Optional[str] = Field(None, description="Optional expiration timestamp (ISO 8601)")
+    resolution_strategy: ResolutionStrategy = Field(
+        default=ResolutionStrategy.DETECT_ONLY,
+        description="How to handle conflicts (detect_only, keep_both, prefer_newest, reject_incoming)"
+    )
+
+
+class PromoteFromQueryRequest(BaseModel):
+    """
+    Complete request model for kg_promoteFromQuery MCP tool.
+
+    T087: Pydantic model for MCP tool input validation.
+    """
+    query: str = Field(..., min_length=1, description="Natural language search query for finding evidence")
+    fact_type: FactType = Field(..., description="Type of facts to create")
+    top_k: int = Field(default=5, ge=1, le=100, description="Maximum number of evidence chunks to promote")
+    scope: Optional[str] = Field(None, description="Optional scope constraint for facts")
+    version: Optional[str] = Field(None, description="Optional version facts apply to")
+    valid_until: Optional[str] = Field(None, description="Optional expiration timestamp (ISO 8601)")
+
+
+class ReviewConflictsRequest(BaseModel):
+    """
+    Complete request model for kg_reviewConflicts MCP tool.
+
+    T087: Pydantic model for MCP tool input validation.
+    """
+    entity: Optional[str] = Field(None, description="Optional entity filter (e.g., 'STM32H7.GPIO.max_speed')")
+    fact_type: Optional[FactType] = Field(None, description="Optional fact type filter")
+    status: Optional[ConflictStatus] = Field(None, description="Optional status filter (open, resolved, deferred)")
+    limit: int = Field(default=50, ge=1, le=1000, description="Maximum results to return")
+
+
+class GetProvenanceRequest(BaseModel):
+    """
+    Request model for kg_getProvenance MCP tool.
+
+    T087: Pydantic model for MCP tool input validation.
+    """
+    fact_id: str = Field(..., min_length=1, description="Fact identifier (UUID)")
+
+
+class PromoteFromEvidenceResponse(BaseModel):
+    """Response model for kg_promoteFromEvidence"""
+    success: bool
+    fact: Fact
+
+
+class PromoteFromQueryResponse(BaseModel):
+    """Response model for kg_promoteFromQuery"""
+    success: bool
+    facts: List[Fact]
+    total_count: int
+
+
+class ReviewConflictsResponse(BaseModel):
+    """Response model for kg_reviewConflicts"""
+    success: bool
+    conflict_count: int
+    conflicts: List[Conflict]
+
+
+class GetProvenanceResponse(BaseModel):
+    """Response model for kg_getProvenance"""
+    success: bool
+    fact_id: str
+    provenance: List[ProvenanceReference]
