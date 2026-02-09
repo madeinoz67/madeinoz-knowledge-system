@@ -38,42 +38,71 @@ DELETE /api/documents/{id} # Delete document
 - Environment: `RAGFLOW_API_KEY` (optional, for authentication)
 - Vector dimension: 1024+ (configurable)
 
-## RT-002: Docling Document Parsing and Chunking
+## RT-002: Docling Document Parsing and Chunking (UPDATED)
 
 ### Decision
 
-**Use Docling with heading-aware recursive chunking**
+**Use Docling HybridChunker for token-aware, heading-aware chunking**
 
 ### Rationale
 
 - Docling provides excellent PDF parsing with table, section, and errata preservation
-- Heading-aware chunking maintains semantic coherence (critical for technical docs)
-- Recursive chunking respects document hierarchy (H1 → H2 → H3)
+- HybridChunker provides token-aware chunking with automatic heading hierarchy tracking
+- Heading awareness is built-in (not configurable) via document structure traversal
 - Alternative: LangChain text splitters (rejected - less PDF structure awareness)
 
-### Implementation Notes
+### Implementation Notes (UPDATED)
 
 ```python
-from docling.document import Document
-from docling.chunking import ChunkingParams
+from docling.document_converter import DocumentConverter
+from docling.chunking import HybridChunker
+from docling_core.transforms.chunker.tokenizer.huggingface import HuggingFaceTokenizer
+from transformers import AutoTokenizer
 
-# Heading-aware chunking params
-params = ChunkingParams(
-    chunk_size=(512, 768),  # token range
-    overlap=100,             # token overlap
-    respect_headings=True,   # split at headings
-    min_chunk_size=256       # avoid tiny chunks
+# Tokenizer for chunk size estimation
+tokenizer = HuggingFaceTokenizer(
+    tokenizer=AutoTokenizer.from_pretrained("sentence-transformers/all-MiniLM-L6-v2"),
+    max_tokens=768,  # CHUNK_SIZE_MAX
 )
+
+# HybridChunker automatically tracks heading hierarchy during traversal
+chunker = HybridChunker(
+    tokenizer=tokenizer,
+    merge_peers=True,  # Merge undersized chunks with same headings
+)
+
+# Usage
+converter = DocumentConverter()
+result = converter.convert("document.pdf")
+doc = result.document
+
+chunks = list(chunker.chunk(dl_doc=doc))
+
+# Access chunk with heading context
+for chunk in chunks:
+    print(f"Text: {chunk.text}")
+    print(f"Headings: {chunk.meta.headings}")  # List of parent headings
 ```
+
+### Key Findings from API Research
+
+**NO `ChunkingParams.respect_headings` EXISTS** - The original assumption was incorrect.
+
+Docling's actual chunking API:
+- **`HybridChunker`**: Token-aware chunking with heading context
+- **`HierarchicalChunker`**: Structure-preserving chunking (one chunk per element)
+- Heading hierarchy is **automatically tracked** via `heading_by_level` dict during traversal
+- Each chunk includes `chunk.meta.headings` list with parent headings
+- `merge_peers=True` merges undersized chunks **only when they share the same heading**
 
 ### Chunking Strategy
 
-1. Parse PDF with Docling → Document object
-2. Extract document structure (headings, sections, tables)
-3. Recursively chunk by heading boundaries
-4. Enforce 512-768 token limits (soft: prefer heading split, hard: force split)
-5. Add 100-token overlap between chunks for context
-6. Generate embeddings for each chunk
+1. Parse PDF with Docling → DLDocument object
+2. **Docling automatically tracks heading hierarchy** (H1 → H2 → H3) via `SectionHeaderItem.level`
+3. HybridChunker creates **token-aligned chunks** with heading metadata attached
+4. Chunk metadata includes `headings` list for provenance tracking
+5. **`merge_peers=True`** prevents tiny chunks by merging same-heading content
+6. **Overlap** is implicit (not configurable) via merge behavior
 
 ## RT-003: Progressive Classification Confidence Calculation
 
@@ -151,7 +180,8 @@ def calculate_confidence(document: Document) -> float:
 EMBEDDING_MODEL=openai # or ollama
 EMBEDDING_DIMENSION=3072 # or 1024 for BGE
 OPENROUTER_API_KEY=sk-...
-OLLAMA_BASE_URL=http://localhost:11434
+# OLLAMA_BASE_URL is OPTIONAL - Ollama container uses default http://localhost:11434
+# When running in docker-compose, Ollama is accessible at http://ollama:11434
 ```
 
 ## RT-005: Conflict Detection in Graph Databases
