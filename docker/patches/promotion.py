@@ -941,3 +941,125 @@ async def review_conflicts(
                 conflicts.append(conflict)
 
     return conflicts[:limit]
+
+
+# =============================================================================
+# Conflict Visualization and Severity (T075, T077)
+# =============================================================================
+
+def visualize_conflicts(conflicts: List[Conflict]) -> str:
+    """
+    Generate ASCII visualization of conflict relationships.
+
+    T075: Conflict visualization for human review.
+
+    Args:
+        conflicts: List of Conflict records to visualize
+
+    Returns:
+        ASCII art showing conflict structure
+
+    Example output:
+        Conflict abc-123: GPIO configuration
+        ├─ Fact 1: gpio_mode = "input" (Constraint, 2024-01-15)
+        └─ Fact 2: gpio_mode = "output" (Constraint, 2024-01-20)
+    """
+    if not conflicts:
+        return "No conflicts detected."
+
+    output = []
+    for conflict in conflicts:
+        output.append(f"Conflict {conflict.conflict_id[:8]}...")
+        output.append(f"  Entity: {conflict.facts[0].entity}")
+        output.append(f"  Type: {conflict.facts[0].type.value}")
+        output.append(f"  Detected: {conflict.detection_date.strftime('%Y-%m-%d %H:%M')}")
+        output.append(f"  Status: {conflict.status.value}")
+        output.append(f"  Strategy: {conflict.resolution_strategy.value}")
+
+        for i, fact in enumerate(conflict.facts):
+            fact_age = (datetime.now() - fact.created_at).days
+            output.append(f"    [{chr(9492 + i)}] {fact.value}")
+            output.append(f"        Type: {fact.type.value}")
+            output.append(f"        Created: {fact.created_at.strftime('%Y-%m-%d')} ({fact_age}d ago)")
+            if fact.evidence_ids:
+                output.append(f"        Evidence: {', '.join([e[:8]+'...' for e in fact.evidence_ids[:2]])}")
+
+        output.append("")  # Blank line between conflicts
+
+    return "\n".join(output)
+
+
+def calculate_conflict_severity(conflict: Conflict) -> str:
+    """
+    Calculate conflict severity level.
+
+    T077: Conflict severity scoring for prioritization.
+
+    Args:
+        conflict: Conflict record to score
+
+    Returns:
+        Severity level: "critical", "major", or "minor"
+
+    Scoring rules:
+    - CRITICAL: Constraint or API conflicts (breaks system behavior)
+    - MAJOR: Erratum, Detection, Indicator conflicts (affects correctness)
+    - MINOR: Workaround, BuildFlag, ProtocolRule conflicts (informational)
+    """
+    fact_types = {fact.type for fact in conflict.facts}
+
+    # Check for critical fact type combinations
+    critical_types = {FactType.CONSTRAINT, FactType.API}
+    if critical_types & fact_types:
+        return "critical"
+
+    # Check for major fact type combinations
+    major_types = {FactType.ERRATUM, FactType.DETECTION, FactType.INDICATOR}
+    if major_types & fact_types:
+        return "major"
+
+    # Everything else is minor
+    return "minor"
+
+
+def add_severity_to_conflicts(conflicts: List[Conflict]) -> List[Conflict]:
+    """
+    Add severity field to all conflicts.
+
+    T077: Batch severity calculation.
+
+    Args:
+        conflicts: List of Conflict records
+
+    Returns:
+        Updated conflicts with severity metadata
+    """
+    for conflict in conflicts:
+        severity = calculate_conflict_severity(conflict)
+        # Update conflict with severity (Conflict model doesn't have this field yet)
+        # For now, store as custom attribute
+        if not hasattr(conflict, 'severity'):
+            conflict.severity = severity
+
+    return conflicts
+
+
+def sort_conflicts_by_severity(conflicts: List[Conflict]) -> List[Conflict]:
+    """
+    Sort conflicts by severity (critical first) and detection date (newest first).
+
+    Args:
+        conflicts: List of Conflict records
+
+    Returns:
+        Sorted conflicts by priority
+    """
+    severity_order = {"critical": 0, "major": 1, "minor": 2}
+
+    return sorted(
+        conflicts,
+        key=lambda c: (
+            severity_order.get(getattr(c, 'severity', 'minor'), 2),
+            -c.detection_date.timestamp()
+        )
+    )

@@ -300,6 +300,25 @@ class MCPWrapper {
       description: 'Investigate entity connections (graph traversal)',
       handler: this.cmdInvestigate.bind(this),
     });
+
+    // Feature 022: LKAP - Local Knowledge Augmentation Platform
+    this.addCommand({
+      name: 'promote',
+      description: 'Promote evidence to knowledge graph fact',
+      handler: this.cmdPromote.bind(this),
+    });
+
+    this.addCommand({
+      name: 'provenance',
+      description: 'Trace fact provenance to source documents',
+      handler: this.cmdProvenance.bind(this),
+    });
+
+    this.addCommand({
+      name: 'conflicts',
+      description: 'Review and resolve knowledge conflicts',
+      handler: this.cmdConflicts.bind(this),
+    });
   }
 
   /**
@@ -716,6 +735,100 @@ class MCPWrapper {
   }
 
   /**
+
+  /**
+   * Feature 022: Command: promote
+   * T095: Promote evidence chunk to knowledge graph fact
+   */
+  private async cmdPromote(
+    args: string[]
+  ): Promise<{ success: boolean; data?: unknown; error?: string }> {
+    if (args.length < 2) {
+      return {
+        success: false,
+        error: 'Usage: promote <evidence_id> <fact_type> <value> [entity] [scope] [version] [valid_until] [resolution_strategy]',
+      };
+    }
+
+    const evidenceId = args[0];
+    const factType = args[1];
+    const value = args[2];
+    const entity = args.includes('--entity') ? args[args.indexOf('--entity') + 1] : undefined;
+    const scope = args.includes('--scope') ? args[args.indexOf('--scope') + 1] : undefined;
+    const version = args.includes('--version') ? args[args.indexOf('--version') + 1] : undefined;
+    const validUntil = args.includes('--valid-until') ? args[args.indexOf('--valid-until') + 1] : undefined;
+    const resolutionStrategy = args.includes('--strategy') ? args[args.indexOf('--strategy') + 1] : undefined;
+
+    const client = this.createClient();
+    const result = await client.callTool({
+      name: 'kg_promoteFromEvidence',
+      arguments: {
+        evidence_id: evidenceId,
+        fact_type: factType,
+        value: value,
+        entity: entity,
+        scope: scope,
+        version: version,
+        valid_until: validUntil,
+        resolution_strategy: resolutionStrategy,
+      },
+    });
+
+    return result;
+  }
+
+  /**
+   * Feature 022: Command: provenance
+   * T096: Trace fact to source documents
+   */
+  private async cmdProvenance(
+    args: string[]
+  ): Promise<{ success: boolean; data?: unknown; error?: string }> {
+    if (args.length < 1) {
+      return {
+        success: false,
+        error: 'Usage: provenance <fact_id>',
+      };
+    }
+
+    const factId = args[0];
+
+    const client = this.createClient();
+    const result = await client.callTool({
+      name: 'kg_getProvenance',
+      arguments: {
+        fact_id: factId,
+      },
+    });
+
+    return result;
+  }
+
+  /**
+   * Feature 022: Command: conflicts
+   * T097: Review and resolve knowledge conflicts
+   */
+  private async cmdConflicts(
+    args: string[]
+  ): Promise<{ success: boolean; data?: unknown; error?: string }> {
+    const entity = args.includes('--entity') ? args[args.indexOf('--entity') + 1] : undefined;
+    const factType = args.includes('--type') ? args[args.indexOf('--type') + 1] : undefined;
+    const status = args.includes('--status') ? args[args.indexOf('--status') + 1] : undefined;
+    const limit = args.includes('--limit') ? Number.parseInt(args[args.indexOf('--limit') + 1], 10) : 50;
+
+    const client = this.createClient();
+    const result = await client.callTool({
+      name: 'kg_reviewConflicts',
+      arguments: {
+        entity: entity,
+        fact_type: factType,
+        status: status,
+        limit: limit,
+      },
+    });
+
+    return result;
+  }
    * Feature 020: Command: investigate
    */
   private async cmdInvestigate(
