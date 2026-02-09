@@ -1,0 +1,66 @@
+# Docker Compose configuration for RAGFlow (Vector Database for LKAP)
+# Feature 022: Self-Hosted RAG (Local Knowledge Augmentation Platform)
+#
+# Services:
+#   - ragflow: Vector database for document chunk storage and semantic search
+#
+# Usage:
+#   Can be combined with Neo4j or FalkorDB backends
+#   Run: docker compose -f docker/docker-compose-ragflow.yml up -d
+#   Access: RAGFlow API at http://localhost:9380
+#
+# Environment Variables:
+#   - RAGFLOW_API_KEY: Optional API key for RAGFlow authentication
+#   - RAGFLOW_EMBEDDING_DIMENSION: Embedding vector dimension (default: 1024+)
+
+networks:
+  madeinoz-knowledge-net:
+    driver: bridge
+    external: true
+
+volumes:
+  ragflow-data:
+    driver: local
+
+services:
+  # RAGFlow Vector Database
+  # Self-hosted vector database for semantic search and document chunk storage
+  ragflow:
+    image: infiniflow/ragflow:latest
+    container_name: madeinoz-knowledge-ragflow
+    restart: unless-stopped
+    networks:
+      - madeinoz-knowledge-net
+    ports:
+      - "9380:9380"  # RAGFlow API
+      - "9381:9381"  # gRPC API
+    volumes:
+      - ragflow-data:/ragflow/data
+      - ./knowledge:/ragflow/documents:ro  # Mount knowledge directory for document access
+    environment:
+      # RAGFlow Configuration
+      # CONSTITUTION: Map from MADEINOZ_KNOWLEDGE_* prefixed vars
+      - RAGFLOW_API_KEY=${MADEINOZ_KNOWLEDGE_RAGFLOW_API_KEY:-}
+      # Embedding configuration reuses existing Graphiti variables
+      - RAGFLOW_EMBEDDING_DIMENSION=${MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS:-1024}
+      - RAGFLOW_EMBEDDING_MODEL=${MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL:-mxbai-embed-large}
+      - RAGFLOW_EMBEDDING_PROVIDER=${MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER:-ollama}
+      - RAGFLOW_EMBEDDING_URL=${MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER_URL:-http://host.containers.internal:11434}
+      # Chunking configuration
+      - RAGFLOW_CHUNK_SIZE_MIN=${MADEINOZ_KNOWLEDGE_RAGFLOW_CHUNK_SIZE_MIN:-512}
+      - RAGFLOW_CHUNK_SIZE_MAX=${MADEINOZ_KNOWLEDGE_RAGFLOW_CHUNK_SIZE_MAX:-768}
+      - RAGFLOW_CHUNK_OVERLAP=${MADEINOZ_KNOWLEDGE_RAGFLOW_CHUNK_OVERLAP:-100}
+
+      # Database Configuration (uses built-in SQLite for MVP)
+      - RAGFLOW_DB_TYPE=sqlite
+      - RAGFLOW_DB_PATH=/ragflow/data/ragflow.db
+
+      # Logging Configuration (FR-036a: basic logging)
+      - RAGFLOW_LOG_LEVEL=${MADEINOZ_KNOWLEDGE_RAGFLOW_LOG_LEVEL:-INFO}
+      - RAGFLOW_LOG_PATH=/ragflow/logs/ragflow.log
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "--max-time", "5", "http://localhost:9380/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s

@@ -488,6 +488,152 @@ Controls prompt caching for Gemini models via OpenRouter. When enabled, the syst
 
 For detailed metrics documentation, see the [Observability & Metrics](observability.md) reference.
 
+## LKAP Configuration (Feature 022)
+
+!!! info "Feature 022: Local Knowledge Augmentation Platform"
+    LKAP adds RAG capabilities with automatic document ingestion, semantic search, and evidence-based knowledge promotion. See [LKAP Quickstart](../usage/lkap-quickstart.md) for complete user guide.
+
+### RAGFlow Configuration
+
+RAGFlow provides the vector database for document chunk storage and semantic search.
+
+```bash
+# RAGFlow API endpoint (container-to-container communication)
+MADEINOZ_KNOWLEDGE_RAGFLOW_API_URL=http://ragflow:9380
+
+# Optional RAGFlow API key for authentication
+MADEINOZ_KNOWLEDGE_RAGFLOW_API_KEY=your-ragflow-api-key
+```
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `RAGFLOW_API_URL` | `http://ragflow:9380` | RAGFlow API endpoint |
+| `RAGFLOW_API_KEY` | (none) | Optional authentication key |
+
+### Embedding Configuration
+
+LKAP requires embeddings with 1024+ dimensions for high-quality semantic search.
+
+```bash
+# Embedding dimension (1024+ per research decision RT-004)
+# - OpenAI text-embedding-3-large: 3072 dimensions (primary, via OpenRouter)
+# - BGE-large: 1024 dimensions (local Ollama fallback)
+MADEINOZ_KNOWLEDGE_RAGFLOW_EMBEDDING_DIMENSION=1024
+
+# Embedding model selection
+# Options: openai (via OpenRouter for text-embedding-3-large), ollama (for BGE-large)
+MADEINOZ_KNOWLEDGE_RAGFLOW_EMBEDDING_MODEL=ollama
+```
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `RAGFLOW_EMBEDDING_DIMENSION` | `1024` | Embedding vector dimension (1024+ recommended) |
+| `RAGFLOW_EMBEDDING_MODEL` | `ollama` | Embedding provider (`ollama` or `openai`) |
+
+**Embedding Model Options:**
+
+| Model | Dimensions | Provider | Notes |
+|-------|------------|----------|-------|
+| `bge-large-en-v1.5` | 1024 | Ollama | Minimum requirement, free |
+| `mxbai-embed-large` | 1024 | Ollama | Higher quality |
+| `text-embedding-3-large` | 3072 | OpenAI/OpenRouter | Best quality, requires API key |
+
+### Chunking Configuration
+
+Documents are split into chunks for semantic search. Chunking respects document heading boundaries for semantic coherence.
+
+```bash
+# Chunking configuration (heading-aware per research decision RT-002)
+MADEINOZ_KNOWLEDGE_RAGFLOW_CHUNK_SIZE_MIN=512
+MADEINOZ_KNOWLEDGE_RAGFLOW_CHUNK_SIZE_MAX=768
+MADEINOZ_KNOWLEDGE_RAGFLOW_CHUNK_OVERLAP=100
+```
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `RAGFLOW_CHUNK_SIZE_MIN` | `512` | Minimum chunk size (tokens) |
+| `RAGFLOW_CHUNK_SIZE_MAX` | `768` | Maximum chunk size (tokens) |
+| `RAGFLOW_CHUNK_OVERLAP` | `100` | Overlap between chunks (tokens) |
+
+### Search Configuration
+
+Control search result quality and logging behavior.
+
+```bash
+# Search confidence threshold (chunks below 0.70 are not returned)
+MADEINOZ_KNOWLEDGE_RAGFLOW_CONFIDENCE_THRESHOLD=0.70
+
+# Logging level (FR-036a: basic logging)
+MADEINOZ_KNOWLEDGE_RAGFLOW_LOG_LEVEL=INFO
+```
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `RAGFLOW_CONFIDENCE_THRESHOLD` | `0.70` | Minimum confidence for results (0.0-1.0) |
+| `RAGFLOW_LOG_LEVEL` | `INFO` | Logging level (`DEBUG`, `INFO`, `WARNING`, `ERROR`) |
+
+### OpenRouter Configuration
+
+For using OpenAI embeddings via OpenRouter (recommended for text-embedding-3-large).
+
+```bash
+# OpenRouter API Key for embeddings (if using OpenAI text-embedding-3-large)
+# Get your key at: https://openrouter.ai/keys
+MADEINOZ_KNOWLEDGE_OPENROUTER_API_KEY=sk-your-openrouter-api-key-here
+```
+
+### Ollama Configuration
+
+Optional - for fully local operation without external API calls.
+
+```bash
+# Ollama API endpoint
+MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL=http://ollama:11434
+
+# Ollama embedding model (BGE-large: 1024 dimensions, minimum requirement)
+MADEINOZ_KNOWLEDGE_OLLAMA_EMBEDDING_MODEL=bge-large-en-v1.5
+
+# Comma-separated list of models to pull on startup
+# bge-large-en-v1.5 provides 1024 dimension embeddings
+MADEINOZ_KNOWLEDGE_OLLAMA_MODELS=bge-large-en-v1.5
+
+# Resource limits for Ollama (adjust based on host hardware)
+# 0 = CPU only, 1+ = number of GPU layers to offload
+MADEINOZ_KNOWLEDGE_OLLAMA_NUM_GPU=0
+MADEINOZ_KNOWLEDGE_OLLAMA_NUM_THREAD=4
+```
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OLLAMA_BASE_URL` | `http://ollama:11434` | Ollama API endpoint |
+| `OLLAMA_EMBEDDING_MODEL` | `bge-large-en-v1.5` | Ollama embedding model |
+| `OLLAMA_MODELS` | `bge-large-en-v1.5` | Models to pull on startup |
+| `OLLAMA_NUM_GPU` | `0` | GPU layers (0 = CPU only) |
+| `OLLAMA_NUM_THREAD` | `4` | CPU threads for inference |
+
+### Docker Commands
+
+```bash
+# Start RAGFlow vector database
+docker compose -f docker/docker-compose-ragflow.yml up -d
+
+# Start Ollama (optional - for fully local embeddings)
+docker compose -f docker/docker-compose-ollama.yml up -d
+
+# Full LKAP stack (Neo4j + RAGFlow + Ollama)
+docker compose -f src/skills/server/docker-compose-neo4j.yml up -d
+docker compose -f docker/docker-compose-ragflow.yml up -d
+docker compose -f docker/docker-compose-ollama.yml up -d
+```
+
+### Document Storage
+
+```bash
+knowledge/
+├── inbox/          # Drop PDFs, markdown, text files here for ingestion
+└── processed/      # Canonical storage after successful ingestion
+```
+
 ## Memory Decay Configuration (Feature 009)
 
 !!! info "Feature 009: Memory Decay Scoring"
