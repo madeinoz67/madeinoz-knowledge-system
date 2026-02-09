@@ -150,6 +150,8 @@ git push origin :refs/tags/v1.x.x
 - Python 3.11+ + OpenTelemetry Prometheus exporter, threading.Lock for thread safety, Grafana dashboard JSON (017-queue-metrics)
 - Python 3.11+ (MCP server), TypeScript/Bun (CLI) + FastMCP (Python), Graphiti Core (knowledge graph), mcp-client (TypeScript) (020-investigative-search)
 - Neo4j (default) or FalkorDB with graph traversal suppor (020-investigative-search)
+- Python 3.11+ (Docker container for MCP server), Bun/TypeScript (CLI tools) + Docling (PDF ingestion), RAGFlow (vector DB + search), Ollama (local embeddings/LLM), Graphiti (knowledge graph), FastMCP (MCP protocol) (022-self-hosted-rag)
+- Neo4j (default) or FalkorDB (knowledge graph), RAGFlow vector DB (embeddings), Local filesystem (documents: inbox/, processed/) (022-self-hosted-rag)
 
 ## Recent Changes
 - 017-queue-metrics: Queue processing metrics for monitoring queue depth, latency, consumer health, and failure tracking
