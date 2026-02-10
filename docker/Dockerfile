@@ -29,8 +29,9 @@ RUN uv add "opentelemetry-api>=1.20.0" "opentelemetry-sdk>=1.20.0" "opentelemetr
 
 # LKAP (Feature 022): Self-Hosted RAG dependencies
 # RAGFlow-native architecture: requests for RAGFlow HTTP client, aiohttp for async operations
+# Qdrant alternative: httpx for async HTTP, FastMCP for Qdrant integration
 # NOTE: Docling and watchdog REMOVED - RAGFlow handles document ingestion via web UI
-RUN uv add "requests>=2.31.0" "aiohttp>=3.9.0"
+RUN uv add "requests>=2.31.0" "aiohttp>=3.9.0" "httpx>=0.27.0" "mcp>=0.9.0"
 
 # Prompt caching implementation (Feature 006)
 COPY docker/patches/cache_metrics.py /app/mcp/src/utils/cache_metrics.py
@@ -65,6 +66,10 @@ COPY docker/patches/stix_importer.py /app/mcp/src/utils/stix_importer.py
 COPY docker/patches/models/__init__.py /app/mcp/src/models/__init__.py
 # Graph traversal engine
 COPY docker/patches/utils/graph_traversal.py /app/mcp/src/utils/graph_traversal.py
+
+# Qdrant-based LKAP (Feature 022 - Lightweight Alternative)
+# Qdrant client for document memory with Ollama embeddings
+COPY docker/patches/qdrant_client.py /app/mcp/src/utils/qdrant_client.py
 
 # Copy both Neo4j and FalkorDB configs
 COPY src/skills/server/config-neo4j.yaml /tmp/config-neo4j.yaml

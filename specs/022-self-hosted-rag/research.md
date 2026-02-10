@@ -304,6 +304,283 @@ def kg_promote_from_evidence(
 | Conflict Detection | Cypher patterns | Leverage graph DB capabilities |
 | MCP Tools | FastMCP | Clean Python API, type-safe |
 
+## RT-007: Lightweight RAG Alternatives to RAGFlow
+
+### Decision
+
+**Evaluate RAGFlow alternatives for <4GB RAM deployments**
+
+### Rationale
+
+RAGFlow requires 16GB+ RAM with 4-container stack (ES + MySQL + MinIO + Redis). For resource-constrained environments (edge devices, home labs, minimal VMs), lighter alternatives exist with 1-2 container deployments and <4GB RAM requirements.
+
+### Comparative Analysis (2025)
+
+| Solution | Containers | Min RAM | Rec RAM | Infrastructure | RAG Features | Deployment Complexity |
+|----------|------------|---------|---------|----------------|--------------|----------------------|
+| **RAGFlow** | 4+ | 16GB | 16GB+ | ES + MySQL + MinIO + Redis | Full pipeline, UI, chunking | High (docker-compose) |
+| **Qdrant** | 1 | 1GB | 4GB | Standalone (Rust) | Vector search, filtering | Low (single image) |
+| **ChromaDB** | 1 | 4GB | 8GB | Embedded (Python/Rust) | Vector search, metadata | Low (pip/Docker) |
+| **LanceDB** | 1 | 1GB | 2GB | Embedded (Rust/Python) | Vector search, hybrid | Low (pip/Docker) |
+| **pgvector** | 1 | 2GB | 8GB | PostgreSQL extension | SQL + vectors, FTS | Medium (Postgres req) |
+| **sqlite-vec** | 0 | <100MB | 512MB | SQLite extension | SQL + vectors, FTS | Very Low (pip only) |
+| **Milvus** | 3+ | 8GB | 16GB+ | etcd + MinIO + standalone | Vector search, distributed | High (kube/docker) |
+| **Weaviate** | 1 | 8GB | 16GB+ | Standalone (Go) | Vector search, GraphQL | Medium (single image) |
+| **LightRAG** | 1 | 4GB | 8GB | Python + Ollama | Knowledge graph RAG | Medium (docker-compose) |
+
+### Detailed Findings by Solution
+
+#### Qdrant (Best Balance: Performance vs Resources)
+
+**Infrastructure:**
+- Single Rust-based container (qdrant/qdrant)
+- Disk-based with optional in-memory acceleration
+- Built-in quantization reduces RAM by 97%
+
+**Resource Requirements:**
+- Minimum: 1GB RAM, 0.5 cores
+- Recommended: 4GB RAM, 2 cores
+- Serves 1M vectors in ~1.2GB RAM
+
+**RAG Features:**
+- Semantic search with filtering
+- Hybrid search (vector + keyword)
+- Payload indexing
+- REST/gRPC APIs
+
+**Deployment:**
+```yaml
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+```
+
+**Sources:**
+- [Qdrant Installation](https://qdrant.tech/documentation/guides/installation/)
+- [Qdrant Memory Consumption](https://qdrant.tech/articles/memory-consumption/)
+
+#### LanceDB (Lightest: Disk-Based Embedded)
+
+**Infrastructure:**
+- Embedded library (no server required) or standalone container
+- Lance columnar storage format (Parquet-like)
+- Serverless deployment to AWS Lambda (96MB RAM possible)
+
+**Resource Requirements:**
+- Minimum: 96MB (serverless), 1GB (container)
+- Recommended: 2GB RAM
+- Typical Docker: 800MB - 1.6GB RAM
+
+**RAG Features:**
+- Vector search with HNSW
+- Full-text search (hybrid)
+- Multi-modal support (text, images, vectors)
+- Python/TypeScript/JavaScript SDKs
+
+**Deployment:**
+```bash
+# Embedded (no container)
+pip install lancedb
+
+# Docker
+docker run -p 8080:8080 lancedb/lancedb
+```
+
+**Sources:**
+- [LanceDB Official Site](https://lancedb.com/)
+- [LanceDB GitHub](https://github.com/lancedb/lancedb)
+
+#### ChromaDB (Simplest: Local Development)
+
+**Infrastructure:**
+- Embedded (Python) or Docker container
+- In-memory by default, persistent option available
+- Database size limited by available RAM
+
+**Resource Requirements:**
+- Minimum: 4GB RAM
+- Recommended: 8GB RAM
+- Database cannot grow larger than system RAM
+
+**RAG Features:**
+- Vector search with metadata filtering
+- Simple Python API
+- LangChain/LlamaIndex integration
+
+**Deployment:**
+```bash
+# Docker
+docker run -p 8000:8000 chromadb/chroma
+
+# Embedded
+pip install chromadb
+```
+
+**Sources:**
+- [ChromaDB Docker Guide](https://www.quantlabsnet.com/post/chromadb-docker-complete-guide-to-vector-database-implementation-and-container-deployment)
+- [ChromaDB Docs](https://docs.trychroma.com/docs/overview/migration)
+
+#### sqlite-vec (Minimalist: Single-File RAG)
+
+**Infrastructure:**
+- SQLite extension (no separate database)
+- Single-file database with vector search
+- FTS5 full-text search included
+
+**Resource Requirements:**
+- Minimum: <100MB RAM overhead
+- Recommended: 512MB - 1GB RAM
+- Zero additional infrastructure
+
+**RAG Features:**
+- Vector similarity search
+- Full-text search (FTS5)
+- Hybrid search possible
+- Serverless operation
+
+**Deployment:**
+```bash
+# Load extension in SQLite
+pip install sqlite-vec
+```
+
+**Sources:**
+- [Building a RAG on SQLite](https://blog.sqlite.ai/building-a-rag-on-sqlite)
+- [sqlite-rag GitHub](https://github.com/sqliteai/sqlite-rag)
+
+#### pgvector (SQL-Native: Extension + PostgreSQL)
+
+**Infrastructure:**
+- PostgreSQL extension
+- Leverages existing Postgres infrastructure
+- Index must fit in RAM for performance
+
+**Resource Requirements:**
+- Minimum: 2GB RAM
+- Recommended: 8-16GB RAM
+- 1M vectors requires ~656MB RAM for index
+
+**RAG Features:**
+- Vector similarity search
+- SQL queries + vectors
+- Full-text search (tsvector)
+- ACID compliance
+
+**Deployment:**
+```bash
+# Docker with pgvector
+docker run -p 5432:5432 \
+  -e POSTGRES_PASSWORD=password \
+  pgvector/pgvector:pg16
+```
+
+**Sources:**
+- [pgvector GitHub](https://github.com/pgvector/pgvector)
+- [PostgreSQL pgvector Setup](https://thedbadmin.com/blog/postgresql-pgvector-setup-guide)
+
+#### LightRAG (Graph-Enhanced: Knowledge Graph RAG)
+
+**Infrastructure:**
+- Python-based with Ollama integration
+- Knowledge graph generation included
+- Single container or pip install
+
+**Resource Requirements:**
+- Minimum: 4GB RAM
+- Recommended: 8GB RAM
+- Requires Ollama for embeddings/LLM
+
+**RAG Features:**
+- Knowledge graph extraction
+- Graph-based retrieval
+- Local LLM support via Ollama
+- Hybrid (graph + vector) search
+
+**Deployment:**
+```bash
+# pip
+pip install lightrag
+
+# Docker with Ollama
+docker compose up  # lightrag + ollama
+```
+
+**Sources:**
+- [LightRAG GitHub](https://github.com/HKUDS/LightRAG)
+- [LightRAG Docker Deployment](https://www.cnblogs.com/JentZhang/p/18801719)
+
+### RAGFlow Stack Comparison
+
+**RAGFlow Infrastructure (Heavy):**
+| Component | Purpose | Resource Impact |
+|-----------|---------|-----------------|
+| Elasticsearch | Full-text search + vector | ~4-8GB RAM |
+| MySQL | Metadata storage | ~2-4GB RAM |
+| MinIO | Object storage (files) | ~1-2GB RAM |
+| Redis | Caching | ~512MB-1GB RAM |
+| RAGFlow API | RAG pipeline | ~2-4GB RAM |
+| **Total** | | **~16GB+ RAM** |
+
+**Sources:**
+- [RAGFlow Configuration](https://ragflow.io/docs/configurations)
+- [RAGFlow GitHub README](https://github.com/infiniflow/ragflow/blob/main/README.md)
+
+### Strategic Recommendations
+
+**For <4GB RAM deployments:**
+
+1. **Primary Choice: LanceDB**
+   - Lowest resource footprint (1-2GB RAM)
+   - Disk-based (scales beyond RAM)
+   - Production-ready with Python SDKs
+   - Excellent for edge/container-constrained environments
+
+2. **Secondary Choice: Qdrant**
+   - Better performance (Rust, HNSW)
+   - Slightly higher RAM (4GB recommended)
+   - Quantization for memory reduction
+   - Production-grade with official Docker image
+
+3. **Tertiary Choice: sqlite-vec**
+   - True minimalism (<100MB overhead)
+   - Single-file deployment
+   - No separate database server
+   - Best for embedded/portable applications
+
+**Migration Considerations:**
+
+If migrating from RAGFlow's full pipeline:
+- **Document Ingestion**: Retain Docling for PDF parsing
+- **Chunking**: Retain Docling HybridChunker
+- **Embeddings**: Retain OpenAI/Ollama strategy
+- **Vector Storage**: Replace RAGFlow ES with LanceDB/Qdrant
+- **Metadata**: Replace MySQL with vector DB payload/SQLite
+- **UI**: Build custom simple API (or skip UI)
+
+**Second-Order Effects:**
+
+- **Simpler Stack**: Fewer moving parts = easier debugging
+- **Reduced Features**: Lose RAGFlow's visual UI, advanced chunking UI
+- **Custom Development**: More code for API layer, monitoring
+- **Portability**: Single-container solutions easier to deploy
+
+### Summary Table
+
+| Priority | Solution | RAM | Containers | Best For |
+|----------|----------|-----|------------|----------|
+| 1 | LanceDB | 1-2GB | 0-1 | Minimal resources, disk-heavy workloads |
+| 2 | Qdrant | 1-4GB | 1 | Performance + resource balance |
+| 3 | sqlite-vec | <100MB | 0 | Embedded/portable applications |
+| 4 | ChromaDB | 4-8GB | 0-1 | Local development |
+| 5 | pgvector | 2-16GB | 1 | SQL-heavy workloads |
+| X | RAGFlow | 16GB+ | 4+ | Full-featured, UI-driven deployments |
+
 ## Next Steps
 
 Phase 1 will use these decisions to create:
