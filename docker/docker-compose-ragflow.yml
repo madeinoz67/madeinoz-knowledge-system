@@ -1,17 +1,17 @@
 # Docker Compose configuration for RAGFlow (Vector Database for LKAP)
 # Feature 022: Self-Hosted RAG (Local Knowledge Augmentation Platform)
 #
-# Services:
-#   - ragflow: Vector database for document chunk storage and semantic search
+# This is a minimal RAGFlow stack with required dependencies:
+#   - Elasticsearch (document storage)
+#   - MySQL (metadata)
+#   - MinIO (file storage)
+#   - Redis (caching)
+#   - RAGFlow (main service)
 #
 # Usage:
-#   Can be combined with Neo4j or FalkorDB backends
-#   Run: docker compose -f docker/docker-compose-ragflow.yml up -d
-#   Access: RAGFlow API at http://localhost:9380
-#
-# Environment Variables:
-#   - RAGFLOW_API_KEY: Optional API key for RAGFlow authentication
-#   - RAGFLOW_EMBEDDING_DIMENSION: Embedding vector dimension (default: 1024+)
+#   docker compose -f docker/docker-compose-ragflow.yml up -d
+#   Access RAGFlow API at http://localhost:9380
+#   Access RAGFlow UI at http://localhost:9380
 
 networks:
   madeinoz-knowledge-net:
@@ -19,48 +19,160 @@ networks:
     external: true
 
 volumes:
-  ragflow-data:
+  ragflow-es-data:
+    driver: local
+  ragflow-mysql-data:
+    driver: local
+  ragflow-minio-data:
+    driver: local
+  ragflow-redis-data:
     driver: local
 
 services:
-  # RAGFlow Vector Database
-  # Self-hosted vector database for semantic search and document chunk storage
+  # Elasticsearch for document storage
+  es01:
+    image: elasticsearch:8.15.0
+    container_name: madeinoz-knowledge-ragflow-es
+    volumes:
+      - ragflow-es-data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    environment:
+      - node.name=es01
+      - bootstrap.memory_lock=false
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    mem_limit: 1g
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 30s
+    networks:
+      - madeinoz-knowledge-net
+    restart: unless-stopped
+
+  # MySQL for metadata
+  mysql:
+    image: mysql:8.0.39
+    container_name: madeinoz-knowledge-ragflow-mysql
+    volumes:
+      - ragflow-mysql-data:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=infini_rag_flow
+      - MYSQL_DATABASE=rag_flow
+    command:
+      --max_connections=1000
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --default-authentication-plugin=mysql_native_password
+      --tls_version="TLSv1.2,TLSv1.3"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-uroot", "-pinfini_rag_flow"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 30s
+    networks:
+      - madeinoz-knowledge-net
+    restart: unless-stopped
+
+  # MinIO for file storage
+  minio:
+    image: quay.io/minio/minio:RELEASE.2025-06-13T11-33-47Z
+    container_name: madeinoz-knowledge-ragflow-minio
+    command: ["server", "--console-address", ":9001", "/data"]
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    volumes:
+      - ragflow-minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 30s
+    networks:
+      - madeinoz-knowledge-net
+    restart: unless-stopped
+
+  # Redis for caching
+  redis:
+    image: valkey/valkey:8
+    container_name: madeinoz-knowledge-ragflow-redis
+    command: ["redis-server", "--requirepass", "infini_rag_flow", "--maxmemory", "128mb", "--maxmemory-policy", "allkeys-lru"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - ragflow-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "infini_rag_flow", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 30s
+    networks:
+      - madeinoz-knowledge-net
+    restart: unless-stopped
+
+  # RAGFlow main service
   ragflow:
-    image: infiniflow/ragflow:latest
+    image: localhost/infiniflow/ragflow:arm64
     container_name: madeinoz-knowledge-ragflow
+    depends_on:
+      mysql:
+        condition: service_healthy
+      es01:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - madeinoz-knowledge-net
     ports:
       - "9380:9380"  # RAGFlow API
       - "9381:9381"  # gRPC API
+      - "80:80"      # Web UI
+      - "443:443"    # Web UI (HTTPS)
     volumes:
-      - ragflow-data:/ragflow/data
-      - ./knowledge:/ragflow/documents:ro  # Mount knowledge directory for document access
+      - ragflow-minio-data:/ragflow/data
     environment:
-      # RAGFlow Configuration
-      # CONSTITUTION: Map from MADEINOZ_KNOWLEDGE_* prefixed vars
+      # Basic configuration
+      - SERVER_PORT=9380
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=infini_rag_flow
+      - MYSQL_DATABASE=rag_flow
+      - ELASTICSEARCH_HOST=es01
+      - ELASTICSEARCH_PORT=9200
+      - MINIO_HOST=minio
+      - MINIO_PORT=9000
+      - MINIO_USER=minioadmin
+      - MINIO_PASSWORD=minioadmin
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=infini_rag_flow
+
+      # RAGFlow-specific for LKAP
       - RAGFLOW_API_KEY=${MADEINOZ_KNOWLEDGE_RAGFLOW_API_KEY:-}
-      # Embedding configuration reuses existing Graphiti variables
       - RAGFLOW_EMBEDDING_DIMENSION=${MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS:-1024}
-      - RAGFLOW_EMBEDDING_MODEL=${MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL:-mxbai-embed-large}
-      - RAGFLOW_EMBEDDING_PROVIDER=${MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER:-ollama}
-      - RAGFLOW_EMBEDDING_URL=${MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER_URL:-http://host.containers.internal:11434}
-      # Chunking configuration
-      - RAGFLOW_CHUNK_SIZE_MIN=${MADEINOZ_KNOWLEDGE_RAGFLOW_CHUNK_SIZE_MIN:-512}
-      - RAGFLOW_CHUNK_SIZE_MAX=${MADEINOZ_KNOWLEDGE_RAGFLOW_CHUNK_SIZE_MAX:-768}
-      - RAGFLOW_CHUNK_OVERLAP=${MADEINOZ_KNOWLEDGE_RAGFLOW_CHUNK_OVERLAP:-100}
-
-      # Database Configuration (uses built-in SQLite for MVP)
-      - RAGFLOW_DB_TYPE=sqlite
-      - RAGFLOW_DB_PATH=/ragflow/data/ragflow.db
-
-      # Logging Configuration (FR-036a: basic logging)
       - RAGFLOW_LOG_LEVEL=${MADEINOZ_KNOWLEDGE_RAGFLOW_LOG_LEVEL:-INFO}
-      - RAGFLOW_LOG_PATH=/ragflow/logs/ragflow.log
     healthcheck:
-      test: ["CMD", "curl", "-sf", "--max-time", "5", "http://localhost:9380/health"]
+      test: ["CMD", "curl", "-sf", "--max-time", "5", "http://localhost:9380/v1/user/login"]
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 60s
+      start_period: 120s
