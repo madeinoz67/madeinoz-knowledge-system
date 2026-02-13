@@ -219,10 +219,10 @@ except ImportError:
 try:
     from patches.ragflow_client import RAGFlowClient, get_ragflow_client, SearchResult
     _ragflow_available = True
-    logger.info("Madeinoz Patch: Feature 022 - LKAP RAGFlow integration (active)")
+    logging.getLogger(__name__).info("Madeinoz Patch: Feature 022 - LKAP RAGFlow integration (active)")
 except ImportError as e:
     _ragflow_available = False
-    logger.debug(f'RAGFlow client not available: {e}')
+    logging.getLogger(__name__).debug(f'RAGFlow client not available: {e}')
 # ============================================================================
 
 # Load .env file from mcp_server directory
@@ -3147,3 +3147,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+# Cache bust: 1770796169
