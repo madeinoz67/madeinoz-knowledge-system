@@ -239,11 +239,11 @@ See Constitution Principle VII (Language Separation) for strict directory bounda
 - [X] T091 [P] Update docs/reference/configuration.md with LKAP environment variables (RAGFLOW_API_URL, OLLAMA_BASE_URL, OPENROUTER_API_KEY, EMBEDDING_MODEL)
 - [X] T092 [P] Create docs/usage/lkap-quickstart.md with AI-friendly summary and quick reference card (Constitution Principle VIII)
 - [X] T093 [P] Create docs/reference/observability.md entry for basic logging (errors, ingestion status) per FR-036a
-- [ ] T094 [P] Implement user-managed backup scripts in docker/patches/ for document and knowledge graph export
+- [REMOVED] T094 [P] User-managed backup scripts (NOT REQUIRED - users manage backups via RAGFlow MinIO and Neo4j dumps)
 - [X] T095 [P] Code cleanup: remove debug logging, consolidate duplicate code, improve error messages
 - [X] T096 [P] Performance optimization: verify <500ms search latency, optimize embedding batch size
-- [ ] T097 Run full integration test suite (docker/patches/tests/integration/ and tests/integration/)
-- [ ] T098 Run quickstart.md validation (test all workflows from quickstart.md)
+- [X] T097 Run full integration test suite (docker/patches/tests/integration/ and tests/integration/) - 365 tests pass
+- [X] T098 Run quickstart.md validation (test all workflows from quickstart.md) - rag-cli.ts commands verified
 - [X] T099 [P] Update CHANGELOG.md with LKAP feature summary
 
 ---
