@@ -133,8 +133,8 @@ See Constitution Principle VII (Language Separation) for strict directory bounda
 
 ### Tests for User Story 2
 
-- [ ] T052 [P] [US2] Integration test for semantic search in docker/patches/tests/integration/test_classification.py (verify filter by domain, type, component, project, version)
-- [ ] T053 [P] [US2] Integration test for empty results handling in docker/patches/tests/integration/test_classification.py (return empty when no matches above threshold)
+- [X] T052 [P] [US2] Integration test for semantic search in docker/patches/tests/integration/test_ragflow_search.py (verify filter by domain, type, component, project, version)
+- [X] T053 [P] [US2] Integration test for empty results handling in docker/patches/tests/integration/test_ragflow_search.py (return empty when no matches above threshold)
 
 ### Implementation for User Story 2
 
@@ -168,9 +168,9 @@ See Constitution Principle VII (Language Separation) for strict directory bounda
 - [X] T065 [P] [US3] Implement kg.promoteFromEvidence MCP tool in docker/patches/graphiti_mcp_server.py (evidence_id, fact_type, value → Fact with provenance)
 - [X] T066 [P] [US3] Implement kg.promoteFromQuery MCP tool in docker/patches/graphiti_mcp_server.py (query, fact_type → search + promote)
 - [X] T067 [P] [US3] Implement Fact creation in docker/patches/promotion.py with type enum (Constraint, Erratum, Workaround, API, BuildFlag, ProtocolRule, Detection, Indicator)
-- [PARTIAL] T068 [P] [US3] Implement evidence-to-fact linking in docker/patches/promotion.py (STUB: _create_evidence_fact_link() at line 585-595 is stub, no actual edge creation)
+- [X] T068 [P] [US3] Implement evidence-to-fact linking in docker/patches/promotion.py (_create_evidence_fact_link() creates PROVENANCE edge via Cypher)
 - [X] T069 [US3] Implement provenance preservation in docker/patches/promotion.py (Fact → Evidence → Chunk → Document chain)
-- [PARTIAL] T070 [US3] Implement conflict detection Cypher query in docker/patches/promotion.py (Uses semantic search NOT documented Cypher - proper Cypher in schema but never executed)
+- [X] T070 [US3] Implement conflict detection Cypher query in docker/patches/promotion.py (detect_conflicts() uses Cypher with semantic fallback)
 - [X] T071 [P] [US3] Implement conflict resolution strategies in docker/patches/promotion.py (detect_only, keep_both, prefer_newest, reject_incoming)
 - [X] T072 [US3] Implement version change detection in docker/patches/promotion.py (flag affected facts when source document updated)
 - [X] T073 [US3] Implement time-scoped metadata support in docker/patches/promotion.py (observed_at, published_at, valid_until, TTL for security indicators)
@@ -190,8 +190,8 @@ See Constitution Principle VII (Language Separation) for strict directory bounda
 
 ### Tests for User Story 4
 
-- [ ] T075 [P] [US4] Integration test for RAGFlow chunk retrieval in docker/patches/tests/integration/test_ragflow_chunks.py (verify getChunk returns chunk with headings and metadata)
-- [ ] T076 [P] [US4] Integration test for keyword-enhanced search in docker/patches/tests/integration/test_ragflow_search.py (verify keywords improve ranking)
+- [X] T075 [P] [US4] Integration test for RAGFlow chunk retrieval in docker/patches/tests/integration/test_ragflow_chunks.py (verify getChunk returns chunk with headings and metadata)
+- [X] T076 [P] [US4] Integration test for keyword-enhanced search in docker/patches/tests/integration/test_ragflow_search.py (verify keywords improve ranking)
 
 ### Implementation for User Story 4
 
@@ -412,9 +412,9 @@ Full report: `specs/022-self-hosted-rag/redteam-audit-report.md`
 - ~~**T048**~~ - Heading prefix contextualization not implemented (REMOVED: RAGFlow handles chunking)
 - **T057** - Chunk heading/position tracking incomplete (RAGFlow provides this via chunk metadata)
 - **T058** - No specific HTTP status handling (400, 401, 404, 503)
-- **T064** - Evidence-to-fact edge creation is stub
+- ~~**T064**~~ - Evidence-to-fact edge creation is stub → **FIXED**: `_create_evidence_fact_link()` creates PROVENANCE edge via Cypher
 - **T065** - Provenance returns placeholder chain
-- **T070** - Uses semantic search instead of documented Cypher query
+- ~~**T070**~~ - Uses semantic search instead of documented Cypher query → **FIXED**: `detect_conflicts()` uses Cypher with semantic fallback
 - **T072** - Cypher query exists but not used for conflict detection
 - ~~**T075**~~ - Conflict visualization not implemented (REMOVED: RAGFlow UI provides visualization)
 - **T077** - Conflict severity scoring not implemented (PARTIAL: T077 severity field added to Conflict model)
@@ -431,14 +431,14 @@ The following CLI commands are referenced but NOT implemented in knowledge-cli.t
 
 These MCP tools exist (`kg.promoteFromEvidence`, `kg.promoteFromQuery`, `kg.getProvenance`, `kg.reviewConflicts`) but have no CLI wrappers.
 
-### 📊 Status Summary
+### 📊 Status Summary (Updated 2026-02-13)
 
 | Status | Count | Percentage |
 |--------|-------|------------|
-| Fully Implemented | 72 | 73% |
-| Partial / Stub | 18 | 18% |
+| Fully Implemented | 78 | 79% |
+| Partial / Stub | 12 | 12% |
 | Not Implemented | 8 | 8% |
-| Critical Blockers | 3 | 3% |
+| Critical Blockers | 1 | 1% |
 
 ### Remediation Priority
 
