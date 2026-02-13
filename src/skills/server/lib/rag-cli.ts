@@ -16,8 +16,8 @@
  *   bun run rag-cli.ts health
  */
 
-import { search, getChunk, listDocuments } from "./ragflow.ts";
-import type { SearchFilters } from "./types.ts";
+import { search, getChunk, listDocuments } from "./ragflow.js";
+import type { SearchFilters } from "./types.js";
 
 // ANSI color codes for terminal output
 const colors = {

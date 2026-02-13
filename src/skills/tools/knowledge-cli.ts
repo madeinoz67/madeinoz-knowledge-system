@@ -760,18 +760,15 @@ class MCPWrapper {
     const resolutionStrategy = args.includes('--strategy') ? args[args.indexOf('--strategy') + 1] : undefined;
 
     const client = this.createClient();
-    const result = await client.callTool({
-      name: 'kg_promoteFromEvidence',
-      arguments: {
-        evidence_id: evidenceId,
-        fact_type: factType,
-        value: value,
-        entity: entity,
-        scope: scope,
-        version: version,
-        valid_until: validUntil,
-        resolution_strategy: resolutionStrategy,
-      },
+    const result = await client.callTool('kg_promoteFromEvidence', {
+      evidence_id: evidenceId,
+      fact_type: factType,
+      value: value,
+      entity: entity,
+      scope: scope,
+      version: version,
+      valid_until: validUntil,
+      resolution_strategy: resolutionStrategy,
     });
 
     return result;
@@ -794,11 +791,8 @@ class MCPWrapper {
     const factId = args[0];
 
     const client = this.createClient();
-    const result = await client.callTool({
-      name: 'kg_getProvenance',
-      arguments: {
-        fact_id: factId,
-      },
+    const result = await client.callTool('kg_getProvenance', {
+      fact_id: factId,
     });
 
     return result;
@@ -817,18 +811,17 @@ class MCPWrapper {
     const limit = args.includes('--limit') ? Number.parseInt(args[args.indexOf('--limit') + 1], 10) : 50;
 
     const client = this.createClient();
-    const result = await client.callTool({
-      name: 'kg_reviewConflicts',
-      arguments: {
-        entity: entity,
-        fact_type: factType,
-        status: status,
-        limit: limit,
-      },
+    const result = await client.callTool('kg_reviewConflicts', {
+      entity: entity,
+      fact_type: factType,
+      status: status,
+      limit: limit,
     });
 
     return result;
   }
+
+  /**
    * Feature 020: Command: investigate
    */
   private async cmdInvestigate(

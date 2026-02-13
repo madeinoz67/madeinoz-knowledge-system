@@ -38,7 +38,7 @@ export async function uploadDocument(
   metadata?: DocumentMetadata
 ): Promise<{ doc_id: string; status: string }> {
   const formData = new FormData();
-  formData.append("file", Bun.file(Bun.file(filePath).blob(), filePath));
+  formData.append("file", Bun.file(filePath));
 
   if (metadata) {
     formData.append("metadata", JSON.stringify(metadata));
