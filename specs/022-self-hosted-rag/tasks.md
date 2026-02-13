@@ -421,6 +421,10 @@ Full report: `specs/022-self-hosted-rag/redteam-audit-report.md`
 - **T087** - Pydantic models defined but not used for MCP validation
 - **T088** - ErrorResponse import broken (file missing)
 
+### 🟢 REDTEAM AUDIT FIXES (2026-02-13)
+
+- ~~**`_create_conflict_record` stub**~~ → **FIXED**: Now stores Conflict episode in Graphiti (promotion.py:195-226)
+
 ### 🟢 MISSING CLI COMMANDS
 
 The following CLI commands are referenced but NOT implemented in knowledge-cli.ts:
