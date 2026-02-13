@@ -71,6 +71,16 @@ COPY docker/patches/utils/graph_traversal.py /app/mcp/src/utils/graph_traversal.
 # Qdrant client for document memory with Ollama embeddings
 COPY docker/patches/qdrant_client.py /app/mcp/src/utils/qdrant_client.py
 
+# LKAP promotion and models (Feature 022)
+# Creates patches/ directory for from patches.promotion import ... to work
+COPY docker/patches/__init__.py /app/mcp/src/patches/__init__.py
+COPY docker/patches/embedding_service.py /app/mcp/src/patches/embedding_service.py
+COPY docker/patches/lkap_logging.py /app/mcp/src/patches/lkap_logging.py
+COPY docker/patches/lkap_models.py /app/mcp/src/patches/lkap_models.py
+COPY docker/patches/lkap_schema.py /app/mcp/src/patches/lkap_schema.py
+COPY docker/patches/promotion.py /app/mcp/src/patches/promotion.py
+COPY docker/patches/ragflow_client.py /app/mcp/src/patches/ragflow_client.py
+
 # Copy both Neo4j and FalkorDB configs
 COPY src/skills/server/config-neo4j.yaml /tmp/config-neo4j.yaml
 COPY src/skills/server/config-falkordb.yaml /tmp/config-falkordb.yaml
