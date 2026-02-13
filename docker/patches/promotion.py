@@ -17,6 +17,7 @@ T072: Version change detection
 T073: Time-scoped metadata (observed_at, published_at, valid_until, TTL)
 """
 
+import json
 import logging
 import uuid
 from typing import List, Optional, Dict, Any, Tuple
@@ -198,16 +199,38 @@ async def _create_conflict_record(
     """
     Create a conflict record when conflicting facts are detected.
 
+    Stores the conflict in Graphiti as an episode with type Conflict.
+    The conflict can later be queried via kg.reviewConflicts.
+
     Args:
         entity: Entity name
         fact_type: Fact type
-        value1: First fact value
-        value2: Second fact value (conflicting)
+        value1: First fact value (incoming)
+        value2: Second fact value (existing, conflicting)
     """
-    # TODO: Create Conflict node in Graphiti
+    graphiti = get_graphiti()
+
+    conflict_id = str(uuid.uuid4())
+    conflict_data = {
+        "conflict_id": conflict_id,
+        "entity": entity,
+        "fact_type": fact_type.value,
+        "values": [value1, value2],
+        "detection_date": datetime.now().isoformat(),
+        "resolution_strategy": DEFAULT_RESOLUTION_STRATEGY.value,
+        "status": ConflictStatus.OPEN.value,
+    }
+
+    # Store conflict as an episode in Graphiti
+    await graphiti.add_episode(
+        name=f"Conflict:{entity}:{fact_type.value}",
+        episode_body=json.dumps(conflict_data),
+        episode_type="Conflict",
+    )
+
     logger.warning(
-        f"Conflict detected for {entity} ({fact_type.value}): "
-        f"{value1} vs {value2}"
+        f"Conflict recorded for {entity} ({fact_type.value}): "
+        f"{value1} vs {value2} [conflict_id={conflict_id}]"
     )
 
 
