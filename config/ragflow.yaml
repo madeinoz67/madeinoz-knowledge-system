@@ -1,0 +1,43 @@
+# RAGFlow Configuration for LKAP (Feature 022)
+# Local Knowledge Augmentation Platform
+
+# RAGFlow API Configuration
+ragflow:
+  # API endpoint for RAGFlow HTTP REST API
+  # CONSTITUTION: All env vars use MADEINOZ_KNOWLEDGE_ prefix
+  api_url: ${MADEINOZ_KNOWLEDGE_RAGFLOW_API_URL:-http://ragflow:9380}
+  api_key: ${MADEINOZ_KNOWLEDGE_RAGFLOW_API_KEY:-}
+
+  # Embedding Configuration
+  # Dimension must be 1024+ per research decision RT-004
+  embedding:
+    dimension: ${MADEINOZ_KNOWLEDGE_RAGFLOW_EMBEDDING_DIMENSION:-1024}
+    model: ${MADEINOZ_KNOWLEDGE_RAGFLOW_EMBEDDING_MODEL:-text-embedding-3-large}  # OpenAI via OpenRouter (3072 dim)
+
+  # Chunking Configuration
+  # Heading-aware chunking per research decision RT-002
+  chunking:
+    min_tokens: ${MADEINOZ_KNOWLEDGE_RAGFLOW_CHUNK_SIZE_MIN:-512}
+    max_tokens: ${MADEINOZ_KNOWLEDGE_RAGFLOW_CHUNK_SIZE_MAX:-768}
+    overlap_tokens: ${MADEINOZ_KNOWLEDGE_RAGFLOW_CHUNK_OVERLAP:-100}
+    respect_headings: true  # Split at heading boundaries
+
+  # Search Configuration
+  search:
+    # Minimum similarity threshold (0.0-1.0)
+    # Chunks below this threshold are not returned
+    confidence_threshold: ${MADEINOZ_KNOWLEDGE_RAGFLOW_CONFIDENCE_THRESHOLD:-0.70}
+    default_top_k: 10
+    max_top_k: 100
+
+  # Logging Configuration (FR-036a)
+  logging:
+    level: ${MADEINOZ_KNOWLEDGE_RAGFLOW_LOG_LEVEL:-INFO}
+    path: /ragflow/logs/ragflow.log
+
+# Document Storage Paths
+# Must match docker compose volume mounts
+storage:
+  inbox: "/ragflow/documents/inbox"
+  processed: "/ragflow/documents/processed"
+  temp: "/ragflow/documents/temp"

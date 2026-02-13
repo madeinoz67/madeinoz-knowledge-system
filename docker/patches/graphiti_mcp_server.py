@@ -213,6 +213,18 @@ except ImportError:
     _lucene_patch_applied = False
 # ============================================================================
 
+# ============================================================================
+# Feature 022: LKAP RAGFlow Integration - Import RAG modules
+# ============================================================================
+try:
+    from patches.ragflow_client import RAGFlowClient, get_ragflow_client, SearchResult
+    _ragflow_available = True
+    logging.getLogger(__name__).info("Madeinoz Patch: Feature 022 - LKAP RAGFlow integration (active)")
+except ImportError as e:
+    _ragflow_available = False
+    logging.getLogger(__name__).debug(f'RAGFlow client not available: {e}')
+# ============================================================================
+
 # Load .env file from mcp_server directory
 mcp_server_dir = Path(__file__).parent.parent
 env_file = mcp_server_dir / '.env'
@@ -801,6 +813,17 @@ class GraphitiService:
 
             # Build indices
             await self.client.build_indices_and_constraints()
+
+            # Feature 022: Initialize promotion module with Graphiti client
+            # This enables kg.promoteFromEvidence and kg.promoteFromQuery MCP tools
+            try:
+                from . import promotion
+                promotion.init_graphiti(self.client)
+                logger.info('Feature 022: LKAP promotion module initialized with Graphiti client')
+            except ImportError:
+                logger.debug('Feature 022: Promotion module not available (LKAP not installed)')
+            except Exception as init_err:
+                logger.warning(f'Feature 022: Failed to initialize promotion module (non-critical): {init_err}')
 
             # Store llm_client for later use in maintenance service
             self.llm_client = llm_client
@@ -2642,6 +2665,440 @@ async def reload_ontology(
         return ErrorResponse(error=f'Error reloading ontology config: {error_msg}')
 
 
+# ============================================================================
+# Feature 022: LKAP RAGFlow MCP Tools - T048, T049
+# ============================================================================
+
+@mcp.tool()
+async def rag_search(
+    query: str,
+    domain: str | None = None,
+    document_type: str | None = None,
+    component: str | None = None,
+    top_k: int = 10,
+) -> dict[str, Any] | ErrorResponse:
+    """Search RAGFlow vector database for semantically similar document chunks.
+
+    Feature 022 T048: RAGFlow semantic search for document memory retrieval.
+
+    Args:
+        query: Natural language search query
+        domain: Optional domain filter (embedded, security, web, etc.)
+        document_type: Optional document type filter (pdf, markdown, text, etc.)
+        component: Optional component filter (specific hardware/software component)
+        top_k: Maximum number of results (1-100, default: 10)
+
+    Returns:
+        Dictionary with search results including chunk_id, text, source_document,
+        page_section, confidence, and metadata for each result
+    """
+    if not _ragflow_available:
+        return ErrorResponse(error='RAGFlow client not available')
+
+    try:
+        if top_k <= 0 or top_k > 100:
+            return ErrorResponse(error='top_k must be between 1 and 100')
+
+        client = get_ragflow_client()
+
+        # Build filters from parameters
+        filters = {}
+        if domain:
+            filters['domain'] = domain
+        if document_type:
+            filters['type'] = document_type
+        if component:
+            filters['component'] = component
+
+        # Perform search
+        results = client.search(query=query, filters=filters or None, top_k=top_k)
+
+        return {
+            'success': True,
+            'query': query,
+            'result_count': len(results),
+            'results': [
+                {
+                    'chunk_id': r.chunk_id,
+                    'text': r.text,
+                    'source_document': r.source_document,
+                    'page_section': r.page_section,
+                    'confidence': r.confidence,
+                    'metadata': r.metadata,
+                }
+                for r in results
+            ],
+        }
+
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f'Error searching RAGFlow: {error_msg}')
+        return ErrorResponse(error=f'Error searching RAGFlow: {error_msg}')
+
+
+@mcp.tool()
+async def rag_get_chunk(
+    chunk_id: str,
+) -> dict[str, Any] | ErrorResponse:
+    """Get exact document chunk from RAGFlow by chunk ID.
+
+    Feature 022 T049: Retrieve precise chunk for verification and evidence review.
+
+    Args:
+        chunk_id: Unique chunk identifier (UUID)
+
+    Returns:
+        Dictionary with chunk data including text, source_document, page_section,
+        embedding_vector (if available), and full metadata
+    """
+    if not _ragflow_available:
+        return ErrorResponse(error='RAGFlow client not available')
+
+    try:
+        if not chunk_id:
+            return ErrorResponse(error='chunk_id is required')
+
+        client = get_ragflow_client()
+
+        # Get chunk
+        chunk = client.get_chunk(chunk_id)
+
+        return {
+            'success': True,
+            'chunk': chunk,
+        }
+
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f'Error getting chunk from RAGFlow: {error_msg}')
+        return ErrorResponse(error=f'Error getting chunk from RAGFlow: {error_msg}')
+
+
+# ============================================================================
+# Feature 022: LKAP Knowledge Promotion MCP Tools - T065, T066, T084, T085
+# ============================================================================
+
+@mcp.tool()
+async def kg_promoteFromEvidence(
+    evidence_id: str,
+    fact_type: str,
+    value: str,
+    entity: str | None = None,
+    scope: str | None = None,
+    version: str | None = None,
+    valid_until: str | None = None,
+    resolution_strategy: str = "detect_only",
+) -> dict[str, Any] | ErrorResponse:
+    """Promote evidence to Knowledge Graph fact.
+
+    Feature 022 T065: kg.promoteFromEvidence MCP tool implementation.
+    T068: Evidence-to-fact linking (Evidence node → Fact node).
+
+    Promotes a specific evidence chunk to a durable Knowledge Graph fact
+    with full provenance tracking. Supports all 8 fact types:
+    Constraint, Erratum, Workaround, API, BuildFlag, ProtocolRule, Detection, Indicator
+
+    Args:
+        evidence_id: Source evidence/chunk identifier from RAGFlow
+        fact_type: Type of fact to create (Constraint, Erratum, Workaround, API, BuildFlag, ProtocolRule, Detection, Indicator)
+        value: Fact value (e.g., "120MHz", "Enable FIFO flush")
+        entity: Optional entity name (e.g., "STM32H7.GPIO.max_speed")
+        scope: Optional scope constraint for fact applicability
+        version: Optional version this fact applies to
+        valid_until: Optional expiration timestamp (ISO 8601)
+        resolution_strategy: How to handle conflicts (detect_only, keep_both, prefer_newest, reject_incoming)
+
+    Returns:
+        Dictionary with created fact including fact_id, type, entity, value, evidence_ids, created_at
+    """
+    try:
+        from patches.promotion import promote_from_evidence
+        from patches.lkap_models import FactType, ResolutionStrategy
+
+        # Parse fact type
+        try:
+            parsed_fact_type = FactType(fact_type)
+        except ValueError:
+            return ErrorResponse(error=f'Invalid fact_type: {fact_type}. Must be one of: Constraint, Erratum, Workaround, API, BuildFlag, ProtocolRule, Detection, Indicator')
+
+        # Parse resolution strategy
+        try:
+            parsed_strategy = ResolutionStrategy(resolution_strategy)
+        except ValueError:
+            parsed_strategy = ResolutionStrategy.DETECT_ONLY
+
+        # Parse valid_until if provided
+        parsed_valid_until = None
+        if valid_until:
+            try:
+                parsed_valid_until = parse_date_input(valid_until)
+            except ValueError as e:
+                return ErrorResponse(error=f'Invalid valid_until date: {e}')
+
+        # Promote evidence to fact
+        fact = await promote_from_evidence(
+            evidence_id=evidence_id,
+            fact_type=parsed_fact_type,
+            value=value,
+            entity=entity,
+            scope=scope,
+            version=version,
+            valid_until=parsed_valid_until,
+            resolution_strategy=parsed_strategy,
+        )
+
+        return {
+            'success': True,
+            'fact': {
+                'fact_id': fact.fact_id,
+                'type': fact.type.value,
+                'entity': fact.entity,
+                'value': fact.value,
+                'scope': fact.scope,
+                'version': fact.version,
+                'valid_until': fact.valid_until.isoformat() if fact.valid_until else None,
+                'evidence_ids': fact.evidence_ids,
+                'created_at': fact.created_at.isoformat(),
+            },
+        }
+
+    except ValueError as e:
+        error_msg = str(e)
+        logger.error(f'Validation error in promoteFromEvidence: {error_msg}')
+        return ErrorResponse(error=f'Validation error: {error_msg}')
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f'Error promoting evidence: {error_msg}')
+        return ErrorResponse(error=f'Error promoting evidence: {error_msg}')
+
+
+@mcp.tool()
+async def kg_promoteFromQuery(
+    query: str,
+    fact_type: str,
+    top_k: int = 5,
+    scope: str | None = None,
+    version: str | None = None,
+    valid_until: str | None = None,
+) -> dict[str, Any] | ErrorResponse:
+    """Search for evidence and promote matching results to Knowledge Graph facts.
+
+    Feature 022 T066: kg.promoteFromQuery MCP tool implementation.
+
+    Combines semantic search (via RAGFlow) with fact promotion in a single call.
+    Searches for evidence chunks matching the query, then promotes the top-k results
+    to Knowledge Graph facts with the specified type.
+
+    Args:
+        query: Natural language search query for finding evidence
+        fact_type: Type of facts to create (Constraint, Erratum, Workaround, API, BuildFlag, ProtocolRule, Detection, Indicator)
+        top_k: Maximum number of evidence chunks to promote (1-100, default: 5)
+        scope: Optional scope constraint for facts
+        version: Optional version facts apply to
+        valid_until: Optional expiration timestamp (ISO 8601)
+
+    Returns:
+        Dictionary with created facts including fact_id, type, entity, value, evidence_ids, created_at
+    """
+    try:
+        from patches.promotion import promote_from_query
+        from patches.lkap_models import FactType
+
+        # Parse fact type
+        try:
+            parsed_fact_type = FactType(fact_type)
+        except ValueError:
+            return ErrorResponse(error=f'Invalid fact_type: {fact_type}. Must be one of: Constraint, Erratum, Workaround, API, BuildFlag, ProtocolRule, Detection, Indicator')
+
+        # Validate top_k
+        if top_k <= 0 or top_k > 100:
+            return ErrorResponse(error='top_k must be between 1 and 100')
+
+        # Parse valid_until if provided
+        parsed_valid_until = None
+        if valid_until:
+            try:
+                parsed_valid_until = parse_date_input(valid_until)
+            except ValueError as e:
+                return ErrorResponse(error=f'Invalid valid_until date: {e}')
+
+        # Promote from query
+        facts = await promote_from_query(
+            query=query,
+            fact_type=parsed_fact_type,
+            top_k=top_k,
+            scope=scope,
+            version=version,
+            valid_until=parsed_valid_until,
+        )
+
+        return {
+            'success': True,
+            'query': query,
+            'fact_count': len(facts),
+            'facts': [
+                {
+                    'fact_id': f.fact_id,
+                    'type': f.type.value,
+                    'entity': f.entity,
+                    'value': f.value,
+                    'scope': f.scope,
+                    'version': f.version,
+                    'valid_until': f.valid_until.isoformat() if f.valid_until else None,
+                    'evidence_ids': f.evidence_ids,
+                    'created_at': f.created_at.isoformat(),
+                }
+                for f in facts
+            ],
+        }
+
+    except ValueError as e:
+        error_msg = str(e)
+        logger.error(f'Validation error in promoteFromQuery: {error_msg}')
+        return ErrorResponse(error=f'Validation error: {error_msg}')
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f'Error promoting from query: {error_msg}')
+        return ErrorResponse(error=f'Error promoting from query: {error_msg}')
+
+
+@mcp.tool()
+async def kg_reviewConflicts(
+    entity: str | None = None,
+    fact_type: str | None = None,
+    status: str | None = None,
+    limit: int = 50,
+) -> dict[str, Any] | ErrorResponse:
+    """Review conflicts with optional filters.
+
+    Feature 022 T084: kg.reviewConflicts MCP tool implementation.
+
+    Retrieves conflict records for review, with optional filtering by
+    entity, fact type, or status. Useful for identifying and resolving
+    conflicting facts in the Knowledge Graph.
+
+    Args:
+        entity: Optional entity filter (e.g., "STM32H7.GPIO.max_speed")
+        fact_type: Optional fact type filter (Constraint, Erratum, etc.)
+        status: Optional status filter (open, resolved, deferred)
+        limit: Maximum results to return (default: 50)
+
+    Returns:
+        Dictionary with conflict records including conflict_id, facts (with conflicting values),
+        detection_date, resolution_strategy, and status
+    """
+    try:
+        from patches.promotion import review_conflicts
+        from patches.lkap_models import FactType, ConflictStatus
+
+        # Parse fact type if provided
+        parsed_fact_type = None
+        if fact_type:
+            try:
+                parsed_fact_type = FactType(fact_type)
+            except ValueError:
+                return ErrorResponse(error=f'Invalid fact_type: {fact_type}')
+
+        # Parse status if provided
+        parsed_status = None
+        if status:
+            try:
+                parsed_status = ConflictStatus(status)
+            except ValueError:
+                return ErrorResponse(error=f'Invalid status: {status}. Must be one of: open, resolved, deferred')
+
+        # Validate limit
+        if limit <= 0 or limit > 1000:
+            return ErrorResponse(error='limit must be between 1 and 1000')
+
+        # Review conflicts
+        conflicts = await review_conflicts(
+            entity=entity,
+            fact_type=parsed_fact_type,
+            status=parsed_status,
+            limit=limit,
+        )
+
+        return {
+            'success': True,
+            'conflict_count': len(conflicts),
+            'conflicts': [
+                {
+                    'conflict_id': c.conflict_id,
+                    'facts': [
+                        {
+                            'fact_id': f.fact_id,
+                            'type': f.type.value,
+                            'entity': f.entity,
+                            'value': f.value,
+                            'created_at': f.created_at.isoformat(),
+                        }
+                        for f in c.facts
+                    ],
+                    'detection_date': c.detection_date.isoformat(),
+                    'resolution_strategy': c.resolution_strategy.value,
+                    'status': c.status.value,
+                    'resolved_at': c.resolved_at.isoformat() if c.resolved_at else None,
+                }
+                for c in conflicts
+            ],
+        }
+
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f'Error reviewing conflicts: {error_msg}')
+        return ErrorResponse(error=f'Error reviewing conflicts: {error_msg}')
+
+
+@mcp.tool()
+async def kg_getProvenance(
+    fact_id: str,
+) -> dict[str, Any] | ErrorResponse:
+    """Get provenance chain for a fact.
+
+    Feature 022 T085: kg.getProvenance MCP tool implementation.
+    T069: Provenance preservation (Fact → Evidence → Chunk → Document chain).
+
+    Retrieves the complete provenance chain for a fact, showing all
+    evidence chunks and source documents that support the fact. Useful
+    for verification, auditing, and understanding fact origin.
+
+    Args:
+        fact_id: Fact identifier (UUID)
+
+    Returns:
+        Dictionary with fact, evidence_chain (chunk_id, text, confidence),
+        and documents (doc_id, filename, path, page_section)
+    """
+    try:
+        from patches.promotion import get_provenance
+
+        if not fact_id:
+            return ErrorResponse(error='fact_id is required')
+
+        # Get provenance
+        provenance = await get_provenance(fact_id)
+
+        return {
+            'success': True,
+            'fact_id': fact_id,
+            'provenance': provenance,
+        }
+
+    except ValueError as e:
+        error_msg = str(e)
+        logger.error(f'Fact not found: {error_msg}')
+        return ErrorResponse(error=f'Fact not found: {error_msg}')
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f'Error getting provenance: {error_msg}')
+        return ErrorResponse(error=f'Error getting provenance: {error_msg}')
+
+
+# ============================================================================
+# End of Feature 022 MCP Tools
+# ============================================================================
+
 def main():
     """Initialize and run the MCP server with all patches."""
 
@@ -2690,3 +3147,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+# Cache bust: 1770796169

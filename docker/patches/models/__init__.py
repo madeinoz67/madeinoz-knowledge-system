@@ -194,4 +194,69 @@ __all__ = [
     "InvestigationMetadata",
     "InvestigateResult",
     "InvestigateEntityError",
+    # Graphiti MCP response types (Feature 022)
+    "ErrorResponse",
+    "SuccessResponse",
+    "EpisodeSearchResponse",
+    "FactSearchResponse",
+    "NodeResult",
+    "NodeSearchResponse",
+    "StatusResponse",
 ]
+
+
+# ==============================================================================
+# Graphiti MCP Response Types
+# ==============================================================================
+# These types are used across MCP tools for consistent error/success responses
+
+
+class SuccessResponse(BaseModel):
+    """Standard success response for MCP operations"""
+    success: bool = Field(default=True, description="Operation succeeded")
+    message: Optional[str] = Field(default=None, description="Optional success message")
+
+
+class ErrorResponse(BaseModel):
+    """Standard error response for MCP operations"""
+    error: str = Field(description="Error message")
+    details: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Additional error details"
+    )
+
+
+class StatusResponse(BaseModel):
+    """Status check response"""
+    status: str = Field(description="Service status: 'ok' or 'error'")
+    message: Optional[str] = Field(default=None, description="Status message")
+
+
+class NodeResult(BaseModel):
+    """Result from a node search operation"""
+    uuid: str = Field(description="Node UUID")
+    name: str = Field(description="Node name")
+    labels: List[str] = Field(description="Node type labels")
+    created_at: Optional[str] = Field(default=None, description="Creation timestamp")
+    attributes: Optional[Dict[str, Any]] = Field(default=None, description="Node attributes")
+
+
+class NodeSearchResponse(BaseModel):
+    """Response from node search operations"""
+    results: List[NodeResult] = Field(description="Matching nodes")
+    total_count: int = Field(description="Total number of results")
+    query: Optional[str] = Field(default=None, description="Original query string")
+
+
+class FactSearchResponse(BaseModel):
+    """Response from fact search operations"""
+    results: List[Dict[str, Any]] = Field(description="Matching facts with relationships")
+    total_count: int = Field(description="Total number of results")
+    query: Optional[str] = Field(default=None, description="Original query string")
+
+
+class EpisodeSearchResponse(BaseModel):
+    """Response from episode search operations"""
+    episodes: List[Dict[str, Any]] = Field(description="Matching episodes")
+    total_count: int = Field(description="Total number of results")
+    query: Optional[str] = Field(default=None, description="Original query string")

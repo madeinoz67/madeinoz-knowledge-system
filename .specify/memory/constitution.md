@@ -1,7 +1,7 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version Change: 1.3.0 → 1.4.0 (MINOR - New principle added)
+Version Change: 1.4.0 → 1.5.0 (MINOR - New principle added)
 
 Modified Principles:
 - [UNCHANGED] I. Container-First Architecture
@@ -12,23 +12,23 @@ Modified Principles:
 - [UNCHANGED] VI. Codanna-First Development
 - [UNCHANGED] VII. Language Separation
 - [UNCHANGED] VIII. Dual-Audience Documentation
+- [UNCHANGED] IX. Observability & Metrics
 
 Added Sections:
-- [NEW] IX. Observability & Metrics - Establishes requirements for metrics documentation, dashboard coverage, and restart gap handling using time-over-time functions
+- [NEW] X. Environment Variable Prefixing - Establishes MADEINOZ_KNOWLEDGE_ prefix requirement for all environment variables to prevent naming conflicts
 
 Removed Sections:
 - None
 
 Templates Requiring Updates:
-- .specify/templates/plan-template.md ⚠ (add metrics/dashboard check to Constitution Check)
-- .specify/templates/spec-template.md ⚠ (add metrics/dashboard requirements for features exposing new metrics)
-- .specify/templates/tasks-template.md ✅ (observability task category exists)
+- .specify/templates/plan-template.md ⚠ (add environment variable check to Constitution Check)
+- .specify/templates/spec-template.md ✅ (no changes needed)
+- .specify/templates/tasks-template.md ✅ (generic structure)
 - .specify/templates/checklist-template.md ✅ (generic structure)
 - .specify/templates/agent-file-template.md ✅ (generic structure)
 
 Follow-up TODOs:
-- Update plan-template.md Constitution Check to include metrics/dashboard coverage validation
-- Update spec-template.md to require metrics documentation for features exposing new data
+- Update plan-template.md Constitution Check to include environment variable prefix validation
 -->
 
 # Madeinoz Knowledge System Constitution
@@ -294,7 +294,46 @@ When adding new metrics, verify:
 
 **Rationale:** Metrics without documentation or dashboards are "dark matter" - they exist but provide no value. Service restarts cause cumulative counters to reset, creating visual "cliffs" in dashboards. Time-over-time functions preserve the last known value during restart gaps, maintaining data continuity for observability. This principle emerged from issue #39 and the RedTeam analysis that identified 43% of collected metrics had no dashboard coverage.
 
-## Technical Constraints
+### X. Environment Variable Prefixing
+
+All environment variables MUST use the `MADEINOZ_KNOWLEDGE_` prefix to prevent naming conflicts and ensure clear ownership.
+
+**Non-Negotiable Rules:**
+- All environment variables MUST be prefixed with `MADEINOZ_KNOWLEDGE_`
+- Container environment variables MUST be mapped from prefixed variables via docker-compose env_file or environment mappings
+- Configuration files MUST document the prefix pattern in comments
+- Variable names after prefix MUST be descriptive and use SCREAMING_SNAKE_CASE
+- Optional configuration MUST use empty defaults (`${VAR:-}`) rather than requiring values
+
+**Rationale:** Prefixing prevents naming conflicts when multiple systems or PAI packs share the same environment namespace (e.g., `.env` file). Clear ownership ensures each variable's purpose is immediately identifiable and prevents accidental overwrites. The `MADEINOZ_KNOWLEDGE_` prefix is the designated namespace for this repository per Technical Constraints.
+
+**Examples:**
+
+```bash
+# CORRECT - Uses MADEINOZ_KNOWLEDGE_ prefix
+MADEINOZ_KNOWLEDGE_DATABASE_TYPE=neo4j
+MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=sk-...
+MADEINOZ_KNOWLEDGE_RAGFLOW_API_URL=http://ragflow:9380
+
+# WRONG - No prefix (violates constitution)
+DATABASE_TYPE=neo4j
+OPENAI_API_KEY=sk-...
+RAGFLOW_API_URL=http://ragflow:9380
+```
+
+**Container Mapping:**
+
+```yaml
+# docker-compose.yml
+services:
+  app:
+    environment:
+      # Map from prefixed variable to container variable
+      - DATABASE_TYPE=${MADEINOZ_KNOWLEDGE_DATABASE_TYPE:-neo4j}
+      - API_KEY=${MADEINOZ_KNOWLEDGE_OPENAI_API_KEY:-}
+```
+
+
 
 **Runtime Environment:**
 - Bun as TypeScript runtime (ES modules, strict mode)
@@ -362,4 +401,4 @@ This Constitution supersedes all other practices in the Madeinoz Knowledge Syste
 - Complexity additions MUST be justified in Complexity Tracking table
 - Metrics additions MUST verify observability docs and dashboard coverage (Principle IX)
 
-**Version**: 1.4.0 | **Ratified**: 2026-01-18 | **Last Amended**: 2026-01-31
+**Version**: 1.5.0 | **Ratified**: 2026-01-18 | **Last Amended**: 2026-02-09

@@ -1,0 +1,54 @@
+# Docker Compose configuration for Qdrant (Lightweight Vector Database for LKAP)
+# Feature 022: Self-Hosted RAG (Local Knowledge Augmentation Platform)
+#
+# This is a minimal Qdrant deployment - single container, <2GB RAM:
+#   - Qdrant (vector database with built-in storage)
+#
+# Usage:
+#   docker compose -f docker/docker-compose-qdrant.yml up -d
+#   Access Qdrant API at http://localhost:6333
+#   Access Qdrant Dashboard at http://localhost:6333/dashboard
+
+networks:
+  madeinoz-knowledge-net:
+    driver: bridge
+    external: true
+
+volumes:
+  qdrant-data:
+    driver: local
+
+services:
+  # Qdrant vector database
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: madeinoz-knowledge-qdrant
+    volumes:
+      - qdrant-data:/qdrant/storage
+    ports:
+      - "6333:6333"  # HTTP API
+      - "6334:6334"  # gRPC API
+    environment:
+      # Qdrant configuration
+      - QDRANT__SERVICE__HTTP_PORT=6333
+      - QDRANT__SERVICE__GRPC_PORT=6334
+      # Memory optimization for resource-constrained environments
+      - QDRANT__STORAGE__OPTIMIZERS__INDEXING_THRESHOLD=20000
+      # Enable telemetry for development (disable in production)
+      - QDRANT__TELEMETRY_DISABLED=false
+    # Resource limits - Qdrant can run with as little as 512MB, 1-2GB recommended
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:6333/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - madeinoz-knowledge-net
+    restart: unless-stopped
