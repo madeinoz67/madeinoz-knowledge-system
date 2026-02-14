@@ -41,8 +41,6 @@ services:
       # Qdrant configuration
       - QDRANT__SERVICE__HTTP_PORT=6333
       - QDRANT__SERVICE__GRPC_PORT=6334
-      # Memory optimization for resource-constrained environments
-      - QDRANT__STORAGE__OPTIMIZERS__INDEXING_THRESHOLD=20000
       # Enable telemetry for development (disable in production)
       - QDRANT__TELEMETRY_DISABLED=false
     # Resource limits - Qdrant can run with as little as 512MB, 1-2GB recommended

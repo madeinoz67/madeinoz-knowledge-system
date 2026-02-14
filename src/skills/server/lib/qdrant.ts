@@ -265,9 +265,9 @@ export async function healthCheck(): Promise<QdrantHealth> {
     collection_name: QDRANT_COLLECTION,
   };
 
-  // Check server connectivity
+  // Check server connectivity (Qdrant uses /readyz for health checks)
   try {
-    const healthResponse = await fetch(`${QDRANT_URL}/health`, {
+    const healthResponse = await fetch(`${QDRANT_URL}/readyz`, {
       signal: AbortSignal.timeout(5000),
     });
     result.connected = healthResponse.ok;

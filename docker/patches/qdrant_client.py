@@ -125,9 +125,7 @@ class QdrantClient:
                 "size": vector_size,
                 "distance": "Cosine",
             },
-            "optimizers_config": {
-                "indexing_threshold": 20000,
-            },
+            # Note: indexing_threshold is configured via QDRANT__STORAGE__OPTIMIZERS__INDEXING_THRESHOLD env var
             "replication_config": {
                 "factor": 1,
             },
@@ -218,9 +216,7 @@ class QdrantClient:
                     "size": self.embedding_dim,
                     "distance": "Cosine",
                 },
-                "optimizers_config": {
-                    "indexing_threshold": 20000,
-                },
+                # Note: indexing_threshold is configured via QDRANT__STORAGE__OPTIMIZERS__INDEXING_THRESHOLD env var
                 "replication_config": {
                     "factor": 1,
                 },

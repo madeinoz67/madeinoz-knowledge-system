@@ -98,7 +98,6 @@ services:
     environment:
       - QDRANT__SERVICE__HTTP_PORT=6333
       - QDRANT__SERVICE__GRPC_PORT=6334
-      - QDRANT__STORAGE__OPTIMIZERS__INDEXING_THRESHOLD=20000
       - QDRANT__TELEMETRY_DISABLED=false
     deploy:
       resources:
