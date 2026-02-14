@@ -5,12 +5,13 @@
  * TypeScript wrapper for Qdrant vector database operations:
  * - Semantic search with embedding generation
  * - Chunk retrieval by ID
- * - Document ingestion
+ * - Document ingestion (via Python DoclingIngester)
  * - Health checks
  *
  * @see https://qdrant.github.io/qdrant/redoc/index.html
  */
 
+import { $ } from "bun";
 import type { SearchFilters } from "./types.js";
 
 // Configuration from environment
@@ -352,4 +353,90 @@ export async function listDocuments(
       count: data.count,
     }))
     .slice(0, limit);
+}
+
+/**
+ * Ingest documents via Python DoclingIngester
+ *
+ * Note: Document ingestion requires Python libraries (Docling, tiktoken) so
+ * this function calls the Python ingestion module via subprocess.
+ *
+ * @param filePath - Path to file or directory to ingest (defaults to knowledge/inbox/)
+ * @param ingestAll - If true, ingest all documents in knowledge/inbox/
+ * @returns Ingestion result with doc_id, chunk_count, status
+ */
+export async function ingest(
+  filePath?: string,
+  ingestAll: boolean = false
+): Promise<IngestionResult | IngestionResult[]> {
+  // Build Python command
+  const pythonScript = `
+import asyncio
+import json
+import sys
+from pathlib import Path
+
+# Add docker/patches to path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "docker" / "patches"))
+
+from qdrant_client import QdrantClient
+from docling_ingester import DoclingIngester
+
+async def main():
+    client = QdrantClient()
+    ingester = DoclingIngester(client)
+
+    ${ingestAll ? `
+    results = await ingester.ingest_directory()
+    print(json.dumps([{
+        "success": r.status.value == "completed",
+        "doc_id": r.doc_id,
+        "filename": r.filename,
+        "chunk_count": r.chunk_count,
+        "status": r.status.value,
+        "error_message": r.error_message,
+        "processing_time_ms": r.processing_time_ms,
+    } for r in results]))
+    ` : `
+    file_path = Path("${filePath || ''}")
+    if not file_path.is_absolute():
+        file_path = Path(ingester.config.inbox_path) / file_path
+
+    result = await ingester.ingest(file_path)
+    print(json.dumps({
+        "success": result.status.value == "completed",
+        "doc_id": result.doc_id,
+        "filename": result.filename,
+        "chunk_count": result.chunk_count,
+        "status": result.status.value,
+        "error_message": result.error_message,
+        "processing_time_ms": result.processing_time_ms,
+    }))
+    `}
+
+asyncio.run(main())
+`;
+
+  try {
+    // Find project root (4 levels up from this file)
+    const projectRoot = new URL("../../../../..", import.meta.url).pathname;
+
+    const result = await $`python3 -c ${pythonScript}`
+      .cwd(projectRoot)
+      .env({
+        ...process.env,
+        MADEINOZ_KNOWLEDGE_QDRANT_URL: QDRANT_URL,
+        MADEINOZ_KNOWLEDGE_QDRANT_COLLECTION: QDRANT_COLLECTION,
+      })
+      .quiet();
+
+    if (result.exitCode !== 0) {
+      throw new Error(`Ingestion failed: ${result.stderr.toString()}`);
+    }
+
+    const output = result.stdout.toString().trim();
+    return JSON.parse(output);
+  } catch (error) {
+    throw new Error(`Ingestion error: ${(error as Error).message}`);
+  }
 }

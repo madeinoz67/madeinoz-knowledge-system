@@ -6,17 +6,20 @@
  * Command-line interface for Qdrant vector database operations:
  * - Search documents with semantic queries
  * - Retrieve specific chunks by ID
+ * - Ingest documents into the vector database
  * - List ingested documents
  * - Check system health
  *
  * Usage:
  *   bun run rag-cli.ts search "GPIO configuration"
  *   bun run rag-cli.ts get-chunk <chunk-id>
+ *   bun run rag-cli.ts ingest <file-path>
+ *   bun run rag-cli.ts ingest --all
  *   bun run rag-cli.ts list
  *   bun run rag-cli.ts health
  */
 
-import { search, getChunk, listDocuments, healthCheck } from "./qdrant.js";
+import { search, getChunk, listDocuments, healthCheck, ingest } from "./qdrant.js";
 import type { SearchFilters } from "./types.js";
 
 // ANSI color codes for terminal output
@@ -218,6 +221,66 @@ async function main(): Promise<void> {
         break;
       }
 
+      case "ingest": {
+        const ingestAll = options.all === "true";
+        const filePath = args[0];
+
+        if (!ingestAll && !filePath) {
+          console.error(colorize("Error: File path required (or use --all for batch)", "red"));
+          console.log("Usage: bun run rag-cli.ts ingest <file-path>");
+          console.log("       bun run rag-cli.ts ingest --all");
+          process.exit(1);
+        }
+
+        if (ingestAll) {
+          console.log(colorize("Ingesting all documents from knowledge/inbox/...", "bright"));
+        } else {
+          console.log(colorize(`Ingesting: ${filePath}`, "bright"));
+        }
+
+        try {
+          const result = await ingest(filePath, ingestAll);
+
+          if (Array.isArray(result)) {
+            // Batch ingestion
+            const successful = result.filter(r => r.success).length;
+            const failed = result.filter(r => !r.success).length;
+
+            console.log(colorize(`\nIngestion complete:`, "bright"));
+            console.log(`  ${colorize("Successful:", "green")} ${successful}`);
+            if (failed > 0) {
+              console.log(`  ${colorize("Failed:", "red")} ${failed}`);
+            }
+            console.log(`\n${colorize("Details:", "dim")}`);
+            result.forEach((r, i) => {
+              const statusColor = r.success ? "green" : "red";
+              console.log(`  ${i + 1}. ${colorize(r.filename, "cyan")} - ${colorize(r.status, statusColor)} (${r.chunk_count} chunks)`);
+              if (r.error_message) {
+                console.log(`     ${colorize("Error:", "red")} ${r.error_message}`);
+              }
+            });
+          } else {
+            // Single file ingestion
+            if (result.success) {
+              console.log(colorize("\n✓ Ingestion successful", "green"));
+              console.log(`  ${colorize("Document ID:", "dim")} ${result.doc_id}`);
+              console.log(`  ${colorize("Filename:", "dim")} ${result.filename}`);
+              console.log(`  ${colorize("Chunks created:", "dim")} ${result.chunk_count}`);
+              console.log(`  ${colorize("Processing time:", "dim")} ${result.processing_time_ms}ms`);
+            } else {
+              console.error(colorize("\n✗ Ingestion failed", "red"));
+              console.error(`  ${colorize("Error:", "dim")} ${result.error_message}`);
+              process.exit(1);
+            }
+          }
+        } catch (error) {
+          console.error(colorize(`\n✗ Ingestion error`, "red"));
+          console.error(colorize(`  ${(error as Error).message}`, "dim"));
+          process.exit(1);
+        }
+        break;
+      }
+
       case "health": {
         console.log(colorize("Checking Qdrant health...", "bright"));
 
@@ -249,6 +312,8 @@ async function main(): Promise<void> {
         console.log("Commands:");
         console.log("  search <query>       Search documents with semantic query");
         console.log("  get-chunk <id>       Retrieve specific chunk by ID");
+        console.log("  ingest <path>        Ingest a document (PDF, markdown, text)");
+        console.log("  ingest --all         Ingest all documents in knowledge/inbox/");
         console.log("  list                 List all ingested documents");
         console.log("  health               Check Qdrant service health");
         console.log("  help                 Show this help message\n");
@@ -264,6 +329,8 @@ async function main(): Promise<void> {
         console.log("Examples:");
         console.log("  bun run rag-cli.ts search \"GPIO configuration\" --domain=embedded");
         console.log("  bun run rag-cli.ts get-chunk abc123-def456");
+        console.log("  bun run rag-cli.ts ingest knowledge/inbox/datasheet.pdf");
+        console.log("  bun run rag-cli.ts ingest --all");
         console.log("  bun run rag-cli.ts list --limit=50");
         console.log("  bun run rag-cli.ts health\n");
         break;
