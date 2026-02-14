@@ -94,7 +94,7 @@ class Document(BaseModel):
     """
     Source file with metadata, tracked through ingestion lifecycle
 
-    Storage: RAGFlow vector database + filesystem
+    Storage: Qdrant vector database + filesystem
     Relationships: 1:N DocumentChunk, 1:N Evidence, 1:1 IngestionState
     """
     doc_id: str = Field(..., description="Unique document identifier (UUID)")
@@ -116,7 +116,7 @@ class DocumentChunk(BaseModel):
     """
     Segment of document content with embedding vector
 
-    Storage: RAGFlow vector database
+    Storage: Qdrant vector database
     Relationships: N:1 Document, 1:N Evidence
 
     T057: Added headings field for heading-aware chunk tracking via Docling HybridChunker.
@@ -231,7 +231,7 @@ class Classification(BaseModel):
 # ============================================================================
 
 class SearchResult(BaseModel):
-    """Search result from RAGFlow semantic search"""
+    """Search result from Qdrant semantic search"""
     chunk_id: str
     text: str
     source_document: str
@@ -299,7 +299,7 @@ class PromoteFromEvidenceRequest(BaseModel):
 
     T087: Pydantic model for MCP tool input validation.
     """
-    evidence_id: str = Field(..., min_length=1, description="Source evidence/chunk identifier from RAGFlow")
+    evidence_id: str = Field(..., min_length=1, description="Source evidence/chunk identifier from Qdrant")
     fact_type: FactType = Field(..., description="Type of fact to create")
     value: str = Field(..., min_length=1, description="Fact value (e.g., '120MHz', 'Enable FIFO flush')")
     entity: Optional[str] = Field(None, description="Optional entity name (e.g., 'STM32H7.GPIO.max_speed')")
@@ -372,3 +372,51 @@ class GetProvenanceResponse(BaseModel):
     success: bool
     fact_id: str
     provenance: List[ProvenanceReference]
+
+
+# ============================================================================
+# Qdrant RAG Models (Feature 023)
+# ============================================================================
+
+class IngestionResult(BaseModel):
+    """
+    Result of document ingestion operation (T011 - Feature 023)
+
+    Returned by DoclingIngester.ingest() after parsing → chunking → embedding → storage.
+
+    Attributes:
+        doc_id: Unique document identifier (UUID)
+        chunk_count: Number of chunks created and stored
+        status: Processing status (completed, failed, partial)
+        error_message: Error details if status is failed
+        filename: Original filename processed
+        processing_time_ms: Total ingestion time in milliseconds
+    """
+    doc_id: str = Field(..., description="Unique document identifier (UUID)")
+    chunk_count: int = Field(..., ge=0, description="Number of chunks created and stored")
+    status: IngestionStatus = Field(..., description="Processing status")
+    error_message: Optional[str] = Field(None, description="Error details if status is failed")
+    filename: str = Field(..., description="Original filename processed")
+    processing_time_ms: Optional[int] = Field(None, description="Total ingestion time in milliseconds")
+
+
+class QdrantSearchResult(BaseModel):
+    """
+    Search result from Qdrant semantic search (T031 - Feature 023)
+
+    Enhanced SearchResult with Qdrant-specific fields.
+
+    Attributes:
+        chunk_id: Unique chunk identifier
+        text: Chunk text content
+        source: Source document filename
+        page: Page number or section identifier
+        confidence: Similarity score (0.0-1.0)
+        metadata: Additional payload (domain, project, component, type)
+    """
+    chunk_id: str = Field(..., description="Unique chunk identifier")
+    text: str = Field(..., description="Chunk text content")
+    source: str = Field(..., description="Source document filename")
+    page: Optional[str] = Field(None, description="Page number or section identifier")
+    confidence: float = Field(..., ge=0.0, le=1.0, description="Similarity score (0.0-1.0)")
+    metadata: dict = Field(default_factory=dict, description="Additional payload")

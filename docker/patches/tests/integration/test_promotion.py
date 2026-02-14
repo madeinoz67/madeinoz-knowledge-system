@@ -3,7 +3,7 @@ Integration Tests for Evidence Promotion (T063 - US3)
 Local Knowledge Augmentation Platform
 
 End-to-end tests for:
-- Evidence promotion from RAGFlow to Knowledge Graph
+- Evidence promotion from Qdrant to Knowledge Graph
 - Fact creation with provenance tracking
 - Query-based fact promotion
 """
@@ -27,7 +27,7 @@ class TestEvidencePromotion:
         Test promoting evidence to Knowledge Graph fact.
 
         Workflow:
-        1. Evidence (chunk from RAGFlow) → Fact in Knowledge Graph
+        1. Evidence (chunk from Qdrant) → Fact in Knowledge Graph
         2. Verify fact is created with correct metadata
         3. Verify provenance link is created
         """
@@ -93,7 +93,7 @@ class TestEvidencePromotion:
         T066: kg.promoteFromQuery implementation test.
 
         Workflow:
-        1. Query RAGFlow for evidence
+        1. Query Qdrant for evidence
         2. Promote top-k results to Knowledge Graph facts
         3. Verify facts are created with provenance
         """

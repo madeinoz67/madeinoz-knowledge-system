@@ -1,9 +1,9 @@
 #!/usr/bin/env bun
 /**
- * RAGFlow CLI Wrapper for LKAP (Feature 022 - T050)
+ * Qdrant CLI Wrapper for LKAP (Feature 023 - T045)
  * Local Knowledge Augmentation Platform
  *
- * Command-line interface for RAGFlow vector database operations:
+ * Command-line interface for Qdrant vector database operations:
  * - Search documents with semantic queries
  * - Retrieve specific chunks by ID
  * - List ingested documents
@@ -16,7 +16,7 @@
  *   bun run rag-cli.ts health
  */
 
-import { search, getChunk, listDocuments } from "./ragflow.js";
+import { search, getChunk, listDocuments, healthCheck } from "./qdrant.js";
 import type { SearchFilters } from "./types.js";
 
 // ANSI color codes for terminal output
@@ -41,8 +41,8 @@ function colorize(text: string, color: keyof typeof colors): string {
 function printSearchResults(results: Array<{
   chunk_id: string;
   text: string;
-  source_document: string;
-  page_section: string;
+  source: string;
+  page?: string;
   confidence: number;
   metadata: any;
 }>): void {
@@ -57,9 +57,9 @@ function printSearchResults(results: Array<{
     const confidenceColor = result.confidence >= 0.85 ? "green" :
                            result.confidence >= 0.70 ? "yellow" : "red";
 
-    console.log(colorize(`[${index + 1}] ${result.source_document}`, "cyan"));
+    console.log(colorize(`[${index + 1}] ${result.source}`, "cyan"));
     console.log(`  ${colorize("Confidence:", "dim")} ${colorize(result.confidence.toFixed(3), confidenceColor)}`);
-    console.log(`  ${colorize("Section:", "dim")} ${result.page_section || "N/A"}`);
+    console.log(`  ${colorize("Section:", "dim")} ${result.page || "N/A"}`);
     console.log(`  ${colorize("Chunk ID:", "dim")} ${result.chunk_id}`);
     console.log(`  ${colorize("Text:", "dim")} ${result.text.substring(0, 200)}${result.text.length > 200 ? "..." : ""}`);
 
@@ -74,26 +74,51 @@ function printSearchResults(results: Array<{
  * Print formatted chunk details
  */
 function printChunk(chunk: {
-  chunk_id: string;
-  text: string;
-  document: any;
-  position: number;
-  token_count: number;
-  page_section?: string;
-  metadata: any;
-}): void {
-  console.log(colorize("\n=== Chunk Details ===\n", "bright"));
-  console.log(`${colorize("Chunk ID:", "dim")} ${chunk.chunk_id}`);
-  console.log(`${colorize("Document:", "dim")} ${chunk.document.filename}`);
-  console.log(`${colorize("Position:", "dim")} ${chunk.position}`);
-  console.log(`${colorize("Tokens:", "dim")} ${chunk.token_count}`);
-  console.log(`${colorize("Section:", "dim")} ${chunk.page_section || "N/A"}`);
-  console.log(`\n${colorize("Text:", "cyan")}`);
-  console.log(chunk.text);
+  id: string;
+  payload: {
+    chunk_id: string;
+    text: string;
+    source?: string;
+    doc_id?: string;
+    position?: number;
+    token_count?: number;
+    page_section?: string;
+    headings?: string[];
+    domain?: string;
+    project?: string;
+    component?: string;
+    type?: string;
+  };
+} | null): void {
+  if (!chunk) {
+    console.log(colorize("Chunk not found.", "red"));
+    return;
+  }
 
-  if (chunk.metadata && Object.keys(chunk.metadata).length > 0) {
+  console.log(colorize("\n=== Chunk Details ===\n", "bright"));
+  console.log(`${colorize("Chunk ID:", "dim")} ${chunk.payload.chunk_id}`);
+  console.log(`${colorize("Document ID:", "dim")} ${chunk.payload.doc_id || "N/A"}`);
+  console.log(`${colorize("Source:", "dim")} ${chunk.payload.source || "N/A"}`);
+  console.log(`${colorize("Position:", "dim")} ${chunk.payload.position ?? "N/A"}`);
+  console.log(`${colorize("Tokens:", "dim")} ${chunk.payload.token_count ?? "N/A"}`);
+  console.log(`${colorize("Section:", "dim")} ${chunk.payload.page_section || "N/A"}`);
+
+  if (chunk.payload.headings && chunk.payload.headings.length > 0) {
+    console.log(`${colorize("Headings:", "dim")} ${chunk.payload.headings.join(" > ")}`);
+  }
+
+  console.log(`\n${colorize("Text:", "cyan")}`);
+  console.log(chunk.payload.text);
+
+  const metadata: Record<string, any> = {};
+  if (chunk.payload.domain) metadata.domain = chunk.payload.domain;
+  if (chunk.payload.project) metadata.project = chunk.payload.project;
+  if (chunk.payload.component) metadata.component = chunk.payload.component;
+  if (chunk.payload.type) metadata.type = chunk.payload.type;
+
+  if (Object.keys(metadata).length > 0) {
     console.log(`\n${colorize("Metadata:", "dim")}`);
-    console.log(JSON.stringify(chunk.metadata, null, 2));
+    console.log(JSON.stringify(metadata, null, 2));
   }
   console.log("");
 }
@@ -185,35 +210,32 @@ async function main(): Promise<void> {
         console.log(colorize(`\nFound ${documents.length} document(s):\n`, "bright"));
 
         documents.forEach((doc, index) => {
-          console.log(`${colorize(String(index + 1), "cyan")}. ${colorize(doc.filename, "bright")}`);
-          console.log(`   ${colorize("ID:", "dim")} ${doc.doc_id}`);
-          console.log(`   ${colorize("Status:", "dim")} ${doc.status}`);
-          console.log(`   ${colorize("Uploaded:", "dim")} ${doc.upload_date}`);
+          console.log(`${colorize(String(index + 1), "cyan")}. ${colorize(doc.source, "bright")}`);
+          console.log(`   ${colorize("Doc ID:", "dim")} ${doc.doc_id}`);
+          console.log(`   ${colorize("Chunks:", "dim")} ${doc.count}`);
           console.log("");
         });
         break;
       }
 
       case "health": {
-        console.log(colorize("Checking RAGFlow health...", "bright"));
-
-        const RAGFLOW_API_URL =
-          process.env.MADEINOZ_KNOWLEDGE_RAGFLOW_API_URL || "http://localhost:9380";
+        console.log(colorize("Checking Qdrant health...", "bright"));
 
         try {
-          const response = await fetch(`${RAGFLOW_API_URL}/health`, {
-            signal: AbortSignal.timeout(5000),
-          });
+          const health = await healthCheck();
 
-          if (response.ok) {
-            console.log(colorize("✓ RAGFlow service is healthy", "green"));
+          if (health.connected) {
+            console.log(colorize("✓ Qdrant service is healthy", "green"));
+            console.log(`  Collection: ${health.collection_name}`);
+            console.log(`  Collection exists: ${health.collection_exists ? "Yes" : "No"}`);
+            console.log(`  Vector count: ${health.vector_count}`);
             process.exit(0);
           } else {
-            console.error(colorize(`✗ RAGFlow returned status: ${response.status}`, "red"));
+            console.error(colorize("✗ Qdrant service is not responding", "red"));
             process.exit(1);
           }
         } catch (error) {
-          console.error(colorize(`✗ Cannot connect to RAGFlow at ${RAGFLOW_API_URL}`, "red"));
+          console.error(colorize(`✗ Cannot connect to Qdrant`, "red"));
           console.error(colorize(`  Error: ${(error as Error).message}`, "dim"));
           process.exit(1);
         }
@@ -221,13 +243,13 @@ async function main(): Promise<void> {
 
       case "help":
       default:
-        console.log(colorize("RAGFlow CLI - Local Knowledge Augmentation Platform\n", "bright"));
+        console.log(colorize("Qdrant CLI - Local Knowledge Augmentation Platform\n", "bright"));
         console.log("Usage: bun run rag-cli.ts <command> [args] [options]\n");
         console.log("Commands:");
         console.log("  search <query>       Search documents with semantic query");
         console.log("  get-chunk <id>       Retrieve specific chunk by ID");
         console.log("  list                 List all ingested documents");
-        console.log("  health               Check RAGFlow service health");
+        console.log("  health               Check Qdrant service health");
         console.log("  help                 Show this help message\n");
         console.log("Search Options:");
         console.log("  --domain=<type>      Filter by domain (embedded, security, etc.)");

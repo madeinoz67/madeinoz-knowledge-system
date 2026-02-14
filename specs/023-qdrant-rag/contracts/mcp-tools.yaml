@@ -1,0 +1,379 @@
+# MCP Tool Contracts: Qdrant RAG
+
+**Feature**: 023-qdrant-rag
+**Date**: 2026-02-13
+**Protocol**: FastMCP (Model Context Protocol)
+
+---
+
+## Tool: rag.search
+
+Semantic search across ingested documents.
+
+### Request Schema
+
+```yaml
+name: rag.search
+arguments:
+  query:
+    type: string
+    required: true
+    description: Natural language search query
+    min_length: 1
+    max_length: 1000
+  filters:
+    type: object
+    required: false
+    description: Metadata filters for search
+    properties:
+      domain:
+        type: string
+        description: Filter by knowledge domain
+      project:
+        type: string
+        description: Filter by project identifier
+      component:
+        type: string
+        description: Filter by component/hardware
+      type:
+        type: string
+        enum: [datasheet, errata, reference, guide, notes]
+        description: Filter by document type
+  top_k:
+    type: integer
+    required: false
+    default: 10
+    description: Maximum results to return
+    minimum: 1
+    maximum: 100
+```
+
+### Response Schema
+
+```yaml
+type: array
+items:
+  type: object
+  properties:
+    chunk_id:
+      type: string
+      format: uuid
+      description: Unique chunk identifier
+    text:
+      type: string
+      description: Chunk text content
+    source_document:
+      type: string
+      description: Source filename
+    page_section:
+      type: string
+      description: Page/section reference
+    confidence:
+      type: number
+      minimum: 0.0
+      maximum: 1.0
+      description: Relevance score
+    metadata:
+      type: object
+      properties:
+        page_number:
+          type: integer
+        headings:
+          type: array
+          items:
+            type: string
+        domain:
+          type: string
+        project:
+          type: string
+        component:
+          type: string
+```
+
+### Example
+
+```json
+// Request
+{
+  "query": "GPIO configuration on STM32H7",
+  "filters": {
+    "domain": "embedded",
+    "type": "datasheet"
+  },
+  "top_k": 5
+}
+
+// Response
+[
+  {
+    "chunk_id": "550e8400-e29b-41d4-a716-446655440001",
+    "text": "The GPIO peripheral can be configured for various modes including input, output, and alternate functions...",
+    "source_document": "stm32h7-reference.pdf",
+    "page_section": "Section 3.2 - GPIO Configuration",
+    "confidence": 0.92,
+    "metadata": {
+      "page_number": 15,
+      "headings": ["GPIO Configuration", "Peripheral Modes"],
+      "domain": "embedded"
+    }
+  }
+]
+```
+
+### Errors
+
+| Code | Message | Cause |
+|------|---------|-------|
+| 400 | Invalid query | Empty or too long query |
+| 503 | Qdrant unavailable | Vector database connection failed |
+| 503 | Embedding service unavailable | Ollama connection failed |
+
+---
+
+## Tool: rag.getChunk
+
+Retrieve a specific chunk by its ID.
+
+### Request Schema
+
+```yaml
+name: rag.getChunk
+arguments:
+  chunk_id:
+    type: string
+    required: true
+    format: uuid
+    description: Unique chunk identifier
+```
+
+### Response Schema
+
+```yaml
+type: object
+properties:
+  chunk_id:
+    type: string
+    format: uuid
+  doc_id:
+    type: string
+    format: uuid
+    description: Parent document identifier
+  text:
+    type: string
+    description: Full chunk text content
+  token_count:
+    type: integer
+    description: Number of tokens
+  page_number:
+    type: integer
+    description: Page in source document
+  section_headings:
+    type: array
+    items:
+      type: string
+    description: Hierarchical headings
+  char_start:
+    type: integer
+    description: Start character position
+  char_end:
+    type: integer
+    description: End character position
+  position:
+    type: integer
+    description: Chunk order in document
+  metadata:
+    type: object
+    description: Additional metadata
+```
+
+### Example
+
+```json
+// Request
+{
+  "chunk_id": "550e8400-e29b-41d4-a716-446655440001"
+}
+
+// Response
+{
+  "chunk_id": "550e8400-e29b-41d4-a716-446655440001",
+  "doc_id": "550e8400-e29b-41d4-a716-446655440000",
+  "text": "The GPIO peripheral can be configured for various modes...",
+  "token_count": 550,
+  "page_number": 15,
+  "section_headings": ["GPIO Configuration", "Peripheral Modes"],
+  "char_start": 12000,
+  "char_end": 12500,
+  "position": 42,
+  "metadata": {
+    "domain": "embedded",
+    "project": "stm32h7"
+  }
+}
+```
+
+### Errors
+
+| Code | Message | Cause |
+|------|---------|-------|
+| 404 | Chunk not found | Invalid chunk_id |
+| 503 | Qdrant unavailable | Vector database connection failed |
+
+---
+
+## Tool: rag.ingest
+
+Ingest a document into the vector database.
+
+### Request Schema
+
+```yaml
+name: rag.ingest
+arguments:
+  file_path:
+    type: string
+    required: true
+    description: Path to document file (absolute or relative to knowledge/inbox/)
+  metadata:
+    type: object
+    required: false
+    description: Additional metadata for all chunks
+    properties:
+      domain:
+        type: string
+        description: Knowledge domain
+      project:
+        type: string
+        description: Project identifier
+      component:
+        type: string
+        description: Component/hardware identifier
+      type:
+        type: string
+        enum: [datasheet, errata, reference, guide, notes]
+        description: Document type
+```
+
+### Response Schema
+
+```yaml
+type: object
+properties:
+  doc_id:
+    type: string
+    format: uuid
+    description: Document identifier
+  filename:
+    type: string
+    description: Ingested filename
+  status:
+    type: string
+    enum: [success, skipped, failed]
+    description: Ingestion status
+  chunk_count:
+    type: integer
+    description: Number of chunks created
+  error_message:
+    type: string
+    description: Error details if failed
+  duration_ms:
+    type: integer
+    description: Processing time in milliseconds
+```
+
+### Example
+
+```json
+// Request
+{
+  "file_path": "knowledge/inbox/stm32h7-reference.pdf",
+  "metadata": {
+    "domain": "embedded",
+    "project": "stm32h7",
+    "type": "datasheet"
+  }
+}
+
+// Response
+{
+  "doc_id": "550e8400-e29b-41d4-a716-446655440000",
+  "filename": "stm32h7-reference.pdf",
+  "status": "success",
+  "chunk_count": 156,
+  "duration_ms": 12500
+}
+```
+
+### Errors
+
+| Code | Message | Cause |
+|------|---------|-------|
+| 400 | File not found | Invalid file_path |
+| 400 | Unsupported file type | Not PDF/MD/TXT |
+| 409 | Document already ingested | Duplicate file_hash |
+| 503 | Qdrant unavailable | Vector database connection failed |
+| 503 | Embedding service unavailable | Ollama connection failed |
+
+---
+
+## Tool: rag.health
+
+Check Qdrant connectivity and system health.
+
+### Request Schema
+
+```yaml
+name: rag.health
+arguments: {}
+```
+
+### Response Schema
+
+```yaml
+type: object
+properties:
+  status:
+    type: string
+    enum: [healthy, degraded, unhealthy]
+    description: Overall health status
+  qdrant:
+    type: object
+    properties:
+      connected:
+        type: boolean
+      collection_exists:
+        type: boolean
+      vector_count:
+        type: integer
+      latency_ms:
+        type: integer
+  ollama:
+    type: object
+    properties:
+      connected:
+        type: boolean
+      model:
+        type: string
+      latency_ms:
+        type: integer
+```
+
+### Example
+
+```json
+// Response
+{
+  "status": "healthy",
+  "qdrant": {
+    "connected": true,
+    "collection_exists": true,
+    "vector_count": 15234,
+    "latency_ms": 5
+  },
+  "ollama": {
+    "connected": true,
+    "model": "bge-large-en-v1.5",
+    "latency_ms": 12
+  }
+}
+```

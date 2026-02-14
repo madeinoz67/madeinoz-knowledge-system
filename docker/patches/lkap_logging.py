@@ -1,5 +1,5 @@
 """
-LKAP Logging Configuration (Feature 022)
+LKAP Logging Configuration (Feature 022/023)
 Local Knowledge Augmentation Platform
 
 Basic logging infrastructure for errors and ingestion status (FR-036a).
@@ -15,8 +15,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Configuration from environment
-LOG_LEVEL = os.getenv("MADEINOZ_KNOWLEDGE_RAGFLOW_LOG_LEVEL", "INFO")
-LOG_PATH = os.getenv("RAGFLOW_LOG_PATH", "/ragflow/logs/ragflow.log")
+LOG_LEVEL = os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_LOG_LEVEL", os.getenv("MADEINOZ_KNOWLEDGE_RAGFLOW_LOG_LEVEL", "INFO"))
+LOG_PATH = os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_LOG_PATH", os.getenv("RAGFLOW_LOG_PATH", "/var/log/lkap/lkap.log"))
 
 
 def setup_lkap_logging():
@@ -67,7 +67,7 @@ def setup_lkap_logging():
         "lkap.ingestion": "Document ingestion processing",
         "lkap.classification": "Progressive classification service",
         "lkap.promotion": "Evidence-to-KG promotion",
-        "lkap.ragflow": "RAGFlow client operations",
+        "lkap.qdrant": "Qdrant client operations",
         "lkap.embeddings": "Embedding generation",
         "lkap.chunking": "Document chunking",
     }

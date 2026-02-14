@@ -35,18 +35,18 @@ from mcp.server import FastMCP
 from mcp.server.types import Tool
 
 # Configure logging
-logging.basicConfig(level=os.getenv("RAGFLOW_LOG_LEVEL", "INFO"))
+logging.basicConfig(level=os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_LOG_LEVEL", os.getenv("RAGFLOW_LOG_LEVEL", "INFO")))
 logger = logging.getLogger(__name__)
 
 # Environment configuration
 QDRANT_URL = os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_URL", "http://localhost:6333")
 QDRANT_COLLECTION = os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_COLLECTION", "lkap_documents")
-OLLAMA_BASE_URL = os.getenv("MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL", "http://localhost:11434")
-EMBEDDING_MODEL = os.getenv("MADEINOZ_KNOWLEDGE_EMBEDDING_MODEL", "bge-large-en-v1.5")
+OLLAMA_BASE_URL = os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_OLLAMA_URL", os.getenv("MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL", "http://localhost:11434"))
+EMBEDDING_MODEL = os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_OLLAMA_MODEL", os.getenv("MADEINOZ_KNOWLEDGE_EMBEDDING_MODEL", "bge-large-en-v1.5"))
 EMBEDDING_DIMENSIONS = int(os.getenv("MADEINOZ_KNOWLEDGE_EMBEDDING_DIMENSIONS", "1024"))
-CHUNK_SIZE_MIN = int(os.getenv("MADEINOZ_KNOWLEDGE_RAGFLOW_CHUNK_SIZE_MIN", "512"))
-CHUNK_SIZE_MAX = int(os.getenv("MADEINOZ_KNOWLEDGE_RAGFLOW_CHUNK_SIZE_MAX", "768"))
-CHUNK_OVERLAP = int(os.getenv("MADEINOZ_KNOWLEDGE_RAGFLOW_CHUNK_OVERLAP", "100"))
+CHUNK_SIZE_MIN = int(os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_CHUNK_SIZE_MIN", os.getenv("MADEINOZ_KNOWLEDGE_RAGFLOW_CHUNK_SIZE_MIN", "512")))
+CHUNK_SIZE_MAX = int(os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_CHUNK_SIZE_MAX", os.getenv("MADEINOZ_KNOWLEDGE_RAGFLOW_CHUNK_SIZE_MAX", "768")))
+CHUNK_OVERLAP = int(os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_CHUNK_OVERLAP", os.getenv("MADEINOZ_KNOWLEDGE_RAGFLOW_CHUNK_OVERLAP", "100")))
 
 # Create MCP server
 mcp = FastMCP("LKAP Qdrant Client")
@@ -65,6 +65,9 @@ class SearchResult:
 
 class QdrantClient:
     """Client for Qdrant vector database operations."""
+
+    # Singleton instance for connection pooling
+    _instance: Optional["QdrantClient"] = None
 
     def __init__(
         self,
@@ -99,6 +102,101 @@ class QdrantClient:
         except Exception as e:
             logger.error(f"Qdrant health check failed: {e}")
             return {"status": "error", "message": str(e)}
+
+    async def create_collection(self, collection_name: str, vector_size: int = 1024) -> bool:
+        """
+        Create a Qdrant collection with specified configuration.
+
+        Creates a collection optimized for semantic document search with:
+        - Cosine distance for similarity
+        - Payload indexes for: chunk_id, doc_id, domain, project, component, type
+
+        Args:
+            collection_name: Name for the new collection
+            vector_size: Embedding vector dimensions (default: 1024)
+
+        Returns:
+            True if collection created successfully, False otherwise
+        """
+        client = await self._get_client()
+
+        payload = {
+            "vectors": {
+                "size": vector_size,
+                "distance": "Cosine",
+            },
+            "optimizers_config": {
+                "indexing_threshold": 20000,
+            },
+            "replication_config": {
+                "factor": 1,
+            },
+            "payload_schema": {
+                # Index for chunk identifier
+                "chunk_id": {"type": "keyword", "index": True},
+                # Index for document identifier
+                "doc_id": {"type": "keyword", "index": True},
+                # Indexes for filtering by domain, project, component
+                "domain": {"type": "keyword", "index": True},
+                "project": {"type": "keyword", "index": True},
+                "component": {"type": "keyword", "index": True},
+                # Index for chunk type (e.g., "heading", "code", "text")
+                "type": {"type": "keyword", "index": True},
+            }
+        }
+
+        try:
+            response = await client.put(
+                f"{self.url}/collections/{collection_name}",
+                json=payload
+            )
+            response.raise_for_status()
+            logger.info(f"Created collection '{collection_name}' with vector_size={vector_size}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to create collection '{collection_name}': {e}")
+            return False
+
+    async def health_check(self) -> Dict[str, Any]:
+        """
+        Comprehensive health check for Qdrant and collection.
+
+        Returns:
+            Dict with:
+            - connected: bool - True if Qdrant server is reachable
+            - collection_exists: bool - True if configured collection exists
+            - vector_count: int - Number of vectors in collection (0 if doesn't exist)
+        """
+        result = {
+            "connected": False,
+            "collection_exists": False,
+            "vector_count": 0,
+        }
+
+        # Check Qdrant server connectivity
+        try:
+            client = await self._get_client()
+            response = await client.get(f"{self.url}/health")
+            response.raise_for_status()
+            result["connected"] = True
+        except Exception as e:
+            logger.error(f"Qdrant server unreachable: {e}")
+            return result
+
+        # Check collection exists and get vector count
+        try:
+            response = await client.get(f"{self.url}/collections/{self.collection_name}")
+            if response.status_code == 200:
+                info = response.json()
+                result["collection_exists"] = True
+                result["vector_count"] = info.get("result", {}).get("points_count", 0)
+                logger.info(f"Collection '{self.collection_name}' exists with {result['vector_count']} vectors")
+            else:
+                logger.warning(f"Collection '{self.collection_name}' not found (status: {response.status_code})")
+        except Exception as e:
+            logger.warning(f"Collection check failed: {e}")
+
+        return result
 
     async def ensure_collection(self) -> bool:
         """Ensure the collection exists, create if not."""
@@ -205,28 +303,28 @@ class QdrantClient:
 
     async def search(
         self,
-        query_embedding: List[float],
-        limit: int = 10,
-        score_threshold: float = 0.5,
+        query_vector: List[float],
+        top_k: int = 10,
         filters: Optional[Dict[str, Any]] = None,
+        score_threshold: float = 0.5,
     ) -> List[SearchResult]:
         """
-        Search for similar chunks.
+        Search for similar chunks by vector similarity.
 
         Args:
-            query_embedding: Query vector
-            limit: Maximum results to return
-            score_threshold: Minimum similarity score (0-1)
-            filters: Optional payload filters
+            query_vector: Query embedding vector
+            top_k: Maximum results to return (default: 10)
+            filters: Optional payload filters for filtering results
+            score_threshold: Minimum similarity score (0-1, default: 0.5)
 
         Returns:
-            List of SearchResult objects
+            List of SearchResult objects with chunk_id, document_id, text, score, metadata
         """
         client = await self._get_client()
 
         search_params = {
-            "vector": query_embedding,
-            "limit": limit,
+            "vector": query_vector,
+            "limit": top_k,
             "with_payload": True,
             "score_threshold": score_threshold,
         }
@@ -255,6 +353,96 @@ class QdrantClient:
 
         except Exception as e:
             logger.error(f"Search failed: {e}")
+            return []
+
+    async def semantic_search(
+        self,
+        query: str,
+        top_k: int = 10,
+        filters: Optional[Dict[str, Any]] = None,
+        confidence_threshold: float = 0.70,
+    ) -> List[Dict[str, Any]]:
+        """
+        High-level semantic search combining embedding + vector search.
+
+        T029-T033: Implements User Story 2 - Semantic Search.
+        - Generates embedding via Ollama
+        - Searches Qdrant with confidence threshold
+        - Filters by metadata if provided
+        - Returns empty list on error (not exception)
+
+        Args:
+            query: Natural language search query
+            top_k: Maximum results to return (default: 10)
+            filters: Optional metadata filters (domain, project, component, type)
+            confidence_threshold: Minimum similarity score (default: 0.70)
+
+        Returns:
+            List of result dicts with chunk_id, text, source, page, confidence, metadata
+        """
+        import time
+        from patches.ollama_embedder import get_ollama_embedder
+
+        start_time = time.time()
+
+        try:
+            # Generate query embedding
+            embedder = get_ollama_embedder()
+            query_vector = await embedder.embed(query)
+
+            # Build Qdrant filter if metadata filters provided
+            qdrant_filter = None
+            if filters:
+                must_conditions = []
+                for key, value in filters.items():
+                    if value and key in ["domain", "project", "component", "type", "doc_id"]:
+                        must_conditions.append({
+                            "key": key,
+                            "match": {"value": value}
+                        })
+                if must_conditions:
+                    qdrant_filter = {"must": must_conditions}
+
+            # Search with vector
+            raw_results = await self.search(
+                query_vector=query_vector,
+                top_k=top_k,
+                filters=qdrant_filter,
+                score_threshold=confidence_threshold,
+            )
+
+            # Transform to QdrantSearchResult format
+            results = []
+            for result in raw_results:
+                payload = result.metadata or {}
+                results.append({
+                    "chunk_id": result.chunk_id,
+                    "text": result.text,
+                    "source": payload.get("source", ""),
+                    "page": payload.get("page_section"),
+                    "confidence": result.score,
+                    "metadata": {
+                        "domain": payload.get("domain", ""),
+                        "project": payload.get("project", ""),
+                        "component": payload.get("component", ""),
+                        "type": payload.get("type", ""),
+                        "headings": payload.get("headings", []),
+                        "doc_id": result.document_id,
+                    }
+                })
+
+            elapsed_ms = (time.time() - start_time) * 1000
+            logger.info(f"Semantic search: '{query[:50]}...' -> {len(results)} results in {elapsed_ms:.1f}ms")
+
+            # T032: Track latency for <500ms target
+            if elapsed_ms > 500:
+                logger.warning(f"Search latency {elapsed_ms:.1f}ms exceeds 500ms target")
+
+            return results
+
+        except Exception as e:
+            # T033: Return empty list, not error
+            logger.error(f"Semantic search failed: {e}")
             return []
 
     async def get_chunk(self, chunk_id: str) -> Optional[Dict[str, Any]]:

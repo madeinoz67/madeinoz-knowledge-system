@@ -154,6 +154,8 @@ git push origin :refs/tags/v1.x.x
 - Python 3.11+ (Docker container for MCP server), Bun/TypeScript (CLI tools) + Docling (PDF ingestion), RAGFlow (vector DB + search), Ollama (local embeddings/LLM), Graphiti (knowledge graph), FastMCP (MCP protocol) (022-self-hosted-rag)
 - Neo4j (default) or FalkorDB (knowledge graph), RAGFlow vector DB (embeddings), Local filesystem (documents: inbox/, processed/) (022-self-hosted-rag)
 - Python 3.11+ (Docker container for MCP server), Bun/TypeScript (CLI tools) + Docling (PDF ingestion), RAGFlow (vector DB + search), Ollama (local embeddings/LLM, optional), Graphiti (knowledge graph), FastMCP (MCP protocol) (022-self-hosted-rag)
+- Python 3.11+ (MCP server patches), TypeScript/Bun (CLI tools) + Docling (PDF parsing), Qdrant Python client, Ollama Python SDK, FastMCP (023-qdrant-rag)
+- Qdrant vector database (Docker container, persistent volume) (023-qdrant-rag)
 
 ## Recent Changes
 - 022-self-hosted-rag: Local Knowledge Augmentation Platform (LKAP) - RAGFlow vector database, Ollama embeddings, document ingestion, semantic search

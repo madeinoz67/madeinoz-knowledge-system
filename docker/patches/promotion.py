@@ -338,7 +338,7 @@ async def promote_from_query(
     Raises:
         RuntimeError: If Graphiti is not initialized
     """
-    # Use RAGFlow to search for evidence (via rag.search tool)
+    # Use Qdrant to search for evidence (via rag.search tool)
     # For now, use Graphiti search
     graphiti = get_graphiti()
 
@@ -637,10 +637,10 @@ async def get_provenance(fact_id: str) -> Dict[str, Any]:
     Returns:
         Provenance graph with fact, evidence chain, and documents
     """
-    from .ragflow_client import get_ragflow_client
+    from .qdrant_client import get_qdrant_client
 
     graphiti = get_graphiti()
-    ragflow = get_ragflow_client()
+    qdrant = get_qdrant_client()
 
     # Search for the fact
     results = await graphiti.search(
@@ -657,40 +657,50 @@ async def get_provenance(fact_id: str) -> Dict[str, Any]:
     fact_result = results[0]
     fact_data = fact_result.get("source_data", {})
 
-    # Build provenance chain with actual RAGFlow data
+    # Build provenance chain with actual Qdrant data
     evidence_chain = []
     documents = {}
 
     for chunk_id in fact_data.get("evidence_ids", []):
         try:
-            # Query RAGFlow for actual chunk data
-            chunk_data = await ragflow.get_chunk(chunk_id)
+            # Query Qdrant for actual chunk data
+            chunk_data = await qdrant.get_chunk(chunk_id)
 
+            if chunk_data is None:
+                raise ValueError(f"Chunk not found: {chunk_id}")
+
+            payload = chunk_data.get("payload", {})
             # Extract document info from chunk metadata
-            source_doc = chunk_data.get("source_document", "Unknown")
-            doc_id = chunk_data.get("doc_id", source_doc)
+            source_doc = payload.get("source", "Unknown")
+            doc_id = payload.get("doc_id", source_doc)
 
             evidence_chain.append({
                 "evidence_id": chunk_id,
                 "chunk_id": chunk_id,
-                "chunk_text": chunk_data.get("text", ""),
-                "page_section": chunk_data.get("page_section", ""),
-                "confidence": chunk_data.get("confidence", 0.85),
+                "chunk_text": payload.get("text", ""),
+                "page_section": payload.get("page_section", ""),
+                "confidence": 0.85,  # Default confidence for provenance
                 "source_document": source_doc,
-                "metadata": chunk_data.get("metadata", {}),
+                "metadata": {
+                    "domain": payload.get("domain"),
+                    "project": payload.get("project"),
+                    "component": payload.get("component"),
+                    "type": payload.get("type"),
+                    "headings": payload.get("headings", []),
+                },
             })
 
             # Track unique documents
             if doc_id not in documents:
                 documents[doc_id] = {
                     "doc_id": doc_id,
-                    "filename": chunk_data.get("filename", source_doc),
+                    "filename": source_doc,
                     "source_document": source_doc,
                 }
 
         except Exception as e:
-            logger.warning(f"Failed to retrieve chunk {chunk_id} from RAGFlow: {e}")
-            # Fallback to placeholder if RAGFlow query fails
+            logger.warning(f"Failed to retrieve chunk {chunk_id} from Qdrant: {e}")
+            # Fallback to placeholder if Qdrant query fails
             evidence_chain.append({
                 "evidence_id": chunk_id,
                 "chunk_id": chunk_id,
@@ -718,7 +728,7 @@ async def _extract_entity_from_evidence(evidence_id: str) -> str:
 
     Uses simple heuristics to extract entity from chunk text.
     """
-    # In real implementation, would query RAGFlow for chunk content
+    # In real implementation, would query Qdrant for chunk content
     # For now, return a placeholder
     return f"entity.{evidence_id[:8]}"
 

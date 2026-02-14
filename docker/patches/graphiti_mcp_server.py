@@ -214,15 +214,16 @@ except ImportError:
 # ============================================================================
 
 # ============================================================================
-# Feature 022: LKAP RAGFlow Integration - Import RAG modules
+# Feature 023: Qdrant RAG Migration - Import Qdrant modules
 # ============================================================================
 try:
-    from patches.ragflow_client import RAGFlowClient, get_ragflow_client, SearchResult
-    _ragflow_available = True
-    logging.getLogger(__name__).info("Madeinoz Patch: Feature 022 - LKAP RAGFlow integration (active)")
+    from patches.qdrant_client import QdrantClient, get_qdrant_client
+    from patches.docling_ingester import DoclingIngester, IngestionConfig, get_docling_ingester
+    _qdrant_available = True
+    logging.getLogger(__name__).info("Madeinoz Patch: Feature 023 - Qdrant RAG migration (active)")
 except ImportError as e:
-    _ragflow_available = False
-    logging.getLogger(__name__).debug(f'RAGFlow client not available: {e}')
+    _qdrant_available = False
+    logging.getLogger(__name__).debug(f'Qdrant client not available: {e}')
 # ============================================================================
 
 # Load .env file from mcp_server directory
@@ -2666,7 +2667,7 @@ async def reload_ontology(
 
 
 # ============================================================================
-# Feature 022: LKAP RAGFlow MCP Tools - T048, T049
+# Feature 023: Qdrant RAG MCP Tools - T042, T043, T044, T047
 # ============================================================================
 
 @mcp.tool()
@@ -2677,9 +2678,9 @@ async def rag_search(
     component: str | None = None,
     top_k: int = 10,
 ) -> dict[str, Any] | ErrorResponse:
-    """Search RAGFlow vector database for semantically similar document chunks.
+    """Search Qdrant vector database for semantically similar document chunks.
 
-    Feature 022 T048: RAGFlow semantic search for document memory retrieval.
+    Feature 023 T042: Qdrant semantic search for document memory retrieval.
 
     Args:
         query: Natural language search query
@@ -2689,17 +2690,17 @@ async def rag_search(
         top_k: Maximum number of results (1-100, default: 10)
 
     Returns:
-        Dictionary with search results including chunk_id, text, source_document,
-        page_section, confidence, and metadata for each result
+        Dictionary with search results including chunk_id, text, source,
+        page, confidence, and metadata for each result
     """
-    if not _ragflow_available:
-        return ErrorResponse(error='RAGFlow client not available')
+    if not _qdrant_available:
+        return ErrorResponse(error='Qdrant client not available')
 
     try:
         if top_k <= 0 or top_k > 100:
             return ErrorResponse(error='top_k must be between 1 and 100')
 
-        client = get_ragflow_client()
+        client = get_qdrant_client()
 
         # Build filters from parameters
         filters = {}
@@ -2710,58 +2711,59 @@ async def rag_search(
         if component:
             filters['component'] = component
 
-        # Perform search
-        results = client.search(query=query, filters=filters or None, top_k=top_k)
+        # Perform semantic search
+        results = await client.semantic_search(
+            query=query,
+            top_k=top_k,
+            filters=filters if filters else None,
+        )
 
         return {
             'success': True,
             'query': query,
             'result_count': len(results),
-            'results': [
-                {
-                    'chunk_id': r.chunk_id,
-                    'text': r.text,
-                    'source_document': r.source_document,
-                    'page_section': r.page_section,
-                    'confidence': r.confidence,
-                    'metadata': r.metadata,
-                }
-                for r in results
-            ],
+            'results': results,
         }
 
     except Exception as e:
         error_msg = str(e)
-        logger.error(f'Error searching RAGFlow: {error_msg}')
-        return ErrorResponse(error=f'Error searching RAGFlow: {error_msg}')
+        logger.error(f'Error searching Qdrant: {error_msg}')
+        return ErrorResponse(error=f'Error searching Qdrant: {error_msg}')
 
 
 @mcp.tool()
 async def rag_get_chunk(
     chunk_id: str,
 ) -> dict[str, Any] | ErrorResponse:
-    """Get exact document chunk from RAGFlow by chunk ID.
+    """Get exact document chunk from Qdrant by chunk ID.
 
-    Feature 022 T049: Retrieve precise chunk for verification and evidence review.
+    Feature 023 T043: Retrieve precise chunk for verification and evidence review.
 
     Args:
         chunk_id: Unique chunk identifier (UUID)
 
     Returns:
-        Dictionary with chunk data including text, source_document, page_section,
-        embedding_vector (if available), and full metadata
+        Dictionary with chunk data including text, source, page,
+        and full metadata
     """
-    if not _ragflow_available:
-        return ErrorResponse(error='RAGFlow client not available')
+    if not _qdrant_available:
+        return ErrorResponse(error='Qdrant client not available')
 
     try:
         if not chunk_id:
             return ErrorResponse(error='chunk_id is required')
 
-        client = get_ragflow_client()
+        client = get_qdrant_client()
 
         # Get chunk
-        chunk = client.get_chunk(chunk_id)
+        chunk = await client.get_chunk(chunk_id)
+
+        if chunk is None:
+            return {
+                'success': False,
+                'error': f'Chunk not found: {chunk_id}',
+                'chunk': None,
+            }
 
         return {
             'success': True,
@@ -2770,8 +2772,119 @@ async def rag_get_chunk(
 
     except Exception as e:
         error_msg = str(e)
-        logger.error(f'Error getting chunk from RAGFlow: {error_msg}')
-        return ErrorResponse(error=f'Error getting chunk from RAGFlow: {error_msg}')
+        logger.error(f'Error getting chunk from Qdrant: {error_msg}')
+        return ErrorResponse(error=f'Error getting chunk from Qdrant: {error_msg}')
+
+
+@mcp.tool()
+async def rag_ingest(
+    file_path: str | None = None,
+    ingest_all: bool = False,
+) -> dict[str, Any] | ErrorResponse:
+    """Ingest documents into Qdrant vector database.
+
+    Feature 023 T044: Document ingestion with Docling parser + semantic chunking.
+
+    Args:
+        file_path: Path to single document to ingest (relative to knowledge/inbox/)
+        ingest_all: If True, ingest all documents in knowledge/inbox/
+
+    Returns:
+        Dictionary with ingestion results including doc_id, chunk_count, status
+    """
+    if not _qdrant_available:
+        return ErrorResponse(error='Qdrant client not available')
+
+    try:
+        from pathlib import Path as PathlibPath
+
+        client = get_qdrant_client()
+        ingester = get_docling_ingester(client)
+
+        if ingest_all:
+            # Ingest all documents in inbox
+            results = await ingester.ingest_directory()
+            return {
+                'success': True,
+                'documents_processed': len(results),
+                'results': [
+                    {
+                        'doc_id': r.doc_id,
+                        'filename': r.filename,
+                        'chunk_count': r.chunk_count,
+                        'status': r.status.value,
+                        'error_message': r.error_message,
+                        'processing_time_ms': r.processing_time_ms,
+                    }
+                    for r in results
+                ],
+            }
+        elif file_path:
+            # Ingest single document
+            full_path = PathlibPath(file_path)
+            if not full_path.is_absolute():
+                full_path = PathlibPath(ingester.config.inbox_path) / file_path
+
+            if not full_path.exists():
+                return ErrorResponse(error=f'File not found: {full_path}')
+
+            result = await ingester.ingest(full_path)
+            return {
+                'success': result.status.value == 'completed',
+                'doc_id': result.doc_id,
+                'filename': result.filename,
+                'chunk_count': result.chunk_count,
+                'status': result.status.value,
+                'error_message': result.error_message,
+                'processing_time_ms': result.processing_time_ms,
+            }
+        else:
+            return ErrorResponse(error='Either file_path or ingest_all must be specified')
+
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f'Error ingesting document: {error_msg}')
+        return ErrorResponse(error=f'Error ingesting document: {error_msg}')
+
+
+@mcp.tool()
+async def rag_health() -> dict[str, Any]:
+    """Check Qdrant vector database connectivity and status.
+
+    Feature 023 T047: Health check for Qdrant connectivity.
+
+    Returns:
+        Dictionary with connection status, collection info, and vector count
+    """
+    if not _qdrant_available:
+        return {
+            'success': False,
+            'available': False,
+            'error': 'Qdrant client not available',
+        }
+
+    try:
+        client = get_qdrant_client()
+        health = await client.health_check()
+
+        return {
+            'success': health['connected'],
+            'available': True,
+            'connected': health['connected'],
+            'collection_exists': health['collection_exists'],
+            'vector_count': health['vector_count'],
+            'collection_name': client.collection_name,
+        }
+
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f'Error checking Qdrant health: {error_msg}')
+        return {
+            'success': False,
+            'available': True,
+            'connected': False,
+            'error': error_msg,
+        }
 
 
 # ============================================================================
@@ -2799,7 +2912,7 @@ async def kg_promoteFromEvidence(
     Constraint, Erratum, Workaround, API, BuildFlag, ProtocolRule, Detection, Indicator
 
     Args:
-        evidence_id: Source evidence/chunk identifier from RAGFlow
+        evidence_id: Source evidence/chunk identifier from Qdrant
         fact_type: Type of fact to create (Constraint, Erratum, Workaround, API, BuildFlag, ProtocolRule, Detection, Indicator)
         value: Fact value (e.g., "120MHz", "Enable FIFO flush")
         entity: Optional entity name (e.g., "STM32H7.GPIO.max_speed")
@@ -2885,7 +2998,7 @@ async def kg_promoteFromQuery(
 
     Feature 022 T066: kg.promoteFromQuery MCP tool implementation.
 
-    Combines semantic search (via RAGFlow) with fact promotion in a single call.
+    Combines semantic search (via Qdrant) with fact promotion in a single call.
     Searches for evidence chunks matching the query, then promotes the top-k results
     to Knowledge Graph facts with the specified type.
 
