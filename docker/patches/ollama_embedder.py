@@ -6,11 +6,12 @@ Async embedding client using Ollama local models.
 Uses bge-large-en-v1.5 model with 1024 dimensions.
 
 Environment Variables:
-    MADEINOZ_KNOWLEDGE_QDRANT_OLLAMA_URL: Ollama API endpoint (default: http://ollama:11434)
-    MADEINOZ_KNOWLEDGE_QDRANT_OLLAMA_MODEL: Model name (default: bge-large-en-v1.5)
+    OLLAMA_BASE_URL: Ollama API endpoint (default: http://ollama:11434)
+    OLLAMA_EMBEDDING_MODEL: Model name (default: bge-large-en-v1.5)
 """
 
 import asyncio
+import json
 import logging
 import time
 from typing import List, Optional
@@ -26,8 +27,8 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 # Environment configuration
-OLLAMA_URL = os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_OLLAMA_URL", "http://ollama:11434")
-OLLAMA_MODEL = os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_OLLAMA_MODEL", "bge-large-en-v1.5")
+OLLAMA_URL = os.getenv("OLLAMA_BASE_URL", "http://ollama:11434")
+OLLAMA_MODEL = os.getenv("OLLAMA_EMBEDDING_MODEL", "bge-large-en-v1.5")
 EMBEDDING_DIMENSION = 1024  # bge-large-en-v1.5 produces 1024-dim vectors
 
 
@@ -102,19 +103,27 @@ class OllamaEmbedder:
             RuntimeError: If embedding generation fails
         """
         session = await self._get_session()
-        url = f"{self.base_url}/api/embeddings"
+        # Use /api/embed endpoint for batch embeddings (Ollama 0.1.26+)
+        url = f"{self.base_url}/api/embed"
 
         payload = {
             "model": self.model,
             "input": texts,
+            "truncate": True,  # Truncate long texts to model's context length
         }
 
         start_time = time.time()
 
         try:
             async with session.post(url, json=payload) as response:
-                response.raise_for_status()
-                data = await response.json()
+                # Capture response body for error debugging
+                response_text = await response.text()
+
+                if response.status != 200:
+                    logger.error(f"Ollama API error {response.status}: {response_text[:500]}")
+                    response.raise_for_status()
+
+                data = json.loads(response_text)
 
                 latency_ms = (time.time() - start_time) * 1000
                 logger.debug(

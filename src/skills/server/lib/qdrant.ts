@@ -12,20 +12,35 @@
  */
 
 import { $ } from "bun";
+import { createMCPClient, MCPClient } from "../../lib/mcp-client.js";
 import type { SearchFilters } from "./types.js";
 
 // Configuration from environment
-const QDRANT_URL =
-  process.env.MADEINOZ_KNOWLEDGE_QDRANT_URL || "http://localhost:6333";
-const QDRANT_COLLECTION =
-  process.env.MADEINOZ_KNOWLEDGE_QDRANT_COLLECTION || "lkap_documents";
+// Use CLI-specific URL for host-side operations (dev port mapping), fall back to standard URL
+// Note: These are functions to allow env vars to be set after module import (e.g., by rag-cli.ts)
+function getQdrantUrl(): string {
+  return (
+    process.env.MADEINOZ_KNOWLEDGE_QDRANT_URL_CLI ||
+    process.env.MADEINOZ_KNOWLEDGE_QDRANT_URL ||
+    "http://localhost:6334"  // Default to CLI dev port
+  );
+}
+function getQdrantCollection(): string {
+  return process.env.MADEINOZ_KNOWLEDGE_QDRANT_COLLECTION || "lkap_documents";
+}
+
+// Keep backward-compatible constants for existing code
+const QDRANT_URL = getQdrantUrl();
+const QDRANT_COLLECTION = getQdrantCollection();
+// For CLI operations, use remote Ollama server (env var or default)
 const OLLAMA_URL =
   process.env.MADEINOZ_KNOWLEDGE_QDRANT_OLLAMA_URL ||
   process.env.MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL ||
-  "http://localhost:11434";
+  "http://10.0.0.150:11434";  // Default to remote Ollama server
 const EMBEDDING_MODEL =
   process.env.MADEINOZ_KNOWLEDGE_QDRANT_OLLAMA_MODEL ||
-  "bge-large-en-v1.5";
+  process.env.MADEINOZ_KNOWLEDGE_OLLAMA_EMBEDDING_MODEL ||
+  "bge-m3";  // Use bge-m3 as default
 const CONFIDENCE_THRESHOLD = parseFloat(
   process.env.MADEINOZ_KNOWLEDGE_QDRANT_CONFIDENCE_THRESHOLD || "0.70"
 );
@@ -99,12 +114,14 @@ export interface IngestionResult {
  * Generate embedding via Ollama
  */
 async function generateEmbedding(text: string): Promise<number[]> {
-  const response = await fetch(`${OLLAMA_URL}/api/embeddings`, {
+  // Use /api/embed endpoint (Ollama 0.1.26+) with batch format
+  const response = await fetch(`${OLLAMA_URL}/api/embed`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       model: EMBEDDING_MODEL,
-      prompt: text,
+      input: [text],
+      truncate: true,
     }),
     signal: AbortSignal.timeout(30000),
   });
@@ -114,7 +131,8 @@ async function generateEmbedding(text: string): Promise<number[]> {
   }
 
   const data = await response.json();
-  return data.embedding;
+  // /api/embed returns {embeddings: [[...]]}
+  return data.embeddings[0];
 }
 
 /**
@@ -158,7 +176,7 @@ function buildFilter(filters: SearchFilters): object | undefined {
 }
 
 /**
- * Semantic search in Qdrant
+ * Semantic search in Qdrant via MCP server
  *
  * @param query - Natural language search query
  * @param filters - Optional metadata filters
@@ -170,90 +188,103 @@ export async function search(
   filters: SearchFilters = {},
   topK: number = 10
 ): Promise<QdrantSearchResult[]> {
-  // Generate query embedding
-  const queryVector = await generateEmbedding(query);
+  try {
+    // Use MCPClient for proper session handling (runs inside container with Qdrant access)
+    const client = createMCPClient();
+    const response = await client.ragSearch({
+      query,
+      top_k: topK,
+      domain: filters.domain,
+      document_type: filters.type,
+      component: filters.component,
+      project: filters.project,
+      version: filters.version,
+    });
 
-  // Build search request
-  const searchRequest: any = {
-    vector: queryVector,
-    limit: topK,
-    with_payload: true,
-    score_threshold: CONFIDENCE_THRESHOLD,
-  };
-
-  const qdrantFilter = buildFilter(filters);
-  if (qdrantFilter) {
-    searchRequest.filter = qdrantFilter;
-  }
-
-  // Search Qdrant
-  const response = await fetch(
-    `${QDRANT_URL}/collections/${QDRANT_COLLECTION}/points/search`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(searchRequest),
-      signal: AbortSignal.timeout(30000),
+    if (!response.success) {
+      throw new Error(response.error || "Search failed");
     }
-  );
 
-  if (!response.ok) {
-    if (response.status === 404) {
-      return []; // Collection doesn't exist yet
+    const result = response.data as any;
+
+    // Check for ErrorResponse format (has 'error' field)
+    if (result.error) {
+      throw new Error(result.error);
     }
-    throw new Error(`Qdrant search failed: ${response.status}`);
+
+    // Transform MCP response to QdrantSearchResult format
+    return (result.results || []).map((r: any) => ({
+      chunk_id: r.chunk_id,
+      text: r.text || "",
+      source: r.source || "",
+      page: r.page?.toString(),
+      confidence: r.confidence,
+      metadata: r.metadata || {},
+    }));
+  } catch (error) {
+    throw new Error(`Search error: ${(error as Error).message}`);
   }
-
-  const data = await response.json();
-
-  // Transform results
-  return (data.result || []).map((point: any) => ({
-    chunk_id: point.id,
-    text: point.payload?.text || "",
-    source: point.payload?.source || "",
-    page: point.payload?.page_section,
-    confidence: point.score,
-    metadata: {
-      domain: point.payload?.domain,
-      project: point.payload?.project,
-      component: point.payload?.component,
-      type: point.payload?.type,
-      headings: point.payload?.headings,
-      doc_id: point.payload?.doc_id,
-    },
-  }));
 }
 
 /**
- * Get a specific chunk by ID
+ * Get a specific chunk by ID via MCP server
  *
  * @param chunkId - Unique chunk identifier
  * @returns Chunk data or null if not found
  */
 export async function getChunk(chunkId: string): Promise<QdrantChunk | null> {
-  const response = await fetch(
-    `${QDRANT_URL}/collections/${QDRANT_COLLECTION}/points/${chunkId}`,
-    {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-      signal: AbortSignal.timeout(10000),
+  try {
+    // Use MCPClient for proper session handling (runs inside container with Qdrant access)
+    const client = createMCPClient();
+    const response = await client.ragGetChunk({ chunk_id: chunkId });
+
+    if (!response.success) {
+      if (response.error?.includes("not found")) {
+        return null;
+      }
+      throw new Error(response.error || "Get chunk failed");
     }
-  );
 
-  if (response.status === 404) {
-    return null;
+    const result = response.data as any;
+
+    // Check for ErrorResponse format (has 'error' field)
+    if (result.error) {
+      if (result.error.includes("not found")) {
+        return null;
+      }
+      throw new Error(result.error);
+    }
+
+    // rag_get_chunk returns {success: true, chunk: {...}}
+    const chunk = result.chunk;
+    if (!chunk) {
+      return null;
+    }
+
+    // Transform MCP response to QdrantChunk format
+    return {
+      id: chunk.id || chunk.chunk_id,
+      payload: {
+        chunk_id: chunk.id || chunk.chunk_id,
+        doc_id: chunk.payload?.doc_id || chunk.document_id || "",
+        text: chunk.payload?.text || chunk.text || "",
+        source: chunk.payload?.source || chunk.source,
+        page_section: chunk.payload?.page_section || chunk.page?.toString(),
+        token_count: chunk.payload?.token_count || chunk.token_count,
+        headings: chunk.payload?.headings || chunk.headings,
+        domain: chunk.payload?.domain,
+        project: chunk.payload?.project,
+        component: chunk.payload?.component,
+        type: chunk.payload?.type,
+      },
+    };
+  } catch (error) {
+    throw new Error(`Get chunk error: ${(error as Error).message}`);
   }
-
-  if (!response.ok) {
-    throw new Error(`Qdrant get chunk failed: ${response.status}`);
-  }
-
-  const data = await response.json();
-  return data.result;
 }
 
 /**
- * Check Qdrant health
+ * Check Qdrant health via MCP server
  *
  * @returns Health status
  */
@@ -265,30 +296,26 @@ export async function healthCheck(): Promise<QdrantHealth> {
     collection_name: QDRANT_COLLECTION,
   };
 
-  // Check server connectivity (Qdrant uses /readyz for health checks)
   try {
-    const healthResponse = await fetch(`${QDRANT_URL}/readyz`, {
-      signal: AbortSignal.timeout(5000),
-    });
-    result.connected = healthResponse.ok;
-  } catch {
-    return result;
-  }
+    // Use MCPClient for proper session handling (runs inside container with Qdrant access)
+    const client = createMCPClient();
+    const response = await client.ragHealth();
 
-  // Check collection exists
-  try {
-    const collectionResponse = await fetch(
-      `${QDRANT_URL}/collections/${QDRANT_COLLECTION}`,
-      { signal: AbortSignal.timeout(5000) }
-    );
+    if (response.success) {
+      const data = response.data as any;
 
-    if (collectionResponse.ok) {
-      const data = await collectionResponse.json();
-      result.collection_exists = true;
-      result.vector_count = data.result?.points_count || 0;
+      // Check for ErrorResponse format (has 'error' field)
+      if (data.error) {
+        return result;
+      }
+
+      // rag_health returns: connected, collection_exists, vector_count, collection_name
+      result.connected = data.connected === true;
+      result.collection_exists = data.collection_exists === true;
+      result.vector_count = data.vector_count || 0;
     }
   } catch {
-    // Collection doesn't exist
+    // Connection failed
   }
 
   return result;
@@ -306,8 +333,12 @@ export async function healthCheck(): Promise<QdrantHealth> {
 export async function listDocuments(
   limit: number = 100
 ): Promise<{ doc_id: string; source: string; count: number }[]> {
+  // Use dynamic URL getter to pick up env vars set after module import
+  const url = getQdrantUrl();
+  const collection = getQdrantCollection();
+
   const response = await fetch(
-    `${QDRANT_URL}/collections/${QDRANT_COLLECTION}/points/scroll`,
+    `${url}/collections/${collection}/points/scroll`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -356,12 +387,12 @@ export async function listDocuments(
 }
 
 /**
- * Ingest documents via Python DoclingIngester
+ * Ingest documents via MCP server rag_ingest tool
  *
- * Note: Document ingestion requires Python libraries (Docling, tiktoken) so
- * this function calls the Python ingestion module via subprocess.
+ * Calls the MCP server's rag_ingest endpoint which runs inside the container
+ * where Python dependencies (Docling, tiktoken) are installed.
  *
- * @param filePath - Path to file or directory to ingest (defaults to knowledge/inbox/)
+ * @param filePath - Path to file (relative to knowledge/inbox/ or absolute)
  * @param ingestAll - If true, ingest all documents in knowledge/inbox/
  * @returns Ingestion result with doc_id, chunk_count, status
  */
@@ -369,73 +400,49 @@ export async function ingest(
   filePath?: string,
   ingestAll: boolean = false
 ): Promise<IngestionResult | IngestionResult[]> {
-  // Build Python command
-  const pythonScript = `
-import asyncio
-import json
-import sys
-from pathlib import Path
-
-# Add docker/patches to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "docker" / "patches"))
-
-from qdrant_client import QdrantClient
-from docling_ingester import DoclingIngester
-
-async def main():
-    client = QdrantClient()
-    ingester = DoclingIngester(client)
-
-    ${ingestAll ? `
-    results = await ingester.ingest_directory()
-    print(json.dumps([{
-        "success": r.status.value == "completed",
-        "doc_id": r.doc_id,
-        "filename": r.filename,
-        "chunk_count": r.chunk_count,
-        "status": r.status.value,
-        "error_message": r.error_message,
-        "processing_time_ms": r.processing_time_ms,
-    } for r in results]))
-    ` : `
-    file_path = Path("${filePath || ''}")
-    if not file_path.is_absolute():
-        file_path = Path(ingester.config.inbox_path) / file_path
-
-    result = await ingester.ingest(file_path)
-    print(json.dumps({
-        "success": result.status.value == "completed",
-        "doc_id": result.doc_id,
-        "filename": result.filename,
-        "chunk_count": result.chunk_count,
-        "status": result.status.value,
-        "error_message": result.error_message,
-        "processing_time_ms": result.processing_time_ms,
-    }))
-    `}
-
-asyncio.run(main())
-`;
-
   try {
-    // Find project root (4 levels up from this file)
-    const projectRoot = new URL("../../../../..", import.meta.url).pathname;
+    // Use MCPClient for proper session handling
+    const client = createMCPClient();
+    const response = await client.ragIngest({
+      file_path: filePath || undefined,
+      ingest_all: ingestAll,
+    });
 
-    const result = await $`python3 -c ${pythonScript}`
-      .cwd(projectRoot)
-      .env({
-        ...process.env,
-        MADEINOZ_KNOWLEDGE_QDRANT_URL: QDRANT_URL,
-        MADEINOZ_KNOWLEDGE_QDRANT_COLLECTION: QDRANT_COLLECTION,
-      })
-      .quiet();
-
-    if (result.exitCode !== 0) {
-      throw new Error(`Ingestion failed: ${result.stderr.toString()}`);
+    if (!response.success) {
+      throw new Error(response.error || "Ingestion failed");
     }
 
-    const output = result.stdout.toString().trim();
-    return JSON.parse(output);
+    const result = response.data as any;
+
+    // Check for ErrorResponse format (has 'error' field)
+    if (result.error) {
+      throw new Error(result.error);
+    }
+
+    // Convert MCP response to IngestionResult format
+    if (result.results && Array.isArray(result.results)) {
+      // Batch ingestion
+      return result.results.map((r: any) => ({
+        success: r.status === "completed",
+        doc_id: r.doc_id,
+        filename: r.filename,
+        chunk_count: r.chunk_count,
+        status: r.status,
+        error_message: r.error_message,
+        processing_time_ms: r.processing_time_ms,
+      }));
+    } else {
+      // Single file ingestion
+      return {
+        success: result.status === "completed" || result.success || false,
+        doc_id: result.doc_id,
+        filename: result.filename,
+        chunk_count: result.chunk_count,
+        status: result.status,
+        error_message: result.error_message,
+        processing_time_ms: result.processing_time_ms,
+      };
+    }
   } catch (error) {
     throw new Error(`Ingestion error: ${(error as Error).message}`);
   }
@@ -475,7 +482,7 @@ export interface QdrantImageResult {
 }
 
 /**
- * Search for images by description similarity
+ * Search for images by description similarity via MCP server
  *
  * Feature 024: Image search with Vision LLM-enriched descriptions.
  *
@@ -489,69 +496,46 @@ export async function searchImages(
   classification?: ImageClassification,
   topK: number = 10
 ): Promise<QdrantImageResult[]> {
-  // Generate query embedding
-  const queryVector = await generateEmbedding(query);
-
-  // Build filter for images only
-  const conditions: object[] = [
-    {
-      key: "content_type",
-      match: { value: "image" },
-    },
-  ];
-
-  if (classification) {
-    conditions.push({
-      key: "classification",
-      match: { value: classification },
+  try {
+    // Use MCPClient for proper session handling (runs inside container with Qdrant access)
+    const client = createMCPClient();
+    const response = await client.ragSearchImages({
+      query,
+      top_k: topK,
+      image_type: classification,
     });
-  }
 
-  const searchRequest: any = {
-    vector: queryVector,
-    limit: topK,
-    with_payload: true,
-    score_threshold: CONFIDENCE_THRESHOLD,
-    filter: { must: conditions },
-  };
-
-  // Search Qdrant
-  const response = await fetch(
-    `${QDRANT_URL}/collections/${QDRANT_COLLECTION}/points/search`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(searchRequest),
-      signal: AbortSignal.timeout(30000),
+    if (!response.success) {
+      throw new Error(response.error || "Image search failed");
     }
-  );
 
-  if (!response.ok) {
-    if (response.status === 404) {
-      return []; // Collection doesn't exist yet
+    const result = response.data as any;
+
+    // Check for ErrorResponse format (has 'error' field)
+    if (result.error) {
+      throw new Error(result.error);
     }
-    throw new Error(`Qdrant image search failed: ${response.status}`);
+
+    // Transform MCP response to QdrantImageResult format
+    return (result.results || []).map((r: any) => ({
+      image_id: r.image_id || "",
+      doc_id: r.doc_id || "",
+      description: r.description || "",
+      classification: r.image_type || "unknown",
+      source_page: r.page,
+      source: r.source || "",
+      confidence: r.confidence,
+      image_data: r.base64_data,
+      image_format: r.image_format || "PNG",
+      headings: r.headings || [],
+    }));
+  } catch (error) {
+    throw new Error(`Image search error: ${(error as Error).message}`);
   }
-
-  const data = await response.json();
-
-  // Transform results
-  return (data.result || []).map((point: any) => ({
-    image_id: point.payload?.image_id || "",
-    doc_id: point.payload?.doc_id || "",
-    description: point.payload?.description || "",
-    classification: point.payload?.classification || "unknown",
-    source_page: point.payload?.source_page,
-    source: point.payload?.source || "",
-    confidence: point.score,
-    image_data: point.payload?.image_data,
-    image_format: point.payload?.image_format || "PNG",
-    headings: point.payload?.headings || [],
-  }));
 }
 
 /**
- * Get a specific image by ID
+ * Get a specific image by ID via MCP server
  *
  * @param imageId - Unique image identifier
  * @returns Image data or null if not found
@@ -559,60 +543,49 @@ export async function searchImages(
 export async function getImage(
   imageId: string
 ): Promise<QdrantImageResult | null> {
-  // Search for point with matching image_id
-  const response = await fetch(
-    `${QDRANT_URL}/collections/${QDRANT_COLLECTION}/points/scroll`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        limit: 1,
-        with_payload: true,
-        with_vector: false,
-        filter: {
-          must: [
-            { key: "content_type", match: { value: "image" } },
-            { key: "image_id", match: { value: imageId } },
-          ],
-        },
-      }),
-      signal: AbortSignal.timeout(10000),
+  try {
+    // Use MCPClient for proper session handling (runs inside container with Qdrant access)
+    const client = createMCPClient();
+    const response = await client.ragGetImage({ image_id: imageId });
+
+    if (!response.success) {
+      if (response.error?.includes("not found")) {
+        return null;
+      }
+      throw new Error(response.error || "Get image failed");
     }
-  );
 
-  if (!response.ok) {
-    if (response.status === 404) {
-      return null;
+    const result = response.data as any;
+
+    // Check for ErrorResponse format (has 'error' field)
+    if (result.error) {
+      if (result.error.includes("not found")) {
+        return null;
+      }
+      throw new Error(result.error);
     }
-    throw new Error(`Qdrant get image failed: ${response.status}`);
+
+    return {
+      image_id: result.image_id || "",
+      doc_id: result.doc_id || "",
+      description: result.description || "",
+      classification: result.image_type || "unknown",
+      source_page: result.page,
+      source: result.source || "",
+      confidence: 1.0,
+      image_data: result.base64_data,
+      image_format: result.image_format || "PNG",
+      headings: result.headings || [],
+    };
+  } catch (error) {
+    throw new Error(`Get image error: ${(error as Error).message}`);
   }
-
-  const data = await response.json();
-  const points = data.result?.points || [];
-
-  if (points.length === 0) {
-    return null;
-  }
-
-  const point = points[0];
-  return {
-    image_id: point.payload?.image_id || "",
-    doc_id: point.payload?.doc_id || "",
-    description: point.payload?.description || "",
-    classification: point.payload?.classification || "unknown",
-    source_page: point.payload?.source_page,
-    source: point.payload?.source || "",
-    confidence: 1.0,
-    image_data: point.payload?.image_data,
-    image_format: point.payload?.image_format || "PNG",
-    headings: point.payload?.headings || [],
-  };
 }
 
 /**
- * List images with optional filters
+ * List images with optional filters via MCP server
  *
- * @param docId - Optional filter by document ID
+ * @param docId - Optional filter by document ID (not supported by MCP, ignored)
  * @param classification - Optional filter by image type
  * @param limit - Maximum results (default: 50)
  * @returns Array of image results (without image_data for performance)
@@ -622,57 +595,43 @@ export async function listImages(
   classification?: ImageClassification,
   limit: number = 50
 ): Promise<Omit<QdrantImageResult, "image_data">[]> {
-  const conditions: object[] = [
-    { key: "content_type", match: { value: "image" } },
-  ];
+  try {
+    // Use MCPClient for proper session handling (runs inside container with Qdrant access)
+    const client = createMCPClient();
+    const response = await client.ragListImages({
+      image_type: classification,
+      limit,
+    });
 
-  if (docId) {
-    conditions.push({ key: "doc_id", match: { value: docId } });
-  }
-  if (classification) {
-    conditions.push({ key: "classification", match: { value: classification } });
-  }
-
-  const response = await fetch(
-    `${QDRANT_URL}/collections/${QDRANT_COLLECTION}/points/scroll`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        limit,
-        with_payload: [
-          "image_id",
-          "doc_id",
-          "description",
-          "classification",
-          "source_page",
-          "source",
-          "image_format",
-        ],
-        with_vector: false,
-        filter: { must: conditions },
-      }),
-      signal: AbortSignal.timeout(30000),
+    if (!response.success) {
+      throw new Error(response.error || "List images failed");
     }
-  );
 
-  if (!response.ok) {
-    if (response.status === 404) {
-      return [];
+    const result = response.data as any;
+
+    // Check for ErrorResponse format (has 'error' field)
+    if (result.error) {
+      throw new Error(result.error);
     }
-    throw new Error(`Qdrant list images failed: ${response.status}`);
+
+    // Transform MCP response, filter by docId if provided
+    let images = (result.images || []).map((r: any) => ({
+      image_id: r.image_id || "",
+      doc_id: r.doc_id || "",
+      description: (r.description || "").substring(0, 200), // Truncate for listing
+      classification: r.image_type || "unknown",
+      source_page: r.page,
+      source: r.source || "",
+      image_format: r.image_format || "PNG",
+    }));
+
+    // Filter by docId if provided (MCP doesn't support this filter)
+    if (docId) {
+      images = images.filter((img: any) => img.doc_id === docId);
+    }
+
+    return images;
+  } catch (error) {
+    throw new Error(`List images error: ${(error as Error).message}`);
   }
-
-  const data = await response.json();
-  const points = data.result?.points || [];
-
-  return points.map((point: any) => ({
-    image_id: point.payload?.image_id || "",
-    doc_id: point.payload?.doc_id || "",
-    description: (point.payload?.description || "").substring(0, 200), // Truncate for listing
-    classification: point.payload?.classification || "unknown",
-    source_page: point.payload?.source_page,
-    source: point.payload?.source || "",
-    image_format: point.payload?.image_format || "PNG",
-  }));
 }

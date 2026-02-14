@@ -31,25 +31,21 @@ from dataclasses import dataclass
 from datetime import datetime
 
 import httpx
-from mcp.server import FastMCP
-from mcp.server.types import Tool
 
 # Configure logging
 logging.basicConfig(level=os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_LOG_LEVEL", os.getenv("RAGFLOW_LOG_LEVEL", "INFO")))
 logger = logging.getLogger(__name__)
 
 # Environment configuration
-QDRANT_URL = os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_URL", "http://localhost:6333")
-QDRANT_COLLECTION = os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_COLLECTION", "lkap_documents")
-OLLAMA_BASE_URL = os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_OLLAMA_URL", os.getenv("MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL", "http://localhost:11434"))
-EMBEDDING_MODEL = os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_OLLAMA_MODEL", os.getenv("MADEINOZ_KNOWLEDGE_EMBEDDING_MODEL", "bge-large-en-v1.5"))
-EMBEDDING_DIMENSIONS = int(os.getenv("MADEINOZ_KNOWLEDGE_EMBEDDING_DIMENSIONS", "1024"))
-CHUNK_SIZE_MIN = int(os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_CHUNK_SIZE_MIN", os.getenv("MADEINOZ_KNOWLEDGE_RAGFLOW_CHUNK_SIZE_MIN", "512")))
-CHUNK_SIZE_MAX = int(os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_CHUNK_SIZE_MAX", os.getenv("MADEINOZ_KNOWLEDGE_RAGFLOW_CHUNK_SIZE_MAX", "768")))
-CHUNK_OVERLAP = int(os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_CHUNK_OVERLAP", os.getenv("MADEINOZ_KNOWLEDGE_RAGFLOW_CHUNK_OVERLAP", "100")))
-
-# Create MCP server
-mcp = FastMCP("LKAP Qdrant Client")
+# Support both MADEINOZ_KNOWLEDGE_* prefix and shorter QDRANT_* prefix (for container compatibility)
+QDRANT_URL = os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_URL", os.getenv("QDRANT_URL", "http://localhost:6333"))
+QDRANT_COLLECTION = os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_COLLECTION", os.getenv("QDRANT_COLLECTION", "lkap_documents"))
+OLLAMA_BASE_URL = os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_OLLAMA_URL", os.getenv("MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL", os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")))
+EMBEDDING_MODEL = os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_OLLAMA_MODEL", os.getenv("MADEINOZ_KNOWLEDGE_EMBEDDING_MODEL", os.getenv("EMBEDDING_MODEL", "bge-large-en-v1.5")))
+EMBEDDING_DIMENSIONS = int(os.getenv("MADEINOZ_KNOWLEDGE_EMBEDDING_DIMENSIONS", os.getenv("QDRANT_EMBEDDING_DIMENSION", "1024")))
+CHUNK_SIZE_MIN = int(os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_CHUNK_SIZE_MIN", os.getenv("QDRANT_CHUNK_SIZE_MIN", "512")))
+CHUNK_SIZE_MAX = int(os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_CHUNK_SIZE_MAX", os.getenv("QDRANT_CHUNK_SIZE_MAX", "768")))
+CHUNK_OVERLAP = int(os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_CHUNK_OVERLAP", os.getenv("QDRANT_CHUNK_OVERLAP", "100")))
 
 
 @dataclass
@@ -96,7 +92,7 @@ class QdrantClient:
         """Check Qdrant health status."""
         client = await self._get_client()
         try:
-            response = await client.get(f"{self.url}/health")
+            response = await client.get(f"{self.url}/readyz")
             response.raise_for_status()
             return response.json()
         except Exception as e:
@@ -174,7 +170,7 @@ class QdrantClient:
         # Check Qdrant server connectivity
         try:
             client = await self._get_client()
-            response = await client.get(f"{self.url}/health")
+            response = await client.get(f"{self.url}/readyz")
             response.raise_for_status()
             result["connected"] = True
         except Exception as e:
@@ -257,7 +253,10 @@ class QdrantClient:
         # Prepare points for Qdrant
         points = []
         for idx, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
-            point_id = f"{document_id}_chunk_{idx}"
+            # Generate a valid UUID5 from document_id + chunk_index for deterministic IDs
+            # Qdrant requires IDs to be either unsigned integers or valid UUIDs
+            import uuid
+            point_id = str(uuid.uuid5(uuid.NAMESPACE_URL, f"{document_id}/chunk/{idx}"))
             payload = {
                 "document_id": document_id,
                 "chunk_index": idx,
@@ -280,8 +279,11 @@ class QdrantClient:
             try:
                 response = await client.put(
                     f"{self.url}/collections/{self.collection_name}/points",
-                    {"points": batch}
+                    json={"points": batch}
                 )
+                if response.status_code != 200:
+                    error_text = response.text
+                    logger.error(f"Qdrant insert failed ({response.status_code}): {error_text[:500]}")
                 response.raise_for_status()
                 result = response.json()
                 results.append(result)
@@ -331,7 +333,7 @@ class QdrantClient:
         try:
             response = await client.post(
                 f"{self.url}/collections/{self.collection_name}/points/search",
-                {"params": search_params}
+                json=search_params
             )
             response.raise_for_status()
             data = response.json()
@@ -356,7 +358,7 @@ class QdrantClient:
         query: str,
         top_k: int = 10,
         filters: Optional[Dict[str, Any]] = None,
-        confidence_threshold: float = 0.70,
+        confidence_threshold: float = 0.5,  # Lowered from 0.70 to allow more results
     ) -> List[Dict[str, Any]]:
         """
         High-level semantic search combining embedding + vector search.
@@ -406,6 +408,10 @@ class QdrantClient:
                 filters=qdrant_filter,
                 score_threshold=confidence_threshold,
             )
+
+            # Debug: log scores
+            if raw_results:
+                logger.info(f"Search returned {len(raw_results)} results, top scores: {[f'{r.score:.3f}' for r in raw_results[:3]]}")
 
             # Transform to QdrantSearchResult format
             results = []
@@ -535,7 +541,7 @@ class QdrantClient:
             # Search for point with matching image_id in payload
             response = await client.post(
                 f"{self.url}/collections/{self.collection_name}/points/scroll",
-                {
+                json={
                     "limit": 1,
                     "with_payload": True,
                     "with_vector": False,
@@ -612,7 +618,7 @@ class QdrantClient:
 
             response = await client.post(
                 f"{self.url}/collections/{self.collection_name}/points/scroll",
-                {
+                json={
                     "limit": limit,
                     "with_payload": True,
                     "with_vector": False,
@@ -667,7 +673,7 @@ class QdrantClient:
         try:
             response = await client.post(
                 f"{self.url}/collections/{self.collection_name}/points/delete",
-                {
+                json={
                     "filter": {
                         "must": [
                             {"key": "document_id", "match": {"value": document_id}}
@@ -794,10 +800,10 @@ def get_ollama_embedder() -> OllamaEmbedder:
 
 
 # ============================================================================
-# MCP Tools
+# Library Functions
+# These can be called directly or wrapped in MCP tools in graphiti_mcp_server.py
 # ============================================================================
 
-@mcp.tool()
 async def qdrant_health() -> Dict[str, Any]:
     """Check Qdrant health status.
 
@@ -808,7 +814,6 @@ async def qdrant_health() -> Dict[str, Any]:
     return await client.health()
 
 
-@mcp.tool()
 async def qdrant_search(
     query: str,
     limit: int = 10,
@@ -857,7 +862,6 @@ async def qdrant_search(
     }
 
 
-@mcp.tool()
 async def qdrant_ingest(
     document_id: str,
     chunks: List[str],
@@ -900,7 +904,6 @@ async def qdrant_ingest(
     return result
 
 
-@mcp.tool()
 async def qdrant_get_chunk(chunk_id: str) -> Dict[str, Any]:
     """Retrieve a specific chunk by ID.
 
@@ -923,7 +926,6 @@ async def qdrant_get_chunk(chunk_id: str) -> Dict[str, Any]:
     }
 
 
-@mcp.tool()
 async def qdrant_delete_document(document_id: str) -> Dict[str, Any]:
     """Delete all chunks for a document.
 
@@ -937,7 +939,6 @@ async def qdrant_delete_document(document_id: str) -> Dict[str, Any]:
     return await client.delete_document(document_id)
 
 
-@mcp.tool()
 async def qdrant_collection_info() -> Dict[str, Any]:
     """Get Qdrant collection information.
 
@@ -948,7 +949,6 @@ async def qdrant_collection_info() -> Dict[str, Any]:
     return await client.collection_info()
 
 
-@mcp.tool()
 async def qdrant_list_documents() -> Dict[str, Any]:
     """List all unique documents in the collection.
 
@@ -965,7 +965,6 @@ async def qdrant_list_documents() -> Dict[str, Any]:
     }
 
 
-@mcp.tool()
 async def ollama_health() -> Dict[str, Any]:
     """Check Ollama embedding service health.
 
@@ -974,9 +973,3 @@ async def ollama_health() -> Dict[str, Any]:
     """
     embedder = get_ollama_embedder()
     return await embedder.health()
-
-
-# Main entrypoint
-if __name__ == "__main__":
-    # Run MCP server
-    mcp.run()

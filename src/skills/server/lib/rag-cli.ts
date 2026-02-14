@@ -22,6 +22,27 @@
  *   bun run rag-cli.ts images list
  */
 
+// Load environment variables from .env.dev using Bun's native .env support
+// Bun automatically loads .env, but we need .env.dev for development
+import { existsSync } from "fs";
+import { resolve } from "path";
+
+const envDevPath = resolve(import.meta.dir, "..", "..", "..", "..", ".env.dev");
+if (existsSync(envDevPath)) {
+  // Read and parse .env.dev manually
+  const envContent = await Bun.file(envDevPath).text();
+  for (const line of envContent.split("\n")) {
+    const trimmed = line.trim();
+    if (trimmed && !trimmed.startsWith("#")) {
+      const [key, ...valueParts] = trimmed.split("=");
+      if (key && valueParts.length > 0) {
+        const value = valueParts.join("=").trim();
+        process.env[key] = value;
+      }
+    }
+  }
+}
+
 import { search, getChunk, listDocuments, healthCheck, ingest, searchImages, getImage, listImages } from "./qdrant.js";
 import type { SearchFilters } from "./types.js";
 import type { ImageClassification } from "./qdrant.js";

@@ -54,10 +54,11 @@ class IngestionConfig:
     min_tokens: int = 512
     max_tokens: int = 768
     overlap_percent: float = 0.15
-    batch_size: int = 32
+    batch_size: int = 8  # Reduced for Ollama stability
     confidence_threshold: float = 0.70
     extract_images: bool = True  # Feature 024: Enable image extraction
     enrich_images: bool = True   # Feature 024: Enable Vision LLM enrichment
+    enable_ocr: bool = False     # OCR disabled by default for faster text-based PDF processing
 
 
 class DoclingIngester:
@@ -92,19 +93,20 @@ class DoclingIngester:
         self.qdrant_client = qdrant_client
         self.config = config or IngestionConfig()
 
+        # Configure Docling pipeline options
+        pipeline_options = PdfPipelineOptions()
+        pipeline_options.do_ocr = self.config.enable_ocr  # Disable OCR by default for faster processing
+
         # Feature 024: Configure Docling for image extraction
         if self.config.extract_images:
-            pipeline_options = PdfPipelineOptions()
             pipeline_options.generate_page_images = False
             pipeline_options.generate_picture_images = True  # Extract figures/images
 
-            self.docling_converter = DocumentConverter(
-                format_options={
-                    InputFormat.PDF: PdfFormatOption(pipeline_options=pipeline_options)
-                }
-            )
-        else:
-            self.docling_converter = DocumentConverter()
+        self.docling_converter = DocumentConverter(
+            format_options={
+                InputFormat.PDF: PdfFormatOption(pipeline_options=pipeline_options)
+            }
+        )
 
         self.chunker = SemanticChunker(
             min_tokens=self.config.min_tokens,
@@ -186,22 +188,70 @@ class DoclingIngester:
         # Export to markdown format for text
         markdown_text = result.document.export_to_markdown()
 
-        # Get structured chunks from Docling
-        chunker = HybridChunker()
-        docling_chunks = list(chunker.chunk(result.document))
+        # Get structured chunks from Docling's HybridChunker (preserves headings/structure)
+        from docling.chunking import HybridChunker as DoclingHybridChunker
+        docling_chunker = DoclingHybridChunker()
+        docling_chunks = list(docling_chunker.chunk(result.document))
+        logger.info(f"Docling produced {len(docling_chunks)} initial chunks")
 
         chunks = []
+        rechunked_count = 0
         for i, chunk in enumerate(docling_chunks):
             headings = []
             if hasattr(chunk, "meta") and hasattr(chunk.meta, "headings"):
-                headings = list(chunk.meta.headings)
+                # Handle case where headings might be None
+                chunk_headings = chunk.meta.headings
+                if chunk_headings is not None:
+                    headings = list(chunk_headings)
 
-            chunks.append({
-                "text": chunk.text,
-                "position": i,
-                "headings": headings,
-                "page_section": getattr(chunk.meta, "page_no", None) if hasattr(chunk, "meta") else None,
-            })
+            text = chunk.text
+            if not text or not text.strip():
+                continue  # Skip empty chunks
+
+            token_count = self.chunker.count_tokens(text)
+            logger.debug(f"Chunk {i}: {token_count} tokens, max={self.config.max_tokens}")
+
+            # If chunk is too large for embedding model, re-chunk it
+            if token_count > self.config.max_tokens:
+                logger.info(f"Re-chunking large chunk {i} ({token_count} tokens > {self.config.max_tokens})")
+                rechunked_count += 1
+                sub_chunks = self.chunker.chunk(text)
+                if sub_chunks is None:
+                    logger.warning(f"Re-chunking returned None for chunk {i}, splitting by sentences")
+                    # Fallback: split by sentences
+                    import re
+                    sentences = re.split(r'[.!?]+', text)
+                    for j, sent in enumerate(sentences):
+                        if sent.strip():
+                            chunks.append({
+                                "text": sent.strip(),
+                                "position": len(chunks),
+                                "headings": headings,
+                                "page_section": getattr(chunk.meta, "page_no", None) if hasattr(chunk, "meta") else None,
+                                "token_count": self.chunker.count_tokens(sent.strip()),
+                            })
+                else:
+                    logger.info(f"Split into {len(sub_chunks)} sub-chunks")
+                    for j, sub in enumerate(sub_chunks):
+                        sub_text = sub.text if hasattr(sub, "text") else str(sub)
+                        sub_tokens = getattr(sub, "token_count", None) or self.chunker.count_tokens(sub_text)
+                        chunks.append({
+                            "text": sub_text,
+                            "position": len(chunks),
+                            "headings": headings,
+                            "page_section": getattr(chunk.meta, "page_no", None) if hasattr(chunk, "meta") else None,
+                            "token_count": sub_tokens,
+                        })
+            else:
+                chunks.append({
+                    "text": text,
+                    "position": i,
+                    "headings": headings,
+                    "page_section": getattr(chunk.meta, "page_no", None) if hasattr(chunk, "meta") else None,
+                    "token_count": token_count,
+                })
+
+        logger.info(f"Final chunks: {len(chunks)} (re-chunked {rechunked_count} large chunks)")
 
         # Feature 024: Extract images from PDF
         images = []
@@ -302,8 +352,8 @@ class DoclingIngester:
         with open(file_path, "r", encoding="utf-8") as f:
             text = f.read()
 
-        # Use semantic chunker for markdown
-        chunks = self.chunker.chunk_with_headings(text)
+        # Use semantic chunker for markdown with empty headings list
+        chunks = self.chunker.chunk_with_headings(text, headings=[])
 
         chunk_dicts = []
         for i, chunk in enumerate(chunks):
@@ -418,16 +468,14 @@ class DoclingIngester:
         Returns:
             Number of chunks stored
         """
-        points = []
-        for i, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
-            chunk_id = f"{doc_id}_chunk_{i}"
-            point = {
-                "id": chunk_id,
-                "vector": embedding,
-                "payload": {
-                    "chunk_id": chunk_id,
+        # Prepare chunks for QdrantClient.ingest_chunks format
+        qdrant_chunks = []
+        for i, chunk in enumerate(chunks):
+            qdrant_chunks.append({
+                "text": chunk["text"],
+                "metadata": {
+                    "chunk_id": f"{doc_id}_chunk_{i}",
                     "doc_id": doc_id,
-                    "text": chunk["text"],
                     "position": chunk["position"],
                     "token_count": chunk.get("token_count", 0),
                     "headings": chunk.get("headings", []),
@@ -438,18 +486,17 @@ class DoclingIngester:
                     "type": metadata.get("type", "text"),
                     "source": metadata.get("filename", ""),
                     "doc_hash": metadata.get("doc_hash", ""),
-                    "created_at": datetime.now().isoformat(),
                 }
-            }
-            points.append(point)
+            })
 
-        # Batch upsert to Qdrant
-        await self.qdrant_client.upsert(
-            collection_name=self.qdrant_client.collection_name,
-            points=points,
+        # Use QdrantClient.ingest_chunks
+        result = await self.qdrant_client.ingest_chunks(
+            chunks=qdrant_chunks,
+            embeddings=embeddings,
+            document_id=doc_id,
         )
 
-        return len(points)
+        return result.get("chunks_ingested", 0)
 
     async def ingest(self, file_path: Path) -> IngestionResult:
         """
@@ -553,9 +600,12 @@ class DoclingIngester:
             # T025: Progress logging
             logger.info(f"[5/5] Moving document to processed/")
 
-            # T023: Move from inbox to processed
-            processed_path = Path(self.config.processed_path) / filename
-            shutil.move(str(file_path), str(processed_path))
+            # T023: Move from inbox to processed (optional - may fail on read-only filesystems)
+            try:
+                processed_path = Path(self.config.processed_path) / filename
+                shutil.move(str(file_path), str(processed_path))
+            except (OSError, PermissionError) as e:
+                logger.warning(f"Could not move document to processed/ (read-only filesystem?): {e}")
 
             processing_time = int((time.time() - start_time) * 1000)
 
@@ -677,13 +727,14 @@ class DoclingIngester:
         Returns:
             Number of images stored
         """
-        points = []
+        # Prepare images as chunks for QdrantClient.ingest_chunks
+        qdrant_chunks = []
+        embeddings = []
         for img in images:
             image_id = img["image_id"]
-            point = {
-                "id": f"{doc_id}_image_{image_id}",
-                "vector": img.get("text_embedding", [0.0] * 1024),  # Use description embedding
-                "payload": {
+            qdrant_chunks.append({
+                "text": img.get("description", ""),  # Use description as text
+                "metadata": {
                     "image_id": image_id,
                     "doc_id": doc_id,
                     "image_data": img["image_data"],
@@ -695,18 +746,18 @@ class DoclingIngester:
                     "domain": metadata.get("domain", "software"),
                     "source": metadata.get("filename", ""),
                     "content_type": "image",
-                    "created_at": datetime.now().isoformat(),
                 }
-            }
-            points.append(point)
+            })
+            embeddings.append(img.get("text_embedding", [0.0] * 1024))
 
-        # Batch upsert to Qdrant
+        # Use QdrantClient.ingest_chunks
         try:
-            await self.qdrant_client.upsert(
-                collection_name=self.qdrant_client.collection_name,
-                points=points,
+            result = await self.qdrant_client.ingest_chunks(
+                chunks=qdrant_chunks,
+                embeddings=embeddings,
+                document_id=doc_id,
             )
-            return len(points)
+            return result.get("chunks_ingested", 0)
         except Exception as e:
             logger.error(f"Failed to store image chunks: {e}")
             return 0

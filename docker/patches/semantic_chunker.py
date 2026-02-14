@@ -87,7 +87,7 @@ class SemanticChunker:
 
         # Initialize tiktoken encoder
         try:
-            self._tokenizer = tiktoken.get_encodingering(self.ENCODING_NAME)
+            self._tokenizer = tiktoken.get_encoding(self.ENCODING_NAME)
         except Exception as e:
             raise RuntimeError(
                 f"Failed to initialize tiktoken encoder '{self.ENCODING_NAME}'. "

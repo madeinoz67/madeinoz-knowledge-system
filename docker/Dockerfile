@@ -4,6 +4,13 @@
 
 FROM zepai/knowledge-graph-mcp:standalone
 
+# Install system dependencies for Docling PDF rendering
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libxcb1 \
+    libgl1 \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
 # Build-time arguments for version tracking (passed during CI build)
 ARG BUILD_VERSION
 ARG BUILD_COMMIT
@@ -69,7 +76,7 @@ COPY docker/patches/utils/graph_traversal.py /app/mcp/src/utils/graph_traversal.
 
 # Qdrant-based LKAP (Feature 022 - Lightweight Alternative)
 # Qdrant client for document memory with Ollama embeddings
-COPY docker/patches/qdrant_client.py /app/mcp/src/utils/qdrant_client.py
+COPY docker/patches/qdrant_client.py /app/mcp/src/patches/qdrant_client.py
 
 # LKAP promotion and models (Feature 022)
 # Creates patches/ directory for from patches.promotion import ... to work

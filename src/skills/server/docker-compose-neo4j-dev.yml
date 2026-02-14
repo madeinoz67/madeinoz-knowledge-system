@@ -136,6 +136,9 @@ services:
     depends_on:
       neo4j:
         condition: service_healthy
+    volumes:
+      - ../../../knowledge/inbox:/app/mcp/knowledge/inbox:ro
+      - ../../../knowledge/processed:/app/mcp/knowledge/processed
     healthcheck:
       test: ["CMD", "curl", "-sf", "--max-time", "5", "http://localhost:8000/health"]
       interval: 30s
