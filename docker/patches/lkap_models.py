@@ -27,6 +27,18 @@ class Domain(str, Enum):
     STANDARDS = "standards"
 
 
+class ImageType(str, Enum):
+    """Classification of image content from technical documents"""
+    SCHEMATIC = "schematic"      # Circuit diagrams, block diagrams
+    PINOUT = "pinout"           # Pin configuration diagrams
+    WAVEFORM = "waveform"       # Timing diagrams, signal plots
+    PHOTO = "photo"             # Product photos
+    TABLE = "table"             # Tables (if extracted as image)
+    GRAPH = "graph"             # Charts, graphs
+    FLOWCHART = "flowchart"     # Process diagrams
+    UNKNOWN = "unknown"         # Unclassified
+
+
 class DocumentType(str, Enum):
     """Document type classification"""
     PDF = "pdf"
@@ -130,6 +142,47 @@ class DocumentChunk(BaseModel):
     headings: List[str] = Field(default_factory=list, description="Parent headings for provenance (H1 > H2 > H3)")
     embedding_vector: Optional[List[float]] = Field(None, description="Embedding vector (1024+ dimensions)")
     created_at: datetime = Field(default_factory=datetime.now, description="Timestamp of chunk creation")
+
+
+class ImageChunk(BaseModel):
+    """
+    Extracted image from document with Vision LLM enrichment.
+
+    Storage: Qdrant vector database (same collection as DocumentChunk with content_type='image')
+    Relationships: N:1 Document, N:M DocumentChunk (related text chunks)
+
+    Feature 024: Multimodal image extraction for technical documents.
+    """
+    image_id: str = Field(..., description="Unique image identifier (UUID)")
+    doc_id: str = Field(..., description="Parent document reference")
+
+    # Image data (one of these required)
+    image_data: Optional[str] = Field(None, description="Base64 encoded image (PNG/JPEG)")
+    image_path: Optional[str] = Field(None, description="Path to stored image file (if external storage)")
+
+    # Metadata
+    image_format: str = Field(default="PNG", description="Image format (PNG, JPEG)")
+    dimensions: tuple[int, int] = Field(..., description="(width, height) in pixels")
+    source_page: int = Field(..., description="Page number in source document")
+    source_position: Optional[dict] = Field(None, description="Bounding box on page {x, y, width, height}")
+
+    # Enrichment (Vision LLM)
+    classification: ImageType = Field(default=ImageType.UNKNOWN, description="Image content type")
+    description: str = Field(..., description="LLM-generated description for search indexing")
+    ocr_text: Optional[str] = Field(None, description="Text extracted from image via OCR")
+
+    # Linking
+    related_chunk_ids: List[str] = Field(default_factory=list, description="Linked text chunk IDs")
+    headings: List[str] = Field(default_factory=list, description="Parent headings for provenance")
+
+    # Embeddings
+    text_embedding: Optional[List[float]] = Field(None, description="Embedding of description (bge-large, 1024 dim)")
+    image_embedding: Optional[List[float]] = Field(None, description="CLIP visual embedding (512 dim, Phase 2)")
+
+    # Content type marker for unified collection
+    content_type: str = Field(default="image", description="Content type marker ('image' or 'text')")
+
+    created_at: datetime = Field(default_factory=datetime.now, description="Timestamp of image extraction")
 
 
 class Evidence(BaseModel):

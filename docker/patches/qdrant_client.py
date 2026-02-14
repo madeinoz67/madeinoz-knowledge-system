@@ -445,6 +445,207 @@ class QdrantClient:
             logger.error(f"Semantic search failed: {e}")
             return []
 
+    async def search_images(
+        self,
+        query: str,
+        classification: Optional[str] = None,
+        top_k: int = 10,
+        confidence_threshold: float = 0.70,
+    ) -> List[Dict[str, Any]]:
+        """
+        Search for images by description similarity.
+
+        Feature 024: Image search with classification filter.
+
+        Args:
+            query: Natural language search query (searches image descriptions)
+            classification: Optional filter by image type (schematic, pinout, waveform, etc.)
+            top_k: Maximum results to return (default: 10)
+            confidence_threshold: Minimum similarity score (default: 0.70)
+
+        Returns:
+            List of image result dicts with image_id, description, classification, source_page, etc.
+        """
+        import time
+        from patches.ollama_embedder import get_ollama_embedder
+
+        start_time = time.time()
+
+        try:
+            # Generate query embedding
+            embedder = get_ollama_embedder()
+            query_vector = await embedder.embed(query)
+
+            # Build Qdrant filter for images
+            must_conditions = [
+                {"key": "content_type", "match": {"value": "image"}}
+            ]
+            if classification:
+                must_conditions.append({
+                    "key": "classification",
+                    "match": {"value": classification}
+                })
+            qdrant_filter = {"must": must_conditions}
+
+            # Search with vector
+            raw_results = await self.search(
+                query_vector=query_vector,
+                top_k=top_k,
+                filters=qdrant_filter,
+                score_threshold=confidence_threshold,
+            )
+
+            # Transform to image result format
+            results = []
+            for result in raw_results:
+                payload = result.metadata or {}
+                results.append({
+                    "image_id": payload.get("image_id"),
+                    "doc_id": payload.get("doc_id"),
+                    "description": payload.get("description", ""),
+                    "classification": payload.get("classification", "unknown"),
+                    "source_page": payload.get("source_page"),
+                    "source": payload.get("source", ""),
+                    "confidence": result.score,
+                    "image_data": payload.get("image_data"),  # Base64 image data
+                    "image_format": payload.get("image_format", "PNG"),
+                    "headings": payload.get("headings", []),
+                })
+
+            elapsed_ms = (time.time() - start_time) * 1000
+            logger.info(f"Image search: '{query[:50]}...' -> {len(results)} results in {elapsed_ms:.1f}ms")
+
+            return results
+
+        except Exception as e:
+            logger.error(f"Image search failed: {e}")
+            return []
+
+    async def get_image(self, image_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Retrieve a specific image by ID.
+
+        Feature 024: Get image with full metadata.
+
+        Args:
+            image_id: Image identifier
+
+        Returns:
+            Image dict with image_data, description, classification, etc.
+        """
+        client = await self._get_client()
+
+        try:
+            # Search for point with matching image_id in payload
+            response = await client.post(
+                f"{self.url}/collections/{self.collection_name}/points/scroll",
+                {
+                    "limit": 1,
+                    "with_payload": True,
+                    "with_vector": False,
+                    "filter": {
+                        "must": [
+                            {"key": "content_type", "match": {"value": "image"}},
+                            {"key": "image_id", "match": {"value": image_id}}
+                        ]
+                    }
+                }
+            )
+            response.raise_for_status()
+            data = response.json()
+
+            points = data.get("result", {}).get("points", [])
+            if not points:
+                return None
+
+            point = points[0]
+            payload = point.get("payload", {})
+
+            return {
+                "image_id": payload.get("image_id"),
+                "doc_id": payload.get("doc_id"),
+                "description": payload.get("description", ""),
+                "classification": payload.get("classification", "unknown"),
+                "source_page": payload.get("source_page"),
+                "source": payload.get("source", ""),
+                "image_data": payload.get("image_data"),
+                "image_format": payload.get("image_format", "PNG"),
+                "headings": payload.get("headings", []),
+                "created_at": payload.get("created_at"),
+            }
+
+        except Exception as e:
+            logger.error(f"Failed to get image {image_id}: {e}")
+            return None
+
+    async def list_images(
+        self,
+        doc_id: Optional[str] = None,
+        classification: Optional[str] = None,
+        limit: int = 50,
+    ) -> List[Dict[str, Any]]:
+        """
+        List images with optional filters.
+
+        Feature 024: List all images or filter by document/classification.
+
+        Args:
+            doc_id: Optional filter by document ID
+            classification: Optional filter by image type
+            limit: Maximum results (default: 50)
+
+        Returns:
+            List of image result dicts (without image_data for performance)
+        """
+        client = await self._get_client()
+
+        try:
+            must_conditions = [
+                {"key": "content_type", "match": {"value": "image"}}
+            ]
+            if doc_id:
+                must_conditions.append({
+                    "key": "doc_id",
+                    "match": {"value": doc_id}
+                })
+            if classification:
+                must_conditions.append({
+                    "key": "classification",
+                    "match": {"value": classification}
+                })
+
+            response = await client.post(
+                f"{self.url}/collections/{self.collection_name}/points/scroll",
+                {
+                    "limit": limit,
+                    "with_payload": True,
+                    "with_vector": False,
+                    "filter": {"must": must_conditions}
+                }
+            )
+            response.raise_for_status()
+            data = response.json()
+
+            results = []
+            for point in data.get("result", {}).get("points", []):
+                payload = point.get("payload", {})
+                results.append({
+                    "image_id": payload.get("image_id"),
+                    "doc_id": payload.get("doc_id"),
+                    "description": payload.get("description", "")[:200],  # Truncate for listing
+                    "classification": payload.get("classification", "unknown"),
+                    "source_page": payload.get("source_page"),
+                    "source": payload.get("source", ""),
+                    "image_format": payload.get("image_format", "PNG"),
+                    # Exclude image_data for performance
+                })
+
+            return results
+
+        except Exception as e:
+            logger.error(f"Failed to list images: {e}")
+            return []
+
     async def get_chunk(self, chunk_id: str) -> Optional[Dict[str, Any]]:
         """Retrieve a specific chunk by ID."""
         client = await self._get_client()

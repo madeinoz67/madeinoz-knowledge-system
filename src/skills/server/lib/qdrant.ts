@@ -440,3 +440,239 @@ asyncio.run(main())
     throw new Error(`Ingestion error: ${(error as Error).message}`);
   }
 }
+
+// ============================================================================
+// Feature 024: Image Search Functions
+// ============================================================================
+
+/**
+ * Image classification types
+ */
+export type ImageClassification =
+  | "schematic"
+  | "pinout"
+  | "waveform"
+  | "photo"
+  | "table"
+  | "graph"
+  | "flowchart"
+  | "unknown";
+
+/**
+ * Image search result from Qdrant
+ */
+export interface QdrantImageResult {
+  image_id: string;
+  doc_id: string;
+  description: string;
+  classification: ImageClassification;
+  source_page?: number;
+  source: string;
+  confidence: number;
+  image_data?: string; // Base64 encoded
+  image_format?: string;
+  headings?: string[];
+}
+
+/**
+ * Search for images by description similarity
+ *
+ * Feature 024: Image search with Vision LLM-enriched descriptions.
+ *
+ * @param query - Natural language search query (e.g., "GPIO pinout diagram")
+ * @param classification - Optional filter by image type
+ * @param topK - Maximum results to return (default: 10)
+ * @returns Array of image results sorted by confidence
+ */
+export async function searchImages(
+  query: string,
+  classification?: ImageClassification,
+  topK: number = 10
+): Promise<QdrantImageResult[]> {
+  // Generate query embedding
+  const queryVector = await generateEmbedding(query);
+
+  // Build filter for images only
+  const conditions: object[] = [
+    {
+      key: "content_type",
+      match: { value: "image" },
+    },
+  ];
+
+  if (classification) {
+    conditions.push({
+      key: "classification",
+      match: { value: classification },
+    });
+  }
+
+  const searchRequest: any = {
+    vector: queryVector,
+    limit: topK,
+    with_payload: true,
+    score_threshold: CONFIDENCE_THRESHOLD,
+    filter: { must: conditions },
+  };
+
+  // Search Qdrant
+  const response = await fetch(
+    `${QDRANT_URL}/collections/${QDRANT_COLLECTION}/points/search`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(searchRequest),
+      signal: AbortSignal.timeout(30000),
+    }
+  );
+
+  if (!response.ok) {
+    if (response.status === 404) {
+      return []; // Collection doesn't exist yet
+    }
+    throw new Error(`Qdrant image search failed: ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  // Transform results
+  return (data.result || []).map((point: any) => ({
+    image_id: point.payload?.image_id || "",
+    doc_id: point.payload?.doc_id || "",
+    description: point.payload?.description || "",
+    classification: point.payload?.classification || "unknown",
+    source_page: point.payload?.source_page,
+    source: point.payload?.source || "",
+    confidence: point.score,
+    image_data: point.payload?.image_data,
+    image_format: point.payload?.image_format || "PNG",
+    headings: point.payload?.headings || [],
+  }));
+}
+
+/**
+ * Get a specific image by ID
+ *
+ * @param imageId - Unique image identifier
+ * @returns Image data or null if not found
+ */
+export async function getImage(
+  imageId: string
+): Promise<QdrantImageResult | null> {
+  // Search for point with matching image_id
+  const response = await fetch(
+    `${QDRANT_URL}/collections/${QDRANT_COLLECTION}/points/scroll`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        limit: 1,
+        with_payload: true,
+        with_vector: false,
+        filter: {
+          must: [
+            { key: "content_type", match: { value: "image" } },
+            { key: "image_id", match: { value: imageId } },
+          ],
+        },
+      }),
+      signal: AbortSignal.timeout(10000),
+    }
+  );
+
+  if (!response.ok) {
+    if (response.status === 404) {
+      return null;
+    }
+    throw new Error(`Qdrant get image failed: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const points = data.result?.points || [];
+
+  if (points.length === 0) {
+    return null;
+  }
+
+  const point = points[0];
+  return {
+    image_id: point.payload?.image_id || "",
+    doc_id: point.payload?.doc_id || "",
+    description: point.payload?.description || "",
+    classification: point.payload?.classification || "unknown",
+    source_page: point.payload?.source_page,
+    source: point.payload?.source || "",
+    confidence: 1.0,
+    image_data: point.payload?.image_data,
+    image_format: point.payload?.image_format || "PNG",
+    headings: point.payload?.headings || [],
+  };
+}
+
+/**
+ * List images with optional filters
+ *
+ * @param docId - Optional filter by document ID
+ * @param classification - Optional filter by image type
+ * @param limit - Maximum results (default: 50)
+ * @returns Array of image results (without image_data for performance)
+ */
+export async function listImages(
+  docId?: string,
+  classification?: ImageClassification,
+  limit: number = 50
+): Promise<Omit<QdrantImageResult, "image_data">[]> {
+  const conditions: object[] = [
+    { key: "content_type", match: { value: "image" } },
+  ];
+
+  if (docId) {
+    conditions.push({ key: "doc_id", match: { value: docId } });
+  }
+  if (classification) {
+    conditions.push({ key: "classification", match: { value: classification } });
+  }
+
+  const response = await fetch(
+    `${QDRANT_URL}/collections/${QDRANT_COLLECTION}/points/scroll`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        limit,
+        with_payload: [
+          "image_id",
+          "doc_id",
+          "description",
+          "classification",
+          "source_page",
+          "source",
+          "image_format",
+        ],
+        with_vector: false,
+        filter: { must: conditions },
+      }),
+      signal: AbortSignal.timeout(30000),
+    }
+  );
+
+  if (!response.ok) {
+    if (response.status === 404) {
+      return [];
+    }
+    throw new Error(`Qdrant list images failed: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const points = data.result?.points || [];
+
+  return points.map((point: any) => ({
+    image_id: point.payload?.image_id || "",
+    doc_id: point.payload?.doc_id || "",
+    description: (point.payload?.description || "").substring(0, 200), // Truncate for listing
+    classification: point.payload?.classification || "unknown",
+    source_page: point.payload?.source_page,
+    source: point.payload?.source || "",
+    image_format: point.payload?.image_format || "PNG",
+  }));
+}

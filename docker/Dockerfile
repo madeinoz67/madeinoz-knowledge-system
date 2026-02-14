@@ -29,8 +29,9 @@ RUN uv add "opentelemetry-api>=1.20.0" "opentelemetry-sdk>=1.20.0" "opentelemetr
 
 # LKAP (Feature 022/023): Self-Hosted RAG dependencies
 # Feature 023: Qdrant migration - Docling for PDF parsing, semantic chunking
+# Feature 024: Multimodal image extraction - Pillow for image processing
 # Qdrant client (qdrant-client), Ollama embeddings, HTTP clients
-RUN uv add "requests>=2.31.0" "aiohttp>=3.9.0" "httpx>=0.27.0" "mcp>=0.9.0" "docling>=2.0.0" "qdrant-client>=1.12.0" "tiktoken>=0.5.0"
+RUN uv add "requests>=2.31.0" "aiohttp>=3.9.0" "httpx>=0.27.0" "mcp>=0.9.0" "docling>=2.0.0" "qdrant-client>=1.12.0" "tiktoken>=0.5.0" "pillow>=10.0.0"
 
 # Prompt caching implementation (Feature 006)
 COPY docker/patches/cache_metrics.py /app/mcp/src/utils/cache_metrics.py
@@ -83,6 +84,9 @@ COPY docker/patches/promotion.py /app/mcp/src/patches/promotion.py
 COPY docker/patches/ollama_embedder.py /app/mcp/src/patches/ollama_embedder.py
 COPY docker/patches/semantic_chunker.py /app/mcp/src/patches/semantic_chunker.py
 COPY docker/patches/docling_ingester.py /app/mcp/src/patches/docling_ingester.py
+
+# Multimodal image extraction (Feature 024)
+COPY docker/patches/image_enricher.py /app/mcp/src/patches/image_enricher.py
 
 # Copy both Neo4j and FalkorDB configs
 COPY src/skills/server/config-neo4j.yaml /tmp/config-neo4j.yaml

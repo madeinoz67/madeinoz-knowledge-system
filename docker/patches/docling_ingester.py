@@ -7,26 +7,35 @@ Ingests PDF and markdown documents into Qdrant with:
 - Semantic chunking with heading awareness
 - Ollama embeddings with bge-large-en-v1.5
 - Idempotent ingestion via document hash
+
+Feature 024: Multimodal image extraction with Vision LLM enrichment
 """
 
+import base64
 import hashlib
+import io
 import logging
 import os
 import shutil
 import time
+import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from docling.chunking import HybridChunker
-from docling.document_converter import DocumentConverter
+from docling.datamodel.base_models import InputFormat
+from docling.datamodel.pipeline_options import PdfPipelineOptions
+from docling.document_converter import DocumentConverter, PdfFormatOption
 
 from patches.lkap_models import (
     Document,
     DocumentChunk,
     DocumentType,
     Domain,
+    ImageChunk,
+    ImageType,
     IngestionResult,
     IngestionStatus,
     Sensitivity,
@@ -47,6 +56,8 @@ class IngestionConfig:
     overlap_percent: float = 0.15
     batch_size: int = 32
     confidence_threshold: float = 0.70
+    extract_images: bool = True  # Feature 024: Enable image extraction
+    enrich_images: bool = True   # Feature 024: Enable Vision LLM enrichment
 
 
 class DoclingIngester:
@@ -62,6 +73,8 @@ class DoclingIngester:
     - T023: Document move from inbox/ to processed/
     - T024: Error handling with rollback
     - T025: Progress logging
+
+    Feature 024: Multimodal image extraction with Vision LLM enrichment
     """
 
     def __init__(
@@ -78,13 +91,30 @@ class DoclingIngester:
         """
         self.qdrant_client = qdrant_client
         self.config = config or IngestionConfig()
-        self.docling_converter = DocumentConverter()
+
+        # Feature 024: Configure Docling for image extraction
+        if self.config.extract_images:
+            pipeline_options = PdfPipelineOptions()
+            pipeline_options.generate_page_images = False
+            pipeline_options.generate_picture_images = True  # Extract figures/images
+
+            self.docling_converter = DocumentConverter(
+                format_options={
+                    InputFormat.PDF: PdfFormatOption(pipeline_options=pipeline_options)
+                }
+            )
+        else:
+            self.docling_converter = DocumentConverter()
+
         self.chunker = SemanticChunker(
             min_tokens=self.config.min_tokens,
             max_tokens=self.config.max_tokens,
             overlap_percent=self.config.overlap_percent,
         )
         self.embedder = get_ollama_embedder()
+
+        # Feature 024: Lazy-load image enricher
+        self._image_enricher = None
 
         # Ensure directories exist
         Path(self.config.inbox_path).mkdir(parents=True, exist_ok=True)
@@ -136,17 +166,18 @@ class DoclingIngester:
             logger.warning(f"Failed to check document existence: {e}")
             return False
 
-    def parse_pdf(self, file_path: Path) -> Tuple[str, List[Dict[str, Any]]]:
+    def parse_pdf(self, file_path: Path) -> Tuple[str, List[Dict[str, Any]], List[Dict[str, Any]]]:
         """
-        Parse PDF document using Docling with table extraction.
+        Parse PDF document using Docling with table extraction and image extraction.
 
         T018: PDF parsing with Docling.
+        Feature 024: Image extraction from PDFs.
 
         Args:
             file_path: Path to PDF file
 
         Returns:
-            Tuple of (full_text, list of chunk dicts with metadata)
+            Tuple of (full_text, list of chunk dicts with metadata, list of image dicts)
         """
         logger.info(f"Parsing PDF: {file_path}")
 
@@ -172,8 +203,87 @@ class DoclingIngester:
                 "page_section": getattr(chunk.meta, "page_no", None) if hasattr(chunk, "meta") else None,
             })
 
-        logger.info(f"Parsed PDF into {len(chunks)} chunks")
-        return markdown_text, chunks
+        # Feature 024: Extract images from PDF
+        images = []
+        if self.config.extract_images:
+            images = self._extract_images_from_docling(result.document)
+            logger.info(f"Extracted {len(images)} images from PDF")
+
+        logger.info(f"Parsed PDF into {len(chunks)} chunks and {len(images)} images")
+        return markdown_text, chunks, images
+
+    def _extract_images_from_docling(self, document) -> List[Dict[str, Any]]:
+        """
+        Extract images from Docling document.
+
+        Feature 024: Image extraction from Docling's picture images.
+
+        Args:
+            document: Docling document object
+
+        Returns:
+            List of image dicts with base64 data and metadata
+        """
+        images = []
+
+        # Docling stores images in document.pictures or similar
+        # The exact API depends on Docling version
+        try:
+            # Try to get pictures from document
+            if hasattr(document, "pictures"):
+                for i, picture in enumerate(document.pictures):
+                    image_data = self._extract_picture_image(picture)
+                    if image_data:
+                        images.append({
+                            "image_id": str(uuid.uuid4()),
+                            "image_data": image_data,
+                            "source_page": getattr(picture, "page_no", i),
+                            "position": i,
+                            "format": "PNG",
+                        })
+
+            # Also check for images in pages if generate_page_images was enabled
+            if hasattr(document, "pages"):
+                for page_num, page in enumerate(document.pages):
+                    if hasattr(page, "image") and page.image:
+                        # Save page image as base64
+                        buffer = io.BytesIO()
+                        page.image.save(buffer, format="PNG")
+                        image_data = base64.b64encode(buffer.getvalue()).decode("utf-8")
+                        images.append({
+                            "image_id": str(uuid.uuid4()),
+                            "image_data": image_data,
+                            "source_page": page_num,
+                            "position": page_num,
+                            "format": "PNG",
+                        })
+
+        except Exception as e:
+            logger.warning(f"Failed to extract images from document: {e}")
+
+        return images
+
+    def _extract_picture_image(self, picture) -> Optional[str]:
+        """
+        Extract base64 image from Docling picture object.
+
+        Args:
+            picture: Docling picture object
+
+        Returns:
+            Base64 encoded image string or None
+        """
+        try:
+            if hasattr(picture, "image") and picture.image:
+                buffer = io.BytesIO()
+                picture.image.save(buffer, format="PNG")
+                return base64.b64encode(buffer.getvalue()).decode("utf-8")
+            elif hasattr(picture, "data"):
+                # Some versions store raw data
+                return base64.b64encode(picture.data).decode("utf-8")
+        except Exception as e:
+            logger.debug(f"Failed to extract picture image: {e}")
+        return None
 
     def parse_markdown(self, file_path: Path) -> Tuple[str, List[Dict[str, Any]]]:
         """
@@ -346,6 +456,7 @@ class DoclingIngester:
         Ingest a document: parse → chunk → embed → store.
 
         T021: Orchestrates the full ingestion pipeline.
+        Feature 024: Also extracts and enriches images from PDFs.
 
         Args:
             file_path: Path to document file
@@ -373,16 +484,16 @@ class DoclingIngester:
                 )
 
             # Generate document ID
-            import uuid
             doc_id = str(uuid.uuid4())
 
             # T025: Progress logging
-            logger.info(f"[1/4] Parsing document: {filename}")
+            logger.info(f"[1/5] Parsing document: {filename}")
 
             # Parse based on document type
             doc_type = self.detect_document_type(file_path)
+            images = []  # Feature 024: Image list
             if doc_type == DocumentType.PDF:
-                full_text, chunks = self.parse_pdf(file_path)
+                full_text, chunks, images = self.parse_pdf(file_path)
             elif doc_type == DocumentType.MARKDOWN:
                 full_text, chunks = self.parse_markdown(file_path)
             else:
@@ -400,7 +511,7 @@ class DoclingIngester:
                 )
 
             # T025: Progress logging
-            logger.info(f"[2/4] Generating embeddings for {len(chunks)} chunks")
+            logger.info(f"[2/5] Generating embeddings for {len(chunks)} chunks")
 
             # Generate embeddings in batches
             all_embeddings = []
@@ -413,7 +524,7 @@ class DoclingIngester:
                 logger.debug(f"Generated embeddings for batch {i//self.config.batch_size + 1}")
 
             # T025: Progress logging
-            logger.info(f"[3/4] Classifying and storing chunks")
+            logger.info(f"[3/5] Classifying and storing chunks")
 
             # Classify domain
             domain = self.classify_domain(filename, full_text)
@@ -431,8 +542,16 @@ class DoclingIngester:
             # Store in Qdrant
             stored_count = await self.store_chunks(doc_id, chunks, all_embeddings, metadata)
 
+            # Feature 024: Process and store images
+            image_count = 0
+            if images and self.config.extract_images:
+                logger.info(f"[4/5] Enriching and storing {len(images)} images")
+                image_count = await self._process_images(doc_id, images, metadata)
+            else:
+                logger.info(f"[4/5] No images to process")
+
             # T025: Progress logging
-            logger.info(f"[4/4] Moving document to processed/")
+            logger.info(f"[5/5] Moving document to processed/")
 
             # T023: Move from inbox to processed
             processed_path = Path(self.config.processed_path) / filename
@@ -440,7 +559,7 @@ class DoclingIngester:
 
             processing_time = int((time.time() - start_time) * 1000)
 
-            logger.info(f"Ingestion complete: {filename} -> {stored_count} chunks ({processing_time}ms)")
+            logger.info(f"Ingestion complete: {filename} -> {stored_count} chunks, {image_count} images ({processing_time}ms)")
 
             return IngestionResult(
                 doc_id=doc_id,
@@ -466,6 +585,131 @@ class DoclingIngester:
                 filename=filename,
                 processing_time_ms=processing_time,
             )
+
+    async def _process_images(
+        self,
+        doc_id: str,
+        images: List[Dict[str, Any]],
+        metadata: Dict[str, Any],
+    ) -> int:
+        """
+        Process images: enrich with Vision LLM and store in Qdrant.
+
+        Feature 024: Image enrichment and storage pipeline.
+
+        Args:
+            doc_id: Document identifier
+            images: List of image dicts from parse_pdf
+            metadata: Document-level metadata
+
+        Returns:
+            Number of images stored
+        """
+        if not images:
+            return 0
+
+        # Lazy-load image enricher
+        if self._image_enricher is None and self.config.enrich_images:
+            from patches.image_enricher import get_image_enricher
+            self._image_enricher = get_image_enricher()
+
+        processed_images = []
+        for img in images:
+            try:
+                # Enrich with Vision LLM if enabled
+                if self.config.enrich_images and self._image_enricher:
+                    enrichment = await self._image_enricher.classify_and_describe(img["image_data"])
+                    classification = enrichment.classification
+                    description = enrichment.description
+                else:
+                    classification = ImageType.UNKNOWN
+                    description = f"Image from page {img.get('source_page', 'unknown')}"
+
+                # Create ImageChunk
+                image_chunk = {
+                    "image_id": img["image_id"],
+                    "doc_id": doc_id,
+                    "image_data": img["image_data"],
+                    "image_format": img.get("format", "PNG"),
+                    "dimensions": img.get("dimensions", (0, 0)),
+                    "source_page": img.get("source_page", 0),
+                    "classification": classification.value,
+                    "description": description,
+                    "headings": [],
+                    "content_type": "image",
+                    "source": metadata.get("filename", ""),
+                }
+
+                # Generate text embedding from description
+                if self._image_enricher:
+                    embeddings = await self.embedder.embed_batch([description])
+                    image_chunk["text_embedding"] = embeddings[0] if embeddings else None
+
+                processed_images.append(image_chunk)
+
+            except Exception as e:
+                logger.warning(f"Failed to process image {img.get('image_id', 'unknown')}: {e}")
+                continue
+
+        # Store images in Qdrant
+        if processed_images:
+            stored = await self._store_image_chunks(doc_id, processed_images, metadata)
+            return stored
+
+        return 0
+
+    async def _store_image_chunks(
+        self,
+        doc_id: str,
+        images: List[Dict[str, Any]],
+        metadata: Dict[str, Any],
+    ) -> int:
+        """
+        Store image chunks in Qdrant.
+
+        Feature 024: Image storage with embeddings.
+
+        Args:
+            doc_id: Document identifier
+            images: List of processed image dicts
+            metadata: Document-level metadata
+
+        Returns:
+            Number of images stored
+        """
+        points = []
+        for img in images:
+            image_id = img["image_id"]
+            point = {
+                "id": f"{doc_id}_image_{image_id}",
+                "vector": img.get("text_embedding", [0.0] * 1024),  # Use description embedding
+                "payload": {
+                    "image_id": image_id,
+                    "doc_id": doc_id,
+                    "image_data": img["image_data"],
+                    "image_format": img.get("image_format", "PNG"),
+                    "classification": img.get("classification", "unknown"),
+                    "description": img.get("description", ""),
+                    "source_page": img.get("source_page", 0),
+                    "headings": img.get("headings", []),
+                    "domain": metadata.get("domain", "software"),
+                    "source": metadata.get("filename", ""),
+                    "content_type": "image",
+                    "created_at": datetime.now().isoformat(),
+                }
+            }
+            points.append(point)
+
+        # Batch upsert to Qdrant
+        try:
+            await self.qdrant_client.upsert(
+                collection_name=self.qdrant_client.collection_name,
+                points=points,
+            )
+            return len(points)
+        except Exception as e:
+            logger.error(f"Failed to store image chunks: {e}")
+            return 0
 
     async def ingest_directory(self, directory: Optional[Path] = None) -> List[IngestionResult]:
         """
