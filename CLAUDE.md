@@ -143,83 +143,71 @@ git push origin :refs/tags/v1.x.x
 **Why this matters:** The release job (`.github/workflows/ci.yml:195`) only triggers on `push` events for tags matching `v*`. Tags created via GitHub web UI or `gh release create` generate a `ReleaseEvent`, not a `push` event, so the workflow never runs.
 
 ## Active Technologies
-- JSON (Grafana dashboard configuration) + Grafana (provisioned), Prometheus (data source), existing metrics from PR #34 (013-prompt-cache-dashboard)
-- N/A (dashboard configuration only) (013-prompt-cache-dashboard)
-- Python 3.11+ + OpenTelemetry Prometheus exporter, Graphiti MCP server (015-memory-access-metrics)
-- Neo4j / FalkorDB (existing graph database) (015-memory-access-metrics)
-- PromQL (Prometheus Query Language), JSON (Grafana dashboard format) + Grafana 10.x, Prometheus (scraping OpenTelemetry metrics) (016-prometheus-dashboard-fixes)
-- Python 3.11+ + OpenTelemetry Prometheus exporter, threading.Lock for thread safety, Grafana dashboard JSON (017-queue-metrics)
-- Python 3.11+ (MCP server), TypeScript/Bun (CLI) + FastMCP (Python), Graphiti Core (knowledge graph), mcp-client (TypeScript) (020-investigative-search)
-- Neo4j (default) or FalkorDB with graph traversal suppor (020-investigative-search)
-- Python 3.11+ (Docker container for MCP server), Bun/TypeScript (CLI tools) + Docling (PDF ingestion), RAGFlow (vector DB + search), Ollama (local embeddings/LLM), Graphiti (knowledge graph), FastMCP (MCP protocol) (022-self-hosted-rag)
-- Neo4j (default) or FalkorDB (knowledge graph), RAGFlow vector DB (embeddings), Local filesystem (documents: inbox/, processed/) (022-self-hosted-rag)
-- Python 3.11+ (Docker container for MCP server), Bun/TypeScript (CLI tools) + Docling (PDF ingestion), RAGFlow (vector DB + search), Ollama (local embeddings/LLM, optional), Graphiti (knowledge graph), FastMCP (MCP protocol) (022-self-hosted-rag)
 - Python 3.11+ (MCP server patches), TypeScript/Bun (CLI tools) + Docling (PDF parsing), Qdrant Python client, Ollama Python SDK, FastMCP (023-qdrant-rag)
-- Qdrant vector database (Docker container, persistent volume) (023-qdrant-rag)
+- Qdrant vector database (Docker container, 69MB image, port 6333, persistent volume) (023-qdrant-rag)
+- Python 3.11+ (MCP server), TypeScript/Bun (CLI) + FastMCP (Python), Graphiti Core (knowledge graph), mcp-client (TypeScript) (020-investigative-search)
+- Neo4j (default) or FalkorDB with graph traversal support (020-investigative-search)
+- Python 3.11+ + OpenTelemetry Prometheus exporter, threading.Lock for thread safety (017-queue-metrics)
+- PromQL (Prometheus Query Language), JSON (Grafana dashboard format) + Grafana 10.x, Prometheus (016-prometheus-dashboard-fixes)
 
 ## Recent Changes
-- 022-self-hosted-rag: Local Knowledge Augmentation Platform (LKAP) - RAGFlow vector database, Ollama embeddings, document ingestion, semantic search
+- 023-qdrant-rag: Qdrant migration - replaced RAGFlow (3.5GB+) with Qdrant (69MB), Docling + semantic chunking, Ollama embeddings
+- 022-self-hosted-rag: Local Knowledge Augmentation Platform (LKAP) - document ingestion, semantic search, knowledge promotion
 - 017-queue-metrics: Queue processing metrics for monitoring queue depth, latency, consumer health, and failure tracking
-- 013-prompt-cache-dashboard: Added JSON (Grafana dashboard configuration) + Grafana (provisioned), Prometheus (data source), existing metrics from PR #34
 
-## LKAP - Local Knowledge Augmentation Platform (Feature 022)
+## LKAP - Local Knowledge Augmentation Platform (Feature 022/023)
 
-LKAP adds RAG (Retrieval-Augmented Generation) capabilities to the knowledge graph system. It provides a two-tier memory model: Document Memory (transient, high-volume) and Knowledge Memory (durable, curated).
+LKAP adds RAG (Retrieval-Augmented Generation) capabilities to the knowledge graph system using Qdrant as the vector database. It provides a two-tier memory model: Document Memory (transient, high-volume) and Knowledge Memory (durable, curated).
 
 ### Environment Variables
 
 ```bash
-# RAGFlow Configuration
-MADEINOZ_KNOWLEDGE_RAGFLOW_API_URL=http://ragflow:9380
-MADEINOZ_KNOWLEDGE_RAGFLOW_API_KEY=                    # Optional authentication
-MADEINOZ_KNOWLEDGE_RAGFLOW_EMBEDDING_DIMENSION=1024     # 1024+ recommended
-MADEINOZ_KNOWLEDGE_RAGFLOW_EMBEDDING_MODEL=ollama       # ollama or openai
-MADEINOZ_KNOWLEDGE_RAGFLOW_CONFIDENCE_THRESHOLD=0.70    # Minimum confidence for results
-MADEINOZ_KNOWLEDGE_RAGFLOW_CHUNK_SIZE_MIN=512
-MADEINOZ_KNOWLEDGE_RAGFLOW_CHUNK_SIZE_MAX=768
-MADEINOZ_KNOWLEDGE_RAGFLOW_CHUNK_OVERLAP=100
-MADEINOZ_KNOWLEDGE_RAGFLOW_LOG_LEVEL=INFO
+# Qdrant Configuration (Feature 023)
+MADEINOZ_KNOWLEDGE_QDRANT_URL=http://localhost:6333
+MADEINOZ_KNOWLEDGE_QDRANT_API_KEY=                        # Optional authentication
+MADEINOZ_KNOWLEDGE_QDRANT_COLLECTION=lkap_documents        # Collection name
+MADEINOZ_KNOWLEDGE_QDRANT_EMBEDDING_DIMENSION=1024         # bge-large-en-v1.5
+MADEINOZ_KNOWLEDGE_QDRANT_CONFIDENCE_THRESHOLD=0.70        # Minimum confidence
+MADEINOZ_KNOWLEDGE_QDRANT_CHUNK_SIZE_MIN=512
+MADEINOZ_KNOWLEDGE_QDRANT_CHUNK_SIZE_MAX=768
+MADEINOZ_KNOWLEDGE_QDRANT_CHUNK_OVERLAP=100
+MADEINOZ_KNOWLEDGE_QDRANT_LOG_LEVEL=INFO
 
-# OpenRouter API Key (for OpenAI text-embedding-3-large)
-MADEINOZ_KNOWLEDGE_OPENROUTER_API_KEY=sk-your-openrouter-key
-
-# Ollama Configuration (optional - for fully local operation)
-MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL=http://ollama:11434
+# Ollama Configuration (for local embeddings)
+MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL=http://localhost:11434
 MADEINOZ_KNOWLEDGE_OLLAMA_EMBEDDING_MODEL=bge-large-en-v1.5
-MADEINOZ_KNOWLEDGE_OLLAMA_MODELS=bge-large-en-v1.5
-MADEINOZ_KNOWLEDGE_OLLAMA_NUM_GPU=0
-MADEINOZ_KNOWLEDGE_OLLAMA_NUM_THREAD=4
 ```
 
 ### Docker Commands
 
 ```bash
-# Start RAGFlow vector database
-docker compose -f docker/docker-compose-ragflow.yml up -d
+# Start Qdrant vector database (69MB image)
+docker compose -f docker/docker-compose-qdrant.yml up -d
 
 # Start Ollama (optional - for fully local embeddings)
 docker compose -f docker/docker-compose-ollama.yml up -d
 
-# Full LKAP stack (Neo4j + RAGFlow + Ollama)
+# Full LKAP stack (Neo4j + Qdrant + Ollama)
 docker compose -f src/skills/server/docker-compose-neo4j.yml up -d
-docker compose -f docker/docker-compose-ragflow.yml up -d
+docker compose -f docker/docker-compose-qdrant.yml up -d
 docker compose -f docker/docker-compose-ollama.yml up -d
 ```
 
 ### Usage Examples
 
 ```bash
-# CLI wrapper for RAGFlow operations
+# CLI wrapper for Qdrant operations
 bun run src/skills/server/lib/rag-cli.ts search "GPIO configuration"
 bun run src/skills/server/lib/rag-cli.ts get-chunk <chunk-id>
-bun run src/skills/server/lib/rag-cli.ts list
+bun run src/skills/server/lib/rag-cli.ts ingest knowledge/inbox/
 bun run src/skills/server/lib/rag-cli.ts health
 
 # MCP Tools (available to Claude)
 rag.search(query, filters, topK)       # Semantic search across documents
 rag.getChunk(chunkId)                  # Retrieve specific chunk by ID
+rag.ingest(path)                       # Ingest documents from path
+rag.health()                           # Check Qdrant connectivity
 kg.promoteFromEvidence(evidenceId)     # Promote fact from evidence
-kg.promoteFromQuery(query)             # Search and promote in one operation
 kg.getProvenance(factId)               # Trace fact to source documents
 ```
 
@@ -233,10 +221,10 @@ kg.getProvenance(factId)               # Trace fact to source documents
 ```
 LKAP Two-Tier Memory Model:
 ┌─────────────────────────────────────────────────────────────┐
-│ Document Memory (RAGFlow)                                   │
-│ - High-volume, versioned, citation-centric                  │
-│ - Semantic search with confidence scores                    │
-│ - Chunks: 512-768 tokens, heading-aware                    │
+│ Document Memory (Qdrant)                                    │
+│ - 69MB Docker image, 626 QPS, port 6333                     │
+│ - Semantic search with cosine similarity                    │
+│ - Chunks: 512-768 tokens, 10-20% overlap, heading-aware     │
 ├─────────────────────────────────────────────────────────────┤
 │ Knowledge Memory (Graphiti)                                 │
 │ - Low-volume, high-signal, typed                            │
@@ -251,9 +239,9 @@ LKAP Two-Tier Memory Model:
 |------|---------|
 | Search documents | `bun run rag-cli.ts search "<query>"` |
 | Get chunk details | `bun run rag-cli.ts get-chunk <id>` |
-| List documents | `bun run rag-cli.ts list` |
+| Ingest documents | `bun run rag-cli.ts ingest <path>` |
 | Check health | `bun run rag-cli.ts health` |
-| Start RAGFlow | `docker compose -f docker/docker-compose-ragflow.yml up -d` |
+| Start Qdrant | `docker compose -f docker/docker-compose-qdrant.yml up -d` |
 
 ### Two-Tier Memory Model
 

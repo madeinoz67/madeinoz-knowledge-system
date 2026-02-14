@@ -239,6 +239,7 @@ async function main(): Promise<void> {
           console.error(colorize(`  Error: ${(error as Error).message}`, "dim"));
           process.exit(1);
         }
+        break;
       }
 
       case "help":

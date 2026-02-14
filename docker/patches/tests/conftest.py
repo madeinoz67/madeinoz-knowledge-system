@@ -45,9 +45,10 @@ def pytest_configure(config):
     # LKAP environment variables for testing
     os.environ.setdefault("LKAP_INBOX_PATH", "/tmp/test_inbox")
     os.environ.setdefault("LKAP_PROCESSED_PATH", "/tmp/test_processed")
-    os.environ.setdefault("MADEINOZ_KNOWLEDGE_RAGFLOW_API_URL", "http://localhost:9380")
+    os.environ.setdefault("MADEINOZ_KNOWLEDGE_QDRANT_URL", "http://localhost:6333")
+    os.environ.setdefault("MADEINOZ_KNOWLEDGE_QDRANT_COLLECTION", "test_documents")
     # Embedding configuration (reuses existing Graphiti variables)
     os.environ.setdefault("MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER_URL", "http://localhost:11434")
     os.environ.setdefault("MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER", "ollama")
-    os.environ.setdefault("MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL", "mxbai-embed-large")
+    os.environ.setdefault("MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL", "bge-large-en-v1.5")
     os.environ.setdefault("MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS", "1024")

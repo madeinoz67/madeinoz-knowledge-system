@@ -1339,11 +1339,11 @@ class QueueMetricsExporter:
 
 **Graceful degradation**: Methods do nothing if metrics are disabled.
 
-## LKAP Logging (Feature 022)
+## LKAP Logging (Feature 022/023)
 
 ### Overview
 
-The Local Knowledge Augmentation Platform (LKAP) provides structured logging for observability of document ingestion, classification, and knowledge promotion operations. Logs track ingestion status, classification confidence, and performance metrics.
+The Local Knowledge Augmentation Platform (LKAP) provides structured logging for observability of document ingestion, classification, and knowledge promotion operations. Uses Qdrant (69MB Docker image) as the vector database. Logs track ingestion status, classification confidence, and performance metrics.
 
 ### Configuration
 
@@ -1351,8 +1351,8 @@ Logging behavior is controlled via environment variables:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `MADEINOZ_KNOWLEDGE_RAGFLOW_LOG_LEVEL` | `INFO` | Log level (DEBUG, INFO, WARNING, ERROR) |
-| `RAGFLOW_LOG_PATH` | `/ragflow/logs/ragflow.log` | Log file path |
+| `MADEINOZ_KNOWLEDGE_QDRANT_LOG_LEVEL` | `INFO` | Log level (DEBUG, INFO, WARNING, ERROR) |
+| `MADEINOZ_KNOWLEDGE_QDRANT_LOG_PATH` | `/var/log/lkap/lkap.log` | Log file path |
 
 ### Log Locations
 
@@ -1378,9 +1378,9 @@ YYYY-MM-DD HH:MM:SS - logger_name - LEVEL - message
 | `lkap.ingestion` | Document Ingestion | File parsing, chunking, storage operations |
 | `lkap.classification` | Progressive Classification | Domain classification, confidence scoring |
 | `lkap.promotion` | Evidence-to-KG Promotion | Knowledge graph fact promotion |
-| `lkap.ragflow` | RAGFlow Client | Vector database operations |
-| `lkap.embeddings` | Embedding Service | Embedding generation |
-| `lkap.chunking` | Chunking Service | Document chunking operations |
+| `lkap.qdrant` | Qdrant Client | Vector database operations (search, storage) |
+| `lkap.embeddings` | Embedding Service | Ollama embedding generation |
+| `lkap.chunking` | Chunking Service | Semantic chunking with tiktoken |
 
 ### Key Log Messages
 
@@ -1474,14 +1474,14 @@ Classification results include confidence band for quality monitoring:
 
 ```bash
 # Count ingestion failures
-grep "Ingestion failed" /ragflow/logs/ragflow.log | wc -l
+grep "Ingestion failed" /var/log/lkap/lkap.log | wc -l
 
 # Find slow ingestions (>3s)
-grep "Ingestion complete" /ragflow/logs/ragflow.log | \
+grep "Ingestion complete" /var/log/lkap/lkap.log | \
   awk '{split($0,a,"in "); split(a[2],b,"s"); if(b[1]>3.0) print}'
 
 # Low confidence classifications
-grep "defaulting to software" /ragflow/logs/ragflow.log
+grep "defaulting to software" /var/log/lkap/lkap.log
 ```
 
 ### Troubleshooting
@@ -1492,7 +1492,7 @@ grep "defaulting to software" /ragflow/logs/ragflow.log
 
 **Check:**
 1. File permissions on inbox directory
-2. RAGFlow service availability
+2. Qdrant service availability (`curl http://localhost:6333/health`)
 3. Disk space on processed path
 
 #### Low Classification Confidence
@@ -1509,8 +1509,8 @@ grep "defaulting to software" /ragflow/logs/ragflow.log
 **Symptoms:** Per-document time > 3.0s
 
 **Check:**
-1. Embedding service responsiveness
-2. RAGFlow API latency
+1. Ollama embedding service responsiveness
+2. Qdrant API latency (should be <500ms for search)
 3. Network connectivity to services
 
 ### Implementation

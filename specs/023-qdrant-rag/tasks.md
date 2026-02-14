@@ -180,15 +180,15 @@ description: "Task list for Qdrant RAG Migration implementation"
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T055 [P] Update CLAUDE.md with Qdrant-specific configuration and usage instructions
-- [ ] T056 [P] Update docs/reference/configuration.md with Qdrant environment variables
-- [ ] T057 [P] Update docs/usage/lkap-quickstart.md with Qdrant workflow
-- [ ] T058 [P] Update docs/reference/observability.md with Qdrant metrics
-- [ ] T059 Code cleanup: remove debug logging, consolidate duplicate code
+- [X] T055 [P] Update CLAUDE.md with Qdrant-specific configuration and usage instructions
+- [X] T056 [P] Update docs/reference/configuration.md with Qdrant environment variables
+- [X] T057 [P] Update docs/usage/lkap-quickstart.md with Qdrant workflow
+- [X] T058 [P] Update docs/reference/observability.md with Qdrant metrics
+- [X] T059 Code cleanup: remove debug logging, consolidate duplicate code
 - [ ] T060 Performance optimization: verify <500ms search latency, optimize batch embedding
-- [ ] T061 Run full test suite: `bun test` and `pytest docker/patches/tests/`
+- [X] T061 Run full test suite: `bun test` and `pytest docker/patches/tests/`
 - [ ] T062 Run quickstart.md validation (test all CLI commands)
-- [ ] T063 Update CHANGELOG.md with Qdrant migration summary
+- [ ] T063 Update CHANGELOG.md with Qdrant migration summary (deferred - git-cliff auto-generates)
 
 ---
 
