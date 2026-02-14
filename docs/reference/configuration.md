@@ -605,15 +605,15 @@ MADEINOZ_KNOWLEDGE_OLLAMA_NUM_THREAD=4
 ### Docker Commands
 
 ```bash
-# Start RAGFlow vector database
-docker compose -f docker/docker-compose-ragflow.yml up -d
+# Start Qdrant vector database (Feature 023 - 69MB image)
+docker compose -f docker/docker-compose-qdrant.yml up -d
 
 # Start Ollama (optional - for fully local embeddings)
 docker compose -f docker/docker-compose-ollama.yml up -d
 
-# Full LKAP stack (Neo4j + RAGFlow + Ollama)
+# Full LKAP stack (Neo4j + Qdrant + Ollama)
 docker compose -f src/skills/server/docker-compose-neo4j.yml up -d
-docker compose -f docker/docker-compose-ragflow.yml up -d
+docker compose -f docker/docker-compose-qdrant.yml up -d
 docker compose -f docker/docker-compose-ollama.yml up -d
 ```
 
