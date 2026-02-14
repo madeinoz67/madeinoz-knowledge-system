@@ -4,6 +4,15 @@
 # This is a minimal Qdrant deployment - single container, <2GB RAM:
 #   - Qdrant (vector database with built-in storage)
 #
+# NOTE: Qdrant is now integrated into the main docker-compose files:
+#   - docker/docker-compose-neo4j.yml (Neo4j backend)
+#   - docker/docker-compose.falkordb.yml (FalkorDB backend)
+#   - docker/docker-compose.custom.yml (Custom image)
+#
+# This standalone file is useful for:
+#   - Testing Qdrant independently
+#   - Adding Qdrant to an existing deployment without Neo4j/FalkorDB
+#
 # Usage:
 #   docker compose -f docker/docker-compose-qdrant.yml up -d
 #   Access Qdrant API at http://localhost:6333

@@ -4,7 +4,7 @@
 # This service provides:
 # - Local embeddings using bge-large-en-v1.5 (1024 dimensions)
 # - Optional local LLM inference via Ollama
-# - Fully offline operation when combined with RAGFlow
+# - Fully offline operation when combined with Qdrant
 #
 # Environment Variables:
 # - MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL: http://ollama:11434
