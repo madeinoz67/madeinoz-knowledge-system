@@ -114,6 +114,40 @@ async function generateEnvFiles(
   }
 
   mcpLines.push('');
+  mcpLines.push('# Qdrant Configuration (LKAP - Document Memory)');
+  if (containerEnv.QDRANT_URL) mcpLines.push(`QDRANT_URL=${containerEnv.QDRANT_URL}`);
+  if (containerEnv.QDRANT_API_KEY) mcpLines.push(`QDRANT_API_KEY=${containerEnv.QDRANT_API_KEY}`);
+  if (containerEnv.QDRANT_COLLECTION) mcpLines.push(`QDRANT_COLLECTION=${containerEnv.QDRANT_COLLECTION}`);
+  if (containerEnv.QDRANT_EMBEDDING_DIMENSION)
+    mcpLines.push(`QDRANT_EMBEDDING_DIMENSION=${containerEnv.QDRANT_EMBEDDING_DIMENSION}`);
+  if (containerEnv.QDRANT_CONFIDENCE_THRESHOLD)
+    mcpLines.push(`QDRANT_CONFIDENCE_THRESHOLD=${containerEnv.QDRANT_CONFIDENCE_THRESHOLD}`);
+  if (containerEnv.QDRANT_CHUNK_SIZE_MIN)
+    mcpLines.push(`QDRANT_CHUNK_SIZE_MIN=${containerEnv.QDRANT_CHUNK_SIZE_MIN}`);
+  if (containerEnv.QDRANT_CHUNK_SIZE_MAX)
+    mcpLines.push(`QDRANT_CHUNK_SIZE_MAX=${containerEnv.QDRANT_CHUNK_SIZE_MAX}`);
+  if (containerEnv.QDRANT_CHUNK_OVERLAP)
+    mcpLines.push(`QDRANT_CHUNK_OVERLAP=${containerEnv.QDRANT_CHUNK_OVERLAP}`);
+  if (containerEnv.QDRANT_LOG_LEVEL)
+    mcpLines.push(`QDRANT_LOG_LEVEL=${containerEnv.QDRANT_LOG_LEVEL}`);
+  // Ollama (for embeddings)
+  if (containerEnv.OLLAMA_BASE_URL)
+    mcpLines.push(`OLLAMA_BASE_URL=${containerEnv.OLLAMA_BASE_URL}`);
+  if (containerEnv.OLLAMA_EMBEDDING_MODEL)
+    mcpLines.push(`OLLAMA_EMBEDDING_MODEL=${containerEnv.OLLAMA_EMBEDDING_MODEL}`);
+  // Vision LLM (Feature 024 - Multimodal Image Extraction)
+  if (containerEnv.VISION_LLM_PROVIDER)
+    mcpLines.push(`VISION_LLM_PROVIDER=${containerEnv.VISION_LLM_PROVIDER}`);
+  if (containerEnv.VISION_LLM_MODEL)
+    mcpLines.push(`VISION_LLM_MODEL=${containerEnv.VISION_LLM_MODEL}`);
+  if (containerEnv.VISION_LLM_FALLBACK)
+    mcpLines.push(`VISION_LLM_FALLBACK=${containerEnv.VISION_LLM_FALLBACK}`);
+  if (containerEnv.OPENROUTER_API_KEY)
+    mcpLines.push(`OPENROUTER_API_KEY=${containerEnv.OPENROUTER_API_KEY}`);
+  if (containerEnv.ZAI_API_KEY)
+    mcpLines.push(`ZAI_API_KEY=${containerEnv.ZAI_API_KEY}`);
+
+  mcpLines.push('');
   mcpLines.push('# Application Configuration');
   mcpLines.push(`SEMAPHORE_LIMIT=${containerEnv.SEMAPHORE_LIMIT}`);
   mcpLines.push(`GROUP_ID=${containerEnv.GROUP_ID}`);
