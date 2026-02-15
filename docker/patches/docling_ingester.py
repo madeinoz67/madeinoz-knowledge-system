@@ -28,6 +28,7 @@ from docling.chunking import HybridChunker
 from docling.datamodel.base_models import InputFormat
 from docling.datamodel.pipeline_options import PdfPipelineOptions
 from docling.document_converter import DocumentConverter, PdfFormatOption
+from docling_core.types.doc import PictureItem
 
 from patches.lkap_models import (
     Document,
@@ -264,9 +265,12 @@ class DoclingIngester:
 
     def _extract_images_from_docling(self, document) -> List[Dict[str, Any]]:
         """
-        Extract images from Docling document.
+        Extract images from Docling document using correct API.
 
-        Feature 024: Image extraction from Docling's picture images.
+        Feature 024: Image extraction from Docling using iterate_items().
+
+        Uses document.iterate_items() to find PictureItem elements,
+        then extracts actual image data via element.get_image(document).
 
         Args:
             document: Docling document object
@@ -275,47 +279,66 @@ class DoclingIngester:
             List of image dicts with base64 data and metadata
         """
         images = []
+        picture_count = 0
 
-        # Docling stores images in document.pictures or similar
-        # The exact API depends on Docling version
+        logger.info("=== Docling Image Extraction (iterate_items API) ===")
+        logger.debug(f"Document type: {type(document)}")
+
         try:
-            # Try to get pictures from document
-            if hasattr(document, "pictures"):
-                for i, picture in enumerate(document.pictures):
-                    image_data = self._extract_picture_image(picture)
-                    if image_data:
-                        images.append({
-                            "image_id": str(uuid.uuid4()),
-                            "image_data": image_data,
-                            "source_page": getattr(picture, "page_no", i),
-                            "position": i,
-                            "format": "PNG",
-                        })
+            # Correct Docling API: iterate through document items
+            # Each item is a tuple of (element, level_in_document_hierarchy)
+            for element, level in document.iterate_items():
+                if isinstance(element, PictureItem):
+                    picture_count += 1
+                    logger.debug(f"Found PictureItem at level {level}: {type(element)}")
 
-            # Also check for images in pages if generate_page_images was enabled
-            if hasattr(document, "pages"):
-                for page_num, page in enumerate(document.pages):
-                    if hasattr(page, "image") and page.image:
-                        # Save page image as base64
+                    # Get the actual image from the PictureItem
+                    # get_image() returns a PIL Image or None
+                    image = element.get_image(document)
+
+                    if image is not None:
+                        logger.debug(f"PictureItem has image: {image.size}, mode={image.mode}")
+
+                        # Convert PIL Image to base64
                         buffer = io.BytesIO()
-                        page.image.save(buffer, format="PNG")
+                        # Convert to RGB if necessary (handles RGBA, etc.)
+                        if image.mode in ('RGBA', 'P'):
+                            image = image.convert('RGB')
+                        image.save(buffer, format="PNG")
                         image_data = base64.b64encode(buffer.getvalue()).decode("utf-8")
+
+                        # Extract metadata from PictureItem
+                        prov = getattr(element, 'prov', [])
+                        page_no = prov[0].page_no if prov else 0
+
                         images.append({
                             "image_id": str(uuid.uuid4()),
                             "image_data": image_data,
-                            "source_page": page_num,
-                            "position": page_num,
+                            "source_page": page_no,
+                            "position": picture_count,
                             "format": "PNG",
+                            "size": image.size,
+                            "mode": image.mode,
                         })
+                        logger.info(f"Extracted image {picture_count}: page={page_no}, size={image.size}")
+                    else:
+                        logger.debug(f"PictureItem.get_image() returned None for item {picture_count}")
+
+            logger.info(f"Image extraction complete: {picture_count} PictureItems found, {len(images)} images extracted")
 
         except Exception as e:
             logger.warning(f"Failed to extract images from document: {e}")
+            logger.exception("Full image extraction error:")
 
         return images
 
     def _extract_picture_image(self, picture) -> Optional[str]:
         """
         Extract base64 image from Docling picture object.
+
+        DEPRECATED: This method is kept for backwards compatibility.
+        New code should use _extract_images_from_docling() which uses
+        the correct iterate_items() API.
 
         Args:
             picture: Docling picture object
