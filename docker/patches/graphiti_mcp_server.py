@@ -818,11 +818,13 @@ class GraphitiService:
             # Feature 022: Initialize promotion module with Graphiti client
             # This enables kg.promoteFromEvidence and kg.promoteFromQuery MCP tools
             try:
-                from . import promotion
+                logger.info('Feature 022: Attempting to import promotion module...')
+                from patches import promotion
+                logger.info('Feature 022: Promotion module imported, initializing...')
                 promotion.init_graphiti(self.client)
                 logger.info('Feature 022: LKAP promotion module initialized with Graphiti client')
-            except ImportError:
-                logger.debug('Feature 022: Promotion module not available (LKAP not installed)')
+            except ImportError as e:
+                logger.warning(f'Feature 022: Promotion module not available (LKAP not installed): {e}')
             except Exception as init_err:
                 logger.warning(f'Feature 022: Failed to initialize promotion module (non-critical): {init_err}')
 

@@ -25,8 +25,7 @@ from datetime import datetime, timedelta
 from dataclasses import dataclass, field
 
 from graphiti_core import Graphiti
-from graphiti_core.nodes import EpisodicNode
-from graphiti_core.utils.search.search_filters import SearchFilters
+from graphiti_core.search.search_filters import SearchFilters
 from graphiti_core.edges import EntityEdge
 
 from .lkap_models import (
@@ -114,7 +113,10 @@ async def create_fact(
     """
     graphiti = get_graphiti()
 
-    # Create fact episode/node
+    # Generate fact ID
+    fact_id = str(uuid.uuid4())
+
+    # Create fact content as JSON string
     fact_data = {
         "fact_type": fact_type.value,
         "entity": entity,
@@ -126,28 +128,32 @@ async def create_fact(
         "created_at": datetime.now().isoformat(),
     }
 
-    # Create episodic node for the fact
-    episode = EpisodicNode(
-        name=f"{entity}:{value}",
-        episode_type=f"Fact:{fact_type.value}",
-        source_data=fact_data,
+    # Create episode name and content
+    episode_name = f"Fact:{fact_type.value}:{entity}"
+    episode_content = json.dumps(fact_data)
+
+    # Add to Graphiti using correct API
+    # Note: Don't pass uuid - Graphiti generates its own. Our fact_id is in the content.
+    result = await graphiti.add_episode(
+        name=episode_name,
+        episode_body=episode_content,
+        source_description=f"LKAP Fact Promotion from evidence",
+        reference_time=datetime.now(),
+        group_id="lkap_facts",  # Dedicated group for promoted facts
     )
 
-    # Add to Graphiti
-    await graphiti.add_episode(
-        name=episode.name,
-        episode_body=episode.source_data,
-        episode_type=episode.episode_type,
-    )
+    # Get the actual episode UUID from Graphiti for the fact_id
+    if result and hasattr(result, 'episodes') and result.episodes:
+        fact_id = result.episodes[0].uuid
 
     # Check for conflicts
     await _check_and_create_conflicts(entity, fact_type, value)
 
     logger.info(f"Created fact: {fact_type.value} - {entity} = {value}")
 
-    # Return fact object (would need to query back to get UUID)
+    # Return fact object
     return Fact(
-        fact_id=episode.name,  # Using name as ID for now
+        fact_id=fact_id,
         type=fact_type,
         entity=entity,
         value=value,
@@ -181,7 +187,7 @@ async def _check_and_create_conflicts(
 
     results = await graphiti.search(
         query=entity,
-        search_filters=search_filter,
+        search_filter=search_filter,
     )
 
     # Check for conflicts (same entity + type, different values)
@@ -225,7 +231,9 @@ async def _create_conflict_record(
     await graphiti.add_episode(
         name=f"Conflict:{entity}:{fact_type.value}",
         episode_body=json.dumps(conflict_data),
-        episode_type="Conflict",
+        source_description="LKAP Conflict Detection",
+        reference_time=datetime.now(),
+        group_id="lkap_conflicts",
     )
 
     logger.warning(
@@ -305,8 +313,10 @@ async def promote_from_evidence(
         valid_until=valid_until,
     )
 
-    # Create evidence-to-fact link (T068)
-    await _create_evidence_fact_link(evidence_id, fact.fact_id)
+    # Note: Evidence provenance is stored in fact.evidence_ids (line 127)
+    # The evidence lives in Qdrant, not as a Graphiti node, so edge creation
+    # is not applicable. Provenance is tracked via evidence_ids in fact data.
+    logger.info(f"Fact {fact.fact_id} linked to evidence {evidence_id} via evidence_ids field")
 
     return fact
 
