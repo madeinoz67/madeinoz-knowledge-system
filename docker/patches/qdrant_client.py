@@ -453,7 +453,7 @@ class QdrantClient:
         query: str,
         classification: Optional[str] = None,
         top_k: int = 10,
-        confidence_threshold: float = 0.70,
+        confidence_threshold: float = 0.50,
     ) -> List[Dict[str, Any]]:
         """
         Search for images by description similarity.
