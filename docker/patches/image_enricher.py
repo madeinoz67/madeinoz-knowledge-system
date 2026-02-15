@@ -29,15 +29,17 @@ from patches.lkap_models import ImageType
 logger = logging.getLogger(__name__)
 
 # Environment configuration
-VISION_PROVIDER = os.getenv("MADEINOZ_KNOWLEDGE_VISION_PROVIDER", "openrouter")
-OPENROUTER_API_KEY = os.getenv("MADEINOZ_KNOWLEDGE_OPENROUTER_API_KEY", "")
+VISION_PROVIDER = os.getenv("MADEINOZ_KNOWLEDGE_VISION_PROVIDER", os.getenv("VISION_LLM_PROVIDER", "ollama"))
+OPENROUTER_API_KEY = os.getenv("MADEINOZ_KNOWLEDGE_OPENROUTER_API_KEY", os.getenv("OPENROUTER_API_KEY", ""))
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 ZAI_API_KEY = os.getenv("MADEINOZ_KNOWLEDGE_ZAI_API_KEY", "")
 ZAI_BASE_URL = os.getenv("MADEINOZ_KNOWLEDGE_ZAI_BASE_URL", "https://api.z.ai/v1")
-OLLAMA_BASE_URL = os.getenv("MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL", "http://localhost:11434")
+# Ollama URL: check MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL first, then OLLAMA_BASE_URL (from container)
+OLLAMA_BASE_URL = os.getenv("MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL", os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"))
+# Vision model: check MADEINOZ_KNOWLEDGE_VISION_MODEL first, then VISION_LLM_MODEL (from container)
 VISION_MODEL = os.getenv(
     "MADEINOZ_KNOWLEDGE_VISION_MODEL",
-    "google/gemini-2.0-flash-exp:free"  # OpenRouter default (free tier)
+    os.getenv("VISION_LLM_MODEL", "llama3.2-vision")  # Default to Ollama vision model
 )
 
 # Classification prompt for technical documents
