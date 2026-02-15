@@ -26,9 +26,9 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
-# Environment configuration
-OLLAMA_URL = os.getenv("OLLAMA_BASE_URL", "http://ollama:11434")
-OLLAMA_MODEL = os.getenv("OLLAMA_EMBEDDING_MODEL", "bge-large-en-v1.5")
+# Environment configuration - Qdrant RAG embedding (MADEINOZ_KNOWLEDGE_QDRANT_* prefix)
+OLLAMA_URL = os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_OLLAMA_URL", os.getenv("OLLAMA_BASE_URL", "http://ollama:11434"))
+OLLAMA_MODEL = os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_EMBEDDING_MODEL", os.getenv("OLLAMA_EMBEDDING_MODEL", "bge-m3"))
 EMBEDDING_DIMENSION = 1024  # bge-large-en-v1.5 produces 1024-dim vectors
 
 
