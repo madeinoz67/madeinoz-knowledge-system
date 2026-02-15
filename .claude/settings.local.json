@@ -46,7 +46,9 @@
       "mcp__plugin_codanna-cc_codanna-cc__semantic_search_with_context",
       "mcp__plugin_codanna-cc_codanna-cc__search_documents",
       "mcp__playwright__browser_run_code",
-      "mcp__github__issue_read"
+      "mcp__github__issue_read",
+      "mcp__github__get_file_contents",
+      "mcp__github__search_code"
     ]
   }
 }

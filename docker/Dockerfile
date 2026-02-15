@@ -4,6 +4,13 @@
 
 FROM zepai/knowledge-graph-mcp:standalone
 
+# Install system dependencies for Docling PDF rendering
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libxcb1 \
+    libgl1 \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
 # Build-time arguments for version tracking (passed during CI build)
 ARG BUILD_VERSION
 ARG BUILD_COMMIT
@@ -26,6 +33,12 @@ COPY docker/patches/falkordb_lucene.py /app/mcp/src/utils/falkordb_lucene.py
 # Add to uv project dependencies
 WORKDIR /app/mcp
 RUN uv add "opentelemetry-api>=1.20.0" "opentelemetry-sdk>=1.20.0" "opentelemetry-exporter-prometheus>=0.41b0" "prometheus-client>=0.17.0" "pyyaml>=6.0" "pydantic>=2.0" "stix2>=3.0.0"
+
+# LKAP (Feature 022/023): Self-Hosted RAG dependencies
+# Feature 023: Qdrant migration - Docling for PDF parsing, semantic chunking
+# Feature 024: Multimodal image extraction - Pillow for image processing
+# Qdrant client (qdrant-client), Ollama embeddings, HTTP clients
+RUN uv add "requests>=2.31.0" "aiohttp>=3.9.0" "httpx>=0.27.0" "mcp>=0.9.0" "docling>=2.0.0" "qdrant-client>=1.12.0" "tiktoken>=0.5.0" "pillow>=10.0.0"
 
 # Prompt caching implementation (Feature 006)
 COPY docker/patches/cache_metrics.py /app/mcp/src/utils/cache_metrics.py
@@ -60,6 +73,27 @@ COPY docker/patches/stix_importer.py /app/mcp/src/utils/stix_importer.py
 COPY docker/patches/models/__init__.py /app/mcp/src/models/__init__.py
 # Graph traversal engine
 COPY docker/patches/utils/graph_traversal.py /app/mcp/src/utils/graph_traversal.py
+
+# Qdrant-based LKAP (Feature 022 - Lightweight Alternative)
+# Qdrant client for document memory with Ollama embeddings
+COPY docker/patches/qdrant_client.py /app/mcp/src/patches/qdrant_client.py
+
+# LKAP promotion and models (Feature 022)
+# Creates patches/ directory for from patches.promotion import ... to work
+COPY docker/patches/__init__.py /app/mcp/src/patches/__init__.py
+COPY docker/patches/embedding_service.py /app/mcp/src/patches/embedding_service.py
+COPY docker/patches/lkap_logging.py /app/mcp/src/patches/lkap_logging.py
+COPY docker/patches/lkap_models.py /app/mcp/src/patches/lkap_models.py
+COPY docker/patches/lkap_schema.py /app/mcp/src/patches/lkap_schema.py
+COPY docker/patches/promotion.py /app/mcp/src/patches/promotion.py
+
+# Qdrant-based LKAP modules (Feature 023)
+COPY docker/patches/ollama_embedder.py /app/mcp/src/patches/ollama_embedder.py
+COPY docker/patches/semantic_chunker.py /app/mcp/src/patches/semantic_chunker.py
+COPY docker/patches/docling_ingester.py /app/mcp/src/patches/docling_ingester.py
+
+# Multimodal image extraction (Feature 024)
+COPY docker/patches/image_enricher.py /app/mcp/src/patches/image_enricher.py
 
 # Copy both Neo4j and FalkorDB configs
 COPY src/skills/server/config-neo4j.yaml /tmp/config-neo4j.yaml

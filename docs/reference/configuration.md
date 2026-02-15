@@ -488,6 +488,143 @@ Controls prompt caching for Gemini models via OpenRouter. When enabled, the syst
 
 For detailed metrics documentation, see the [Observability & Metrics](observability.md) reference.
 
+## LKAP Configuration (Feature 022/023)
+
+!!! info "Feature 022/023: Local Knowledge Augmentation Platform"
+    LKAP adds RAG capabilities with automatic document ingestion, semantic search, and evidence-based knowledge promotion. Uses Qdrant (69MB Docker image) as the vector database. See [LKAP Quickstart](../usage/lkap-quickstart.md) for complete user guide.
+
+### Qdrant Configuration
+
+Qdrant provides lightweight vector database storage with 69MB Docker image and 626 QPS performance.
+
+```bash
+# Qdrant API endpoint
+MADEINOZ_KNOWLEDGE_QDRANT_URL=http://localhost:6333
+
+# Optional Qdrant API key for authentication (cloud deployments)
+MADEINOZ_KNOWLEDGE_QDRANT_API_KEY=your-qdrant-api-key
+
+# Collection name for document chunks
+MADEINOZ_KNOWLEDGE_QDRANT_COLLECTION=lkap_documents
+```
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `QDRANT_URL` | `http://localhost:6333` | Qdrant API endpoint |
+| `QDRANT_API_KEY` | (none) | Optional authentication key (cloud only) |
+| `QDRANT_COLLECTION` | `lkap_documents` | Collection name for chunks |
+
+### Embedding Configuration
+
+LKAP requires embeddings with 1024+ dimensions for high-quality semantic search. Uses Ollama with bge-large-en-v1.5 by default.
+
+```bash
+# Embedding dimension (1024 for bge-large-en-v1.5)
+MADEINOZ_KNOWLEDGE_QDRANT_EMBEDDING_DIMENSION=1024
+
+# Embedding model selection (ollama for local operation)
+MADEINOZ_KNOWLEDGE_OLLAMA_EMBEDDING_MODEL=bge-large-en-v1.5
+```
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `QDRANT_EMBEDDING_DIMENSION` | `1024` | Embedding vector dimension |
+| `OLLAMA_EMBEDDING_MODEL` | `bge-large-en-v1.5` | Ollama embedding model |
+
+**Embedding Model Options:**
+
+| Model | Dimensions | Provider | Notes |
+|-------|------------|----------|-------|
+| `bge-large-en-v1.5` | 1024 | Ollama | Default, free, high quality |
+| `mxbai-embed-large` | 1024 | Ollama | Alternative option |
+| `nomic-embed-text` | 768 | Ollama | Smaller dimension |
+
+### Chunking Configuration
+
+Documents are split into chunks for semantic search using tiktoken with heading-aware boundaries.
+
+```bash
+# Chunking configuration (semantic, heading-aware)
+MADEINOZ_KNOWLEDGE_QDRANT_CHUNK_SIZE_MIN=512
+MADEINOZ_KNOWLEDGE_QDRANT_CHUNK_SIZE_MAX=768
+MADEINOZ_KNOWLEDGE_QDRANT_CHUNK_OVERLAP=100
+```
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `QDRANT_CHUNK_SIZE_MIN` | `512` | Minimum chunk size (tokens) |
+| `QDRANT_CHUNK_SIZE_MAX` | `768` | Maximum chunk size (tokens) |
+| `QDRANT_CHUNK_OVERLAP` | `100` | Overlap between chunks (tokens) |
+
+### Search Configuration
+
+Control search result quality and logging behavior.
+
+```bash
+# Search confidence threshold (chunks below 0.70 are not returned)
+MADEINOZ_KNOWLEDGE_QDRANT_CONFIDENCE_THRESHOLD=0.70
+
+# Logging level
+MADEINOZ_KNOWLEDGE_QDRANT_LOG_LEVEL=INFO
+```
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `QDRANT_CONFIDENCE_THRESHOLD` | `0.70` | Minimum confidence for results (0.0-1.0) |
+| `QDRANT_LOG_LEVEL` | `INFO` | Logging level (`DEBUG`, `INFO`, `WARNING`, `ERROR`) |
+
+### Ollama Configuration
+
+For fully local operation without external API calls.
+
+```bash
+# Ollama API endpoint
+MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL=http://ollama:11434
+
+# Ollama embedding model (BGE-large: 1024 dimensions, minimum requirement)
+MADEINOZ_KNOWLEDGE_OLLAMA_EMBEDDING_MODEL=bge-large-en-v1.5
+
+# Comma-separated list of models to pull on startup
+# bge-large-en-v1.5 provides 1024 dimension embeddings
+MADEINOZ_KNOWLEDGE_OLLAMA_MODELS=bge-large-en-v1.5
+
+# Resource limits for Ollama (adjust based on host hardware)
+# 0 = CPU only, 1+ = number of GPU layers to offload
+MADEINOZ_KNOWLEDGE_OLLAMA_NUM_GPU=0
+MADEINOZ_KNOWLEDGE_OLLAMA_NUM_THREAD=4
+```
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OLLAMA_BASE_URL` | `http://ollama:11434` | Ollama API endpoint |
+| `OLLAMA_EMBEDDING_MODEL` | `bge-large-en-v1.5` | Ollama embedding model |
+| `OLLAMA_MODELS` | `bge-large-en-v1.5` | Models to pull on startup |
+| `OLLAMA_NUM_GPU` | `0` | GPU layers (0 = CPU only) |
+| `OLLAMA_NUM_THREAD` | `4` | CPU threads for inference |
+
+### Docker Commands
+
+```bash
+# Start Qdrant vector database (Feature 023 - 69MB image)
+docker compose -f docker/docker-compose-qdrant.yml up -d
+
+# Start Ollama (optional - for fully local embeddings)
+docker compose -f docker/docker-compose-ollama.yml up -d
+
+# Full LKAP stack (Neo4j + Qdrant + Ollama)
+docker compose -f src/skills/server/docker-compose-neo4j.yml up -d
+docker compose -f docker/docker-compose-qdrant.yml up -d
+docker compose -f docker/docker-compose-ollama.yml up -d
+```
+
+### Document Storage
+
+```bash
+knowledge/
+├── inbox/          # Drop PDFs, markdown, text files here for ingestion
+└── processed/      # Canonical storage after successful ingestion
+```
+
 ## Memory Decay Configuration (Feature 009)
 
 !!! info "Feature 009: Memory Decay Scoring"

@@ -56,6 +56,14 @@ export const MCP_TOOLS = {
   RESUME_IMPORT: 'resume_import',
   // Feature 020: Investigative search
   INVESTIGATE_ENTITY: 'investigate_entity',
+  // Feature 023: Qdrant RAG tools
+  RAG_SEARCH: 'rag_search',
+  RAG_GET_CHUNK: 'rag_get_chunk',
+  RAG_INGEST: 'rag_ingest',
+  RAG_HEALTH: 'rag_health',
+  RAG_SEARCH_IMAGES: 'rag_searchImages',
+  RAG_GET_IMAGE: 'rag_getImage',
+  RAG_LIST_IMAGES: 'rag_listImages',
 } as const;
 
 /**
@@ -1213,6 +1221,156 @@ export class MCPClient {
         error: 'Unknown error occurred',
       };
     }
+  }
+
+  // ===========================================================================
+  // Feature 023: Qdrant RAG Tools
+  // ===========================================================================
+
+  /**
+   * Search documents in Qdrant vector database
+   */
+  async ragSearch(params: {
+    query: string;
+    top_k?: number;
+    domain?: string;
+    document_type?: string;
+    component?: string;
+    project?: string;
+    version?: string;
+  }): Promise<
+    MCPClientResponse<{
+      results: Array<{
+        chunk_id: string;
+        text: string;
+        source: string;
+        page?: number;
+        confidence: number;
+        metadata?: Record<string, unknown>;
+      }>;
+      total: number;
+      query_time_ms: number;
+    }>
+  > {
+    return await this.callTool(MCP_TOOLS.RAG_SEARCH, params as Record<string, unknown>);
+  }
+
+  /**
+   * Get a specific chunk by ID
+   */
+  async ragGetChunk(params: {
+    chunk_id: string;
+  }): Promise<
+    MCPClientResponse<{
+      chunk_id: string;
+      text: string;
+      source: string;
+      page?: number;
+      token_count?: number;
+      headings?: string[];
+      metadata?: Record<string, unknown>;
+    }>
+  > {
+    return await this.callTool(MCP_TOOLS.RAG_GET_CHUNK, params as Record<string, unknown>);
+  }
+
+  /**
+   * Ingest documents into Qdrant
+   */
+  async ragIngest(params: {
+    file_path?: string;
+    ingest_all?: boolean;
+  }): Promise<
+    MCPClientResponse<{
+      success: boolean;
+      doc_id?: string;
+      chunk_count?: number;
+      documents_processed?: number;
+      results?: Array<{
+        doc_id: string;
+        chunk_count: number;
+        status: string;
+      }>;
+      message?: string;
+    }>
+  > {
+    return await this.callTool(MCP_TOOLS.RAG_INGEST, params as Record<string, unknown>);
+  }
+
+  /**
+   * Check Qdrant health
+   */
+  async ragHealth(): Promise<
+    MCPClientResponse<{
+      status: string;
+      collection?: string;
+      vector_count?: number;
+      indexed?: boolean;
+    }>
+  > {
+    return await this.callTool(MCP_TOOLS.RAG_HEALTH, {});
+  }
+
+  /**
+   * Search images by description
+   */
+  async ragSearchImages(params: {
+    query: string;
+    top_k?: number;
+    image_type?: string;
+  }): Promise<
+    MCPClientResponse<{
+      results: Array<{
+        image_id: string;
+        description: string;
+        source: string;
+        page?: number;
+        confidence: number;
+        image_type?: string;
+      }>;
+      total: number;
+    }>
+  > {
+    return await this.callTool(MCP_TOOLS.RAG_SEARCH_IMAGES, params as Record<string, unknown>);
+  }
+
+  /**
+   * Get specific image by ID
+   */
+  async ragGetImage(params: {
+    image_id: string;
+  }): Promise<
+    MCPClientResponse<{
+      image_id: string;
+      description: string;
+      source: string;
+      page?: number;
+      image_type?: string;
+      base64_data?: string;
+    }>
+  > {
+    return await this.callTool(MCP_TOOLS.RAG_GET_IMAGE, params as Record<string, unknown>);
+  }
+
+  /**
+   * List all images
+   */
+  async ragListImages(params?: {
+    image_type?: string;
+    limit?: number;
+  }): Promise<
+    MCPClientResponse<{
+      images: Array<{
+        image_id: string;
+        description: string;
+        source: string;
+        page?: number;
+        image_type?: string;
+      }>;
+      total: number;
+    }>
+  > {
+    return await this.callTool(MCP_TOOLS.RAG_LIST_IMAGES, (params || {}) as Record<string, unknown>);
   }
 }
 

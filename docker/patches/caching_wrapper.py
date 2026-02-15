@@ -285,10 +285,7 @@ def wrap_openai_client_for_caching(client: Any, model: str) -> Any:
             async def create_with_caching(*args, **kwargs):
                 """Wrapped chat.completions.create method with metrics and optional caching support."""
 
-                # ALWAYS log this to verify wrapper is being called
-                import sys
-                print(f"🔍🔍🔍 WRAPPER CALLED: chat.completions.create for model: {model}", file=sys.stderr, flush=True)
-                logger.info(f"🔍 chat.completions.create CALLED for model: {model}")
+                logger.debug(f"chat.completions.create called for model: {model}")
 
                 # PHASE 1: REQUEST PREPROCESSING
                 # Format messages with cache_control markers (only if caching enabled for this model)

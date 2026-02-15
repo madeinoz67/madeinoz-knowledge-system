@@ -55,6 +55,26 @@ export interface KnowledgeConfig {
   // Telemetry
   GRAPHITI_TELEMETRY_ENABLED: string;
 
+  // Qdrant Configuration (LKAP - Document Memory)
+  QDRANT_URL?: string;
+  QDRANT_API_KEY?: string;
+  QDRANT_COLLECTION?: string;
+  QDRANT_EMBEDDING_DIMENSION?: string;
+  QDRANT_CONFIDENCE_THRESHOLD?: string;
+  QDRANT_CHUNK_SIZE_MIN?: string;
+  QDRANT_CHUNK_SIZE_MAX?: string;
+  QDRANT_CHUNK_OVERLAP?: string;
+  QDRANT_LOG_LEVEL?: string;
+  OLLAMA_BASE_URL?: string;
+  OLLAMA_EMBEDDING_MODEL?: string;
+
+  // Vision LLM Configuration (Feature 024 - Multimodal Image Extraction)
+  VISION_LLM_PROVIDER?: string;
+  VISION_LLM_MODEL?: string;
+  VISION_LLM_FALLBACK?: string;
+  OPENROUTER_API_KEY?: string;
+  ZAI_API_KEY?: string;
+
   // Prompt Caching (Gemini)
   PROMPT_CACHE_ENABLED?: string;
   PROMPT_CACHE_METRICS_ENABLED?: string;
@@ -151,6 +171,7 @@ export class ConfigLoader {
   /**
    * Load environment variables from PAI .env file using Bun
    * PAI .env (${PAI_DIR}/.env or ~/.claude/.env) is the ONLY source of truth
+   * Additionally loads .env.dev from pack root for development overrides
    */
   async loadEnv(): Promise<Record<string, string>> {
     const env: Record<string, string> = {};
@@ -166,6 +187,14 @@ export class ConfigLoader {
     if (await this.envExists()) {
       const file = Bun.file(this.envFile);
       const content = await file.text();
+      this.parseEnvFile(content, env);
+    }
+
+    // Load .env.dev from pack root (development overrides)
+    const devEnvFile = join(this.packRoot, '.env.dev');
+    const devFile = Bun.file(devEnvFile);
+    if (await devFile.exists()) {
+      const content = await devFile.text();
       this.parseEnvFile(content, env);
     }
 
@@ -263,6 +292,25 @@ export class ConfigLoader {
       MADEINOZ_KNOWLEDGE_TLS_CA: 'KNOWLEDGE_TLS_CA',
       MADEINOZ_KNOWLEDGE_TLS_CERT: 'KNOWLEDGE_TLS_CERT',
       MADEINOZ_KNOWLEDGE_TLS_KEY: 'KNOWLEDGE_TLS_KEY',
+      // Qdrant (LKAP - Feature 022/023)
+      MADEINOZ_KNOWLEDGE_QDRANT_URL: 'QDRANT_URL',
+      MADEINOZ_KNOWLEDGE_QDRANT_API_KEY: 'QDRANT_API_KEY',
+      MADEINOZ_KNOWLEDGE_QDRANT_COLLECTION: 'QDRANT_COLLECTION',
+      MADEINOZ_KNOWLEDGE_QDRANT_EMBEDDING_DIMENSION: 'QDRANT_EMBEDDING_DIMENSION',
+      MADEINOZ_KNOWLEDGE_QDRANT_CONFIDENCE_THRESHOLD: 'QDRANT_CONFIDENCE_THRESHOLD',
+      MADEINOZ_KNOWLEDGE_QDRANT_CHUNK_SIZE_MIN: 'QDRANT_CHUNK_SIZE_MIN',
+      MADEINOZ_KNOWLEDGE_QDRANT_CHUNK_SIZE_MAX: 'QDRANT_CHUNK_SIZE_MAX',
+      MADEINOZ_KNOWLEDGE_QDRANT_CHUNK_OVERLAP: 'QDRANT_CHUNK_OVERLAP',
+      MADEINOZ_KNOWLEDGE_QDRANT_LOG_LEVEL: 'QDRANT_LOG_LEVEL',
+      // Ollama (for Qdrant embeddings) - uses QDRANT prefix for consistency
+      MADEINOZ_KNOWLEDGE_QDRANT_OLLAMA_URL: 'OLLAMA_BASE_URL',
+      MADEINOZ_KNOWLEDGE_QDRANT_EMBEDDING_MODEL: 'OLLAMA_EMBEDDING_MODEL',
+      // Vision LLM (Feature 024 - Multimodal Image Extraction)
+      MADEINOZ_KNOWLEDGE_VISION_LLM_PROVIDER: 'VISION_LLM_PROVIDER',
+      MADEINOZ_KNOWLEDGE_VISION_LLM_MODEL: 'VISION_LLM_MODEL',
+      MADEINOZ_KNOWLEDGE_VISION_LLM_FALLBACK: 'VISION_LLM_FALLBACK',
+      MADEINOZ_KNOWLEDGE_OPENROUTER_API_KEY: 'OPENROUTER_API_KEY',
+      MADEINOZ_KNOWLEDGE_ZAI_API_KEY: 'ZAI_API_KEY',
     };
 
     // Apply mappings - MADEINOZ_KNOWLEDGE_* takes PRECEDENCE over unprefixed variables
@@ -349,6 +397,26 @@ export class ConfigLoader {
         'GRAPHITI_TELEMETRY_ENABLED',
         DEFAULTS.GRAPHITI_TELEMETRY_ENABLED
       ),
+
+      // Qdrant Configuration (LKAP - Document Memory)
+      QDRANT_URL: this.getEnvValue(mapped, 'QDRANT_URL', ''),
+      QDRANT_API_KEY: this.getEnvValue(mapped, 'QDRANT_API_KEY', ''),
+      QDRANT_COLLECTION: this.getEnvValue(mapped, 'QDRANT_COLLECTION', ''),
+      QDRANT_EMBEDDING_DIMENSION: this.getEnvValue(mapped, 'QDRANT_EMBEDDING_DIMENSION', ''),
+      QDRANT_CONFIDENCE_THRESHOLD: this.getEnvValue(mapped, 'QDRANT_CONFIDENCE_THRESHOLD', ''),
+      QDRANT_CHUNK_SIZE_MIN: this.getEnvValue(mapped, 'QDRANT_CHUNK_SIZE_MIN', ''),
+      QDRANT_CHUNK_SIZE_MAX: this.getEnvValue(mapped, 'QDRANT_CHUNK_SIZE_MAX', ''),
+      QDRANT_CHUNK_OVERLAP: this.getEnvValue(mapped, 'QDRANT_CHUNK_OVERLAP', ''),
+      QDRANT_LOG_LEVEL: this.getEnvValue(mapped, 'QDRANT_LOG_LEVEL', ''),
+      OLLAMA_BASE_URL: this.getEnvValue(mapped, 'OLLAMA_BASE_URL', ''),
+      OLLAMA_EMBEDDING_MODEL: this.getEnvValue(mapped, 'OLLAMA_EMBEDDING_MODEL', ''),
+
+      // Vision LLM Configuration (Feature 024)
+      VISION_LLM_PROVIDER: this.getEnvValue(mapped, 'VISION_LLM_PROVIDER', ''),
+      VISION_LLM_MODEL: this.getEnvValue(mapped, 'VISION_LLM_MODEL', ''),
+      VISION_LLM_FALLBACK: this.getEnvValue(mapped, 'VISION_LLM_FALLBACK', ''),
+      OPENROUTER_API_KEY: this.getEnvValue(mapped, 'OPENROUTER_API_KEY', ''),
+      ZAI_API_KEY: this.getEnvValue(mapped, 'ZAI_API_KEY', ''),
 
       // Prompt Caching (Gemini)
       PROMPT_CACHE_ENABLED: this.getEnvValue(mapped, 'PROMPT_CACHE_ENABLED', ''),
@@ -497,6 +565,26 @@ export class ConfigLoader {
     if (config.METRICS_PORT) {
       env.METRICS_PORT = config.METRICS_PORT;
     }
+
+    // Qdrant Configuration (LKAP)
+    if (config.QDRANT_URL) env.QDRANT_URL = config.QDRANT_URL;
+    if (config.QDRANT_API_KEY) env.QDRANT_API_KEY = config.QDRANT_API_KEY;
+    if (config.QDRANT_COLLECTION) env.QDRANT_COLLECTION = config.QDRANT_COLLECTION;
+    if (config.QDRANT_EMBEDDING_DIMENSION) env.QDRANT_EMBEDDING_DIMENSION = config.QDRANT_EMBEDDING_DIMENSION;
+    if (config.QDRANT_CONFIDENCE_THRESHOLD) env.QDRANT_CONFIDENCE_THRESHOLD = config.QDRANT_CONFIDENCE_THRESHOLD;
+    if (config.QDRANT_CHUNK_SIZE_MIN) env.QDRANT_CHUNK_SIZE_MIN = config.QDRANT_CHUNK_SIZE_MIN;
+    if (config.QDRANT_CHUNK_SIZE_MAX) env.QDRANT_CHUNK_SIZE_MAX = config.QDRANT_CHUNK_SIZE_MAX;
+    if (config.QDRANT_CHUNK_OVERLAP) env.QDRANT_CHUNK_OVERLAP = config.QDRANT_CHUNK_OVERLAP;
+    if (config.QDRANT_LOG_LEVEL) env.QDRANT_LOG_LEVEL = config.QDRANT_LOG_LEVEL;
+    if (config.OLLAMA_BASE_URL) env.OLLAMA_BASE_URL = config.OLLAMA_BASE_URL;
+    if (config.OLLAMA_EMBEDDING_MODEL) env.OLLAMA_EMBEDDING_MODEL = config.OLLAMA_EMBEDDING_MODEL;
+
+    // Vision LLM Configuration (Feature 024)
+    if (config.VISION_LLM_PROVIDER) env.VISION_LLM_PROVIDER = config.VISION_LLM_PROVIDER;
+    if (config.VISION_LLM_MODEL) env.VISION_LLM_MODEL = config.VISION_LLM_MODEL;
+    if (config.VISION_LLM_FALLBACK) env.VISION_LLM_FALLBACK = config.VISION_LLM_FALLBACK;
+    if (config.OPENROUTER_API_KEY) env.OPENROUTER_API_KEY = config.OPENROUTER_API_KEY;
+    if (config.ZAI_API_KEY) env.ZAI_API_KEY = config.ZAI_API_KEY;
 
     return env;
   }
