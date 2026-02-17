@@ -11,11 +11,12 @@
 
 | Metric | Value |
 |--------|-------|
-| **Overall Compliance** | 54% (13/24 best practices) |
-| **Critical Gaps** | 2 |
+| **Overall Compliance** | 71% (17/24 best practices) |
+| **Critical Gaps** | 2 (remaining P3) |
 | **Quick Wins (P0)** | 2 (complete) |
 | **P1 Tasks** | 4 (complete) |
-| **Estimated Accuracy Loss** | 10-15% (down from 30-40%) |
+| **P2 Tasks** | 4 (complete) |
+| **Estimated Accuracy Loss** | 5-10% (down from 30-40%) |
 
 ---
 
@@ -32,8 +33,8 @@
 | 7 | Embedding | 768-1024 dimensions | ✅ IMPLEMENTED | |
 | 8 | Embedding | Qwen3-Embedding SOTA | ⚠️ AVAILABLE | Not default |
 | 9 | Retrieval | Hybrid search (BM25 + dense) | ✅ IMPLEMENTED | |
-| 10 | Retrieval | HyDE query expansion | ❌ MISSING | #GAP-004 |
-| 11 | Retrieval | Query classification (adaptive) | ❌ MISSING | #GAP-005 |
+| 10 | Retrieval | HyDE query expansion | ✅ IMPLEMENTED | |
+| 11 | Retrieval | Query classification (adaptive) | ✅ IMPLEMENTED | |
 | 12 | Retrieval | Multi-query variants | ❌ MISSING | #GAP-006 |
 | 13 | Reranking | Cross-encoder on top-20 | ✅ IMPLEMENTED | |
 | 14 | Reranking | Never skip in production | ✅ IMPLEMENTED | |
@@ -41,10 +42,10 @@
 | 16 | Metadata | Source citations in payload | ✅ IMPLEMENTED | |
 | 17 | Deduplication | Hash-based at ingestion | ✅ IMPLEMENTED | |
 | 18 | Deduplication | Semantic (0.85-0.95 threshold) | ⚠️ PARTIAL | MinHash available |
-| 19 | Ingestion | Quality scoring (freshness, authority) | ❌ MISSING | #GAP-009 |
-| 20 | Ingestion | Garbage detection (entropy, language) | ❌ MISSING | #GAP-010 |
+| 19 | Ingestion | Quality scoring (freshness, authority) | ✅ IMPLEMENTED | |
+| 20 | Ingestion | Garbage detection (entropy, language) | ✅ IMPLEMENTED | |
 | 21 | Evaluation | MRR, NDCG, recall@k metrics | ✅ IMPLEMENTED | |
-| 22 | Evaluation | Human evaluation framework | ❌ MISSING | #GAP-012 |
+| 22 | Evaluation | Human evaluation framework | ✅ IMPLEMENTED | |
 | 23 | Security | Source trust scoring | ✅ IMPLEMENTED | |
 | 24 | Security | RBAC/ABAC filtering | ❌ MISSING | #GAP-014 |
 
@@ -74,17 +75,27 @@
 - Reciprocal Rank Fusion: `score(d) = sum(1 / (k + rank))` for robust combining
 - Tests: `docker/patches/tests/unit/test_hybrid_search.py` (18 tests)
 
-### #GAP-004: HyDE Query Expansion
-**Impact**: Medium | **Effort**: Medium
+### #GAP-004: HyDE Query Expansion ✅ IMPLEMENTED
+**Impact**: Medium | **Effort**: Medium | **Status**: COMPLETE (2026-02-17)
 **Description**: Short, ambiguous queries fail to match document language
 **RAG Book**: "Generate a hypothetical answer, retrieve docs similar to it"
-**Mitigation**: Optional HyDE mode for queries under 10 tokens
+**Implementation**:
+- `docker/patches/hyde_expansion.py` - HyDEExpander and HyDERetrievalAugmenter
+- Generates hypothetical documents for short/ambiguous queries
+- Configurable thresholds: MIN_QUERY_TOKENS (10), MAX_HYPOTHETICAL_TOKENS (200)
+- Integrates with HyDERetrievalAugmenter for combine mode (RRF fusion)
+- Tests: `docker/patches/tests/unit/test_hyde_expansion.py` (29 tests)
 
-### #GAP-005: Query Classification
-**Impact**: Medium | **Effort**: Medium
+### #GAP-005: Query Classification ✅ IMPLEMENTED
+**Impact**: Medium | **Effort**: Medium | **Status**: COMPLETE (2026-02-17)
 **Description**: All queries receive identical treatment regardless of type
 **RAG Book**: "Different queries need different retrieval strategies"
-**Mitigation**: Classify as factual/procedural/comparative/temporal, adapt retrieval
+**Implementation**:
+- `docker/patches/query_classifier.py` - QueryClassifier, RuleBasedClassifier, QueryRouter
+- 6 query types: FACTUAL, PROCEDURAL, CONCEPTUAL, COMPARATIVE, TEMPORAL, AMBIGUOUS
+- Rule-based classification with regex patterns
+- Retrieval strategies per query type (top_k, hybrid_weight, rerank)
+- Tests: `docker/patches/tests/unit/test_query_classifier.py` (28 tests)
 
 ### #GAP-006: Multi-Query Variants
 **Impact**: Medium | **Effort**: Medium
@@ -113,17 +124,27 @@
 - Optional MinHash near-duplicate detection (disabled by default)
 - Tests: `docker/patches/tests/unit/test_deduplication.py` (21 tests)
 
-### #GAP-009: Quality Scoring
-**Impact**: Medium | **Effort**: Medium
+### #GAP-009: Quality Scoring ✅ IMPLEMENTED
+**Impact**: Medium | **Effort**: Medium | **Status**: COMPLETE (2026-02-17)
 **Description**: No freshness, completeness, or authority scoring
 **RAG Book**: "Documents below threshold get flagged for review or excluded"
-**Mitigation**: Calculate quality_score at ingestion, boost high-quality in retrieval
+**Implementation**:
+- `docker/patches/quality_scoring.py` - QualityScorer and GarbageDetector
+- Quality factors: freshness, completeness, authority, entropy
+- Freshness decay with configurable half-life (default 365 days)
+- Quality levels: EXCELLENT (0.9+), GOOD (0.7+), ACCEPTABLE (0.5+), POOR (0.3+)
+- Tests: `docker/patches/tests/unit/test_quality_scoring.py` (43 tests)
 
-### #GAP-010: Garbage Detection
-**Impact**: Low | **Effort**: Low
+### #GAP-010: Garbage Detection ✅ IMPLEMENTED
+**Impact**: Low | **Effort**: Low | **Status**: COMPLETE (2026-02-17)
 **Description**: No entropy, language, or length validation
 **RAG Book**: "Placeholder text, 'lorem ipsum', corrupted exports"
-**Mitigation**: Add entropy check, language detection, length heuristics at ingestion
+**Implementation**:
+- Included in `docker/patches/quality_scoring.py` - GarbageDetector class
+- Pattern detection: lorem ipsum, placeholder text, TODO, TBD
+- Shannon entropy calculation for information density
+- Minimum length (50 chars) and unique words (10) thresholds
+- Low-entropy pattern detection for repeated content
 
 ### #GAP-011: Evaluation Metrics ✅ IMPLEMENTED
 **Impact**: CRITICAL | **Effort**: Medium | **Status**: COMPLETE (2026-02-17)
@@ -138,11 +159,18 @@
 - Aggregate metrics for dashboard
 - Tests: `docker/patches/tests/unit/test_evaluation.py` (35 tests)
 
-### #GAP-012: Human Evaluation Framework
-**Impact**: High | **Effort**: Medium
+### #GAP-012: Human Evaluation Framework ✅ IMPLEMENTED
+**Impact**: High | **Effort**: Medium | **Status**: COMPLETE (2026-02-17)
 **Description**: No feedback loop for quality validation
 **RAG Book**: "Human evaluation samples essential for quality validation"
-**Mitigation**: Add thumbs up/down, collect ratings, sample for human review
+**Implementation**:
+- `docker/patches/human_evaluation.py` - HumanEvaluationFramework
+- 5-level relevance grading: PERFECT, HIGHLY_RELEVANT, SOMEWHAT_RELEVANT, MARGINAL, NOT_RELEVANT
+- Smart sampling: prioritize low confidence, random sample for high confidence
+- Review queue with persistence
+- Cohen's Kappa for inter-rater agreement
+- Dispute detection when reviewers disagree significantly
+- Tests: `docker/patches/tests/unit/test_human_evaluation.py` (32 tests)
 
 ### #GAP-013: Source Trust Scoring ✅ IMPLEMENTED
 **Impact**: High (security) | **Effort**: Low | **Status**: COMPLETE (2026-02-17)
@@ -183,14 +211,14 @@
 | Source trust scoring | #GAP-013 | Low | Prevents poisoning | ✅ DONE |
 | Evaluation metrics (MRR) | #GAP-011 | Medium | Quality visibility | ✅ DONE |
 
-### P2: Medium-Term (Enhancement)
+### P2: Medium-Term (Enhancement) ✅ COMPLETE
 
-| Task | Gap | Effort | Impact |
-|------|-----|--------|--------|
-| Query classification | #GAP-005 | Medium | +15% edge cases |
-| HyDE query expansion | #GAP-004 | Medium | Better short queries |
-| Human evaluation framework | #GAP-012 | Medium | Feedback loop |
-| Quality scoring at ingestion | #GAP-009 | Medium | Filters garbage |
+| Task | Gap | Effort | Impact | Status |
+|------|-----|--------|--------|--------|
+| Query classification | #GAP-005 | Medium | +15% edge cases | ✅ DONE |
+| HyDE query expansion | #GAP-004 | Medium | Better short queries | ✅ DONE |
+| Human evaluation framework | #GAP-012 | Medium | Feedback loop | ✅ DONE |
+| Quality scoring at ingestion | #GAP-009 | Medium | Filters garbage | ✅ DONE |
 
 ### P3: Long-Term (Advanced)
 
