@@ -11,8 +11,7 @@
  * @see https://qdrant.github.io/qdrant/redoc/index.html
  */
 
-import { $ } from "bun";
-import { createMCPClient, MCPClient } from "../../lib/mcp-client.js";
+import { createMCPClient } from "../../lib/mcp-client.js";
 import type { SearchFilters } from "./types.js";
 
 // Configuration from environment
@@ -29,21 +28,8 @@ function getQdrantCollection(): string {
   return process.env.MADEINOZ_KNOWLEDGE_QDRANT_COLLECTION || "lkap_documents";
 }
 
-// Keep backward-compatible constants for existing code
-const QDRANT_URL = getQdrantUrl();
+// Keep backward-compatible constant for existing code
 const QDRANT_COLLECTION = getQdrantCollection();
-// For CLI operations, use remote Ollama server (env var or default)
-const OLLAMA_URL =
-  process.env.MADEINOZ_KNOWLEDGE_QDRANT_OLLAMA_URL ||
-  process.env.MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL ||
-  "http://10.0.0.150:11434";  // Default to remote Ollama server
-const EMBEDDING_MODEL =
-  process.env.MADEINOZ_KNOWLEDGE_QDRANT_OLLAMA_MODEL ||
-  process.env.MADEINOZ_KNOWLEDGE_OLLAMA_EMBEDDING_MODEL ||
-  "bge-m3";  // Use bge-m3 as default
-const CONFIDENCE_THRESHOLD = parseFloat(
-  process.env.MADEINOZ_KNOWLEDGE_QDRANT_CONFIDENCE_THRESHOLD || "0.70"
-);
 
 /**
  * Search result from Qdrant
@@ -108,71 +94,6 @@ export interface IngestionResult {
   status: string;
   error_message?: string;
   processing_time_ms?: number;
-}
-
-/**
- * Generate embedding via Ollama
- */
-async function generateEmbedding(text: string): Promise<number[]> {
-  // Use /api/embed endpoint (Ollama 0.1.26+) with batch format
-  const response = await fetch(`${OLLAMA_URL}/api/embed`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: EMBEDDING_MODEL,
-      input: [text],
-      truncate: true,
-    }),
-    signal: AbortSignal.timeout(30000),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Ollama embedding failed: ${response.status}`);
-  }
-
-  const data = await response.json();
-  // /api/embed returns {embeddings: [[...]]}
-  return data.embeddings[0];
-}
-
-/**
- * Build Qdrant filter from search filters
- */
-function buildFilter(filters: SearchFilters): object | undefined {
-  const conditions: object[] = [];
-
-  if (filters.domain) {
-    conditions.push({
-      key: "domain",
-      match: { value: filters.domain },
-    });
-  }
-  if (filters.type) {
-    conditions.push({
-      key: "type",
-      match: { value: filters.type },
-    });
-  }
-  if (filters.component) {
-    conditions.push({
-      key: "component",
-      match: { value: filters.component },
-    });
-  }
-  if (filters.project) {
-    conditions.push({
-      key: "project",
-      match: { value: filters.project },
-    });
-  }
-  if (filters.version) {
-    conditions.push({
-      key: "version",
-      match: { value: filters.version },
-    });
-  }
-
-  return conditions.length > 0 ? { must: conditions } : undefined;
 }
 
 /**
