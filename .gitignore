@@ -97,3 +97,5 @@ env/
 docker/patches/utils/
 .fastembed_cache
 .env.dev
+
+rag-book-md/

@@ -43,6 +43,7 @@ from patches.lkap_models import (
 )
 from patches.ollama_embedder import get_ollama_embedder
 from patches.semantic_chunker import SemanticChunker
+from patches.trust_scoring import TrustScoringService, TrustLevel
 
 logger = logging.getLogger(__name__)
 
@@ -116,6 +117,9 @@ class DoclingIngester:
         )
         self.embedder = get_ollama_embedder()
 
+        # GAP-013: Trust scoring service
+        self.trust_service = TrustScoringService()
+
         # Feature 024: Lazy-load image enricher
         self._image_enricher = None
 
@@ -140,6 +144,41 @@ class DoclingIngester:
             for chunk in iter(lambda: f.read(8192), b""):
                 sha256.update(chunk)
         return sha256.hexdigest()
+
+    def _extract_page_number(self, chunk) -> Optional[int]:
+        """
+        Extract page number from Docling chunk metadata.
+
+        GAP-015: Properly extract page numbers from provenance data.
+        Docling stores page info in chunk.meta.prov[0].page_no for PDFs.
+
+        Args:
+            chunk: Docling chunk object
+
+        Returns:
+            Page number (1-indexed) or None if not available
+        """
+        if not hasattr(chunk, "meta"):
+            return None
+
+        meta = chunk.meta
+
+        # Try direct page_no attribute first
+        if hasattr(meta, "page_no") and meta.page_no is not None:
+            return meta.page_no
+
+        # Try provenance data (more common in Docling)
+        if hasattr(meta, "prov") and meta.prov:
+            prov = meta.prov
+            if isinstance(prov, list) and len(prov) > 0:
+                first_prov = prov[0]
+                if hasattr(first_prov, "page_no"):
+                    return first_prov.page_no
+                # Some versions use 'page' instead
+                if hasattr(first_prov, "page"):
+                    return first_prov.page
+
+        return None
 
     async def check_document_exists(self, doc_hash: str) -> bool:
         """
@@ -205,6 +244,10 @@ class DoclingIngester:
                 if chunk_headings is not None:
                     headings = list(chunk_headings)
 
+            # GAP-015: Extract page number from Docling provenance data
+            # Page number is in chunk.meta.prov[0].page_no for PDFs
+            page_number = self._extract_page_number(chunk)
+
             text = chunk.text
             if not text or not text.strip():
                 continue  # Skip empty chunks
@@ -228,7 +271,8 @@ class DoclingIngester:
                                 "text": sent.strip(),
                                 "position": len(chunks),
                                 "headings": headings,
-                                "page_section": getattr(chunk.meta, "page_no", None) if hasattr(chunk, "meta") else None,
+                                "page_number": page_number,
+                                "page_section": page_number,  # Keep for backwards compatibility
                                 "token_count": self.chunker.count_tokens(sent.strip()),
                             })
                 else:
@@ -240,7 +284,8 @@ class DoclingIngester:
                             "text": sub_text,
                             "position": len(chunks),
                             "headings": headings,
-                            "page_section": getattr(chunk.meta, "page_no", None) if hasattr(chunk, "meta") else None,
+                            "page_number": page_number,
+                            "page_section": page_number,  # Keep for backwards compatibility
                             "token_count": sub_tokens,
                         })
             else:
@@ -248,7 +293,8 @@ class DoclingIngester:
                     "text": text,
                     "position": i,
                     "headings": headings,
-                    "page_section": getattr(chunk.meta, "page_no", None) if hasattr(chunk, "meta") else None,
+                    "page_number": page_number,
+                    "page_section": page_number,  # Keep for backwards compatibility
                     "token_count": token_count,
                 })
 
@@ -502,13 +548,18 @@ class DoclingIngester:
                     "position": chunk["position"],
                     "token_count": chunk.get("token_count", 0),
                     "headings": chunk.get("headings", []),
-                    "page_section": chunk.get("page_section"),
+                    "page_number": chunk.get("page_number"),  # GAP-015: Explicit page number
+                    "page_section": chunk.get("page_section"),  # Keep for backwards compatibility
                     "domain": metadata.get("domain", "software"),
                     "project": metadata.get("project", ""),
                     "component": metadata.get("component", ""),
                     "type": metadata.get("type", "text"),
                     "source": metadata.get("filename", ""),
                     "doc_hash": metadata.get("doc_hash", ""),
+                    # GAP-013: Trust scoring metadata
+                    "trust_score": metadata.get("trust_score", 0.7),
+                    "trust_level": metadata.get("trust_level", "trusted"),
+                    "source_path": metadata.get("source_path", ""),
                 }
             })
 
@@ -599,6 +650,14 @@ class DoclingIngester:
             # Classify domain
             domain = self.classify_domain(filename, full_text)
 
+            # GAP-013: Compute trust score based on source path
+            source_path = str(file_path)
+            trust_result = self.trust_service.compute_trust_score(
+                source_path=source_path,
+                created_at=datetime.now(),  # Use current time as document timestamp
+            )
+            logger.info(f"Trust score for {filename}: {trust_result.final_score:.2f} ({trust_result.trust_level.value})")
+
             # Prepare metadata
             metadata = {
                 "filename": filename,
@@ -607,6 +666,10 @@ class DoclingIngester:
                 "type": doc_type.value,
                 "project": "",
                 "component": "",
+                # GAP-013: Trust scoring metadata
+                "trust_score": trust_result.final_score,
+                "trust_level": trust_result.trust_level.value,
+                "source_path": source_path,
             }
 
             # Store in Qdrant
