@@ -11,12 +11,13 @@
 
 | Metric | Value |
 |--------|-------|
-| **Overall Compliance** | 71% (17/24 best practices) |
-| **Critical Gaps** | 2 (remaining P3) |
+| **Overall Compliance** | 79% (19/24 best practices) |
+| **Critical Gaps** | 1 (remaining P3) |
 | **Quick Wins (P0)** | 2 (complete) |
 | **P1 Tasks** | 4 (complete) |
 | **P2 Tasks** | 4 (complete) |
-| **Estimated Accuracy Loss** | 5-10% (down from 30-40%) |
+| **P3 Tasks** | 2/3 (complete) |
+| **Estimated Accuracy Loss** | <5% (down from 30-40%) |
 
 ---
 
@@ -35,13 +36,13 @@
 | 9 | Retrieval | Hybrid search (BM25 + dense) | ✅ IMPLEMENTED | |
 | 10 | Retrieval | HyDE query expansion | ✅ IMPLEMENTED | |
 | 11 | Retrieval | Query classification (adaptive) | ✅ IMPLEMENTED | |
-| 12 | Retrieval | Multi-query variants | ❌ MISSING | #GAP-006 |
+| 12 | Retrieval | Multi-query variants | ✅ IMPLEMENTED | |
 | 13 | Reranking | Cross-encoder on top-20 | ✅ IMPLEMENTED | |
 | 14 | Reranking | Never skip in production | ✅ IMPLEMENTED | |
 | 15 | Metadata | Chunk position (page number) | ✅ IMPLEMENTED | |
 | 16 | Metadata | Source citations in payload | ✅ IMPLEMENTED | |
 | 17 | Deduplication | Hash-based at ingestion | ✅ IMPLEMENTED | |
-| 18 | Deduplication | Semantic (0.85-0.95 threshold) | ⚠️ PARTIAL | MinHash available |
+| 18 | Deduplication | Semantic (0.85-0.95 threshold) | ✅ IMPLEMENTED | |
 | 19 | Ingestion | Quality scoring (freshness, authority) | ✅ IMPLEMENTED | |
 | 20 | Ingestion | Garbage detection (entropy, language) | ✅ IMPLEMENTED | |
 | 21 | Evaluation | MRR, NDCG, recall@k metrics | ✅ IMPLEMENTED | |
@@ -97,11 +98,16 @@
 - Retrieval strategies per query type (top_k, hybrid_weight, rerank)
 - Tests: `docker/patches/tests/unit/test_query_classifier.py` (28 tests)
 
-### #GAP-006: Multi-Query Variants
-**Impact**: Medium | **Effort**: Medium
+### #GAP-006: Multi-Query Variants ✅ IMPLEMENTED
+**Impact**: Medium | **Effort**: Medium | **Status**: COMPLETE (2026-02-17)
 **Description**: Complex queries not decomposed
 **RAG Book**: "Generate 3 different ways to ask this question, combine results"
-**Mitigation**: LLM-powered query variant generation for complex queries
+**Implementation**:
+- `docker/patches/multi_query.py` - MultiQueryRetriever, QueryVariantGenerator
+- Rule-based variants: synonym replacement, query expansion, decomposition
+- LLM variants: rephrasing (optional)
+- RRF merging of results from multiple queries
+- Tests: `docker/patches/tests/unit/test_multi_query.py` (31 tests)
 
 ### #GAP-007: Cross-Encoder Reranking ✅ IMPLEMENTED
 **Impact**: CRITICAL (30-40% accuracy) | **Effort**: Medium | **Status**: COMPLETE (2026-02-17)
@@ -121,8 +127,19 @@
 - `docker/patches/deduplication.py` - ChunkDeduplicator with SHA-256 hashing
 - Document-level dedup already in `docling_ingester.py`
 - Chunk-level dedup filters duplicates within/across documents
-- Optional MinHash near-duplicate detection (disabled by default)
 - Tests: `docker/patches/tests/unit/test_deduplication.py` (21 tests)
+
+### #GAP-008b: MinHash Near-Dedup ✅ IMPLEMENTED
+**Impact**: Medium | **Effort**: Medium | **Status**: COMPLETE (2026-02-17)
+**Description**: Near-duplicate detection for semantically similar chunks
+**RAG Book**: "Near-duplicates pollute retrieval, create false consensus"
+**Implementation**:
+- `docker/patches/minhash_dedup.py` - MinHashDeduplicator with LSH
+- Character n-gram shingling for robust similarity detection
+- MinHash signatures with configurable permutations (default 128)
+- LSH indexing for efficient candidate retrieval
+- Jaccard similarity threshold (default 0.85)
+- Tests: `docker/patches/tests/unit/test_minhash_dedup.py` (34 tests)
 
 ### #GAP-009: Quality Scoring ✅ IMPLEMENTED
 **Impact**: Medium | **Effort**: Medium | **Status**: COMPLETE (2026-02-17)
@@ -222,11 +239,11 @@
 
 ### P3: Long-Term (Advanced)
 
-| Task | Gap | Effort | Impact |
-|------|-----|--------|--------|
-| Late chunking | #GAP-001 | High | +10% context |
-| Multi-query variants | #GAP-006 | Medium | Complex queries |
-| MinHash near-dedup | #GAP-008b | Medium | Near-duplicate detection |
+| Task | Gap | Effort | Impact | Status |
+|------|-----|--------|--------|--------|
+| Late chunking | #GAP-001 | High | +10% context | |
+| Multi-query variants | #GAP-006 | Medium | Complex queries | ✅ DONE |
+| MinHash near-dedup | #GAP-008b | Medium | Near-duplicate detection | ✅ DONE |
 
 ---
 
