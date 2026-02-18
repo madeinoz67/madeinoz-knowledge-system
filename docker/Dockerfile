@@ -95,6 +95,33 @@ COPY docker/patches/docling_ingester.py /app/mcp/src/patches/docling_ingester.py
 # Multimodal image extraction (Feature 024)
 COPY docker/patches/image_enricher.py /app/mcp/src/patches/image_enricher.py
 
+# RAG Book Compliance modules (P0-P3)
+# Cross-encoder reranking for +30-40% accuracy improvement
+COPY docker/patches/reranker.py /app/mcp/src/patches/reranker.py
+# Hybrid search with RRF and weighted fusion
+COPY docker/patches/hybrid_search.py /app/mcp/src/patches/hybrid_search.py
+# Evaluation metrics (Precision@k, Recall@k, MRR, NDCG@10)
+COPY docker/patches/evaluation.py /app/mcp/src/patches/evaluation.py
+# Query classification for adaptive retrieval
+COPY docker/patches/query_classifier.py /app/mcp/src/patches/query_classifier.py
+# Quality scoring for result filtering
+COPY docker/patches/quality_scoring.py /app/mcp/src/patches/quality_scoring.py
+# Deduplication service
+COPY docker/patches/deduplication.py /app/mcp/src/patches/deduplication.py
+# HyDE (Hypothetical Document Embeddings) expansion
+COPY docker/patches/hyde_expansion.py /app/mcp/src/patches/hyde_expansion.py
+# Multi-query expansion for recall improvement
+COPY docker/patches/multi_query.py /app/mcp/src/patches/multi_query.py
+# Human evaluation interface
+COPY docker/patches/human_evaluation.py /app/mcp/src/patches/human_evaluation.py
+# MinHash-based near-duplicate detection
+COPY docker/patches/minhash_dedup.py /app/mcp/src/patches/minhash_dedup.py
+# Trust scoring for source reliability
+COPY docker/patches/trust_scoring.py /app/mcp/src/patches/trust_scoring.py
+
+# Install sentence-transformers for cross-encoder reranking
+RUN uv add "sentence-transformers>=2.2.0"
+
 # Copy both Neo4j and FalkorDB configs
 COPY src/skills/server/config-neo4j.yaml /tmp/config-neo4j.yaml
 COPY src/skills/server/config-falkordb.yaml /tmp/config-falkordb.yaml

@@ -958,15 +958,15 @@ async def qdrant_search(
     # Search Qdrant
     client = get_qdrant_client()
     results = await client.search(
-        query_embedding=query_embedding,
-        limit=limit,
+        query_vector=query_embedding,
+        top_k=limit,
         score_threshold=score_threshold,
     )
 
     return {
         "status": "success",
         "query": query,
-        "results": [
+        "chunks": [
             {
                 "chunk_id": r.chunk_id,
                 "document_id": r.document_id,
