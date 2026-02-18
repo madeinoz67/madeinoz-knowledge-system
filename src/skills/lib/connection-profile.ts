@@ -115,9 +115,14 @@ export class ConnectionProfileManager {
    */
   private findConfigFile(): string | null {
     // 1. Check explicit config file path from env var
+    // If explicitly set, honor it exclusively (don't fall back to other locations)
     const explicitConfigPath = process.env.MADEINOZ_KNOWLEDGE_CONFIG_FILE;
-    if (explicitConfigPath && existsSync(explicitConfigPath)) {
-      return explicitConfigPath;
+    if (explicitConfigPath) {
+      if (existsSync(explicitConfigPath)) {
+        return explicitConfigPath;
+      }
+      // File explicitly specified but doesn't exist - return null, don't fall back
+      return null;
     }
 
     // 2. Check local project config (development mode)

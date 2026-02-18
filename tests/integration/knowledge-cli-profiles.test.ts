@@ -66,6 +66,7 @@ function runCLI(args: string[], env: Record<string, string> = {}): Promise<CLIRe
 describe('knowledge-cli Profile Integration', () => {
   let tempDir: string;
   let configPath: string;
+  let originalConfigFile: string | undefined;
 
   beforeEach(() => {
     // Create temporary directory for test fixtures
@@ -73,9 +74,21 @@ describe('knowledge-cli Profile Integration', () => {
     mkdirSync(tempDir, { recursive: true });
     mkdirSync(join(tempDir, 'config'), { recursive: true }); // Create config subdirectory
     configPath = join(tempDir, 'config', 'knowledge-profiles.yaml');
+
+    // Use MADEINOZ_KNOWLEDGE_CONFIG_FILE (priority 1) to override local project config
+    // This is critical because config/knowledge-profiles.yaml exists in the repo
+    originalConfigFile = process.env.MADEINOZ_KNOWLEDGE_CONFIG_FILE;
+    process.env.MADEINOZ_KNOWLEDGE_CONFIG_FILE = configPath;
   });
 
   afterEach(() => {
+    // Restore original env var
+    if (originalConfigFile !== undefined) {
+      process.env.MADEINOZ_KNOWLEDGE_CONFIG_FILE = originalConfigFile;
+    } else {
+      delete process.env.MADEINOZ_KNOWLEDGE_CONFIG_FILE;
+    }
+
     // Clean up temporary directory
     if (tempDir) {
       rmSync(tempDir, { recursive: true, force: true });
