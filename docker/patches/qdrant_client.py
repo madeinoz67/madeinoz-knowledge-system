@@ -300,6 +300,52 @@ class QdrantClient:
             "results": results,
         }
 
+    async def scroll(
+        self,
+        collection_name: str,
+        scroll_filter: Optional[Dict[str, Any]] = None,
+        limit: int = 10,
+    ) -> Dict[str, Any]:
+        """
+        Scroll through points in collection without requiring a query vector.
+
+        Used for filtering and retrieving points by payload values (e.g., doc_hash).
+
+        Args:
+            collection_name: Name of the collection to scroll
+            scroll_filter: Optional filter dict with 'must' conditions
+            limit: Maximum points to return
+
+        Returns:
+            Dict with 'points' list containing matching points
+        """
+        client = await self._get_client()
+
+        scroll_params = {
+            "limit": limit,
+            "with_payload": True,
+            "with_vector": False,
+        }
+
+        if scroll_filter:
+            scroll_params["filter"] = scroll_filter
+
+        try:
+            response = await client.post(
+                f"{self.url}/collections/{collection_name}/points/scroll",
+                json=scroll_params
+            )
+            response.raise_for_status()
+            data = response.json()
+
+            return {
+                "points": data.get("result", [])
+            }
+
+        except Exception as e:
+            logger.error(f"Scroll failed: {e}")
+            return {"points": []}
+
     async def search(
         self,
         query_vector: List[float],
@@ -396,8 +442,9 @@ class QdrantClient:
 
         try:
             # Generate query embedding
+            # #GAP-002: Use is_query=True for search queries (E5 prefix support)
             embedder = get_ollama_embedder()
-            query_vector = await embedder.embed(query)
+            query_vector = await embedder.embed(query, is_query=True)
 
             # Build Qdrant filter if metadata filters provided
             qdrant_filter = None
@@ -592,8 +639,9 @@ class QdrantClient:
 
         try:
             # Generate query embedding
+            # #GAP-002: Use is_query=True for search queries (E5 prefix support)
             embedder = get_ollama_embedder()
-            query_vector = await embedder.embed(query)
+            query_vector = await embedder.embed(query, is_query=True)
 
             # Build Qdrant filter for images
             must_conditions = [
@@ -947,8 +995,9 @@ async def qdrant_search(
         Search results with chunks, scores, and metadata.
     """
     # Generate query embedding
+    # #GAP-002: Use is_query=True for search queries (E5 prefix support)
     embedder = get_ollama_embedder()
-    embeddings = await embedder.embed([query])
+    embeddings = await embedder.embed_batch([query], is_query=True)
 
     if not embeddings or not embeddings[0]:
         return {"status": "error", "message": "Failed to generate query embedding"}
