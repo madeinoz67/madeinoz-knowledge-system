@@ -17,7 +17,7 @@ Performance targets:
 import os
 import logging
 import hashlib
-from typing import List, Optional, Dict, Tuple
+from typing import List, Optional, Dict, Tuple, Any
 import requests
 from dotenv import load_dotenv
 from functools import lru_cache
@@ -25,6 +25,12 @@ from functools import lru_cache
 load_dotenv()
 
 logger = logging.getLogger(__name__)
+
+# #GAP-002: E5 model prefix configuration
+# E5 models (intfloat/e5-*) require "query: " and "passage: " prefixes for optimal performance.
+# BGE and OpenAI models do NOT require prefixes.
+# Models matching these patterns will have prefixes automatically added.
+E5_MODEL_PATTERNS = {"e5-", "multilingual-e5-", "intfloat/e5"}
 
 # T046: Embedding cache configuration
 # Cache size: 1000 most recent embeddings (adjust based on memory constraints)
@@ -98,6 +104,8 @@ class EmbeddingService:
 
     OpenRouter (text-embedding-3-large): 3072 dimensions, high quality
     Ollama (bge-large-en-v1.5): 1024 dimensions, offline capability
+
+    #GAP-002: Automatically adds query/passage prefixes for E5 models.
     """
 
     def __init__(
@@ -121,21 +129,42 @@ class EmbeddingService:
             self.api_url = provider_url
             self.batch_size = EMBEDDING_BATCH_SIZE_OLLAMA
 
+        # #GAP-002: Detect if this model needs E5 prefixes
+        self._needs_e5_prefix = self._detect_e5_model(model)
+
         logger.info(f"Embedding service initialized: provider={self.provider}, "
                    f"model={self.model}, dimension={self.dimension}, "
-                   f"batch_size={self.batch_size}")
+                   f"batch_size={self.batch_size}, e5_prefixes={self._needs_e5_prefix}")
 
-    def embed(self, texts: List[str]) -> List[List[float]]:
+    def _detect_e5_model(self, model: str) -> bool:
+        """Detect if model requires E5-style query/passage prefixes."""
+        model_lower = model.lower()
+        return any(pattern in model_lower for pattern in E5_MODEL_PATTERNS)
+
+    def _add_e5_prefix(self, text: str, is_query: bool = True) -> str:
+        """Add E5 prefix to text if model requires it."""
+        if not self._needs_e5_prefix:
+            return text
+        prefix = "query: " if is_query else "passage: "
+        return prefix + text
+
+    def embed(self, texts: List[str], is_query: bool = False) -> List[List[float]]:
         """
         Generate embeddings for a list of texts.
 
         T046: Checks cache before generating embeddings to avoid redundant API calls.
+
+        #GAP-002: Adds E5 prefixes for models that require them.
+        - is_query=True: Use "query: " prefix for search queries
+        - is_query=False: Use "passage: " prefix for documents/chunks
 
         Automatically batches requests for optimal throughput. Large lists
         are split into batches based on provider-specific batch sizes.
 
         Args:
             texts: List of text strings to embed
+            is_query: If True, treat as search queries (use "query: " prefix for E5).
+                     If False, treat as documents (use "passage: " prefix for E5).
 
         Returns:
             List of embedding vectors (each is a list of floats)
@@ -143,11 +172,16 @@ class EmbeddingService:
         Raises:
             RuntimeError: If embedding generation fails
         """
+        # #GAP-002: Add E5 prefixes if needed
+        prefixed_texts = [self._add_e5_prefix(text, is_query=is_query) for text in texts]
+
         # Check cache for each text, collect misses
+        # Note: Cache key includes the prefixed text, so "query: foo" and "passage: foo"
+        # will have different cache entries if both are used
         cached_embeddings: Dict[int, List[float]] = {}
         uncached_texts: List[Tuple[int, str]] = []  # (original_index, text)
 
-        for i, text in enumerate(texts):
+        for i, text in enumerate(prefixed_texts):
             cached = _get_cached_embedding(text, self.model)
             if cached is not None:
                 cached_embeddings[i] = cached
@@ -338,30 +372,51 @@ def get_embedding_service() -> EmbeddingService:
     return _service
 
 
-def embed_text(text: str) -> List[float]:
+def embed_text(text: str, is_query: bool = False) -> List[float]:
     """
     Convenience function to embed a single text string.
 
+    #GAP-002: Supports E5 query/passage prefixes.
+
     Args:
         text: Text to embed
+        is_query: If True, use "query: " prefix for E5 models
 
     Returns:
         Embedding vector as list of floats
     """
     service = get_embedding_service()
-    embeddings = service.embed([text])
+    embeddings = service.embed([text], is_query=is_query)
     return embeddings[0]
 
 
-def embed_texts(texts: List[str]) -> List[List[float]]:
+def embed_query(query: str) -> List[float]:
+    """
+    Convenience function to embed a search query.
+
+    #GAP-002: Automatically uses "query: " prefix for E5 models.
+
+    Args:
+        query: Search query to embed
+
+    Returns:
+        Embedding vector as list of floats
+    """
+    return embed_text(query, is_query=True)
+
+
+def embed_texts(texts: List[str], is_query: bool = False) -> List[List[float]]:
     """
     Convenience function to embed multiple text strings.
 
+    #GAP-002: Supports E5 query/passage prefixes.
+
     Args:
         texts: List of texts to embed
+        is_query: If True, use "query: " prefix for E5 models
 
     Returns:
         List of embedding vectors
     """
     service = get_embedding_service()
-    return service.embed(texts)
+    return service.embed(texts, is_query=is_query)

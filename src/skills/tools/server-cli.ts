@@ -140,8 +140,6 @@ async function generateEnvFiles(
     mcpLines.push(`VISION_LLM_PROVIDER=${containerEnv.VISION_LLM_PROVIDER}`);
   if (containerEnv.VISION_LLM_MODEL)
     mcpLines.push(`VISION_LLM_MODEL=${containerEnv.VISION_LLM_MODEL}`);
-  if (containerEnv.VISION_LLM_FALLBACK)
-    mcpLines.push(`VISION_LLM_FALLBACK=${containerEnv.VISION_LLM_FALLBACK}`);
   if (containerEnv.OPENROUTER_API_KEY)
     mcpLines.push(`OPENROUTER_API_KEY=${containerEnv.OPENROUTER_API_KEY}`);
   if (containerEnv.ZAI_API_KEY)

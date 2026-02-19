@@ -15,6 +15,7 @@ Environment Variables:
     MADEINOZ_KNOWLEDGE_VISION_MODEL: Vision model name
 """
 
+import asyncio
 import base64
 import logging
 import os
@@ -23,6 +24,11 @@ from enum import Enum
 from typing import Any, Optional
 
 import httpx
+
+# Rate limiting configuration for Ollama resource protection
+VISION_REQUEST_DELAY = float(os.getenv("VISION_REQUEST_DELAY", "2.0"))  # Seconds between requests
+VISION_BATCH_SIZE = int(os.getenv("VISION_BATCH_SIZE", "5"))  # Images per batch
+VISION_BATCH_COOLDOWN = float(os.getenv("VISION_BATCH_COOLDOWN", "5.0"))  # Seconds between batches
 
 from patches.lkap_models import ImageType
 
@@ -39,7 +45,7 @@ OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 # Vision model: check MADEINOZ_KNOWLEDGE_VISION_MODEL first, then VISION_LLM_MODEL (from container)
 VISION_MODEL = os.getenv(
     "MADEINOZ_KNOWLEDGE_VISION_MODEL",
-    os.getenv("VISION_LLM_MODEL", "llama3.2-vision")  # Default to Ollama vision model
+    os.getenv("VISION_LLM_MODEL", "llama3.2-vision")  # Fallback if env not set
 )
 
 # Classification prompt for technical documents
@@ -334,21 +340,51 @@ class ImageEnricher:
     async def classify_batch(
         self,
         images: list[tuple[str, str]],  # List of (image_id, base64_data)
+        batch_size: int = None,
+        request_delay: float = None,
+        batch_cooldown: float = None,
     ) -> list[tuple[str, EnrichmentResult]]:
         """
-        Classify multiple images in batch.
+        Classify multiple images in batch with rate limiting.
+
+        Implements Ollama resource protection via:
+        - Inter-request delay to prevent overload
+        - Batch processing with cooldown periods
 
         Args:
             images: List of (image_id, base64_data) tuples
+            batch_size: Images per batch (default: VISION_BATCH_SIZE env, 5)
+            request_delay: Seconds between requests (default: VISION_REQUEST_DELAY env, 2.0)
+            batch_cooldown: Seconds between batches (default: VISION_BATCH_COOLDOWN env, 5.0)
 
         Returns:
             List of (image_id, EnrichmentResult) tuples
         """
+        batch_size = batch_size or VISION_BATCH_SIZE
+        request_delay = request_delay if request_delay is not None else VISION_REQUEST_DELAY
+        batch_cooldown = batch_cooldown if batch_cooldown is not None else VISION_BATCH_COOLDOWN
+
         results = []
-        for image_id, image_data in images:
+        total_images = len(images)
+
+        for i, (image_id, image_data) in enumerate(images):
             try:
+                # Log progress for large batches
+                if total_images > 5 and (i + 1) % batch_size == 0:
+                    logger.info(f"Processing image {i + 1}/{total_images}")
+
                 result = await self.classify_and_describe(image_data)
                 results.append((image_id, result))
+
+                # Rate limiting: delay between requests
+                if request_delay > 0 and i < total_images - 1:
+                    await asyncio.sleep(request_delay)
+
+                # Batch cooldown: pause after each batch
+                if batch_cooldown > 0 and (i + 1) % batch_size == 0 and i < total_images - 1:
+                    logger.info(f"Batch complete ({i + 1}/{total_images}), cooling down for {batch_cooldown}s")
+                    await asyncio.sleep(batch_cooldown)
+
             except Exception as e:
                 logger.error(f"Failed to enrich image {image_id}: {e}")
                 results.append((image_id, EnrichmentResult(
@@ -356,6 +392,8 @@ class ImageEnricher:
                     description=f"Enrichment failed: {e}",
                     provider="none",
                 )))
+
+        logger.info(f"Batch enrichment complete: {len(results)}/{total_images} images processed")
         return results
 
 

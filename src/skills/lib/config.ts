@@ -71,7 +71,6 @@ export interface KnowledgeConfig {
   // Vision LLM Configuration (Feature 024 - Multimodal Image Extraction)
   VISION_LLM_PROVIDER?: string;
   VISION_LLM_MODEL?: string;
-  VISION_LLM_FALLBACK?: string;
   OPENROUTER_API_KEY?: string;
   ZAI_API_KEY?: string;
 
@@ -306,9 +305,11 @@ export class ConfigLoader {
       MADEINOZ_KNOWLEDGE_QDRANT_OLLAMA_URL: 'OLLAMA_BASE_URL',
       MADEINOZ_KNOWLEDGE_QDRANT_EMBEDDING_MODEL: 'OLLAMA_EMBEDDING_MODEL',
       // Vision LLM (Feature 024 - Multimodal Image Extraction)
+      // Support both naming conventions: short (VISION_*) and long (VISION_LLM_*)
+      MADEINOZ_KNOWLEDGE_VISION_PROVIDER: 'VISION_LLM_PROVIDER',
+      MADEINOZ_KNOWLEDGE_VISION_MODEL: 'VISION_LLM_MODEL',
       MADEINOZ_KNOWLEDGE_VISION_LLM_PROVIDER: 'VISION_LLM_PROVIDER',
       MADEINOZ_KNOWLEDGE_VISION_LLM_MODEL: 'VISION_LLM_MODEL',
-      MADEINOZ_KNOWLEDGE_VISION_LLM_FALLBACK: 'VISION_LLM_FALLBACK',
       MADEINOZ_KNOWLEDGE_OPENROUTER_API_KEY: 'OPENROUTER_API_KEY',
       MADEINOZ_KNOWLEDGE_ZAI_API_KEY: 'ZAI_API_KEY',
     };
@@ -414,7 +415,6 @@ export class ConfigLoader {
       // Vision LLM Configuration (Feature 024)
       VISION_LLM_PROVIDER: this.getEnvValue(mapped, 'VISION_LLM_PROVIDER', ''),
       VISION_LLM_MODEL: this.getEnvValue(mapped, 'VISION_LLM_MODEL', ''),
-      VISION_LLM_FALLBACK: this.getEnvValue(mapped, 'VISION_LLM_FALLBACK', ''),
       OPENROUTER_API_KEY: this.getEnvValue(mapped, 'OPENROUTER_API_KEY', ''),
       ZAI_API_KEY: this.getEnvValue(mapped, 'ZAI_API_KEY', ''),
 
@@ -582,7 +582,6 @@ export class ConfigLoader {
     // Vision LLM Configuration (Feature 024)
     if (config.VISION_LLM_PROVIDER) env.VISION_LLM_PROVIDER = config.VISION_LLM_PROVIDER;
     if (config.VISION_LLM_MODEL) env.VISION_LLM_MODEL = config.VISION_LLM_MODEL;
-    if (config.VISION_LLM_FALLBACK) env.VISION_LLM_FALLBACK = config.VISION_LLM_FALLBACK;
     if (config.OPENROUTER_API_KEY) env.OPENROUTER_API_KEY = config.OPENROUTER_API_KEY;
     if (config.ZAI_API_KEY) env.ZAI_API_KEY = config.ZAI_API_KEY;
 
