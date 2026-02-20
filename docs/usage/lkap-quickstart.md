@@ -35,6 +35,13 @@ MCP Tools:
 - kg.getProvenance(factId) - Trace fact to source documents
 
 Configuration Prefix: MADEINOZ_KNOWLEDGE_QDRANT_*
+
+Security Configuration:
+- MADEINOZ_KNOWLEDGE_NEO4J_PASSWORD - Required (no default)
+- MADEINOZ_KNOWLEDGE_QDRANT_TLS_VERIFY - TLS certificate verification (default: true)
+- MADEINOZ_KNOWLEDGE_EMBEDDING_RATE_LIMIT - Rate limiting (default: 60/min)
+- Fail-fast validation - Services won't start without required credentials
+- URL validation - Only http:// and https:// schemes allowed
 -->
 
 # LKAP Quickstart Guide
@@ -355,6 +362,76 @@ MADEINOZ_KNOWLEDGE_QDRANT_CHUNK_OVERLAP=100
 MADEINOZ_KNOWLEDGE_QDRANT_OLLAMA_URL=http://localhost:11434
 MADEINOZ_KNOWLEDGE_QDRANT_OLLAMA_MODEL=bge-large-en-v1.5
 ```
+
+## Security Configuration
+
+### Required Credentials
+
+The system uses **fail-fast validation** - services will not start without required credentials.
+
+```bash
+# Database credentials (REQUIRED - no defaults)
+MADEINOZ_KNOWLEDGE_NEO4J_PASSWORD=your-secure-password
+MADEINOZ_KNOWLEDGE_FALKORDB_PASSWORD=your-secure-password  # If using FalkorDB
+```
+
+**Development defaults** are available in `.env.dev` for local testing only.
+
+### TLS Verification
+
+Control TLS certificate verification for external services:
+
+```bash
+# TLS verification (default: true for security)
+MADEINOZ_KNOWLEDGE_QDRANT_TLS_VERIFY=true
+MADEINOZ_KNOWLEDGE_OLLAMA_TLS_VERIFY=true
+```
+
+| Setting | Use Case |
+|---------|----------|
+| `true` (default) | Production - verify certificates |
+| `false` | Development with self-signed certs |
+
+### URL Validation
+
+All URLs are validated to prevent SSRF attacks. Only `http://` and `https://` schemes are allowed.
+
+```bash
+# These are valid
+MADEINOZ_KNOWLEDGE_QDRANT_URL=http://localhost:6333
+MADEINOZ_KNOWLEDGE_QDRANT_URL=https://qdrant.example.com:6333
+
+# These will be REJECTED
+MADEINOZ_KNOWLEDGE_QDRANT_URL=file:///etc/passwd
+MADEINOZ_KNOWLEDGE_QDRANT_URL=gopher://internal-server:70
+```
+
+### Rate Limiting
+
+Protect against API quota exhaustion:
+
+```bash
+# Embedding rate limit (requests per minute)
+MADEINOZ_KNOWLEDGE_EMBEDDING_RATE_LIMIT=60
+```
+
+When exceeded, a warning is logged. Increase for batch processing:
+
+```bash
+# Higher limit for bulk ingestion
+MADEINOZ_KNOWLEDGE_EMBEDDING_RATE_LIMIT=120
+```
+
+### Security Best Practices
+
+| Practice | Implementation |
+|----------|----------------|
+| **No hardcoded secrets** | All passwords via environment variables |
+| **Fail-fast validation** | Services won't start without required config |
+| **TLS enforcement** | Certificate verification enabled by default |
+| **URL allowlisting** | Only HTTP/HTTPS schemes permitted |
+| **Rate limiting** | Prevents API quota exhaustion |
+| **Audit logging** | Security events logged with `SECURITY:` prefix |
 
 ## CLI Reference
 
