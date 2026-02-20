@@ -120,7 +120,7 @@ const DEFAULTS: Record<string, string> = {
   FALKORDB_PORT: '6379',
   NEO4J_URI: 'bolt://localhost:7687',
   NEO4J_USER: 'neo4j',
-  NEO4J_PASSWORD: 'demodemo',
+  NEO4J_PASSWORD: '', // SECURITY: No default password - must be configured via environment
 };
 
 /**

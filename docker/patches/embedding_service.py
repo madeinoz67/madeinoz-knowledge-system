@@ -91,6 +91,51 @@ EMBEDDING_DIMENSION = int(os.getenv("MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS", "1
 EMBEDDING_PROVIDER_URL = os.getenv("MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER_URL", "http://host.containers.internal:11434")
 OPENROUTER_API_KEY = os.getenv("MADEINOZ_KNOWLEDGE_OPENROUTER_API_KEY", "")
 
+
+def _validate_url(url: str, name: str) -> str:
+    """
+    SECURITY: Validate URL scheme to prevent SSRF attacks.
+
+    Only allows HTTP and HTTPS schemes. Blocks dangerous schemes like
+    file://, gopher://, ftp://, etc.
+    """
+    from urllib.parse import urlparse
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https"):
+        raise ValueError(
+            f"SECURITY: Invalid URL scheme for {name}: '{parsed.scheme}'. "
+            f"Only http:// and https:// are allowed."
+        )
+    return url
+
+
+def _validate_api_key(key: str, name: str, provider: str) -> None:
+    """
+    SECURITY: Validate API key is set when required by provider.
+
+    Logs warning if key is missing but doesn't fail - allows fallback
+    to other providers.
+    """
+    if not key or key.strip() == "":
+        logger.warning(
+            f"SECURITY: {name} is not set. Provider '{provider}' may not be available. "
+            f"Set {name} in environment to enable this provider."
+        )
+    else:
+        # Log presence only, never log the key itself
+        logger.info(f"{name}: configured ({len(key)} chars)")
+
+
+# Validate URLs at module load time
+try:
+    EMBEDDING_PROVIDER_URL = _validate_url(EMBEDDING_PROVIDER_URL, "EMBEDDING_PROVIDER_URL")
+except ValueError as e:
+    logger.warning(f"{e} Using default: http://host.containers.internal:11434")
+    EMBEDDING_PROVIDER_URL = "http://host.containers.internal:11434"
+
+# Validate API keys (warn but don't fail to allow provider fallback)
+_validate_api_key(OPENROUTER_API_KEY, "OPENROUTER_API_KEY", EMBEDDING_PROVIDER)
+
 # Batch size configuration for optimal throughput
 # OpenRouter supports up to 2048 inputs per request
 # Ollama performance degrades beyond ~50 texts per batch

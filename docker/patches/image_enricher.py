@@ -42,6 +42,28 @@ ZAI_API_KEY = os.getenv("MADEINOZ_KNOWLEDGE_ZAI_API_KEY", "")
 ZAI_BASE_URL = os.getenv("MADEINOZ_KNOWLEDGE_ZAI_BASE_URL", "https://api.z.ai/v1")
 # Ollama URL: use container env var (populated by config.ts from MADEINOZ_KNOWLEDGE_QDRANT_OLLAMA_URL)
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+
+
+def _validate_api_key(key: str, name: str, provider: str) -> None:
+    """
+    SECURITY: Validate API key is set when required by provider.
+
+    Logs warning if key is missing but doesn't fail - allows fallback
+    to other providers.
+    """
+    if not key or key.strip() == "":
+        logger.warning(
+            f"SECURITY: {name} is not set. Provider '{provider}' may not be available. "
+            f"Set {name} in environment to enable this provider."
+        )
+    else:
+        # Log presence only, never log the key itself
+        logger.info(f"{name}: configured ({len(key)} chars)")
+
+
+# Validate API keys at module load time (warn but don't fail to allow provider fallback)
+_validate_api_key(OPENROUTER_API_KEY, "OPENROUTER_API_KEY", "openrouter")
+_validate_api_key(ZAI_API_KEY, "ZAI_API_KEY", "zai")
 # Vision model: check MADEINOZ_KNOWLEDGE_VISION_MODEL first, then VISION_LLM_MODEL (from container)
 VISION_MODEL = os.getenv(
     "MADEINOZ_KNOWLEDGE_VISION_MODEL",

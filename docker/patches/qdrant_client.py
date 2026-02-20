@@ -40,6 +40,33 @@ logger = logging.getLogger(__name__)
 # Support both MADEINOZ_KNOWLEDGE_* prefix and shorter QDRANT_* prefix (for container compatibility)
 QDRANT_URL = os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_URL", os.getenv("QDRANT_URL", "http://localhost:6333"))
 QDRANT_COLLECTION = os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_COLLECTION", os.getenv("QDRANT_COLLECTION", "lkap_documents"))
+# SECURITY: TLS verification (default: True for production safety)
+QDRANT_TLS_VERIFY = os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_TLS_VERIFY", "true").lower() in ("true", "1", "yes")
+
+
+def _validate_url(url: str, name: str) -> str:
+    """
+    SECURITY: Validate URL scheme to prevent SSRF attacks.
+
+    Only allows HTTP and HTTPS schemes. Blocks dangerous schemes like
+    file://, gopher://, ftp://, etc.
+    """
+    from urllib.parse import urlparse
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https"):
+        raise ValueError(
+            f"SECURITY: Invalid URL scheme for {name}: '{parsed.scheme}'. "
+            f"Only http:// and https:// are allowed."
+        )
+    return url
+
+
+# Validate URL at module load time
+try:
+    QDRANT_URL = _validate_url(QDRANT_URL, "QDRANT_URL")
+except ValueError as e:
+    logger.warning(f"{e} Using default: http://localhost:6333")
+    QDRANT_URL = "http://localhost:6333"
 # Ollama: use container env var (populated by config.ts from MADEINOZ_KNOWLEDGE_QDRANT_OLLAMA_URL)
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 EMBEDDING_MODEL = os.getenv("OLLAMA_EMBEDDING_MODEL", "bge-m3")
@@ -78,9 +105,13 @@ class QdrantClient:
         self._client: Optional[httpx.AsyncClient] = None
 
     async def _get_client(self) -> httpx.AsyncClient:
-        """Get or create HTTP client."""
+        """Get or create HTTP client with TLS verification."""
         if self._client is None:
-            self._client = httpx.AsyncClient(timeout=60.0)
+            # SECURITY: Explicit TLS verification (configurable via QDRANT_TLS_VERIFY)
+            self._client = httpx.AsyncClient(
+                timeout=60.0,
+                verify=QDRANT_TLS_VERIFY
+            )
         return self._client
 
     async def close(self):
