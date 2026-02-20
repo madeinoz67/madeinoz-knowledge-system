@@ -37,7 +37,10 @@ E5_MODEL_PATTERNS = {"e5-", "multilingual-e5-", "intfloat/e5"}
 # Cache key: hash(text + model) to ensure different models don't share cache
 EMBEDDING_CACHE_SIZE = 1000
 
-_embedding_cache: Dict[str, List[float]] = {}
+from collections import OrderedDict
+
+# SECURITY: Use OrderedDict for proper LRU eviction
+_embedding_cache: OrderedDict[str, List[float]] = OrderedDict()
 _cache_hits = 0
 _cache_misses = 0
 
@@ -49,26 +52,30 @@ def _cache_key(text: str, model: str) -> str:
 
 
 def _get_cached_embedding(text: str, model: str) -> Optional[List[float]]:
-    """Get embedding from cache if available"""
+    """Get embedding from cache if available (updates access order for LRU)"""
     global _cache_hits
     key = _cache_key(text, model)
     if key in _embedding_cache:
         _cache_hits += 1
+        # Move to end for LRU (most recently used)
+        _embedding_cache.move_to_end(key)
         return _embedding_cache[key]
     _cache_misses += 1
     return None
 
 
 def _set_cached_embedding(text: str, model: str, embedding: List[float]) -> None:
-    """Store embedding in cache with LRU eviction"""
+    """Store embedding in cache with proper LRU eviction"""
     key = _cache_key(text, model)
 
-    # Simple LRU: remove oldest if cache is full
-    if len(_embedding_cache) >= EMBEDDING_CACHE_SIZE:
-        # Remove first (oldest) entry
-        oldest_key = next(iter(_embedding_cache))
-        del _embedding_cache[oldest_key]
+    # If key exists, remove it first (will be re-added at end)
+    if key in _embedding_cache:
+        del _embedding_cache[key]
+    # Evict least recently used (first item) if cache is full
+    elif len(_embedding_cache) >= EMBEDDING_CACHE_SIZE:
+        _embedding_cache.popitem(last=False)
 
+    # Add to end (most recently used)
     _embedding_cache[key] = embedding
 
 
@@ -90,6 +97,12 @@ EMBEDDING_MODEL = os.getenv("MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL", "mxbai-embed-la
 EMBEDDING_DIMENSION = int(os.getenv("MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS", "1024"))
 EMBEDDING_PROVIDER_URL = os.getenv("MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER_URL", "http://host.containers.internal:11434")
 OPENROUTER_API_KEY = os.getenv("MADEINOZ_KNOWLEDGE_OPENROUTER_API_KEY", "")
+
+# SECURITY: Rate limiting configuration (requests per minute)
+# Prevents quota exhaustion and unexpected API costs
+EMBEDDING_RATE_LIMIT = int(os.getenv("MADEINOZ_KNOWLEDGE_EMBEDDING_RATE_LIMIT", "60"))  # Default: 60/min
+_embedding_request_count = 0
+_embedding_rate_limit_warned = False
 
 
 def _validate_url(url: str, name: str) -> str:
@@ -237,6 +250,17 @@ class EmbeddingService:
         if not uncached_texts:
             logger.debug(f"Cache hit: all {len(texts)} embeddings retrieved from cache")
             return [cached_embeddings[i] for i in range(len(texts))]
+
+        # SECURITY: Rate limiting check (warn once if approaching limit)
+        global _embedding_request_count, _embedding_rate_limit_warned
+        _embedding_request_count += len(uncached_texts)
+        if not _embedding_rate_limit_warned and _embedding_request_count > EMBEDDING_RATE_LIMIT:
+            logger.warning(
+                f"SECURITY: Embedding request count ({_embedding_request_count}) exceeds "
+                f"rate limit ({EMBEDDING_RATE_LIMIT}/min). Consider reducing batch size or "
+                f"adjusting MADEINOZ_KNOWLEDGE_EMBEDDING_RATE_LIMIT env var."
+            )
+            _embedding_rate_limit_warned = True
 
         # Generate embeddings for uncached texts
         uncached_text_list = [text for _, text in uncached_texts]

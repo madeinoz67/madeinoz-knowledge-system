@@ -103,15 +103,20 @@ class QdrantClient:
         self.collection_name = collection_name
         self.embedding_dim = embedding_dim
         self._client: Optional[httpx.AsyncClient] = None
+        # SECURITY: Thread-safe singleton initialization
+        self._lock = asyncio.Lock()
 
     async def _get_client(self) -> httpx.AsyncClient:
-        """Get or create HTTP client with TLS verification."""
+        """Get or create HTTP client with TLS verification (thread-safe)."""
         if self._client is None:
-            # SECURITY: Explicit TLS verification (configurable via QDRANT_TLS_VERIFY)
-            self._client = httpx.AsyncClient(
-                timeout=60.0,
-                verify=QDRANT_TLS_VERIFY
-            )
+            async with self._lock:
+                # Double-check after acquiring lock
+                if self._client is None:
+                    # SECURITY: Explicit TLS verification (configurable via QDRANT_TLS_VERIFY)
+                    self._client = httpx.AsyncClient(
+                        timeout=60.0,
+                        verify=QDRANT_TLS_VERIFY
+                    )
         return self._client
 
     async def close(self):

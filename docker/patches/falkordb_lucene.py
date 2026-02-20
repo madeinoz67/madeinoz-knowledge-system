@@ -76,6 +76,15 @@ def requires_lucene_sanitization() -> bool:
 # Lucene/RediSearch special characters that need escaping
 # Order matters: escape backslash first, then others
 # Pre-compile for performance (used frequently)
+#
+# SECURITY NOTE: This escaping covers the standard Lucene special characters.
+# Known edge cases that are handled:
+# - Hyphenated identifiers (e.g., "apt-28", "CVE-2024-1234") - wrapped in quotes
+# - Quoted strings with internal quotes - escaped properly
+# - Boolean operators (&&, ||) - escaped in lucene_escape_in_place()
+#
+# Testing: See tests/unit/test_lucene_sanitization.py for comprehensive coverage
+# including CTI/OSINT identifiers with special characters.
 LUCENE_SPECIAL_PATTERN = re.compile(r'[+\-&|!(){}\[\]^"~*?:/@#$%<>=]')
 
 
