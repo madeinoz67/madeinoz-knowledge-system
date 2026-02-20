@@ -386,8 +386,18 @@ class HybridSearchService:
             data = response.json()
             results = []
 
+            # Qdrant scroll API returns {"result": {"points": [...], "next_page_offset": null}}
+            result_data = data.get("result", {})
+            if isinstance(result_data, dict):
+                points = result_data.get("points", [])
+            else:
+                # Fallback if result is directly a list (older API version)
+                points = result_data if isinstance(result_data, list) else []
+
             # Score based on keyword match count (simple proxy for BM25)
-            for point in data.get("result", []):
+            for point in points:
+                if not isinstance(point, dict):
+                    continue  # Skip if point is not a dict
                 payload = point.get("payload", {})
                 text = payload.get("text", "").lower()
                 chunk_id = point.get("id", "")
