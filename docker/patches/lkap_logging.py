@@ -3,10 +3,13 @@ LKAP Logging Configuration (Feature 022/023)
 Local Knowledge Augmentation Platform
 
 Basic logging infrastructure for errors and ingestion status (FR-036a).
+
+SECURITY: Includes log sanitization to prevent sensitive data exposure.
 """
 
 import logging
 import os
+import re
 from logging.handlers import RotatingFileHandler
 from datetime import datetime
 
@@ -17,6 +20,28 @@ load_dotenv()
 # Configuration from environment
 LOG_LEVEL = os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_LOG_LEVEL", os.getenv("MADEINOZ_KNOWLEDGE_RAGFLOW_LOG_LEVEL", "INFO"))
 LOG_PATH = os.getenv("MADEINOZ_KNOWLEDGE_QDRANT_LOG_PATH", os.getenv("RAGFLOW_LOG_PATH", "/var/log/lkap/lkap.log"))
+
+# SECURITY: Patterns to redact from logs
+SENSITIVE_PATTERNS = [
+    (r'(api[_-]?key["\s:=]+)["\']?[\w-]{10,}["\']?', r'\1[REDACTED]'),
+    (r'(password["\s:=]+)["\']?[\w-]{4,}["\']?', r'\1[REDACTED]'),
+    (r'(token["\s:=]+)["\']?[\w-]{10,}["\']?', r'\1[REDACTED]'),
+    (r'(secret["\s:=]+)["\']?[\w-]{10,}["\']?', r'\1[REDACTED]'),
+    (r'Bearer\s+[\w-]{20,}', r'Bearer [REDACTED]'),
+]
+
+
+def sanitize_log_message(message: str) -> str:
+    """
+    SECURITY: Remove sensitive data from log messages.
+
+    Redacts API keys, passwords, tokens, and secrets that may
+    accidentally be included in log output.
+    """
+    sanitized = str(message)
+    for pattern, replacement in SENSITIVE_PATTERNS:
+        sanitized = re.sub(pattern, replacement, sanitized, flags=re.IGNORECASE)
+    return sanitized
 
 
 def setup_lkap_logging():

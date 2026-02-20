@@ -15,9 +15,18 @@ Architecture:
 - Ollama: Local embeddings (bge-large-en-v1.5, 1024 dimensions)
 - Graphiti: Knowledge graph with provenance links
 
+SECURITY CONSIDERATIONS:
+- Local deployments (localhost): HTTP is acceptable, no request signing needed
+- Distributed deployments (remote Qdrant):
+  * MUST use HTTPS (set QDRANT_URL to https://...)
+  * Consider enabling Qdrant API key authentication
+  * For high-security environments, implement HMAC request signing
+  * See: https://qdrant.tech/documentation/guides/security/
+
 Environment Variables:
     MADEINOZ_KNOWLEDGE_QDRANT_URL: Qdrant API URL (default: http://localhost:6333)
     MADEINOZ_KNOWLEDGE_QDRANT_COLLECTION: Collection name (default: lkap_documents)
+    MADEINOZ_KNOWLEDGE_QDRANT_TLS_VERIFY: Enable TLS verification (default: true)
     MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL: Ollama API URL (default: http://localhost:11434)
     MADEINOZ_KNOWLEDGE_EMBEDDING_MODEL: Embedding model (default: bge-large-en-v1.5)
     MADEINOZ_KNOWLEDGE_EMBEDDING_DIMENSIONS: Vector dimensions (default: 1024)

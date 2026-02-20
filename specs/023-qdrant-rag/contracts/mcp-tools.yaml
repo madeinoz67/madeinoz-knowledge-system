@@ -4,6 +4,9 @@
 **Date**: 2026-02-13
 **Protocol**: FastMCP (Model Context Protocol)
 
+**SECURITY**: All schemas use `additionalProperties: false` to reject unknown fields.
+This prevents data injection through unexpected schema properties.
+
 ---
 
 ## Tool: rag.search
@@ -25,6 +28,7 @@ arguments:
     type: object
     required: false
     description: Metadata filters for search
+    additionalProperties: false
     properties:
       domain:
         type: string
@@ -46,6 +50,7 @@ arguments:
     description: Maximum results to return
     minimum: 1
     maximum: 100
+additionalProperties: false
 ```
 
 ### Response Schema
@@ -54,6 +59,7 @@ arguments:
 type: array
 items:
   type: object
+  additionalProperties: false
   properties:
     chunk_id:
       type: string
@@ -75,6 +81,7 @@ items:
       description: Relevance score
     metadata:
       type: object
+      additionalProperties: false
       properties:
         page_number:
           type: integer
