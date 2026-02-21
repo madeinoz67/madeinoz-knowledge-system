@@ -28,7 +28,7 @@ Related Sections:
 
 **Local Knowledge Augmentation Platform** combines transient document search with durable knowledge storage.
 
-![LKAP Two-Tier Memory Model](../assets/lkap-two-tier.jpg)
+![LKAP Two-Tier Memory Model](../assets/lkap-overview.jpg)
 
 ## Two-Tier Memory Model
 

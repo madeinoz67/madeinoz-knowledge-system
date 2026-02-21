@@ -35,6 +35,8 @@ The promotion workflow bridges Document Memory (RAG) and Knowledge Memory (Graph
 
 ## The Promotion Flow
 
+![Promotion Workflow](../assets/promotion-workflow.jpg)
+
 ```
 Document → Search → Evidence → Promote → Knowledge
                     (chunk)            (fact)
