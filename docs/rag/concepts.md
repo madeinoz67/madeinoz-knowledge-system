@@ -38,7 +38,7 @@ Document Memory is **Tier 1** of the LKAP two-tier model:
 
 ## Architecture
 
-![RAG Architecture](../assets/rag-architecture.jpg)
+![Document Memory Architecture](../assets/rag-concepts.jpg)
 
 ### Document Flow
 
