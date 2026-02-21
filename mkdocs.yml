@@ -56,6 +56,8 @@ nav:
   - Guides:
     - Basic Usage: usage/basic-usage.md
     - Advanced Usage: usage/advanced.md
+    - Document Search (RAG): rag/quickstart.md
+    - Evidence Promotion: lkap/promotion-workflow.md
     - Memory Decay: usage/memory-decay.md
     - Monitoring: usage/monitoring.md
     - Backup & Restore: usage/backup-restore.md
