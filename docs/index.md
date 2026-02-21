@@ -91,7 +91,8 @@ Set up the system:
 Learn how to use the system:
 
 - **[Basic Usage](usage/basic-usage.md)** - Capturing and searching knowledge
-- **[LKAP Quickstart](usage/lkap-quickstart.md)** - Document RAG with Qdrant vector search
+- **[LKAP Overview](usage/lkap-quickstart.md)** - Two-tier memory model combining RAG and Knowledge Graph
+- **[RAG Quickstart](usage/rag-quickstart.md)** - Document search with Qdrant vector database
 - **[Advanced Usage](usage/advanced.md)** - Bulk import, backup, multiple graphs
 - **[Memory Decay & Lifecycle](usage/memory-decay.md)** - Memory prioritization, decay scoring, and lifecycle management
 - **[Monitoring](usage/monitoring.md)** - Prometheus and Grafana dashboards

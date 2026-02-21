@@ -1,474 +1,137 @@
 ---
-title: "LKAP Quickstart"
-description: "Quick start guide for the Local Knowledge Augmentation Platform"
+title: "LKAP Overview"
+description: "Two-tier memory model combining RAG and Knowledge Graph"
 ---
 
 <!-- AI-FRIENDLY SUMMARY
 System: Local Knowledge Augmentation Platform (LKAP)
-Purpose: Self-hosted RAG with Qdrant vector database and knowledge promotion
+Purpose: Two-tier memory combining transient documents with durable knowledge
 Feature: 023-qdrant-rag
 
 Two-Tier Memory Model:
-1. Document Memory (Qdrant) - High-volume, versioned, citation-centric, short-lived relevance
-2. Knowledge Memory (Graphiti) - Low-volume, high-signal, typed, version-aware, long-lived
+1. Document Memory (Qdrant) - High-volume, transient, citation-centric
+2. Knowledge Memory (Graphiti) - Low-volume, durable, typed, provenance-backed
 
-Key Concepts:
-- Documents are evidence (transient, noisy, versioned) - managed via file drop in knowledge/inbox/
-- Knowledge is curated truth (durable, typed, conflict-aware)
-- Users are validators, not data entry clerks
-- System is fast when confident, careful when uncertain, always explicit about provenance
+Key Concept: Documents are evidence. Knowledge is curated truth.
+- Users validate, not data-enter
+- Promotion workflow bridges RAG → Knowledge Graph
+- Provenance traces facts back to source documents
 
-Core Workflows:
-1. Drop documents in knowledge/inbox/ for automatic ingestion
-2. Ingestion uses Docling for PDF parsing + semantic chunking
-3. Search with rag.search() for semantic retrieval with citations
-4. Promote facts to knowledge graph with kg.promoteFromEvidence()
-5. Trace provenance with kg.getProvenance()
-
-MCP Tools:
-- rag.search(query, filters, topK) - Semantic search across documents
-- rag.getChunk(chunkId) - Retrieve specific chunk by ID
-- rag.ingest(filePath, ingestAll) - Ingest documents from inbox
-- rag.health() - Check Qdrant connectivity
-- kg.promoteFromEvidence(evidenceId) - Promote fact from evidence
-- kg.promoteFromQuery(query) - Search and promote in one operation
-- kg.getProvenance(factId) - Trace fact to source documents
-
-Configuration Prefix: MADEINOZ_KNOWLEDGE_QDRANT_*
-
-Security Configuration:
-- MADEINOZ_KNOWLEDGE_NEO4J_PASSWORD - Required (no default)
-- MADEINOZ_KNOWLEDGE_QDRANT_TLS_VERIFY - TLS certificate verification (default: true)
-- MADEINOZ_KNOWLEDGE_EMBEDDING_RATE_LIMIT - Rate limiting (default: 60/min)
-- Fail-fast validation - Services won't start without required credentials
-- URL validation - Only http:// and https:// schemes allowed
+Related Docs:
+- [RAG Quickstart](rag-quickstart.md) - Document Memory details
+- [Knowledge Graph Quickstart](../concepts/knowledge-graph.md) - Knowledge Memory details
 -->
 
-# LKAP Quickstart Guide
+# LKAP Overview
 
-**Local Knowledge Augmentation Platform** - Self-hosted RAG with Qdrant vector database and evidence-based knowledge promotion. Documents are ingested by dropping files in `knowledge/inbox/`.
-
-## What is LKAP?
-
-LKAP extends the knowledge graph system with a two-tier memory model:
-
-1. **Document Memory (RAG)** - Fast semantic search across PDFs, markdown, and text documents (powered by Qdrant)
-2. **Knowledge Memory (KG)** - Durable, typed facts with provenance links to source documents
-
-**Key Value Proposition**: Documents are evidence (transient, noisy). Knowledge is curated truth (durable, typed). You validate facts, the system tracks provenance.
-
-## Quick Reference Card
-
-| Task | Command/Action |
-|------|----------------|
-| **Start LKAP** | `docker compose -f docker/docker-compose-qdrant.yml up -d` |
-| **Ingest documents** | Drop files in `knowledge/inbox/` then run `rag.ingest(ingestAll=true)` |
-| **Search documents** | `bun run src/skills/server/lib/rag-cli.ts search "<query>"` |
-| **Get chunk details** | `bun run src/skills/server/lib/rag-cli.ts get-chunk <id>` |
-| **List documents** | `bun run src/skills/server/lib/rag-cli.ts list` |
-| **Check health** | `bun run src/skills/server/lib/rag-cli.ts health` |
-
-## Architecture Overview
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        LKAP Two-Tier Memory Model                   │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  ┌──────────────────────────────────────────────────────────────┐  │
-│  │  Document Memory (Qdrant)                                    │  │
-│  │  - Drop documents in knowledge/inbox/                        │  │
-│  │  - Docling parser: PDF, markdown, text                       │  │
-│  │  - Semantic chunking: 512-768 tokens                         │  │
-│  │  - Ollama embeddings: bge-large-en-v1.5 (1024 dims)          │  │
-│  │  - Processed docs moved to knowledge/processed/              │  │
-│  └──────────────────────────────────────────────────────────────┘  │
-│                              ▲                                      │
-│                              │ Promote with evidence               │
-│                              ▼                                      │
-│  ┌──────────────────────────────────────────────────────────────┐  │
-│  │  Knowledge Memory (Graphiti)                                  │  │
-│  │  - Low-volume, high-signal facts                             │  │
-│  │  - Typed: Constraint, Erratum, API, etc.                     │  │
-│  │  - Evidence-backed with provenance links                     │  │
-│  │  - Conflict-aware, version-aware                             │  │
-│  │  - Durable, long-lived, curated truth                        │  │
-│  └──────────────────────────────────────────────────────────────┘  │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
-## Getting Started
-
-### 1. Start Services
-
-```bash
-# Start Qdrant vector database
-docker compose -f docker/docker-compose-qdrant.yml up -d
-
-# Start Ollama (for local embeddings)
-docker compose -f docker/docker-compose-ollama.yml up -d
-
-# Verify services are healthy
-bun run src/skills/server/lib/rag-cli.ts health
-```
-
-### 2. Ingest Documents
-
-Drop documents in the inbox directory:
-
-```bash
-# Place documents for ingestion
-cp ~/Downloads/datasheet.pdf knowledge/inbox/
-cp ~/Documents/notes.md knowledge/inbox/
-```
-
-Then trigger ingestion via MCP tool:
-
-```python
-# Ingest all documents in inbox
-rag.ingest(ingestAll=true)
-
-# Or ingest a specific file
-rag.ingest(filePath="datasheet.pdf")
-```
-
-After successful ingestion:
-- Documents are moved to `knowledge/processed/`
-- Chunks are stored in Qdrant with embeddings
-- Original file hash is tracked for idempotency
-
-### 3. Search Documents
-
-Use the CLI or MCP tools:
-
-```bash
-# CLI search
-bun run src/skills/server/lib/rag-cli.ts search "GPIO configuration"
-
-# Search with filters
-bun run src/skills/server/lib/rag-cli.ts search "interrupt handlers" --domain=embedded --top-k=5
-```
-
-Results include:
-- Chunk text with source document
-- Page/section reference
-- Confidence score
-- Metadata filters (domain, type, component)
-
-### 4. Promote to Knowledge
-
-Promote high-value facts from evidence to the durable knowledge graph:
-
-```bash
-# Via MCP (available to Claude)
-kg.promoteFromEvidence(evidenceId)
-kg.promoteFromQuery("max clock frequency 120MHz")
-```
-
-Promoted facts are:
-- Typed (Constraint, Erratum, API, etc.)
-- Linked to source evidence and documents
-- Conflict-aware (detects contradictions)
-- Version-aware (tracks document changes)
+**Local Knowledge Augmentation Platform** combines transient document search with durable knowledge storage.
 
 ## Two-Tier Memory Model
 
-### Document Memory (RAG)
-
-**Purpose**: Fast semantic search across all documents.
-
-**Characteristics**:
-- High-volume storage (thousands of documents)
-- Semantic search with confidence scores
-- Heading-aware chunking for coherence
-- Citation-centric retrieval
-- Short-lived relevance (documents change)
-
-**Best For**:
-- Exploring new information
-- Finding evidence for decisions
-- Cross-referencing specifications
-- Understanding context
-
-**Access**:
-- **CLI**: `bun run rag-cli.ts search "<query>"`
-- **MCP**: `rag.search(query, filters, topK)` for semantic search
-- **MCP**: `rag.getChunk(chunkId)` for specific chunk retrieval
-
-### Knowledge Memory (KG)
-
-**Purpose**: Durable, verified facts with provenance.
-
-**Characteristics**:
-- Low-volume, high-signal (10x fewer facts than chunks)
-- Typed (Constraint, Erratum, API, etc.)
-- Evidence-backed with provenance links
-- Conflict-aware (detects contradictions)
-- Version-aware (tracks source changes)
-- Long-lived relevance
-
-**Best For**:
-- Verified constraints and requirements
-- Errata and workarounds
-- API signatures and build flags
-- Detection rules and indicators
-
-**Access**:
-- `kg.promoteFromEvidence(evidenceId)` - Promote from evidence
-- `kg.promoteFromQuery(query)` - Search and promote
-- `kg.getProvenance(factId)` - Trace to source documents
-
-## MCP Tools
-
-### rag.search(query, filters, topK)
-
-Semantic search across documents.
-
-```python
-rag.search(
-    query="GPIO configuration",
-    domain="embedded",
-    component="gpio-driver",
-    top_k=10
-)
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                      LKAP Memory Model                          │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌─────────────────────────────────────────────────────────────┐│
+│  │  Tier 1: Document Memory (RAG)                              ││
+│  │  Storage: Qdrant (69MB)                                     ││
+│  │  Purpose: Fast semantic search across documents             ││
+│  │  Characteristics: High-volume, transient, citation-centric  ││
+│  │  Guide: [RAG Quickstart](rag-quickstart.md)                 ││
+│  └────────────────────────────┬────────────────────────────────┘│
+│                               │                                 │
+│                               │ Promote with evidence           │
+│                               ▼                                 │
+│  ┌─────────────────────────────────────────────────────────────┐│
+│  │  Tier 2: Knowledge Memory (KG)                              ││
+│  │  Storage: Graphiti/Neo4j                                    ││
+│  │  Purpose: Durable facts with provenance                     ││
+│  │  Characteristics: Low-volume, typed, conflict-aware         ││
+│  │  Guide: [Knowledge Graph Quickstart](../concepts/knowledge-graph.md)│
+│  └─────────────────────────────────────────────────────────────┘│
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-**Returns**:
-- Chunk text with source document
-- Page/section reference
-- Confidence score (0.0-1.0)
-- Metadata filters
+## When to Use Each Tier
 
-### rag.getChunk(chunkId)
+| Question | Use Tier | Why |
+|----------|----------|-----|
+| "What does the datasheet say about GPIO?" | **Document Memory** | Exploring new information |
+| "Find evidence for this decision" | **Document Memory** | Finding citations |
+| "What's the max clock frequency?" | **Knowledge Memory** | Verified constraint |
+| "What workarounds exist for this bug?" | **Knowledge Memory** | Curated solutions |
 
-Retrieve specific chunk by ID.
+## Quick Start
 
-```python
-rag.getChunk(chunk_id="abc123-def456")
+### 1. Document Memory (RAG)
+
+```bash
+# Start Qdrant
+docker compose -f docker/docker-compose-qdrant.yml up -d
+
+# Drop documents
+cp report.pdf knowledge/inbox/
+
+# Search
+bun run src/skills/server/lib/rag-cli.ts search "GPIO configuration"
 ```
 
-**Returns**:
-- Full chunk text
-- Document metadata
-- Position and token count
-- Section heading
+➡️ **[Full RAG Guide](rag-quickstart.md)**
 
-### rag.ingest(filePath, ingestAll)
+### 2. Knowledge Memory (KG)
 
-Ingest documents from inbox.
+```bash
+# Start Neo4j (included with knowledge system)
+bun run server-cli start
 
-```python
-# Ingest all documents in inbox
-rag.ingest(ingest_all=True)
-
-# Ingest specific file
-rag.ingest(file_path="datasheet.pdf")
+# Promote facts from evidence
+kg.promoteFromQuery("max clock frequency")
 ```
 
-**Returns**:
-- Document ID
-- Chunk count
-- Processing status
-- Error message (if failed)
+➡️ **[Full Knowledge Graph Guide](../concepts/knowledge-graph.md)**
 
-### rag.health()
+## Promotion Workflow
 
-Check Qdrant connectivity.
+The key LKAP workflow is **promoting** high-value facts from documents to durable knowledge:
 
-```python
-rag.health()
+```
+Document → Search → Evidence → Promote → Knowledge
+                    (chunk)            (fact)
 ```
 
-**Returns**:
-- Connection status
-- Collection status
-- Vector count
-
-### kg.promoteFromEvidence(evidenceId)
-
-Promote fact from specific evidence.
+### Promote from Evidence
 
 ```python
+# Search and find relevant evidence
+results = rag.search("SPI clock frequency limit")
+
+# Promote the evidence to knowledge
 kg.promoteFromEvidence(
-    evidence_id="ev-123",
+    evidence_id="chunk-abc123",
     fact_type="Constraint",
-    value="max clock frequency is 120MHz"
+    value="SPI max frequency is 80MHz"
 )
 ```
 
-**Returns**:
-- Fact ID with provenance links
-- Conflict detection results
-- Knowledge graph subgraph
-
-### kg.promoteFromQuery(query)
-
-Search and promote in one operation.
+### Promote from Query
 
 ```python
+# Search and promote in one operation
 kg.promoteFromQuery(
-    query="SPI clock frequency",
+    query="maximum clock frequency",
     fact_type="Constraint"
 )
 ```
 
-**Returns**:
-- Top evidence chunks
-- Promoted fact with provenance
-- Conflict detection results
-
-### kg.getProvenance(factId)
-
-Trace fact to source documents.
+### Trace Provenance
 
 ```python
+# See where a fact came from
 kg.getProvenance(fact_id="fact-456")
+# Returns: Fact → Evidence chunks → Source documents
 ```
-
-**Returns**:
-- Fact with type and value
-- Source evidence chunks
-- Original documents
-- Full provenance subgraph
-
-## Configuration
-
-### Required Variables
-
-```bash
-# Qdrant API endpoint
-MADEINOZ_KNOWLEDGE_QDRANT_URL=http://localhost:6333
-
-# Qdrant collection name
-MADEINOZ_KNOWLEDGE_QDRANT_COLLECTION=lkap_documents
-```
-
-### Optional Variables
-
-```bash
-# Qdrant Configuration
-MADEINOZ_KNOWLEDGE_QDRANT_API_KEY=                    # For cloud deployments
-MADEINOZ_KNOWLEDGE_QDRANT_CONFIDENCE_THRESHOLD=0.70
-MADEINOZ_KNOWLEDGE_QDRANT_DEFAULT_TOP_K=10
-MADEINOZ_KNOWLEDGE_QDRANT_MAX_TOP_K=100
-
-# Chunking Configuration
-MADEINOZ_KNOWLEDGE_QDRANT_CHUNK_SIZE_MIN=512
-MADEINOZ_KNOWLEDGE_QDRANT_CHUNK_SIZE_MAX=768
-MADEINOZ_KNOWLEDGE_QDRANT_CHUNK_OVERLAP=100
-
-# Ollama Configuration (for local embeddings)
-MADEINOZ_KNOWLEDGE_QDRANT_OLLAMA_URL=http://localhost:11434
-MADEINOZ_KNOWLEDGE_QDRANT_OLLAMA_MODEL=bge-large-en-v1.5
-```
-
-## Security Configuration
-
-### Required Credentials
-
-The system uses **fail-fast validation** - services will not start without required credentials.
-
-```bash
-# Database credentials (REQUIRED - no defaults)
-MADEINOZ_KNOWLEDGE_NEO4J_PASSWORD=your-secure-password
-MADEINOZ_KNOWLEDGE_FALKORDB_PASSWORD=your-secure-password  # If using FalkorDB
-```
-
-**Development defaults** are available in `.env.dev` for local testing only.
-
-### TLS Verification
-
-Control TLS certificate verification for external services:
-
-```bash
-# TLS verification (default: true for security)
-MADEINOZ_KNOWLEDGE_QDRANT_TLS_VERIFY=true
-MADEINOZ_KNOWLEDGE_OLLAMA_TLS_VERIFY=true
-```
-
-| Setting | Use Case |
-|---------|----------|
-| `true` (default) | Production - verify certificates |
-| `false` | Development with self-signed certs |
-
-### URL Validation
-
-All URLs are validated to prevent SSRF attacks. Only `http://` and `https://` schemes are allowed.
-
-```bash
-# These are valid
-MADEINOZ_KNOWLEDGE_QDRANT_URL=http://localhost:6333
-MADEINOZ_KNOWLEDGE_QDRANT_URL=https://qdrant.example.com:6333
-
-# These will be REJECTED
-MADEINOZ_KNOWLEDGE_QDRANT_URL=file:///etc/passwd
-MADEINOZ_KNOWLEDGE_QDRANT_URL=gopher://internal-server:70
-```
-
-### Rate Limiting
-
-Protect against API quota exhaustion:
-
-```bash
-# Embedding rate limit (requests per minute)
-MADEINOZ_KNOWLEDGE_EMBEDDING_RATE_LIMIT=60
-```
-
-When exceeded, a warning is logged. Increase for batch processing:
-
-```bash
-# Higher limit for bulk ingestion
-MADEINOZ_KNOWLEDGE_EMBEDDING_RATE_LIMIT=120
-```
-
-### Security Best Practices
-
-| Practice | Implementation |
-|----------|----------------|
-| **No hardcoded secrets** | All passwords via environment variables |
-| **Fail-fast validation** | Services won't start without required config |
-| **TLS enforcement** | Certificate verification enabled by default |
-| **URL allowlisting** | Only HTTP/HTTPS schemes permitted |
-| **Rate limiting** | Prevents API quota exhaustion |
-| **Audit logging** | Security events logged with `SECURITY:` prefix |
-
-## CLI Reference
-
-```bash
-# Search documents
-bun run src/skills/server/lib/rag-cli.ts search "<query>"
-
-# Search with filters
-bun run src/skills/server/lib/rag-cli.ts search "<query>" --domain=embedded --type=pdf --component=gpio
-
-# Get chunk details
-bun run src/skills/server/lib/rag-cli.ts get-chunk <chunk-id>
-
-# List all documents
-bun run src/skills/server/lib/rag-cli.ts list
-
-# List with limit
-bun run src/skills/server/lib/rag-cli.ts list --limit=50
-
-# Check health
-bun run src/skills/server/lib/rag-cli.ts health
-
-# Show help
-bun run src/skills/server/lib/rag-cli.ts help
-```
-
-## Document Storage
-
-| Directory | Purpose |
-|-----------|---------|
-| `knowledge/inbox/` | Drop documents here for ingestion |
-| `knowledge/processed/` | Canonical storage after ingestion |
-
-**Supported Formats**:
-- **PDF**: `.pdf` files (parsed via Docling)
-- **Markdown**: `.md`, `.mdx` files
-- **Text**: `.txt` files
 
 ## Fact Types
 
@@ -476,71 +139,36 @@ When promoting to knowledge, facts are typed:
 
 | Type | Description | Example |
 |------|-------------|---------|
-| `Constraint` | System limits and requirements | "max clock frequency is 120MHz" |
-| `Erratum` | Known issues and bugs | "SPI FIFO corrupts above 80MHz" |
+| `Constraint` | System limits | "max clock frequency is 120MHz" |
+| `Erratum` | Known issues | "SPI FIFO corrupts above 80MHz" |
 | `API` | Function signatures | `gpio_init(port, pin, mode)` |
-| `Workaround` | Solutions to errata | "Use DMA instead of FIFO" |
-| `BuildFlag` | Compiler/build options | `-DUSE_SPI_FIFO=0` |
-| `ProtocolRule` | Protocol constraints | "I2C max frequency is 400kHz" |
-| `Detection` | Security detection rules | "suspicious GPIO toggling" |
-| `Indicator` | IOC/indicator data | "IP 192.168.1.100" |
+| `Workaround` | Solutions | "Use DMA instead of FIFO" |
+| `BuildFlag` | Compiler options | `-DUSE_SPI_FIFO=0` |
+| `ProtocolRule` | Protocol limits | "I2C max frequency is 400kHz" |
+| `Detection` | Security rules | "suspicious GPIO toggling" |
+| `Indicator` | IOC data | "IP 192.168.1.100" |
 
-## Troubleshooting
+## MCP Tools Summary
 
-### Qdrant connection failed
+### Document Memory (RAG)
 
-```bash
-# Check Qdrant is running
-docker ps | grep qdrant
+| Tool | Purpose |
+|------|---------|
+| `rag.search(query, filters, topK)` | Semantic search |
+| `rag.getChunk(chunkId)` | Get specific chunk |
+| `rag.ingest(filePath, ingestAll)` | Ingest documents |
+| `rag.health()` | Check Qdrant |
 
-# Check logs
-docker logs qdrant
+### Knowledge Memory (KG)
 
-# Restart if needed
-docker compose -f docker/docker-compose-qdrant.yml restart
-```
-
-### Documents not ingesting
-
-```bash
-# Check inbox directory exists
-ls -la knowledge/inbox/
-
-# Check file permissions
-chmod 644 knowledge/inbox/*
-
-# Check MCP server logs for errors
-docker logs madeinoz-knowledge-mcp
-```
-
-### Search returns no results
-
-```bash
-# Verify documents are ingested
-bun run src/skills/server/lib/rag-cli.ts list
-
-# Check health
-bun run src/skills/server/lib/rag-cli.ts health
-
-# Lower confidence threshold if needed
-MADEINOZ_KNOWLEDGE_QDRANT_CONFIDENCE_THRESHOLD=0.60
-```
-
-### Ollama embeddings failing
-
-```bash
-# Check Ollama is running
-curl http://localhost:11434/api/tags
-
-# Pull the embedding model if needed
-ollama pull bge-large-en-v1.5
-
-# Check Ollama logs
-docker logs ollama
-```
+| Tool | Purpose |
+|------|---------|
+| `kg.promoteFromEvidence(evidenceId)` | Promote fact |
+| `kg.promoteFromQuery(query)` | Search & promote |
+| `kg.getProvenance(factId)` | Trace sources |
 
 ## Next Steps
 
-- [Configuration Reference](../reference/configuration.md#qdrant-configuration-feature-023) - Complete environment variable reference
-- [Memory Decay Guide](memory-decay.md) - Knowledge lifecycle management
-- [CLI Reference](../reference/cli.md) - Complete CLI documentation
+- **[RAG Quickstart](rag-quickstart.md)** - Document ingestion and search
+- **[Knowledge Graph Quickstart](../concepts/knowledge-graph.md)** - Entities, relationships, facts
+- **[Configuration Reference](../reference/configuration.md)** - Environment variables

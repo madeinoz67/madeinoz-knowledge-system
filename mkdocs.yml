@@ -47,6 +47,8 @@ nav:
     - Remote Access: remote-access.md
   - Usage:
     - Basic Usage: usage/basic-usage.md
+    - LKAP Overview: usage/lkap-quickstart.md
+    - RAG Quickstart: usage/rag-quickstart.md
     - Advanced: usage/advanced.md
     - Memory Decay & Lifecycle: usage/memory-decay.md
     - Weighted Search: weighted-search.md
