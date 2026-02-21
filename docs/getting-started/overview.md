@@ -5,22 +5,66 @@ description: "Introduction to the Madeinoz Knowledge System and how to use your 
 
 # Knowledge System - User Guide
 
-Welcome to the Madeinoz Knowledge System! This guide will help you understand and use your personal knowledge management system.
+Welcome to the Madeinoz Knowledge System! This guide will help you understand and use your personal knowledge management system with LKAP two-tier memory.
 
 !!! info "PAI Pack"
     This is a **[PAI (Personal AI Infrastructure)](https://github.com/danielmiessler/PAI)** Pack - a modular component that adds persistent memory capabilities to your AI infrastructure. PAI Packs are self-contained modules that can be installed into any PAI-compatible system.
 
+## LKAP Two-Tier Memory
+
+The system uses a two-tier memory model:
+
+| Tier | Technology | Best For |
+|------|------------|----------|
+| **Document Memory (RAG)** | Qdrant | Search documents, find citations, explore content |
+| **Knowledge Memory (Graph)** | Graphiti/Neo4j | Verified facts, relationships, provenance |
+
+**Key principle**: Documents are evidence. Knowledge is curated truth.
+
 ## What is the Knowledge System?
 
-Think of the Knowledge System as your AI's memory. Instead of forgetting what you discussed yesterday or last week, it remembers everything you tell it to remember. It's like having a smart notebook that:
+Think of the Knowledge System as your AI's memory with two complementary capabilities:
 
+**Document Memory (RAG)** - Drop documents and search them semantically:
+- Drop PDFs, markdown, text files in `knowledge/inbox/`
+- Search across all documents using natural language
+- Get citations showing exactly where information came from
+
+**Knowledge Memory (Graph)** - Store and connect curated facts:
 - Automatically organizes information as you add it
 - Finds connections between different topics
 - Lets you search using everyday language
 - Keeps track of when you learned things
-- Never forgets what you taught it
 
 ## What Can You Do With It?
+
+### Document Memory (RAG)
+
+**Search documents semantically using the CLI:**
+
+```bash
+# Drop a document in the inbox
+cp datasheet.pdf knowledge/inbox/
+
+# Ingest it (CLI method)
+bun run src/skills/server/lib/rag-cli.ts ingest --all
+
+# Search
+bun run src/skills/server/lib/rag-cli.ts search "GPIO configuration"
+```
+
+**Or use MCP tools from Claude:**
+```
+You: "Search my documents for SPI clock settings"
+[Claude calls rag_search tool automatically]
+```
+
+**Get citations with results:**
+- Each result shows the source document
+- Page/section references included
+- Confidence scores for relevance
+
+### Knowledge Memory (Graph)
 
 ### Store Information
 
