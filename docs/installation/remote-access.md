@@ -498,6 +498,6 @@ services:
 
 ## Related Documentation
 
-- [Installation Guide](installation/index.md) - Complete installation instructions
-- [Troubleshooting](troubleshooting/common-issues.md) - Common issues and solutions
-- [Configuration Reference](reference/configuration.md) - Full configuration options
+- [Installation Guide](index.md) - Complete installation instructions
+- [Troubleshooting](../troubleshooting/common-issues.md) - Common issues and solutions
+- [Configuration Reference](../reference/configuration.md) - Full configuration options

@@ -588,7 +588,7 @@ This format is ideal for:
 
 ## Remote Access CLI Options
 
-The Knowledge CLI supports remote MCP access via connection profiles and CLI flags. See [Remote Access Documentation](../remote-access.md) for complete details.
+The Knowledge CLI supports remote MCP access via connection profiles and CLI flags. See [Remote Access Documentation](../installation/remote-access.md) for complete details.
 
 ### Connection Profiles
 

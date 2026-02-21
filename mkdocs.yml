@@ -43,6 +43,7 @@ nav:
     - Requirements: installation/requirements.md
     - Verification: installation/verification.md
     - Remote Deployment: installation/remote-deployment.md
+    - Remote Access: installation/remote-access.md
   - LKAP:
     - Overview: lkap/index.md
     - Two-Tier Model: lkap/two-tier-model.md
@@ -56,6 +57,7 @@ nav:
   - Guides:
     - Basic Usage: usage/basic-usage.md
     - Advanced Usage: usage/advanced.md
+    - Weighted Search: usage/weighted-search.md
     - Document Search (RAG): rag/quickstart.md
     - Evidence Promotion: lkap/promotion-workflow.md
     - Memory Decay: usage/memory-decay.md
@@ -68,9 +70,12 @@ nav:
     - Architecture: concepts/architecture.md
     - Observability: reference/observability.md
     - Model Guide: reference/model-guide.md
+    - Cache Implementation: reference/cache-implementation.md
+    - Style Guide: reference/style-guide.md
     - RAG Troubleshooting: rag/troubleshooting.md
     - KG Troubleshooting: kg/troubleshooting.md
     - Common Issues: troubleshooting/common-issues.md
+    - Known Issues: troubleshooting/known-issues.md
   - About:
     - Acknowledgments: acknowledgments.md
     - Hooks & Integration: concepts/hooks-integration.md
