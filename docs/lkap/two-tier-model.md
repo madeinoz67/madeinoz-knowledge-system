@@ -73,15 +73,9 @@ The LKAP (Local Knowledge Augmentation Platform) uses a two-tier memory architec
 
 Documents contain evidence. Knowledge contains curated truth. The **promotion workflow** bridges them:
 
-```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│  Document       │     │    Evidence     │     │    Knowledge    │
-│  Memory (RAG)   │────▶│    (Chunks)     │────▶│    Memory (KG)  │
-│                 │     │                 │     │                 │
-│  High volume    │     │  High signal    │     │  Durable facts  │
-│  Transient      │     │  Citation-backed│     │  Provenance     │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-```
+![Promotion Workflow](../assets/promotion-workflow.jpg)
+
+**Workflow Steps:**
 
 1. **Search Document Memory** - Find relevant chunks with semantic search
 2. **Identify High-Value Evidence** - Chunk contains important fact
