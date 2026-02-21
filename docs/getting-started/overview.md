@@ -104,6 +104,54 @@ You: "How are Graphiti and FalkorDB connected?"
 
 The system traces the relationships in your knowledge graph and explains how these concepts link together.
 
+## Using the Knowledge Skill
+
+The Knowledge skill provides natural language triggers that route to specific workflows. Just say what you want to do:
+
+### Natural Language Triggers
+
+| Intent | Example Phrases | What Happens |
+|--------|----------------|--------------|
+| **Capture** | "remember this", "store this", "add to knowledge", "save this" | Captures episode with entity extraction |
+| **Search** | "what do I know about", "search my knowledge", "find in knowledge base" | Searches entities semantically |
+| **Relationships** | "how are X and Y connected", "what's the relationship", "show connections" | Traverses graph edges |
+| **Recent** | "what did I learn", "recent knowledge", "latest additions" | Gets recent episodes |
+| **Status** | "knowledge status", "system health", "graph stats" | Returns system health |
+| **Documents** | "search documents", "find in PDFs", "RAG search" | Searches Qdrant vector DB |
+| **Promote** | "promote to knowledge", "add to graph" | Promotes RAG evidence to KG |
+
+### Workflow Routing
+
+When you use a trigger phrase, the skill routes your request to the appropriate workflow:
+
+```
+"Remember that Podman uses daemonless architecture"
+       ↓
+CaptureEpisode workflow
+       ↓
+CLI: bun run knowledge-cli.ts add_episode "Podman Architecture" "..."
+       ↓
+Entity extraction → Graph storage
+       ↓
+Response: "✓ Captured: Podman uses daemonless architecture"
+```
+
+### CLI vs Natural Language
+
+You can interact with the system two ways:
+
+**Natural Language (Recommended):**
+```
+You: "What do I know about container orchestration?"
+[Claude handles the workflow automatically]
+```
+
+**Direct CLI (For scripting/automation):**
+```bash
+bun run knowledge-cli.ts search_nodes "container orchestration" 10
+bun run rag-cli.ts search "SPI configuration" --top-k=5
+```
+
 ## Quick Start
 
 ### Before You Begin

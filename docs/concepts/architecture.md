@@ -19,7 +19,7 @@ For detailed concepts on each memory tier:
 
 ### LKAP Two-Tier Memory Architecture
 
-![LKAP Architecture](../assets/lkap-architecture.png)
+![LKAP Architecture](../assets/lkap-architecture-v3.jpg)
 
 The LKAP (Local Knowledge Augmentation Platform) extends the knowledge system with RAG capabilities using a two-tier memory model:
 
