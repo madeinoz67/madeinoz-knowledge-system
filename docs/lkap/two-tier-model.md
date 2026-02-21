@@ -26,6 +26,8 @@ Key Insight: Documents are evidence. Knowledge is curated truth.
 
 The LKAP (Local Knowledge Augmentation Platform) uses a two-tier memory architecture that separates transient document exploration from durable knowledge storage.
 
+![LKAP Architecture](../assets/lkap-architecture-complete.jpg)
+
 ## Tier Comparison
 
 | Aspect | Document Memory (RAG) | Knowledge Memory (Graph) |
