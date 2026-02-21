@@ -12,7 +12,7 @@ version: 1.9.0
 author: madeinoz67
 
 # description: (128 words max) One-line description
-description: Persistent personal knowledge management system powered by Graphiti knowledge graph with FalkorDB or Neo4j backend - automatic entity extraction, relationship mapping, and semantic search for AI conversations and documents
+description: Two-tier memory system with RAG document search (Qdrant) and knowledge graph (Neo4j) - automatic entity extraction, semantic search, and evidence-to-fact promotion for AI conversations and documents
 
 # type: (single) concept | skill | hook | plugin | agent | mcp | workflow | template | other
 type: skill
@@ -27,7 +27,7 @@ platform: claude-code
 dependencies: []
 
 # keywords: (24 tags max) Searchable tags for discovery
-keywords: [knowledge, graph, memory, semantic search, entity extraction, relationships, graphiti, falkordb, neo4j, mcp, persistent, ai, storage, retrieval, organizational, learning, documentation]
+keywords: [knowledge, graph, memory, semantic search, entity extraction, relationships, graphiti, neo4j, qdrant, rag, lkap, docling, ollama, mcp, persistent, ai, storage, retrieval, documentation]
 ---
 
 <p align="center"><img src="./icons/knowledge-system-architecture.png" alt="Madeinoz Knowledge System Architecture"></p>
@@ -52,16 +52,25 @@ See [CHANGELOG.md](CHANGELOG.md) for full version history.
 | Topic | Description |
 |-------|-------------|
 | [Getting Started](https://madeinoz67.github.io/madeinoz-knowledge-system/getting-started/) | Installation and quick start guide |
+| [LKAP Overview](https://madeinoz67.github.io/madeinoz-knowledge-system/lkap/) | Two-tier memory model |
+| [RAG Quickstart](https://madeinoz67.github.io/madeinoz-knowledge-system/rag/quickstart/) | Document search setup |
 | [Configuration](https://madeinoz67.github.io/madeinoz-knowledge-system/reference/configuration/) | Environment variables and settings |
-| [Architecture](https://madeinoz67.github.io/madeinoz-knowledge-system/reference/architecture/) | System design and components |
+| [Architecture](https://madeinoz67.github.io/madeinoz-knowledge-system/concepts/architecture/) | System design and components |
 | [Troubleshooting](https://madeinoz67.github.io/madeinoz-knowledge-system/troubleshooting/) | Common issues and solutions |
-| [Developer Notes](https://madeinoz67.github.io/madeinoz-knowledge-system/reference/developer-notes/) | Contributing and development |
 
 ## Installation
 
 See [INSTALL.md](INSTALL.md) for complete installation instructions, performance benchmarks, and [VERIFY.md](VERIFY.md) for verification checklist.
 
 ## Features
+
+### Two-Tier Memory (LKAP)
+
+- **Document Memory (RAG)** - Fast semantic search across PDFs, markdown, and text using Qdrant
+- **Knowledge Memory (Graph)** - Durable facts with provenance tracking in Neo4j
+- **Promotion Workflow** - Promote evidence from documents to verified facts
+
+### Knowledge Graph
 
 - **Automatic Entity Extraction** - LLM-powered extraction of people, organizations, concepts, and more
 - **Relationship Mapping** - Automatically discovers connections between entities
@@ -70,12 +79,15 @@ See [INSTALL.md](INSTALL.md) for complete installation instructions, performance
 - **Memory Decay Scoring** - Automatic memory prioritization with importance/stability classification
 - **Weighted Search** - Results ranked by semantic relevance, recency, and importance
 - **Lifecycle Management** - Automated memory transitions (ACTIVE → DORMANT → ARCHIVED → EXPIRED)
+- **Temporal Tracking** - Know when knowledge was captured and how it evolves
+- **OSINT/CTI Ontology** - Custom entity types for threat intelligence with STIX 2.1 import support
+
+### Observability
+
 - **Prometheus Metrics** - Token usage, API costs, cache statistics, and memory health metrics
 - **Automated Maintenance** - Scheduled cleanup of expired memories
 - **Grafana Dashboards** - Visualize knowledge, token usage, graph stats and memory health
-- **Temporal Tracking** - Know when knowledge was captured and how it evolves
 - **Memory Sync** - Auto-syncs learnings from PAI Memory System
-- **OSINT/CTI Ontology** - Custom entity types for threat intelligence (ThreatActor, Malware, Vulnerability, Indicator, etc.) with STIX 2.1 import support
 
 ## Usage
 
@@ -89,6 +101,21 @@ The skill triggers automatically based on natural language:
 | "what did I learn today" | **Temporal search** - filter by date |
 | "recent learnings" | Retrieve recent knowledge additions |
 | "knowledge status" | Check system health |
+| "search documents for X" | **RAG search** across ingested documents |
+
+### Document Search (RAG)
+
+Drop documents in `knowledge/inbox/` for automatic ingestion, then search:
+
+```bash
+# Semantic search across documents
+bun run rag-cli.ts search "GPIO configuration"
+
+# Ingest new documents
+bun run rag-cli.ts ingest knowledge/inbox/
+```
+
+See [RAG Quickstart](https://madeinoz67.github.io/madeinoz-knowledge-system/rag/quickstart/) for full documentation.
 
 ### Temporal Search
 
@@ -135,14 +162,15 @@ bun run tools/knowledge-cli.ts search_nodes "topic" --weighted
 | `src/skills/workflows/` | 8 workflows (Capture, Search, SearchByDate, Facts, Recent, Status, Clear, BulkImport) |
 | `src/skills/tools/` | Server management scripts (start, stop, status, logs) |
 | `src/hooks/` | Memory sync hook for automatic knowledge capture |
-| `docker/` | Docker/Podman compose files for Neo4j and FalkorDB |
+| `docker/` | Docker/Podman compose files for Neo4j and Qdrant |
 
 ## Database Backends
 
-| Backend | Web UI | Best For |
-|---------|--------|----------|
-| **Neo4j** (default and recommended) | <http://localhost:7474> | Rich queries, special character handling |
-| **FalkorDB** (experimental) | <http://localhost:3000> | Simple setup, lower resources |
+| Backend | Port | Purpose |
+|---------|------|---------|
+| **Neo4j** (default) | 7474/7687 | Knowledge graph storage |
+| **Qdrant** | 6333 | Document memory (RAG) vector storage |
+| **Ollama** | 11434 | Local embeddings (optional) |
 
 ## For AI Agents
 
@@ -156,7 +184,9 @@ This is a **PAI Pack** - a complete, self-contained module for Personal AI Infra
 ## Credits
 
 - **Knowledge graph engine**: [Graphiti](https://github.com/getzep/graphiti) by Zep AI
-- **Graph databases**: [Neo4j](https://neo4j.com/), [FalkorDB](https://www.falkordb.com/)
+- **Graph database**: [Neo4j](https://neo4j.com/)
+- **Vector database**: [Qdrant](https://qdrant.tech/)
+- **Document parsing**: [Docling](https://github.com/DS4SD/docling)
 - **Built for**: [Personal AI Infrastructure (PAI)](https://github.com/danielmiessler/PAI)
 
 See full [Acknowledgments](https://madeinoz67.github.io/madeinoz-knowledge-system/acknowledgments) for credits to the community and research that inspired this system.
