@@ -56,32 +56,9 @@ Document Memory provides RAG (Retrieval-Augmented Generation) capabilities for y
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    Document Memory (RAG)                         │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  knowledge/inbox/     ┌─────────────┐     ┌─────────────────┐  │
-│  ├── report.pdf   ──▶ │   Docling   │ ──▶ │ Semantic Chunk  │  │
-│  ├── notes.md         │   Parser    │     │ 512-768 tokens  │  │
-│  └── data.txt         └─────────────┘     └────────┬────────┘  │
-│                                                    │            │
-│                                                    ▼            │
-│  ┌─────────────────────────────────────────────────────────────┐│
-│  │                    Qdrant Vector DB                         ││
-│  │  - 69MB Docker image                                        ││
-│  │  - Port 6333                                                ││
-│  │  - Ollama embeddings (bge-large-en-v1.5, 1024 dims)        ││
-│  └─────────────────────────────────────────────────────────────┘│
-│                              ▲                                  │
-│                              │ Semantic Search                  │
-│                              │                                  │
-│                     ┌────────┴────────┐                        │
-│                     │   User Query    │                        │
-│                     │ rag.search()    │                        │
-│                     └─────────────────┘                        │
-└─────────────────────────────────────────────────────────────────┘
-```
+![RAG Architecture](../assets/rag-architecture.jpg)
+
+Document flow: inbox → Docling parser → semantic chunking → Ollama embeddings → Qdrant → search results.
 
 ## Getting Started
 

@@ -28,31 +28,13 @@ Related Docs:
 
 ## Two-Tier Memory Model
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                      LKAP Memory Model                          │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌─────────────────────────────────────────────────────────────┐│
-│  │  Tier 1: Document Memory (RAG)                              ││
-│  │  Storage: Qdrant (69MB)                                     ││
-│  │  Purpose: Fast semantic search across documents             ││
-│  │  Characteristics: High-volume, transient, citation-centric  ││
-│  │  Guide: [RAG Quickstart](rag-quickstart.md)                 ││
-│  └────────────────────────────┬────────────────────────────────┘│
-│                               │                                 │
-│                               │ Promote with evidence           │
-│                               ▼                                 │
-│  ┌─────────────────────────────────────────────────────────────┐│
-│  │  Tier 2: Knowledge Memory (KG)                              ││
-│  │  Storage: Graphiti/Neo4j                                    ││
-│  │  Purpose: Durable facts with provenance                     ││
-│  │  Characteristics: Low-volume, typed, conflict-aware         ││
-│  │  Guide: [Knowledge Graph Quickstart](../concepts/knowledge-graph.md)│
-│  └─────────────────────────────────────────────────────────────┘│
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+![LKAP Two-Tier Memory Model](../assets/lkap-two-tier.jpg)
+
+**Tier 1: Document Memory (RAG)** - Qdrant-based semantic search for transient document exploration.
+
+**Tier 2: Knowledge Memory (KG)** - Graphiti/Neo4j for durable, typed facts with provenance.
+
+**Promotion workflow** bridges the two: evidence from documents → curated knowledge.
 
 ## When to Use Each Tier
 
