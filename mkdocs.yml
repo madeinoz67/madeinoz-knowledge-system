@@ -50,6 +50,7 @@ nav:
     - Promotion Workflow: lkap/promotion-workflow.md
     - RAG Concepts: rag/concepts.md
     - RAG Quickstart: rag/quickstart.md
+    - RAG Advanced: rag/advanced-search.md
     - RAG Config: rag/configuration.md
     - KG Concepts: kg/concepts.md
     - KG Quickstart: kg/quickstart.md

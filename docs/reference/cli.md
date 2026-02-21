@@ -5,15 +5,16 @@ description: "Command-line interface reference for the Madeinoz Knowledge System
 
 <!-- AI-FRIENDLY SUMMARY
 System: Madeinoz Knowledge System - CLI Tools
-Purpose: Command-line interface for knowledge graph management, server operations, and remote access
-Key Components: server-cli (container management), knowledge-cli (knowledge operations with remote access support)
+Purpose: Command-line interface for knowledge graph management, server operations, RAG operations, and remote access
+Key Components: server-cli (containers), knowledge-cli (knowledge graph), rag-cli (document memory)
 
 Key Tools/Commands:
 - server-cli: start/stop/restart/status/logs for MCP server containers
-- knowledge-cli: add_episode, search_nodes, search_facts, investigate, get_episodes, get_status, clear_graph, health, status, list_profiles
+- knowledge-cli: add_episode, search_nodes, search_facts, investigate, get_episodes, get_status, clear_graph, health
+- rag-cli: search, ingest, get-chunk, list, health, images search/list/get
 
 Configuration Prefix: MADEINOZ_KNOWLEDGE_
-Default Ports: 8001 (MCP HTTP), 8000 (MCP Server), 7474 (Neo4j Browser), 7687 (Neo4j Bolt)
+Default Ports: 8001 (MCP HTTP), 8000 (MCP Server), 7474 (Neo4j Browser), 7687 (Neo4j Bolt), 6333 (Qdrant)
 
 Remote Access (Feature 010):
 - Connection profiles via YAML config: $PAI_DIR/config/knowledge-profiles.yaml
@@ -234,6 +235,120 @@ This triggers the ClearGraph workflow which:
 1. Confirms destructive action
 2. Deletes all entities and relationships
 3. Rebuilds indices
+
+## RAG Operations (Document Memory)
+
+The `rag-cli` provides commands for Document Memory operations using Qdrant vector search.
+
+### Syntax
+
+```bash
+bun run src/skills/server/lib/rag-cli.ts <command> [args...] [options]
+```
+
+### Commands
+
+#### search
+
+Search documents with semantic similarity:
+
+```bash
+# Basic search
+bun run src/skills/server/lib/rag-cli.ts search "GPIO configuration"
+
+# With filters
+bun run src/skills/server/lib/rag-cli.ts search "interrupts" --domain=embedded --top-k=5
+
+# With document type filter
+bun run src/skills/server/lib/rag-cli.ts search "pinout" --type=pdf --top-k=10
+```
+
+**Options:**
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--top-k` | Maximum results | 10 |
+| `--domain` | Filter by domain (embedded, security, web) | All |
+| `--type` | Filter by document type (pdf, markdown, text) | All |
+| `--component` | Filter by component | All |
+
+#### ingest
+
+Ingest documents into the vector database:
+
+```bash
+# Ingest all documents in inbox
+bun run src/skills/server/lib/rag-cli.ts ingest --all
+
+# Ingest specific file
+bun run src/skills/server/lib/rag-cli.ts ingest knowledge/inbox/report.pdf
+```
+
+**Options:**
+
+| Option | Description |
+|--------|-------------|
+| `--all` | Ingest all files in knowledge/inbox/ |
+| `<path>` | Path to specific file |
+
+#### get-chunk
+
+Retrieve a specific chunk by ID:
+
+```bash
+bun run src/skills/server/lib/rag-cli.ts get-chunk <chunk-id>
+```
+
+Returns full chunk text, source document, page, and metadata.
+
+#### list
+
+List ingested documents:
+
+```bash
+# List all documents
+bun run src/skills/server/lib/rag-cli.ts list
+
+# Limit results
+bun run src/skills/server/lib/rag-cli.ts list --limit=20
+```
+
+#### health
+
+Check Qdrant connectivity and status:
+
+```bash
+bun run src/skills/server/lib/rag-cli.ts health
+```
+
+Returns connection status, collection info, and vector count.
+
+### Image Search Commands
+
+Search and manage extracted images from documents:
+
+```bash
+# Search images by description
+bun run src/skills/server/lib/rag-cli.ts images search "pinout diagram"
+
+# List all extracted images
+bun run src/skills/server/lib/rag-cli.ts images list
+
+# Get specific image metadata
+bun run src/skills/server/lib/rag-cli.ts images get <image-id>
+```
+
+### RAG Quick Reference
+
+| Task | Command |
+|------|---------|
+| Search documents | `rag-cli.ts search "<query>"` |
+| Get chunk details | `rag-cli.ts get-chunk <id>` |
+| Ingest all | `rag-cli.ts ingest --all` |
+| Ingest single | `rag-cli.ts ingest <file>` |
+| List documents | `rag-cli.ts list` |
+| Check health | `rag-cli.ts health` |
+| Search images | `rag-cli.ts images search "<query>"` |
 
 ## Knowledge CLI (Token-Efficient Wrapper)
 
