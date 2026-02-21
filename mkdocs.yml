@@ -36,53 +36,45 @@ theme:
 
 nav:
   - Home: index.md
-  - Getting Started:
+  - Get Started:
     - Overview: getting-started/overview.md
     - Quick Reference: getting-started/quick-reference.md
-  - Installation:
-    - Guide: installation/index.md
+    - Installation: installation/index.md
     - Requirements: installation/requirements.md
     - Verification: installation/verification.md
     - Remote Deployment: installation/remote-deployment.md
-    - Remote Access: remote-access.md
-  - LKAP (Local Knowledge Augmentation):
+  - LKAP:
     - Overview: lkap/index.md
-    - Two-Tier Memory Model: lkap/two-tier-model.md
+    - Two-Tier Model: lkap/two-tier-model.md
     - Promotion Workflow: lkap/promotion-workflow.md
-  - Document Memory (RAG):
-    - Concepts: rag/concepts.md
-    - Quickstart: rag/quickstart.md
-    - Configuration: rag/configuration.md
-    - Troubleshooting: rag/troubleshooting.md
-  - Knowledge Memory (Graph):
-    - Concepts: kg/concepts.md
-    - Quickstart: kg/quickstart.md
-    - Configuration: kg/configuration.md
-    - Troubleshooting: kg/troubleshooting.md
-  - Usage:
+    - RAG Concepts: rag/concepts.md
+    - RAG Quickstart: rag/quickstart.md
+    - RAG Config: rag/configuration.md
+    - KG Concepts: kg/concepts.md
+    - KG Quickstart: kg/quickstart.md
+    - KG Config: kg/configuration.md
+  - Guides:
     - Basic Usage: usage/basic-usage.md
-    - Advanced: usage/advanced.md
-    - Memory Decay & Lifecycle: usage/memory-decay.md
-    - Weighted Search: weighted-search.md
+    - Advanced Usage: usage/advanced.md
+    - Memory Decay: usage/memory-decay.md
     - Monitoring: usage/monitoring.md
     - Backup & Restore: usage/backup-restore.md
-    - OSINT & CTI Workflows: guides/osint-workflows.md
-  - Concepts:
-    - Architecture: concepts/architecture.md
-    - Hooks & Integration: concepts/hooks-integration.md
-  - Troubleshooting:
-    - Common Issues: troubleshooting/common-issues.md
-    - Known Issues: troubleshooting/known-issues.md
+    - OSINT Workflows: guides/osint-workflows.md
   - Reference:
     - CLI: reference/cli.md
     - Configuration: reference/configuration.md
-    - Observability & Metrics: reference/observability.md
-    - Cache Implementation: reference/cache-implementation.md
+    - Architecture: concepts/architecture.md
+    - Observability: reference/observability.md
     - Model Guide: reference/model-guide.md
+    - RAG Troubleshooting: rag/troubleshooting.md
+    - KG Troubleshooting: kg/troubleshooting.md
+    - Common Issues: troubleshooting/common-issues.md
+  - About:
+    - Acknowledgments: acknowledgments.md
+    - Hooks & Integration: concepts/hooks-integration.md
     - Benchmarks: reference/benchmarks.md
     - Developer Notes: reference/developer-notes.md
     - Release Process: reference/releases.md
-  - Acknowledgments: acknowledgments.md
 
 plugins:
   - search
