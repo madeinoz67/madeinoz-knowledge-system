@@ -7,6 +7,10 @@ description: "Understanding how knowledge graphs work, core concepts, and how in
 
 This guide explains how the Madeinoz Knowledge System works under the hood. Understanding these concepts will help you use the system more effectively.
 
+## Knowledge Graph Architecture
+
+![Knowledge Memory Architecture](../assets/kg-concepts.jpg)
+
 ## The Knowledge Graph
 
 ### What is a Graph?
