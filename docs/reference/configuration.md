@@ -491,7 +491,7 @@ For detailed metrics documentation, see the [Observability & Metrics](observabil
 ## LKAP Configuration (Feature 022/023)
 
 !!! info "Feature 022/023: Local Knowledge Augmentation Platform"
-    LKAP adds RAG capabilities with automatic document ingestion, semantic search, and evidence-based knowledge promotion. Uses Qdrant (69MB Docker image) as the vector database. See [LKAP Quickstart](../usage/lkap-quickstart.md) for complete user guide.
+    LKAP adds RAG capabilities with automatic document ingestion, semantic search, and evidence-based knowledge promotion. Uses Qdrant (69MB Docker image) as the vector database. See [LKAP Quickstart](../lkap/index.md) for complete user guide.
 
 ### Qdrant Configuration
 

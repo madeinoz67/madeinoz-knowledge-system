@@ -505,7 +505,7 @@ See the [Backup & Restore Guide](../usage/backup-restore.md) for detailed instru
 
 1. Check logs: `bun run server-cli logs`
 2. Read the [Troubleshooting Guide](../troubleshooting/common-issues.md)
-3. Review the [Knowledge Graph Concepts](../concepts/knowledge-graph.md)
+3. Review the [Knowledge Graph Concepts](../kg/concepts.md)
 4. Check the [Architecture](../concepts/architecture.md)
 
 ## Version Info

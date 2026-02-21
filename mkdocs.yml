@@ -45,10 +45,22 @@ nav:
     - Verification: installation/verification.md
     - Remote Deployment: installation/remote-deployment.md
     - Remote Access: remote-access.md
+  - LKAP (Local Knowledge Augmentation):
+    - Overview: lkap/index.md
+    - Two-Tier Memory Model: lkap/two-tier-model.md
+    - Promotion Workflow: lkap/promotion-workflow.md
+  - Document Memory (RAG):
+    - Concepts: rag/concepts.md
+    - Quickstart: rag/quickstart.md
+    - Configuration: rag/configuration.md
+    - Troubleshooting: rag/troubleshooting.md
+  - Knowledge Memory (Graph):
+    - Concepts: kg/concepts.md
+    - Quickstart: kg/quickstart.md
+    - Configuration: kg/configuration.md
+    - Troubleshooting: kg/troubleshooting.md
   - Usage:
     - Basic Usage: usage/basic-usage.md
-    - LKAP Overview: usage/lkap-quickstart.md
-    - RAG Quickstart: usage/rag-quickstart.md
     - Advanced: usage/advanced.md
     - Memory Decay & Lifecycle: usage/memory-decay.md
     - Weighted Search: weighted-search.md
@@ -57,7 +69,6 @@ nav:
     - OSINT & CTI Workflows: guides/osint-workflows.md
   - Concepts:
     - Architecture: concepts/architecture.md
-    - Knowledge Graph: concepts/knowledge-graph.md
     - Hooks & Integration: concepts/hooks-integration.md
   - Troubleshooting:
     - Common Issues: troubleshooting/common-issues.md

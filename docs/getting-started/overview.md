@@ -234,7 +234,7 @@ Ready to dive deeper? Check out:
 
 - [Installation Guide](../installation/index.md) - Set up the system step by step
 - [Usage Guide](../usage/basic-usage.md) - Detailed examples and commands
-- [Concepts Guide](../concepts/knowledge-graph.md) - Deep dive into how the system works
+- [Concepts Guide](../kg/concepts.md) - Deep dive into how the system works
 - [Troubleshooting](../troubleshooting/common-issues.md) - Fix common issues
 
 ## Getting Help

@@ -1,11 +1,17 @@
 ---
 title: "Architecture"
-description: "Deep dive into the ßKnowledge System architecture, component stack, and how information flows through the system"
+description: "System architecture overview with LKAP two-tier memory model"
 ---
 
 # Architecture
 
 The Knowledge System solves the problem of amnesiac AI through **automatic knowledge graph construction**. Instead of requiring manual note-taking, it extracts and structures knowledge as a natural byproduct of conversation.
+
+## Related Concept Guides
+
+For detailed concepts on each memory tier:
+- **[Document Memory (RAG) Concepts](../rag/concepts.md)** - RAG architecture, chunking, embeddings
+- **[Knowledge Memory (Graph) Concepts](../kg/concepts.md)** - Knowledge graphs, entities, relationships
 
 ## Core Architecture
 

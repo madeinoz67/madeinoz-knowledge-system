@@ -485,5 +485,5 @@ docker exec madeinoz-knowledge-falkordb redis-cli GRAPH.LIST          # List gra
 
 - Return to [advanced usage](advanced.md) for other expert-level patterns
 - Review [basic usage](basic-usage.md) for fundamental operations
-- Learn more about [how the system works](../concepts/knowledge-graph.md)
+- Learn more about [how the system works](../kg/concepts.md)
 - Troubleshoot issues in the [troubleshooting guide](../troubleshooting/common-issues.md)

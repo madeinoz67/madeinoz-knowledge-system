@@ -341,7 +341,7 @@ Lower numbers = slower but less likely to hit rate limits.
 Now that everything is installed:
 
 1. Read the [Usage Guide](../usage/basic-usage.md) to learn all the commands
-2. Check out [Concepts](../concepts/knowledge-graph.md) to understand how it works
+2. Check out [Concepts](../kg/concepts.md) to understand how it works
 3. Start using it! The more you capture, the more valuable it becomes
 
 ## Troubleshooting
