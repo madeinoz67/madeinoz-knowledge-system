@@ -109,10 +109,6 @@ Documents contain evidence. Knowledge contains curated truth. The **promotion wo
 - **Promotion** bridges the two with user validation
 - **Provenance** traces facts back to evidence
 
-## Architecture Diagram
-
-![LKAP Two-Tier Memory Model](../assets/lkap-two-tier.jpg)
-
 ## Related Topics
 
 - **[LKAP Overview](index.md)** - Introduction to LKAP
