@@ -95,12 +95,37 @@ Learn how to use the system:
 - **[Memory Decay & Lifecycle](usage/memory-decay.md)** - Memory prioritization, decay scoring, and lifecycle management
 - **[Monitoring](usage/monitoring.md)** - Prometheus and Grafana dashboards
 
+### LKAP (Local Knowledge Augmentation)
+
+Two-tier memory combining RAG and Knowledge Graph:
+
+- **[LKAP Overview](lkap/index.md)** - Introduction to two-tier memory
+- **[Two-Tier Memory Model](lkap/two-tier-model.md)** - When to use each tier
+- **[Promotion Workflow](lkap/promotion-workflow.md)** - Promote facts from documents to knowledge
+
+### Document Memory (RAG)
+
+Semantic search across documents:
+
+- **[RAG Concepts](rag/concepts.md)** - How document memory works
+- **[RAG Quickstart](rag/quickstart.md)** - Get started with document search
+- **[RAG Configuration](rag/configuration.md)** - Configure Qdrant and Ollama
+- **[RAG Troubleshooting](rag/troubleshooting.md)** - Solve common issues
+
+### Knowledge Memory (Graph)
+
+Durable knowledge with relationships:
+
+- **[KG Concepts](kg/concepts.md)** - How knowledge graphs work
+- **[KG Quickstart](kg/quickstart.md)** - Get started with knowledge memory
+- **[KG Configuration](kg/configuration.md)** - Configure Neo4j and LLM
+- **[KG Troubleshooting](kg/troubleshooting.md)** - Solve common issues
+
 ### Concepts
 
 Understand how it works:
 
 - **[Architecture](concepts/architecture.md)** - System design and components
-- **[Knowledge Graph](concepts/knowledge-graph.md)** - Episodes, entities, facts explained
 
 ### Troubleshooting
 
@@ -227,7 +252,7 @@ bun run ~/.claude/hooks/sync-memory-to-knowledge.ts --dry-run
 ## Need Help?
 
 1. Check the [Troubleshooting Guide](troubleshooting/common-issues.md)
-2. Review [Key Concepts](concepts/knowledge-graph.md)
+2. Review [Key Concepts](kg/concepts.md)
 3. Look for examples in the [Usage Guide](usage/basic-usage.md)
 
 ## Quick Reference Card

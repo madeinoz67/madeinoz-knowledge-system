@@ -1339,6 +1339,211 @@ class QueueMetricsExporter:
 
 **Graceful degradation**: Methods do nothing if metrics are disabled.
 
+## LKAP Logging (Feature 022/023)
+
+### Overview
+
+The Local Knowledge Augmentation Platform (LKAP) provides structured logging for observability of document ingestion, classification, and knowledge promotion operations. Uses Qdrant (69MB Docker image) as the vector database. Logs track ingestion status, classification confidence, and performance metrics.
+
+### Configuration
+
+Logging behavior is controlled via environment variables:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `MADEINOZ_KNOWLEDGE_QDRANT_LOG_LEVEL` | `INFO` | Log level (DEBUG, INFO, WARNING, ERROR) |
+| `MADEINOZ_KNOWLEDGE_QDRANT_LOG_PATH` | `/var/log/lkap/lkap.log` | Log file path |
+
+### Log Locations
+
+Logs are written to two destinations:
+
+1. **Console** (stdout): Full output with timestamps for development
+2. **File**: Rotating file handler (10MB max, 5 backups)
+
+File log format:
+```
+YYYY-MM-DD HH:MM:SS - logger_name - LEVEL - function_name:line_number - message
+```
+
+Console format:
+```
+YYYY-MM-DD HH:MM:SS - logger_name - LEVEL - message
+```
+
+### Component Loggers
+
+| Logger Name | Component | Description |
+|-------------|-----------|-------------|
+| `lkap.ingestion` | Document Ingestion | File parsing, chunking, storage operations |
+| `lkap.classification` | Progressive Classification | Domain classification, confidence scoring |
+| `lkap.promotion` | Evidence-to-KG Promotion | Knowledge graph fact promotion |
+| `lkap.qdrant` | Qdrant Client | Vector database operations (search, storage) |
+| `lkap.embeddings` | Embedding Service | Ollama embedding generation |
+| `lkap.chunking` | Chunking Service | Semantic chunking with tiktoken |
+
+### Key Log Messages
+
+#### Ingestion Status
+
+**Successful ingestion:**
+```
+Ingestion complete for {doc_id}: 42/42 chunks in 12.3s
+Document moved to processed: /path/to/processed/{doc_id}/v1/filename.pdf
+```
+
+**Skipped (duplicate):**
+```
+Document already ingested (hash match): filename.pdf
+```
+
+**Failed ingestion:**
+```
+Ingestion failed for {file_path}: {error_message}
+```
+
+#### Classification Events
+
+**Domain classified:**
+```
+User override for domain: {path} -> {domain}
+Saved user override: {source_key} domain: {original} -> {new}
+```
+
+**Low confidence warning:**
+```
+Could not classify domain for {filename}, defaulting to software
+```
+
+#### Batch Processing
+
+**Batch completion:**
+```
+Batch ingestion complete: 95/100 successful, 3 skipped, 2 failed in 285.1s
+Found 150 documents for batch ingestion
+```
+
+**Performance warnings:**
+```
+Batch ingestion performance: 3.45s per document (target: 3s for 100 docs in 5 min)
+```
+
+### Ingestion Metrics
+
+Logged after each document ingestion:
+
+| Metric | Description |
+|--------|-------------|
+| `doc_id` | Unique document identifier |
+| `duration_seconds` | Total ingestion time |
+| `chunks_processed` | Number of chunks successfully processed |
+| `chunks_total` | Total chunks in document |
+| `errors` | List of error messages (if any) |
+| `success` | Boolean indicating success/failure |
+
+### Confidence Bands
+
+Classification results include confidence band for quality monitoring:
+
+| Band | Confidence Range | Action |
+|------|------------------|--------|
+| HIGH | >= 0.85 | Auto-accept |
+| MEDIUM | 0.70 - 0.84 | Optional review |
+| LOW | < 0.70 | Required review |
+
+### Performance Targets
+
+| Operation | Target | Logged By |
+|-----------|--------|-----------|
+| Document ingestion | < 3.0 seconds per document | `lkap.ingestion` |
+| Batch ingestion (100 docs) | < 5 minutes total | `lkap.ingestion` |
+| Classification | < 500ms | `lkap.classification` |
+| Chunking | < 1 second per document | `lkap.chunking` |
+
+### Monitoring Recommendations
+
+**Key indicators to monitor:**
+
+1. **Ingestion success rate**: Track "Ingestion complete" vs "Ingestion failed"
+2. **Duplicate detection**: Monitor "Document already ingested" frequency
+3. **Classification confidence**: Watch for low confidence warnings
+4. **Performance degradation**: Alert on per-document time > 3.0s
+5. **Batch processing**: Monitor success/skipped/failed ratios
+
+**Example log monitoring queries:**
+
+```bash
+# Count ingestion failures
+grep "Ingestion failed" /var/log/lkap/lkap.log | wc -l
+
+# Find slow ingestions (>3s)
+grep "Ingestion complete" /var/log/lkap/lkap.log | \
+  awk '{split($0,a,"in "); split(a[2],b,"s"); if(b[1]>3.0) print}'
+
+# Low confidence classifications
+grep "defaulting to software" /var/log/lkap/lkap.log
+```
+
+### Troubleshooting
+
+#### High Ingestion Failure Rate
+
+**Symptoms:** Many "Ingestion failed" messages
+
+**Check:**
+1. File permissions on inbox directory
+2. Qdrant service availability (`curl http://localhost:6333/health`)
+3. Disk space on processed path
+
+#### Low Classification Confidence
+
+**Symptoms:** Frequent "defaulting to software" warnings
+
+**Check:**
+1. Document path structure (add domain-specific folders)
+2. Content quality (are documents technical enough?)
+3. Consider user overrides for recurring sources
+
+#### Performance Degradation
+
+**Symptoms:** Per-document time > 3.0s
+
+**Check:**
+1. Ollama embedding service responsiveness
+2. Qdrant API latency (should be <500ms for search)
+3. Network connectivity to services
+
+### Implementation
+
+The logging system is implemented in `docker/patches/lkap_logging.py`:
+
+```python
+def setup_lkap_logging()
+    # Configures console and rotating file handlers
+
+def get_logger(name: str) -> logging.Logger
+    # Returns configured logger for component
+
+class IngestionMetrics
+    # Tracks ingestion metrics and produces summaries
+```
+
+**Usage example:**
+
+```python
+from lkap_logging import get_logger, IngestionMetrics
+
+logger = get_logger("lkap.ingestion")
+metrics = IngestionMetrics(doc_id)
+
+# Track progress
+metrics.increment_chunks()
+metrics.set_chunks_total(42)
+
+# Log summary
+metrics.log_summary(logger)
+```
+
 ## Related Documentation
 
 - [Configuration Reference](configuration.md) - All environment variables

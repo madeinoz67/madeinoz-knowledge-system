@@ -400,7 +400,7 @@ This means:
 
 **Pro tip:** More detailed input = better extraction. "Podman is fast" extracts less than "Podman starts containers faster than Docker because it doesn't need a daemon."
 
-See [concepts/knowledge-graph.md](../concepts/knowledge-graph.md#the-role-of-llms-language-models) for a deep dive on LLM roles and cost optimization.
+See [concepts/knowledge-graph.md](../kg/concepts.md#the-role-of-llms-language-models) for a deep dive on LLM roles and cost optimization.
 
 ## Tips for Effective Knowledge Management
 
@@ -606,6 +606,6 @@ After adding new knowledge and wanting to search for it immediately:
 
 ## Next Steps
 
-- Learn more about [how the system works](../concepts/knowledge-graph.md)
+- Learn more about [how the system works](../kg/concepts.md)
 - Explore [advanced usage patterns](advanced.md)
 - Troubleshoot issues in the [troubleshooting guide](../troubleshooting/common-issues.md)

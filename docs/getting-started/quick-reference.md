@@ -7,11 +7,21 @@ description: "One-page reference guide for common commands and configurations in
 System: Madeinoz Knowledge System Quick Reference
 Purpose: One-page command and configuration reference for rapid context loading
 
+LKAP Two-Tier Memory:
+- Tier 1: Document Memory (RAG) - Qdrant vector search
+- Tier 2: Knowledge Memory (Graph) - Graphiti/Neo4j graph
+
 Natural Language Triggers:
 - Capture: "Remember that [knowledge]", "Store this: [information]"
 - Search: "What do I know about [topic]?", "Search my knowledge for [subject]"
 - Connections: "How are [X] and [Y] connected?"
 - Status: "Show knowledge graph status", "Check memory health"
+
+RAG Commands:
+- Drop documents in knowledge/inbox/
+- rag.ingest(ingestAll=true) to ingest
+- rag.search(query) for semantic search
+- rag.health() to check Qdrant
 
 CLI Commands (bun run):
 - start: Start all containers
@@ -25,8 +35,7 @@ CLI Commands (bun run):
 
 Health & Status:
 - curl http://localhost:8000/health | jq: Full system health
-- curl http://localhost:8000/health | jq '.maintenance': Maintenance status (Feature 009)
-- curl http://localhost:8000/health | jq '.memory_counts.by_state': Lifecycle distribution
+- curl http://localhost:6333/collections/lkap_documents: Qdrant status
 
 Metrics:
 - http://localhost:9091/metrics: Prometheus metrics (dev)
@@ -35,6 +44,7 @@ Metrics:
 Dashboards:
 - Grafana: http://localhost:3002 (dev) / http://localhost:3001 (prod)
 - Neo4j Browser: http://localhost:7474 (Neo4j backend only)
+- Qdrant Dashboard: http://localhost:6333/dashboard
 - FalkorDB UI: http://localhost:3000 (FalkorDB backend only)
 
 Lifecycle States (Feature 009):
@@ -50,9 +60,89 @@ Stability Levels (Feature 009): VOLATILE (1), LOW (2), MODERATE (3), HIGH (4), P
 
 # Quick Reference Card
 
-One-page reference for the Madeinoz Knowledge System.
+One-page reference for the Madeinoz Knowledge System with LKAP two-tier memory.
 
-## Natural Language Commands
+## LKAP Two-Tier Memory
+
+| Tier | Technology | Use Case |
+|------|------------|----------|
+| **Document Memory** | Qdrant (RAG) | Search documents, find citations |
+| **Knowledge Memory** | Graphiti/Neo4j | Verified facts, relationships |
+
+**When to use each:**
+- **RAG**: Exploring docs, finding evidence, broad search
+- **KG**: Verified facts, relationships, provenance
+
+---
+
+## RAG Commands (Document Memory)
+
+**Two ways to use RAG:**
+
+| Method | When to Use | How |
+|--------|-------------|-----|
+| **CLI Script** | Terminal, automation, scripting | `bun run rag-cli.ts <command>` |
+| **MCP Tools** | From Claude conversation | Tool calls via MCP server |
+
+### CLI Script (Terminal)
+
+```bash
+# Ingest documents
+bun run src/skills/server/lib/rag-cli.ts ingest --all          # All in inbox
+bun run src/skills/server/lib/rag-cli.ts ingest report.pdf     # Single file
+
+# Search documents
+bun run src/skills/server/lib/rag-cli.ts search "GPIO configuration"
+bun run src/skills/server/lib/rag-cli.ts search "interrupts" --domain=embedded --top-k=5
+
+# Get specific chunk
+bun run src/skills/server/lib/rag-cli.ts get-chunk <chunk-id>
+
+# List ingested documents
+bun run src/skills/server/lib/rag-cli.ts list
+
+# Check Qdrant health
+bun run src/skills/server/lib/rag-cli.ts health
+```
+
+### MCP Tools (From Claude)
+
+When the MCP server is running, these tools are available in Claude:
+
+| Tool | Purpose | Example |
+|------|---------|---------|
+| `rag_search` | Semantic search | `query="GPIO config", top_k=10` |
+| `rag_get_chunk` | Get chunk by ID | `chunk_id="abc-123"` |
+| `rag_ingest` | Ingest documents | `ingest_all=true` or `file_path="doc.pdf"` |
+| `rag_health` | Check Qdrant status | (no params) |
+
+**Example in conversation:**
+```
+You: "Search my documents for SPI configuration"
+[Claude calls rag_search(query="SPI configuration", top_k=10)]
+```
+
+### Quick Start
+
+```bash
+# 1. Start Qdrant
+docker compose -f docker/docker-compose-qdrant.yml up -d
+
+# 2. Drop documents in inbox
+cp report.pdf knowledge/inbox/
+
+# 3. Ingest
+bun run src/skills/server/lib/rag-cli.ts ingest --all
+
+# 4. Search
+bun run src/skills/server/lib/rag-cli.ts search "your query"
+```
+
+---
+
+## Knowledge Graph Commands (Knowledge Memory)
+
+### Natural Language Commands
 
 ### Capture Knowledge
 
@@ -505,7 +595,7 @@ See the [Backup & Restore Guide](../usage/backup-restore.md) for detailed instru
 
 1. Check logs: `bun run server-cli logs`
 2. Read the [Troubleshooting Guide](../troubleshooting/common-issues.md)
-3. Review the [Knowledge Graph Concepts](../concepts/knowledge-graph.md)
+3. Review the [Knowledge Graph Concepts](../kg/concepts.md)
 4. Check the [Architecture](../concepts/architecture.md)
 
 ## Version Info

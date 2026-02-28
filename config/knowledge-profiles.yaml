@@ -42,13 +42,11 @@ profiles:
       ca: /etc/ssl/certs/ca.pem
       minVersion: TLSv1.3
 
-  # Development profile - connects to development server with self-signed certificate
+  # Development profile - connects to local development containers
   # Usage: MADEINOZ_KNOWLEDGE_PROFILE=development bun run src/skills/tools/knowledge-cli.ts search_nodes "test"
   development:
-    host: 192.168.1.100
-    port: 8000
-    protocol: https
+    host: localhost
+    port: 8001
+    protocol: http
     basePath: /mcp
-    timeout: 30000
-    tls:
-      verify: false  # For self-signed certificates (WARNING: security risk)
+    timeout: 600000  # 10 minutes for document ingestion (PDF parsing with OCR)

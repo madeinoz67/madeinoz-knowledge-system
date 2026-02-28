@@ -19,6 +19,7 @@ import {
 describe('ConnectionProfileManager', () => {
   let tempDir: string;
   let configPath: string;
+  let originalConfigFile: string | undefined;
 
   beforeEach(() => {
     // Create temporary directory for test fixtures
@@ -26,9 +27,21 @@ describe('ConnectionProfileManager', () => {
     mkdirSync(tempDir, { recursive: true });
     mkdirSync(join(tempDir, 'config'), { recursive: true }); // Create config subdirectory
     configPath = join(tempDir, 'config', 'knowledge-profiles.yaml');
+
+    // Use MADEINOZ_KNOWLEDGE_CONFIG_FILE (priority 1) to override local project config
+    // This is critical because config/knowledge-profiles.yaml exists in the repo
+    originalConfigFile = process.env.MADEINOZ_KNOWLEDGE_CONFIG_FILE;
+    process.env.MADEINOZ_KNOWLEDGE_CONFIG_FILE = configPath;
   });
 
   afterEach(() => {
+    // Restore original env var
+    if (originalConfigFile !== undefined) {
+      process.env.MADEINOZ_KNOWLEDGE_CONFIG_FILE = originalConfigFile;
+    } else {
+      delete process.env.MADEINOZ_KNOWLEDGE_CONFIG_FILE;
+    }
+
     // Clean up temporary directory
     if (existsSync(tempDir)) {
       rmSync(tempDir, { recursive: true, force: true });
@@ -36,31 +49,27 @@ describe('ConnectionProfileManager', () => {
   });
 
   describe('findConfigFile', () => {
-    test('should return path when config exists in PAI_DIR', () => {
-      // Create config in temp PAI_DIR
-      const paiConfigPath = join(tempDir, 'config', 'knowledge-profiles.yaml');
-      mkdirSync(join(tempDir, 'config'), { recursive: true });
-      writeFileSync(paiConfigPath, 'version: "1.0"\ndefault_profile: test\nprofiles: {}');
+    test('should return path when config exists via MADEINOZ_KNOWLEDGE_CONFIG_FILE', () => {
+      // Config path is set via MADEINOZ_KNOWLEDGE_CONFIG_FILE in beforeEach
+      writeFileSync(configPath, 'version: "1.0"\ndefault_profile: test\nprofiles: {}');
 
-      // Mock PAI_DIR environment
-      const originalPAIDir = process.env.PAI_DIR;
-      process.env.PAI_DIR = tempDir;
-
-      try {
-        const manager = new ConnectionProfileManager();
-        expect(manager.getConfigPath()).toBe(paiConfigPath);
-      } finally {
-        process.env.PAI_DIR = originalPAIDir;
-      }
+      const manager = new ConnectionProfileManager();
+      expect(manager.getConfigPath()).toBe(configPath);
     });
 
     test('should find config in home directory when PAI_DIR not set', () => {
+      // Clear the explicit config file to test fallback
+      delete process.env.MADEINOZ_KNOWLEDGE_CONFIG_FILE;
+
       // Note: This test may pick up existing ~/.claude/config/knowledge-profiles.yaml
       // so we just verify it returns a path or null
       const manager = new ConnectionProfileManager();
       const path = manager.getConfigPath();
       // Should either be null or a valid path string
       expect(path === null || typeof path === 'string').toBe(true);
+
+      // Restore for subsequent tests
+      process.env.MADEINOZ_KNOWLEDGE_CONFIG_FILE = configPath;
     });
   });
 
@@ -480,14 +489,10 @@ describe('ConnectionProfileManager', () => {
     });
 
     test('should return empty array when config file does not exist', () => {
-      // Use a different temp dir that has no config
-      const emptyDir = join(tmpdir(), `empty-test-${Date.now()}`);
-      mkdirSync(emptyDir, { recursive: true });
-
-      const originalPAIDir = process.env.PAI_DIR;
-      const originalHome = process.env.HOME;
-      process.env.PAI_DIR = emptyDir;
-      process.env.HOME = emptyDir; // Also override HOME to prevent fallback
+      // Set MADEINOZ_KNOWLEDGE_CONFIG_FILE to a non-existent path
+      // With the code fix, this will return null instead of falling back to local project config
+      const nonExistentPath = join(tmpdir(), `nonexistent-config-${Date.now()}.yaml`);
+      process.env.MADEINOZ_KNOWLEDGE_CONFIG_FILE = nonExistentPath;
 
       try {
         const manager = new ConnectionProfileManager();
@@ -495,9 +500,8 @@ describe('ConnectionProfileManager', () => {
 
         expect(profiles).toEqual([]);
       } finally {
-        process.env.PAI_DIR = originalPAIDir;
-        process.env.HOME = originalHome;
-        rmSync(emptyDir, { recursive: true, force: true });
+        // Restore MADEINOZ_KNOWLEDGE_CONFIG_FILE for subsequent tests
+        process.env.MADEINOZ_KNOWLEDGE_CONFIG_FILE = configPath;
       }
     });
   });
@@ -506,15 +510,27 @@ describe('ConnectionProfileManager', () => {
 describe('getProfileName', () => {
   let tempDir: string;
   let configPath: string;
+  let originalConfigFile: string | undefined;
 
   beforeEach(() => {
     tempDir = join(tmpdir(), `profile-test-${Date.now()}`);
     mkdirSync(tempDir, { recursive: true });
     mkdirSync(join(tempDir, 'config'), { recursive: true }); // Create config subdirectory
     configPath = join(tempDir, 'config', 'knowledge-profiles.yaml');
+
+    // Use MADEINOZ_KNOWLEDGE_CONFIG_FILE (priority 1) to override local project config
+    originalConfigFile = process.env.MADEINOZ_KNOWLEDGE_CONFIG_FILE;
+    process.env.MADEINOZ_KNOWLEDGE_CONFIG_FILE = configPath;
   });
 
   afterEach(() => {
+    // Restore original env var
+    if (originalConfigFile !== undefined) {
+      process.env.MADEINOZ_KNOWLEDGE_CONFIG_FILE = originalConfigFile;
+    } else {
+      delete process.env.MADEINOZ_KNOWLEDGE_CONFIG_FILE;
+    }
+
     if (existsSync(tempDir)) {
       rmSync(tempDir, { recursive: true, force: true });
     }
@@ -592,15 +608,27 @@ describe('getProfileName', () => {
 describe('loadProfileWithOverrides', () => {
   let tempDir: string;
   let configPath: string;
+  let originalConfigFile: string | undefined;
 
   beforeEach(() => {
     tempDir = join(tmpdir(), `override-test-${Date.now()}`);
     mkdirSync(tempDir, { recursive: true });
     mkdirSync(join(tempDir, 'config'), { recursive: true }); // Create config subdirectory
     configPath = join(tempDir, 'config', 'knowledge-profiles.yaml');
+
+    // Use MADEINOZ_KNOWLEDGE_CONFIG_FILE (priority 1) to override local project config
+    originalConfigFile = process.env.MADEINOZ_KNOWLEDGE_CONFIG_FILE;
+    process.env.MADEINOZ_KNOWLEDGE_CONFIG_FILE = configPath;
   });
 
   afterEach(() => {
+    // Restore original env var
+    if (originalConfigFile !== undefined) {
+      process.env.MADEINOZ_KNOWLEDGE_CONFIG_FILE = originalConfigFile;
+    } else {
+      delete process.env.MADEINOZ_KNOWLEDGE_CONFIG_FILE;
+    }
+
     if (existsSync(tempDir)) {
       rmSync(tempDir, { recursive: true, force: true });
     }

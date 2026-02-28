@@ -1,0 +1,491 @@
+"""
+Embedding Service for LKAP (Feature 022)
+Local Knowledge Augmentation Platform
+
+Provides embeddings using OpenRouter (text-embedding-3-large, 3072 dim)
+as primary and Ollama (bge-large-en-v1.5, 1024 dim) as fallback.
+
+Research Decision RT-004:
+- Primary: OpenAI text-embedding-3-large (3072 dim) via OpenRouter
+- Fallback: BAAI bge-large-en-v1.5 (1024 dim) via Ollama
+
+Performance targets:
+- Batch size: 100 texts per request (OpenRouter), 50 for Ollama
+- Latency: <500ms for single embedding, <5s for 100 embeddings
+"""
+
+import os
+import logging
+import hashlib
+from typing import List, Optional, Dict, Tuple, Any
+import requests
+from dotenv import load_dotenv
+from functools import lru_cache
+
+load_dotenv()
+
+logger = logging.getLogger(__name__)
+
+# #GAP-002: E5 model prefix configuration
+# E5 models (intfloat/e5-*) require "query: " and "passage: " prefixes for optimal performance.
+# BGE and OpenAI models do NOT require prefixes.
+# Models matching these patterns will have prefixes automatically added.
+E5_MODEL_PATTERNS = {"e5-", "multilingual-e5-", "intfloat/e5"}
+
+# T046: Embedding cache configuration
+# Cache size: 1000 most recent embeddings (adjust based on memory constraints)
+# Cache key: hash(text + model) to ensure different models don't share cache
+EMBEDDING_CACHE_SIZE = 1000
+
+from collections import OrderedDict
+
+# SECURITY: Use OrderedDict for proper LRU eviction
+_embedding_cache: OrderedDict[str, List[float]] = OrderedDict()
+_cache_hits = 0
+_cache_misses = 0
+
+
+def _cache_key(text: str, model: str) -> str:
+    """Generate cache key from text and model name"""
+    content = f"{model}:{text}"
+    return hashlib.sha256(content.encode()).hexdigest()
+
+
+def _get_cached_embedding(text: str, model: str) -> Optional[List[float]]:
+    """Get embedding from cache if available (updates access order for LRU)"""
+    global _cache_hits
+    key = _cache_key(text, model)
+    if key in _embedding_cache:
+        _cache_hits += 1
+        # Move to end for LRU (most recently used)
+        _embedding_cache.move_to_end(key)
+        return _embedding_cache[key]
+    _cache_misses += 1
+    return None
+
+
+def _set_cached_embedding(text: str, model: str, embedding: List[float]) -> None:
+    """Store embedding in cache with proper LRU eviction"""
+    key = _cache_key(text, model)
+
+    # If key exists, remove it first (will be re-added at end)
+    if key in _embedding_cache:
+        del _embedding_cache[key]
+    # Evict least recently used (first item) if cache is full
+    elif len(_embedding_cache) >= EMBEDDING_CACHE_SIZE:
+        _embedding_cache.popitem(last=False)
+
+    # Add to end (most recently used)
+    _embedding_cache[key] = embedding
+
+
+def get_cache_stats() -> Dict[str, int]:
+    """Get embedding cache statistics"""
+    total = _cache_hits + _cache_misses
+    hit_rate = _cache_hits / total if total > 0 else 0
+    return {
+        "cache_size": len(_embedding_cache),
+        "cache_hits": _cache_hits,
+        "cache_misses": _cache_misses,
+        "hit_rate": round(hit_rate * 100, 1),
+    }
+
+
+# Configuration (reuses existing Graphiti variables per Constitution Principle X)
+EMBEDDING_PROVIDER = os.getenv("MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER", "ollama")
+EMBEDDING_MODEL = os.getenv("MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL", "mxbai-embed-large")
+EMBEDDING_DIMENSION = int(os.getenv("MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS", "1024"))
+EMBEDDING_PROVIDER_URL = os.getenv("MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER_URL", "http://host.containers.internal:11434")
+OPENROUTER_API_KEY = os.getenv("MADEINOZ_KNOWLEDGE_OPENROUTER_API_KEY", "")
+
+# SECURITY: Rate limiting configuration (requests per minute)
+# Prevents quota exhaustion and unexpected API costs
+EMBEDDING_RATE_LIMIT = int(os.getenv("MADEINOZ_KNOWLEDGE_EMBEDDING_RATE_LIMIT", "60"))  # Default: 60/min
+_embedding_request_count = 0
+_embedding_rate_limit_warned = False
+
+
+def _validate_url(url: str, name: str) -> str:
+    """
+    SECURITY: Validate URL scheme to prevent SSRF attacks.
+
+    Only allows HTTP and HTTPS schemes. Blocks dangerous schemes like
+    file://, gopher://, ftp://, etc.
+    """
+    from urllib.parse import urlparse
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https"):
+        raise ValueError(
+            f"SECURITY: Invalid URL scheme for {name}: '{parsed.scheme}'. "
+            f"Only http:// and https:// are allowed."
+        )
+    return url
+
+
+def _validate_api_key(key: str, name: str, provider: str) -> None:
+    """
+    SECURITY: Validate API key is set when required by provider.
+
+    Logs warning if key is missing but doesn't fail - allows fallback
+    to other providers.
+    """
+    if not key or key.strip() == "":
+        logger.warning(
+            f"SECURITY: {name} is not set. Provider '{provider}' may not be available. "
+            f"Set {name} in environment to enable this provider."
+        )
+    else:
+        # Log presence only, never log the key itself
+        logger.info(f"{name}: configured ({len(key)} chars)")
+
+
+# Validate URLs at module load time
+try:
+    EMBEDDING_PROVIDER_URL = _validate_url(EMBEDDING_PROVIDER_URL, "EMBEDDING_PROVIDER_URL")
+except ValueError as e:
+    logger.warning(f"{e} Using default: http://host.containers.internal:11434")
+    EMBEDDING_PROVIDER_URL = "http://host.containers.internal:11434"
+
+# Validate API keys (warn but don't fail to allow provider fallback)
+_validate_api_key(OPENROUTER_API_KEY, "OPENROUTER_API_KEY", EMBEDDING_PROVIDER)
+
+# Batch size configuration for optimal throughput
+# OpenRouter supports up to 2048 inputs per request
+# Ollama performance degrades beyond ~50 texts per batch
+EMBEDDING_BATCH_SIZE_OPENROUTER = 100
+EMBEDDING_BATCH_SIZE_OLLAMA = 50
+
+
+class EmbeddingService:
+    """
+    Embedding service supporting multiple providers.
+
+    OpenRouter (text-embedding-3-large): 3072 dimensions, high quality
+    Ollama (bge-large-en-v1.5): 1024 dimensions, offline capability
+
+    #GAP-002: Automatically adds query/passage prefixes for E5 models.
+    """
+
+    def __init__(
+        self,
+        provider: str = EMBEDDING_PROVIDER,
+        model: str = EMBEDDING_MODEL,
+        dimension: int = EMBEDDING_DIMENSION,
+        provider_url: str = EMBEDDING_PROVIDER_URL,
+    ):
+        self.provider = provider
+        self.model = model
+        self.dimension = dimension
+        self.provider_url = provider_url
+        self.session = requests.Session()
+
+        # Configure based on provider
+        if provider == "openai" or provider == "openrouter":
+            self.api_url = "https://openrouter.ai/api/v1"
+            self.batch_size = EMBEDDING_BATCH_SIZE_OPENROUTER
+        else:  # ollama or other local providers
+            self.api_url = provider_url
+            self.batch_size = EMBEDDING_BATCH_SIZE_OLLAMA
+
+        # #GAP-002: Detect if this model needs E5 prefixes
+        self._needs_e5_prefix = self._detect_e5_model(model)
+
+        logger.info(f"Embedding service initialized: provider={self.provider}, "
+                   f"model={self.model}, dimension={self.dimension}, "
+                   f"batch_size={self.batch_size}, e5_prefixes={self._needs_e5_prefix}")
+
+    def _detect_e5_model(self, model: str) -> bool:
+        """Detect if model requires E5-style query/passage prefixes."""
+        model_lower = model.lower()
+        return any(pattern in model_lower for pattern in E5_MODEL_PATTERNS)
+
+    def _add_e5_prefix(self, text: str, is_query: bool = True) -> str:
+        """Add E5 prefix to text if model requires it."""
+        if not self._needs_e5_prefix:
+            return text
+        prefix = "query: " if is_query else "passage: "
+        return prefix + text
+
+    def embed(self, texts: List[str], is_query: bool = False) -> List[List[float]]:
+        """
+        Generate embeddings for a list of texts.
+
+        T046: Checks cache before generating embeddings to avoid redundant API calls.
+
+        #GAP-002: Adds E5 prefixes for models that require them.
+        - is_query=True: Use "query: " prefix for search queries
+        - is_query=False: Use "passage: " prefix for documents/chunks
+
+        Automatically batches requests for optimal throughput. Large lists
+        are split into batches based on provider-specific batch sizes.
+
+        Args:
+            texts: List of text strings to embed
+            is_query: If True, treat as search queries (use "query: " prefix for E5).
+                     If False, treat as documents (use "passage: " prefix for E5).
+
+        Returns:
+            List of embedding vectors (each is a list of floats)
+
+        Raises:
+            RuntimeError: If embedding generation fails
+        """
+        # #GAP-002: Add E5 prefixes if needed
+        prefixed_texts = [self._add_e5_prefix(text, is_query=is_query) for text in texts]
+
+        # Check cache for each text, collect misses
+        # Note: Cache key includes the prefixed text, so "query: foo" and "passage: foo"
+        # will have different cache entries if both are used
+        cached_embeddings: Dict[int, List[float]] = {}
+        uncached_texts: List[Tuple[int, str]] = []  # (original_index, text)
+
+        for i, text in enumerate(prefixed_texts):
+            cached = _get_cached_embedding(text, self.model)
+            if cached is not None:
+                cached_embeddings[i] = cached
+            else:
+                uncached_texts.append((i, text))
+
+        # If all cached, return immediately
+        if not uncached_texts:
+            logger.debug(f"Cache hit: all {len(texts)} embeddings retrieved from cache")
+            return [cached_embeddings[i] for i in range(len(texts))]
+
+        # SECURITY: Rate limiting check (warn once if approaching limit)
+        global _embedding_request_count, _embedding_rate_limit_warned
+        _embedding_request_count += len(uncached_texts)
+        if not _embedding_rate_limit_warned and _embedding_request_count > EMBEDDING_RATE_LIMIT:
+            logger.warning(
+                f"SECURITY: Embedding request count ({_embedding_request_count}) exceeds "
+                f"rate limit ({EMBEDDING_RATE_LIMIT}/min). Consider reducing batch size or "
+                f"adjusting MADEINOZ_KNOWLEDGE_EMBEDDING_RATE_LIMIT env var."
+            )
+            _embedding_rate_limit_warned = True
+
+        # Generate embeddings for uncached texts
+        uncached_text_list = [text for _, text in uncached_texts]
+
+        # Process in batches for optimal throughput
+        new_embeddings: List[List[float]] = []
+        if len(uncached_text_list) <= self.batch_size:
+            if self.provider == "openrouter":
+                new_embeddings = self._embed_openrouter(uncached_text_list)
+            else:
+                new_embeddings = self._embed_ollama(uncached_text_list)
+        else:
+            # Split into batches and process
+            for i in range(0, len(uncached_text_list), self.batch_size):
+                batch = uncached_text_list[i:i + self.batch_size]
+                if self.provider == "openrouter":
+                    batch_embeddings = self._embed_openrouter(batch)
+                else:
+                    batch_embeddings = self._embed_ollama(batch)
+                new_embeddings.extend(batch_embeddings)
+
+        # Cache new embeddings
+        for (_, text), embedding in zip(uncached_texts, new_embeddings):
+            _set_cached_embedding(text, self.model, embedding)
+
+        # Combine cached and new embeddings in original order
+        all_embeddings = []
+        for i in range(len(texts)):
+            if i in cached_embeddings:
+                all_embeddings.append(cached_embeddings[i])
+            else:
+                # Find corresponding new embedding
+                for j, (orig_idx, _) in enumerate(uncached_texts):
+                    if orig_idx == i:
+                        all_embeddings.append(new_embeddings[j])
+                        break
+
+        cache_stats = get_cache_stats()
+        if uncached_texts:
+            logger.debug(
+                f"Embedding cache: {cache_stats['cache_hits']} hits, "
+                f"{cache_stats['cache_misses']} misses, "
+                f"{cache_stats['hit_rate']}% hit rate"
+            )
+
+        return all_embeddings
+
+    def _embed_openrouter(self, texts: List[str]) -> List[List[float]]:
+        """Generate embeddings using OpenRouter API (text-embedding-3-large)"""
+        if not OPENROUTER_API_KEY:
+            raise RuntimeError("OPENROUTER_API_KEY required for OpenRouter embeddings")
+
+        headers = {
+            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+            "Content-Type": "application/json",
+        }
+
+        data = {
+            "model": self.model,
+            "input": texts,
+        }
+
+        try:
+            response = self.session.post(
+                f"{self.api_url}/embeddings",
+                headers=headers,
+                json=data,
+                timeout=30,
+            )
+            response.raise_for_status()
+
+            result = response.json()
+            embeddings = [item["embedding"] for item in result["data"]]
+            return embeddings
+
+        except requests.RequestException as e:
+            logger.error(f"OpenRouter embedding failed: {e}")
+            raise RuntimeError(
+                f"OpenRouter embedding API failed. Check your API key is valid and "
+                f"you have available credits. Verify network connectivity to OpenRouter. "
+                f"Original error: {e}"
+            ) from e
+
+    def _embed_ollama(self, texts: List[str]) -> List[List[float]]:
+        """Generate embeddings using Ollama API (bge-large-en-v1.5)"""
+        # Ollama embedding API endpoint
+        url = f"{self.api_url}/api/embed"
+        data = {
+            "model": self.model,
+            "input": texts,
+        }
+
+        try:
+            response = self.session.post(url, json=data, timeout=60)
+            response.raise_for_status()
+
+            result = response.json()
+            embeddings = result.get("embeddings", [])
+
+            if not embeddings:
+                raise RuntimeError("No embeddings returned from Ollama")
+
+            return embeddings
+
+        except requests.RequestException as e:
+            logger.error(f"Ollama embedding failed: {e}")
+            raise RuntimeError(
+                f"Ollama embedding service failed. Ensure Ollama is running at "
+                f"{self.api_url} and the model '{self.model}' is available. "
+                f"Run 'ollama pull {self.model}' if needed. Original error: {e}"
+            ) from e
+
+    def get_dimension(self) -> int:
+        """Return the embedding dimension"""
+        return self.dimension
+
+    def embed_chunks(self, chunks: List[Dict[str, Any]]) -> List[List[float]]:
+        """
+        Generate embeddings for chunks with heading contextualization.
+
+        T048: Contextualize chunks with heading prefixes before embedding.
+        This prepends document hierarchy to chunk text so embeddings capture
+        section context for better semantic retrieval.
+
+        Args:
+            chunks: List of chunk dictionaries with 'text' and optional 'headings' keys
+
+        Returns:
+            List of embedding vectors
+
+        Note:
+            If chunks have 'headings' metadata, prepends them to text.
+            Example: "Embedded Systems > GPIO: The GPIO port supports..."
+        """
+        from .chunking_service import contextualize_chunk
+
+        # Contextualize chunks before embedding
+        contextualized_texts = []
+        for chunk in chunks:
+            if isinstance(chunk, dict):
+                contextualized = contextualize_chunk(chunk)
+                contextualized_texts.append(contextualized)
+            else:
+                # Plain string, use as-is
+                contextualized_texts.append(chunk)
+
+        return self.embed(contextualized_texts)
+
+    def health_check(self) -> bool:
+        """
+        Check if the embedding service is healthy.
+
+        Returns:
+            True if service is accessible, False otherwise
+        """
+        try:
+            if self.provider == "ollama":
+                # Check Ollama is running
+                response = self.session.get(f"{self.api_url}/api/tags", timeout=5)
+                return response.status_code == 200
+            else:
+                # Check OpenRouter API key is valid
+                return bool(OPENROUTER_API_KEY)
+        except Exception as e:
+            logger.warning(f"Embedding service health check failed: {e}")
+            return False
+
+
+# Singleton instance
+_service: Optional[EmbeddingService] = None
+
+
+def get_embedding_service() -> EmbeddingService:
+    """Get or create singleton embedding service instance"""
+    global _service
+    if _service is None:
+        _service = EmbeddingService()
+    return _service
+
+
+def embed_text(text: str, is_query: bool = False) -> List[float]:
+    """
+    Convenience function to embed a single text string.
+
+    #GAP-002: Supports E5 query/passage prefixes.
+
+    Args:
+        text: Text to embed
+        is_query: If True, use "query: " prefix for E5 models
+
+    Returns:
+        Embedding vector as list of floats
+    """
+    service = get_embedding_service()
+    embeddings = service.embed([text], is_query=is_query)
+    return embeddings[0]
+
+
+def embed_query(query: str) -> List[float]:
+    """
+    Convenience function to embed a search query.
+
+    #GAP-002: Automatically uses "query: " prefix for E5 models.
+
+    Args:
+        query: Search query to embed
+
+    Returns:
+        Embedding vector as list of floats
+    """
+    return embed_text(query, is_query=True)
+
+
+def embed_texts(texts: List[str], is_query: bool = False) -> List[List[float]]:
+    """
+    Convenience function to embed multiple text strings.
+
+    #GAP-002: Supports E5 query/passage prefixes.
+
+    Args:
+        texts: List of texts to embed
+        is_query: If True, use "query: " prefix for E5 models
+
+    Returns:
+        List of embedding vectors
+    """
+    service = get_embedding_service()
+    return service.embed(texts, is_query=is_query)

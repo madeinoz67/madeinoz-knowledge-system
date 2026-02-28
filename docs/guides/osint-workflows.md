@@ -256,4 +256,4 @@ bun run ~/.claude/skills/Knowledge/tools/knowledge-cli.ts --profile development 
 - [Configuration Reference](../reference/configuration.md) - Entity and relationship type configuration
 - [CLI Reference](../reference/cli.md) - Investigate command syntax
 - [Memory Decay](../usage/memory-decay.md) - Decay scoring for CTI data
-- [Remote Access](../remote-access.md) - Connection profiles for CTI databases
+- [Remote Access](../installation/remote-access.md) - Connection profiles for CTI databases

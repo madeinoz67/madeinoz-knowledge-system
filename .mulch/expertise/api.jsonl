@@ -1,0 +1,1 @@
+{"type":"convention","content":"MCP tools: rag.search/query, rag.getChunk, rag.ingest, rag.health for documents. kg.promoteFromEvidence, kg.getProvenance for knowledge graph.","classification":"tactical","recorded_at":"2026-02-25T23:57:23.937Z","tags":["mcp","tools"],"id":"mx-e83a93"}

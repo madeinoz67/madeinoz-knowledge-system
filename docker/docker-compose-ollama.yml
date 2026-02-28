@@ -1,0 +1,69 @@
+# Ollama Service for Fully-Local LKAP (Feature 022)
+# Local Knowledge Augmentation Platform - Local Embeddings & LLM
+#
+# This service provides:
+# - Local embeddings using bge-large-en-v1.5 (1024 dimensions)
+# - Optional local LLM inference via Ollama
+# - Fully offline operation when combined with Qdrant
+#
+# Environment Variables:
+# - MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL: http://ollama:11434
+# - MADEINOZ_KNOWLEDGE_OLLAMA_EMBEDDING_MODEL: bge-large-en-v1.5
+# - MADEINOZ_KNOWLEDGE_OLLAMA_NUM_GPU: 0 (CPU mode) or 1 (GPU mode)
+# - MADEINOZ_KNOWLEDGE_OLLAMA_NUM_THREAD: 4 (default thread count)
+#
+# Usage:
+#   docker compose -f docker/docker-compose-ollama.yml up -d
+#
+# Verify:
+#   docker logs madeinoz-knowledge-ollama
+#   curl http://localhost:11434/api/tags
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: madeinoz-knowledge-ollama
+    restart: unless-stopped
+    networks:
+      - madeinoz-knowledge-net
+    ports:
+      - "11434:11434"
+    environment:
+      # GPU configuration (set to 1 for CUDA/ROCm support)
+      - OLLAMA_NUM_GPU=${MADEINOZ_KNOWLEDGE_OLLAMA_NUM_GPU:-0}
+      # Thread count for CPU inference
+      - OLLAMA_NUM_THREAD=${MADEINOZ_KNOWLEDGE_OLLAMA_NUM_THREAD:-4}
+      # Ollama debug logging (disable in production)
+      - OLLAMA_DEBUG=${OLLAMA_DEBUG:-0}
+    volumes:
+      # Persist models across container restarts
+      - ollama-data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    # Pull embedding model on startup, then serve
+    command: >
+      sh -c "
+        echo 'Starting Ollama service...' &&
+        ollama serve &
+        OLLAMA_PID=$$! &&
+        echo 'Waiting for Ollama to be ready...' &&
+        sleep 10 &&
+        echo 'Pulling bge-large-en-v1.5 embedding model...' &&
+        ollama pull bge-large-en-v1.5 &&
+        echo 'Model ready. Serving Ollama API...' &&
+        wait $$OLLAMA_PID
+      "
+
+networks:
+  madeinoz-knowledge-net:
+    name: madeinoz-knowledge-net
+    external: true
+
+volumes:
+  ollama-data:
+    name: madeinoz-knowledge-ollama-data
+    driver: local

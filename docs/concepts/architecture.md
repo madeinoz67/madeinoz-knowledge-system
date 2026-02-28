@@ -1,15 +1,32 @@
 ---
 title: "Architecture"
-description: "Deep dive into the ßKnowledge System architecture, component stack, and how information flows through the system"
+description: "System architecture overview with LKAP two-tier memory model"
 ---
 
 # Architecture
 
 The Knowledge System solves the problem of amnesiac AI through **automatic knowledge graph construction**. Instead of requiring manual note-taking, it extracts and structures knowledge as a natural byproduct of conversation.
 
+## Related Concept Guides
+
+For detailed concepts on each memory tier:
+- **[Document Memory (RAG) Concepts](../rag/concepts.md)** - RAG architecture, chunking, embeddings
+- **[Knowledge Memory (Graph) Concepts](../kg/concepts.md)** - Knowledge graphs, entities, relationships
+
 ## Core Architecture
 
 ![Knowledge System Core Architecture](../images/architecture-core-system.png)
+
+### LKAP Two-Tier Memory Architecture
+
+![LKAP Architecture](../assets/lkap-architecture-v3.jpg)
+
+The LKAP (Local Knowledge Augmentation Platform) extends the knowledge system with RAG capabilities using a two-tier memory model:
+
+| Tier | Storage | Purpose | Characteristics |
+|------|---------|---------|-----------------|
+| **Document Memory** | Qdrant (69MB) | Fast semantic search | High-volume, transient, citation-centric |
+| **Knowledge Memory** | Graphiti/Neo4j | Durable facts with provenance | Low-volume, high-signal, typed |
 
 *User conversation and document text flow through the Knowledge System Skill → Intent Routing → Graphiti MCP Server (with Memory Decay) → Graph Database Backend (Neo4j/FalkorDB) → Graph Storage (Nodes, Edges, Episodes, Indices)*
 
@@ -191,3 +208,89 @@ This architecture makes your AI infrastructure genuinely intelligent, not just a
 | **Manual organization** | Tag and categorize yourself | Automatic entity extraction |
 | **Scattered knowledge** | Multiple tools | Single unified graph |
 | **Hyphenated identifiers** | Query syntax errors | Automatic sanitization |
+
+## Security Architecture
+
+The Knowledge System implements **secure-by-default** principles with multiple security layers.
+
+### Credential Management
+
+| Principle | Implementation |
+|-----------|----------------|
+| **No hardcoded secrets** | All passwords via environment variables |
+| **Fail-fast validation** | Services won't start without required credentials |
+| **No defaults in code** | Empty defaults force explicit configuration |
+
+```bash
+# Required credentials (no defaults)
+MADEINOZ_KNOWLEDGE_NEO4J_PASSWORD=<your-password>
+MADEINOZ_KNOWLEDGE_FALKORDB_PASSWORD=<your-password>  # If using FalkorDB
+```
+
+### TLS/SSL Configuration
+
+| Component | Default | Configuration |
+|-----------|---------|---------------|
+| **Qdrant client** | TLS verify ON | `MADEINOZ_KNOWLEDGE_QDRANT_TLS_VERIFY=true` |
+| **Ollama client** | TLS verify ON | `MADEINOZ_KNOWLEDGE_OLLAMA_TLS_VERIFY=true` |
+| **HTTP clients** | TLS verify ON | `verify=True` in httpx.AsyncClient |
+
+**Development override** for self-signed certificates:
+
+```bash
+MADEINOZ_KNOWLEDGE_QDRANT_TLS_VERIFY=false
+```
+
+### Input Validation
+
+| Layer | Protection |
+|-------|------------|
+| **URL validation** | Only `http://` and `https://` schemes allowed |
+| **API key validation** | Warning logged if missing, allows graceful fallback |
+| **MCP schema** | `additionalProperties: false` prevents unknown fields |
+
+### Rate Limiting
+
+Prevents API quota exhaustion and unexpected costs:
+
+```bash
+MADEINOZ_KNOWLEDGE_EMBEDDING_RATE_LIMIT=60  # requests per minute
+```
+
+### Audit Logging
+
+Security events are logged with `SECURITY:` prefix:
+
+```
+SECURITY: OPENROUTER_API_KEY is not set. Provider 'openrouter' may not be available.
+SECURITY: Invalid URL scheme for QDRANT_URL: 'file'. Only http:// and https:// are allowed.
+SECURITY: Embedding request count (75) exceeds rate limit (60/min).
+```
+
+### Security Layer Diagram
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Security Architecture                         │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌─────────────────┐   ┌─────────────────┐   ┌───────────────┐ │
+│  │ Input Validation│   │ Credential Mgmt │   │ Rate Limiting │ │
+│  │ - URL allowlist │   │ - Fail-fast     │   │ - 60 req/min  │ │
+│  │ - Schema check  │   │ - No defaults   │   │ - Warning log │ │
+│  └────────┬────────┘   └────────┬────────┘   └───────┬───────┘ │
+│           │                     │                    │         │
+│           ▼                     ▼                    ▼         │
+│  ┌─────────────────────────────────────────────────────────────┤
+│  │                    TLS Verification                         │
+│  │              (enabled by default)                           │
+│  └─────────────────────────────────────────────────────────────┤
+│           │                     │                    │         │
+│           ▼                     ▼                    ▼         │
+│  ┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐ │
+│  │   Qdrant    │    │  Knowledge      │    │    Ollama       │ │
+│  │  (6333)     │    │  Graph (7687)   │    │   (11434)       │ │
+│  └─────────────┘    └─────────────────┘    └─────────────────┘ │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```

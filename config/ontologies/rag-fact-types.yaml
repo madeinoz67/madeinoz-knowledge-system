@@ -1,0 +1,115 @@
+# RAG Fact Type Ontology for LKAP (Feature 022)
+# Local Knowledge Augmentation Platform
+# Defines fact types that can be promoted from document evidence to the Knowledge Graph
+
+# Fact Type Enum Values
+# From data-model.md Fact entity definition
+fact_types:
+  # Constraint: Limitation or restriction
+  # Example: "max clock frequency: 120MHz"
+  - name: Constraint
+    description: Limitation or restriction on a component or system
+    color: "#ef4444"  # Red
+
+  # Erratum: Documented error or bug
+  # Example: "REV A silicon bug: I2C hang"
+  - name: Erratum
+    description: Documented error or bug in hardware or software
+    color: "#f97316"  # Orange
+
+  # Workaround: Mitigation for a problem
+  # Example: "Use I2C2 instead of I2C1"
+  - name: Workaround
+    description: Mitigation strategy for a known problem
+    color: "#eab308"  # Yellow
+
+  # API: Function or interface
+  # Example: "HAL_GPIO_Init()"
+  - name: API
+    description: Function, method, or interface signature
+    color: "#22c55e"  # Green
+
+  # BuildFlag: Compiler or build flag
+  # Example: "-DUSE_HAL_DRIVER"
+  - name: BuildFlag
+    description: Compiler flag, build option, or preprocessor directive
+    color: "#06b6d4"  # Cyan
+
+  # ProtocolRule: Communication protocol rule
+  # Example: "I2C max freq: 400kHz"
+  - name: ProtocolRule
+    description: Communication protocol constraint or rule
+    color: "#3b82f6"  # Blue
+
+  # Detection: Security detection rule
+  # Example: "C2 beacon pattern detected"
+  - name: Detection
+    description: Security detection rule or indicator
+    color: "#8b5cf6"  # Purple
+
+  # Indicator: Threat intelligence indicator
+  # Example: "IP: 192.168.1.100 associated with APT28"
+  - name: Indicator
+    description: Threat intelligence indicator or IOC
+    color: "#ec4899"  # Pink
+
+# Conflict Resolution Strategies
+# From data-model.md Conflict entity definition
+resolution_strategies:
+  - name: detect_only
+    description: Flag conflicts without auto-resolution
+    default: true
+
+  - name: keep_both
+    description: Retain all facts with scope metadata
+    requires_scope: true
+
+  - name: prefer_newest
+    description: Accept fact with latest created_at timestamp
+    temporal: true
+
+  - name: reject_incoming
+    description: Preserve existing fact, reject new conflicting fact
+    conservative: true
+
+# Confidence Band Thresholds
+# From research decision RT-003
+confidence_bands:
+  high:
+    threshold: 0.85
+    behavior: auto_accept
+    description: "Auto-accept without user prompt"
+
+  medium:
+    min: 0.70
+    max: 0.84
+    behavior: optional_review
+    description: "Accept with optional review available"
+
+  low:
+    max: 0.69
+    behavior: required_review
+    description: "User confirmation required before ingestion"
+
+# Domain Classification Values
+# Used by progressive classification service
+domains:
+  - embedded     # Embedded systems, microcontrollers, hardware
+  - software     # Software development, programming, frameworks
+  - security     # Security, threat intelligence, CTI, OSINT
+  - cloud        # Cloud services, infrastructure, deployment
+  - standards    # Standards, specifications, protocols
+
+# Document Type Classification Values
+document_types:
+  - pdf          # PDF documents (datasheets, manuals)
+  - markdown     # Markdown documentation
+  - text         # Plain text files
+  - html         # HTML documents
+
+# Sensitivity Levels
+sensitivity_levels:
+  - public       # Publicly available information
+  - internal     # Internal organization information
+  - confidential # Confidential business information
+  - restricted   # Restricted access, highly sensitive

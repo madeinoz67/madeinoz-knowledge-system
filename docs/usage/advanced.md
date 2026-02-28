@@ -84,5 +84,5 @@ For complete backup and restore procedures, see the dedicated [Backup & Restore 
 ## Related Documentation
 
 - Return to [basic usage](basic-usage.md) for fundamental operations
-- Learn more about [how the system works](../concepts/knowledge-graph.md)
+- Learn more about [how the system works](../kg/concepts.md)
 - Troubleshoot issues in the [troubleshooting guide](../troubleshooting/common-issues.md)

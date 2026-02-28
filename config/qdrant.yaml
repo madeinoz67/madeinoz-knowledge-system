@@ -1,0 +1,46 @@
+# Qdrant RAG Configuration
+# Feature 023: Qdrant RAG Migration
+
+# Collection settings
+collection:
+  name: lkap_documents
+  vector_size: 1024
+  distance: Cosine
+
+# Embedding settings
+embedding:
+  model: bge-large-en-v1.5
+  dimension: 1024
+  batch_size: 32
+
+# Chunking settings
+chunking:
+  min_tokens: 512
+  max_tokens: 768
+  overlap_percent: 15
+
+# Search settings
+search:
+  confidence_threshold: 0.70
+  default_top_k: 10
+  max_top_k: 100
+
+# Storage paths
+storage:
+  inbox: knowledge/inbox
+  processed: knowledge/processed
+
+# Payload indexes for filtering
+payload_indexes:
+  - name: chunk_id
+    type: keyword
+  - name: doc_id
+    type: keyword
+  - name: domain
+    type: keyword
+  - name: project
+    type: keyword
+  - name: component
+    type: keyword
+  - name: type
+    type: keyword

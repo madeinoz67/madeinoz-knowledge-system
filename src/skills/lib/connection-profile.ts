@@ -106,10 +106,33 @@ export class ConnectionProfileManager {
 
   /**
    * Find the profile configuration file
-   * Checks $PAI_DIR/config first, then ~/.claude/config
+   *
+   * Priority order:
+   * 1. MADEINOZ_KNOWLEDGE_CONFIG_FILE env var (explicit path)
+   * 2. Local project config/knowledge-profiles.yaml (for development)
+   * 3. $PAI_DIR/config/knowledge-profiles.yaml
+   * 4. ~/.claude/config/knowledge-profiles.yaml
    */
   private findConfigFile(): string | null {
-    // Check $PAI_DIR/config first (priority)
+    // 1. Check explicit config file path from env var
+    // If explicitly set, honor it exclusively (don't fall back to other locations)
+    const explicitConfigPath = process.env.MADEINOZ_KNOWLEDGE_CONFIG_FILE;
+    if (explicitConfigPath) {
+      if (existsSync(explicitConfigPath)) {
+        return explicitConfigPath;
+      }
+      // File explicitly specified but doesn't exist - return null, don't fall back
+      return null;
+    }
+
+    // 2. Check local project config (development mode)
+    // Look for config/knowledge-profiles.yaml relative to this file
+    const localConfigPath = resolve(import.meta.dir, '..', '..', '..', 'config', 'knowledge-profiles.yaml');
+    if (existsSync(localConfigPath)) {
+      return localConfigPath;
+    }
+
+    // 3. Check $PAI_DIR/config
     const paiDir = process.env.PAI_DIR;
     if (paiDir) {
       const paiConfigPath = resolve(paiDir, 'config', 'knowledge-profiles.yaml');
@@ -118,7 +141,7 @@ export class ConnectionProfileManager {
       }
     }
 
-    // Fallback to ~/.claude/config
+    // 4. Fallback to ~/.claude/config
     const homeDir = process.env.HOME || process.env.USERPROFILE;
     if (homeDir) {
       const claudeConfigPath = resolve(homeDir, '.claude', 'config', 'knowledge-profiles.yaml');

@@ -5,22 +5,66 @@ description: "Introduction to the Madeinoz Knowledge System and how to use your 
 
 # Knowledge System - User Guide
 
-Welcome to the Madeinoz Knowledge System! This guide will help you understand and use your personal knowledge management system.
+Welcome to the Madeinoz Knowledge System! This guide will help you understand and use your personal knowledge management system with LKAP two-tier memory.
 
 !!! info "PAI Pack"
     This is a **[PAI (Personal AI Infrastructure)](https://github.com/danielmiessler/PAI)** Pack - a modular component that adds persistent memory capabilities to your AI infrastructure. PAI Packs are self-contained modules that can be installed into any PAI-compatible system.
 
+## LKAP Two-Tier Memory
+
+The system uses a two-tier memory model:
+
+| Tier | Technology | Best For |
+|------|------------|----------|
+| **Document Memory (RAG)** | Qdrant | Search documents, find citations, explore content |
+| **Knowledge Memory (Graph)** | Graphiti/Neo4j | Verified facts, relationships, provenance |
+
+**Key principle**: Documents are evidence. Knowledge is curated truth.
+
 ## What is the Knowledge System?
 
-Think of the Knowledge System as your AI's memory. Instead of forgetting what you discussed yesterday or last week, it remembers everything you tell it to remember. It's like having a smart notebook that:
+Think of the Knowledge System as your AI's memory with two complementary capabilities:
 
+**Document Memory (RAG)** - Drop documents and search them semantically:
+- Drop PDFs, markdown, text files in `knowledge/inbox/`
+- Search across all documents using natural language
+- Get citations showing exactly where information came from
+
+**Knowledge Memory (Graph)** - Store and connect curated facts:
 - Automatically organizes information as you add it
 - Finds connections between different topics
 - Lets you search using everyday language
 - Keeps track of when you learned things
-- Never forgets what you taught it
 
 ## What Can You Do With It?
+
+### Document Memory (RAG)
+
+**Search documents semantically using the CLI:**
+
+```bash
+# Drop a document in the inbox
+cp datasheet.pdf knowledge/inbox/
+
+# Ingest it (CLI method)
+bun run src/skills/server/lib/rag-cli.ts ingest --all
+
+# Search
+bun run src/skills/server/lib/rag-cli.ts search "GPIO configuration"
+```
+
+**Or use MCP tools from Claude:**
+```
+You: "Search my documents for SPI clock settings"
+[Claude calls rag_search tool automatically]
+```
+
+**Get citations with results:**
+- Each result shows the source document
+- Page/section references included
+- Confidence scores for relevance
+
+### Knowledge Memory (Graph)
 
 ### Store Information
 
@@ -59,6 +103,54 @@ You: "How are Graphiti and FalkorDB connected?"
 ```
 
 The system traces the relationships in your knowledge graph and explains how these concepts link together.
+
+## Using the Knowledge Skill
+
+The Knowledge skill provides natural language triggers that route to specific workflows. Just say what you want to do:
+
+### Natural Language Triggers
+
+| Intent | Example Phrases | What Happens |
+|--------|----------------|--------------|
+| **Capture** | "remember this", "store this", "add to knowledge", "save this" | Captures episode with entity extraction |
+| **Search** | "what do I know about", "search my knowledge", "find in knowledge base" | Searches entities semantically |
+| **Relationships** | "how are X and Y connected", "what's the relationship", "show connections" | Traverses graph edges |
+| **Recent** | "what did I learn", "recent knowledge", "latest additions" | Gets recent episodes |
+| **Status** | "knowledge status", "system health", "graph stats" | Returns system health |
+| **Documents** | "search documents", "find in PDFs", "RAG search" | Searches Qdrant vector DB |
+| **Promote** | "promote to knowledge", "add to graph" | Promotes RAG evidence to KG |
+
+### Workflow Routing
+
+When you use a trigger phrase, the skill routes your request to the appropriate workflow:
+
+```
+"Remember that Podman uses daemonless architecture"
+       ↓
+CaptureEpisode workflow
+       ↓
+CLI: bun run knowledge-cli.ts add_episode "Podman Architecture" "..."
+       ↓
+Entity extraction → Graph storage
+       ↓
+Response: "✓ Captured: Podman uses daemonless architecture"
+```
+
+### CLI vs Natural Language
+
+You can interact with the system two ways:
+
+**Natural Language (Recommended):**
+```
+You: "What do I know about container orchestration?"
+[Claude handles the workflow automatically]
+```
+
+**Direct CLI (For scripting/automation):**
+```bash
+bun run knowledge-cli.ts search_nodes "container orchestration" 10
+bun run rag-cli.ts search "SPI configuration" --top-k=5
+```
 
 ## Quick Start
 
@@ -234,7 +326,7 @@ Ready to dive deeper? Check out:
 
 - [Installation Guide](../installation/index.md) - Set up the system step by step
 - [Usage Guide](../usage/basic-usage.md) - Detailed examples and commands
-- [Concepts Guide](../concepts/knowledge-graph.md) - Deep dive into how the system works
+- [Concepts Guide](../kg/concepts.md) - Deep dive into how the system works
 - [Troubleshooting](../troubleshooting/common-issues.md) - Fix common issues
 
 ## Getting Help

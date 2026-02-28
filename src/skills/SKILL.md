@@ -1,7 +1,7 @@
 ---
 name: Knowledge
-version: 1.9.0
-description: Personal knowledge management using Graphiti knowledge graph with Neo4j/FalkorDB, supporting remote MCP access with connection profiles and TLS, OSINT/CTI ontology, and investigative search. USE WHEN 'store this', 'remember this', 'add to knowledge', 'search my knowledge', 'what do I know about', 'find in knowledge base', 'save to memory', 'graphiti', 'knowledge graph', 'entity extraction', 'relationship mapping', 'semantic search', 'episode', 'install knowledge', 'setup knowledge system', 'configure knowledge graph', 'remote knowledge server', 'connect to knowledge', 'knowledge profile', knowledge capture, retrieval, synthesis, memory decay, decay scoring, lifecycle state, importance classification, stability classification, health metrics, run maintenance, permanent memory, soft-delete, 'investigate entity', 'find connections', 'graph traversal', 'threat hunting', 'list ontology', 'custom entity types', 'CTI entities', 'OSINT entities', 'import STIX', 'STIX bundle', 'threat intel import'.
+version: 1.10.0
+description: Personal knowledge management using Graphiti knowledge graph with Neo4j/FalkorDB, supporting remote MCP access with connection profiles and TLS, OSINT/CTI ontology, investigative search, and LKAP RAG capabilities. USE WHEN 'store this', 'remember this', 'add to knowledge', 'search my knowledge', 'what do I know about', 'find in knowledge base', 'save to memory', 'graphiti', 'knowledge graph', 'entity extraction', 'relationship mapping', 'semantic search', 'episode', 'install knowledge', 'setup knowledge system', 'configure knowledge graph', 'remote knowledge server', 'connect to knowledge', 'knowledge profile', knowledge capture, retrieval, synthesis, memory decay, decay scoring, lifecycle state, importance classification, stability classification, health metrics, run maintenance, permanent memory, soft-delete, 'investigate entity', 'find connections', 'graph traversal', 'threat hunting', 'list ontology', 'custom entity types', 'CTI entities', 'OSINT entities', 'import STIX', 'STIX bundle', 'threat intel import', 'search documents', 'RAG search', 'ingest PDF', 'ingest document', 'document search', 'promote evidence', 'provenance', 'document memory', 'knowledge memory', 'two-tier memory', 'Qdrant', 'vector search'.
 tools:
   # MCP Wrapper CLI (76%+ token savings vs direct MCP calls)
   - Bash(bun run */knowledge-cli.ts add_episode *)
@@ -27,6 +27,14 @@ tools:
   - Bash(bun run */knowledge-cli.ts stix:status)
   # Feature 020: Investigative Search
   - Bash(bun run */knowledge-cli.ts investigate *)
+  # Feature 022/023: LKAP RAG Operations
+  - Bash(bun run */rag-cli.ts search *)
+  - Bash(bun run */rag-cli.ts ingest *)
+  - Bash(bun run */rag-cli.ts get *)
+  - Bash(bun run */rag-cli.ts list *)
+  - Bash(bun run */rag-cli.ts health)
+  - Bash(bun run */knowledge-cli.ts promote *)
+  - Bash(bun run */knowledge-cli.ts provenance *)
   # Server management
   - Bash(bun run server-cli *)
 ---
@@ -53,10 +61,28 @@ Persistent personal knowledge system powered by Graphiti knowledge graph with Ne
 | **Investigate Entity** | "investigate entity", "find connections", "graph traversal", "threat hunting", "connected entities" | `workflows/InvestigateEntity.md` |
 | **Ontology Management** | "list ontology", "custom entity types", "CTI entities", "OSINT entities", "ontology config" | `workflows/OntologyManagement.md` |
 | **STIX Import** | "import STIX", "STIX bundle", "threat intel import", "CTI data" | `workflows/StixImport.md` |
+| **Search Documents** | "search documents", "find in documents", "RAG search", "search my PDFs", "document search" | `workflows/RAGSearchDocuments.md` |
+| **Ingest Documents** | "ingest PDF", "ingest document", "add documents", "import to RAG", "process documents" | `workflows/DocumentIngestion.md` |
+| **Promote Evidence** | "promote to knowledge", "promote evidence", "verify fact", "add to knowledge graph" | `workflows/EvidencePromotion.md` |
 
 ## Core Capabilities
 
-**Knowledge Graph Features:**
+**Two-Tier Memory Model (LKAP):**
+
+The system uses a two-tier memory architecture for comprehensive knowledge management:
+
+| Tier | System | Purpose | Lifecycle |
+|------|--------|---------|-----------|
+| **Document Memory** | Qdrant (RAG) | Raw document chunks, semantic search | Transient, high-volume |
+| **Knowledge Memory** | Graphiti (KG) | Verified facts with provenance | Durable, curated |
+
+**Document Memory (Qdrant):**
+- Semantic search across PDFs, markdown, and text files
+- Docling-based parsing with semantic chunking (512-768 tokens)
+- Ollama embeddings (bge-large-en-v1.5, 1024 dimensions)
+- Fast retrieval with confidence scores and citations
+
+**Knowledge Memory (Graphiti):**
 
 - **Automatic Entity Extraction** - Identifies people, organizations, locations, concepts, preferences, requirements
 - **Relationship Mapping** - Tracks how entities connect with temporal context
@@ -187,6 +213,15 @@ bun run tools/knowledge-cli.ts stix:status
 # Feature 020: Investigative Search
 bun run tools/knowledge-cli.ts investigate "entity-name" --depth 2
 bun run tools/knowledge-cli.ts investigate "apt28" --relationship-type attributed_to --relationship-type uses
+
+# Feature 022/023: LKAP RAG Operations
+bun run tools/rag-cli.ts search "query" --top-k=10
+bun run tools/rag-cli.ts ingest --all
+bun run tools/rag-cli.ts get <chunk-id>
+bun run tools/rag-cli.ts list --limit=50
+bun run tools/rag-cli.ts health
+bun run tools/knowledge-cli.ts promote <evidence-id> <fact-type> "<value>"
+bun run tools/knowledge-cli.ts provenance <fact-id>
 ```
 
 **Options:**
@@ -316,6 +351,12 @@ http://localhost:8000/mcp/
 | `validate_ontology` | - | "Validate ontology configuration" |
 | `reload_ontology` | - | "Reload ontology configuration (hot-reload)" |
 | `import_stix_bundle` | - | "Import STIX 2.1 bundle from file or URL" |
+| `rag.search` | - | "Search documents with semantic similarity" |
+| `rag.getChunk` | - | "Retrieve specific document chunk by ID" |
+| `rag.ingest` | - | "Ingest documents into RAG system" |
+| `rag.health` | - | "Check Qdrant vector database health" |
+| `kg.promoteFromEvidence` | - | "Promote RAG evidence to knowledge graph fact" |
+| `kg.getProvenance` | - | "Trace fact provenance to source documents" |
 
 **Naming Convention (Hybrid Approach):**
 
@@ -358,6 +399,20 @@ MADEINOZ_KNOWLEDGE_GROUP_ID=main
 
 # Disable telemetry
 MADEINOZ_KNOWLEDGE_GRAPHITI_TELEMETRY_ENABLED=false
+
+# Qdrant Configuration (Feature 023 - LKAP RAG)
+MADEINOZ_KNOWLEDGE_QDRANT_URL=http://localhost:6333
+MADEINOZ_KNOWLEDGE_QDRANT_API_KEY=                        # Optional authentication
+MADEINOZ_KNOWLEDGE_QDRANT_COLLECTION=lkap_documents        # Collection name
+MADEINOZ_KNOWLEDGE_QDRANT_EMBEDDING_DIMENSION=1024         # bge-large-en-v1.5
+MADEINOZ_KNOWLEDGE_QDRANT_CONFIDENCE_THRESHOLD=0.70        # Minimum confidence
+MADEINOZ_KNOWLEDGE_QDRANT_CHUNK_SIZE_MIN=512
+MADEINOZ_KNOWLEDGE_QDRANT_CHUNK_SIZE_MAX=768
+MADEINOZ_KNOWLEDGE_QDRANT_CHUNK_OVERLAP=100
+
+# Ollama Configuration (for local embeddings)
+MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL=http://localhost:11434
+MADEINOZ_KNOWLEDGE_OLLAMA_EMBEDDING_MODEL=bge-large-en-v1.5
 ```
 
 **Model Recommendations:**
@@ -382,4 +437,4 @@ MADEINOZ_KNOWLEDGE_GRAPHITI_TELEMETRY_ENABLED=false
 - [Graphiti Documentation](https://help.getzep.com/graphiti)
 - [Podman Configuration](../README.md)
 
-**Last Updated:** 2026-02-04
+**Last Updated:** 2026-02-19

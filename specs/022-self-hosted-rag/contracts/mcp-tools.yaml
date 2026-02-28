@@ -1,0 +1,421 @@
+openapi: 3.1.0
+info:
+  title: LKAP MCP Tools
+  description: MCP tool schemas for Local Knowledge Augmentation Platform
+  version: 1.0.0
+
+paths: {}
+
+components:
+  schemas:
+    # --- Request Schemas ---
+
+    rag_search_params:
+      type: object
+      required:
+        - query
+      properties:
+        query:
+          type: string
+          description: Natural language search query
+          example: "how to configure GPIO interrupts on STM32H7"
+        filters:
+          type: object
+          description: Optional search filters
+          properties:
+            domain:
+              type: string
+              enum: [embedded, software, security, cloud, standards]
+              example: "embedded"
+            type:
+              type: string
+              enum: [pdf, markdown, text, html]
+              example: "pdf"
+            component:
+              type: string
+              example: "STM32H7"
+            project:
+              type: string
+              example: "motor-controller"
+            version:
+              type: string
+              example: "v1.0"
+          additionalProperties: false
+        top_k:
+          type: integer
+          description: Maximum number of results to return
+          default: 10
+          minimum: 1
+          maximum: 100
+
+    rag_getChunk_params:
+      type: object
+      required:
+        - chunk_id
+      properties:
+        chunk_id:
+          type: string
+          format: uuid
+          description: Unique chunk identifier
+          example: "550e8400-e29b-41d4-a716-446655440000"
+
+    kg_promoteFromEvidence_params:
+      type: object
+      required:
+        - evidence_id
+        - fact_type
+        - value
+      properties:
+        evidence_id:
+          type: string
+          format: uuid
+          description: Source chunk identifier
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        fact_type:
+          type: string
+          enum: [Constraint, Erratum, Workaround, API, BuildFlag, ProtocolRule, Detection, Indicator]
+          description: Type of fact to create
+          example: "Constraint"
+        value:
+          type: string
+          description: Fact value
+          example: "max clock frequency: 120MHz"
+        scope:
+          type: string
+          description: Optional scope constraint
+          example: "GPIO Port A only"
+        version:
+          type: string
+          description: Applicable version (if version-specific)
+          example: "v1.0"
+
+    kg_promoteFromQuery_params:
+      type: object
+      required:
+        - query
+        - fact_type
+      properties:
+        query:
+          type: string
+          description: Search query to find evidence
+          example: "STM32H7 maximum GPIO clock speed"
+        fact_type:
+          type: string
+          enum: [Constraint, Erratum, Workaround, API, BuildFlag, ProtocolRule, Detection, Indicator]
+          description: Type of fact to create
+          example: "Constraint"
+        top_k:
+          type: integer
+          description: Number of evidence chunks to consider
+          default: 3
+          minimum: 1
+          maximum: 10
+
+    kg_reviewConflicts_params:
+      type: object
+      properties:
+        entity:
+          type: string
+          description: Filter by entity name
+          example: "STM32H7.GPIO.max_speed"
+        fact_type:
+          type: string
+          enum: [Constraint, Erratum, Workaround, API, BuildFlag, ProtocolRule, Detection, Indicator]
+          description: Filter by fact type
+          example: "Constraint"
+        status:
+          type: string
+          enum: [open, resolved, deferred]
+          description: Filter by conflict status
+          example: "open"
+        limit:
+          type: integer
+          description: Maximum number of conflicts to return
+          default: 50
+
+    kg_getProvenance_params:
+      type: object
+      required:
+        - fact_id
+      properties:
+        fact_id:
+          type: string
+          format: uuid
+          description: Fact identifier to trace
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        include_chunks:
+          type: boolean
+          description: Whether to include evidence chunks in response
+          default: true
+        include_documents:
+          type: boolean
+          description: Whether to include document metadata in response
+          default: true
+
+    # --- Response Schemas ---
+
+    SearchResult:
+      type: object
+      required:
+        - chunk_id
+        - text
+        - source_document
+        - page_section
+        - confidence
+        - metadata
+      properties:
+        chunk_id:
+          type: string
+          format: uuid
+          description: Chunk identifier
+        text:
+          type: string
+          description: Chunk text content
+        source_document:
+          type: string
+          description: Source document filename
+          example: "STM32H743_Datasheet.pdf"
+        page_section:
+          type: string
+          description: Page number or section identifier
+          example: "Section 3.2.1, Page 45"
+        confidence:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+          description: Similarity confidence score
+          example: 0.87
+        metadata:
+          type: object
+          description: Chunk metadata
+          properties:
+            domain:
+              type: string
+              example: "embedded"
+            type:
+              type: string
+              example: "pdf"
+            vendor:
+              type: string
+              example: "ST"
+            component:
+              type: string
+              example: "STM32H7"
+            version:
+              type: string
+              example: "Rev C"
+        provenance:
+          type: array
+          description: Provenance chain if chunk was used as evidence
+          items:
+            type: object
+            properties:
+              fact_id:
+                type: string
+                description: Fact ID that uses this as evidence
+              fact_type:
+                type: string
+                description: Type of fact
+
+    Chunk:
+      type: object
+      required:
+        - chunk_id
+        - text
+        - document
+        - position
+        - token_count
+        - metadata
+      properties:
+        chunk_id:
+          type: string
+          format: uuid
+        text:
+          type: string
+        document:
+          type: object
+          description: Parent document info
+          properties:
+            doc_id:
+              type: string
+              format: uuid
+            filename:
+              type: string
+            path:
+              type: string
+            upload_date:
+              type: string
+              format: date-time
+        position:
+          type: integer
+          description: Position in document sequence
+        token_count:
+          type: integer
+          description: Number of tokens in chunk
+        page_section:
+          type: string
+          description: Page or section identifier
+        metadata:
+          type: object
+          description: Chunk metadata (same as SearchResult)
+
+    Fact:
+      type: object
+      required:
+        - fact_id
+        - type
+        - entity
+        - value
+        - evidence_ids
+        - created_at
+      properties:
+        fact_id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [Constraint, Erratum, Workaround, API, BuildFlag, ProtocolRule, Detection, Indicator]
+        entity:
+          type: string
+          description: Entity name
+          example: "STM32H7.GPIO.max_speed"
+        value:
+          type: string
+          description: Fact value
+          example: "120MHz"
+        scope:
+          type: string
+          description: Scope constraint
+        version:
+          type: string
+          description: Applicable version
+        valid_until:
+          type: string
+          format: date-time
+          description: Expiration timestamp
+        conflict_id:
+          type: string
+          format: uuid
+          description: Conflict reference if conflicted
+        evidence_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Source evidence identifiers
+        created_at:
+          type: string
+          format: date-time
+        deprecated_at:
+          type: string
+          format: date-time
+          description: Deprecation timestamp
+        deprecated_by:
+          type: string
+          description: Who deprecated the fact
+
+    Conflict:
+      type: object
+      required:
+        - conflict_id
+        - facts
+        - detection_date
+        - resolution_strategy
+        - status
+      properties:
+        conflict_id:
+          type: string
+          format: uuid
+        facts:
+          type: array
+          description: Conflicting facts
+          items:
+            type: object
+            properties:
+              fact_id:
+                type: string
+                format: uuid
+              type:
+                type: string
+              entity:
+                type: string
+              value:
+                type: string
+        detection_date:
+          type: string
+          format: date-time
+        resolution_strategy:
+          type: string
+          enum: [detect_only, keep_both, prefer_newest, reject_incoming]
+        status:
+          type: string
+          enum: [open, resolved, deferred]
+        resolved_at:
+          type: string
+          format: date-time
+        resolved_by:
+          type: string
+
+    ProvenanceGraph:
+      type: object
+      required:
+        - fact
+        - evidence_chain
+        - documents
+      properties:
+        fact:
+          type: object
+          description: The fact being traced
+        evidence_chain:
+          type: array
+          description: Chain of evidence from fact to chunks
+          items:
+            type: object
+            properties:
+              evidence_id:
+                type: string
+                format: uuid
+              chunk_id:
+                type: string
+                format: uuid
+              chunk_text:
+                type: string
+                description: Excerpt of chunk text
+              confidence:
+                type: number
+                format: float
+        documents:
+          type: array
+          description: Source documents in the provenance chain
+          items:
+            type: object
+            properties:
+              doc_id:
+                type: string
+                format: uuid
+              filename:
+                type: string
+              path:
+                type: string
+              page_section:
+                type: string
+                description: Where in the document
+
+    # --- Error Schemas ---
+
+    Error:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          enum: [validation_error, not_found, conflict_error, ingestion_error, search_error]
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: object
+          description: Additional error details

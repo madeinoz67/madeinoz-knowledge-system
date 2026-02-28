@@ -5,6 +5,7 @@ name: madeinoz-knowledge-system
 #
 # Services:
 #   - neo4j: Graph database backend (Cypher queries, no RediSearch/Lucene escaping needed)
+#   - qdrant: Vector database for LKAP (Document Memory with semantic search)
 #   - graphiti-mcp: MCP server (exposed to host)
 #
 # Madeinoz Patches APPLIED:
@@ -35,6 +36,8 @@ volumes:
     driver: local
   neo4j-logs:
     driver: local
+  qdrant-data:
+    driver: local
 
 services:
   # Neo4j Graph Database
@@ -52,7 +55,8 @@ services:
       - neo4j-data:/data
       - neo4j-logs:/logs
     environment:
-      - NEO4J_AUTH=${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:-madeinozknowledge}
+      # CONSTITUTION: Map from MADEINOZ_KNOWLEDGE_* prefixed vars
+      - NEO4J_AUTH=${MADEINOZ_KNOWLEDGE_NEO4J_USER:-neo4j}/${MADEINOZ_KNOWLEDGE_NEO4J_PASSWORD:-madeinozknowledge}
       - NEO4J_server_memory_heap_initial__size=512m
       - NEO4J_server_memory_heap_max__size=1G
       - NEO4J_server_memory_pagecache_size=512m
@@ -62,6 +66,41 @@ services:
       test: ["CMD", "wget", "-O", "/dev/null", "http://localhost:7474"]
       interval: 10s
       timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Qdrant Vector Database (LKAP - Document Memory)
+  # Lightweight vector store for semantic search with <2GB RAM footprint
+  # Feature 023: Qdrant RAG Migration
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: madeinoz-knowledge-qdrant
+    restart: unless-stopped
+    networks:
+      - madeinoz-knowledge-net
+    ports:
+      - "6333:6333"  # HTTP API
+      - "6334:6334"  # gRPC API
+    volumes:
+      - qdrant-data:/qdrant/storage
+    environment:
+      # Qdrant configuration
+      - QDRANT__SERVICE__HTTP_PORT=6333
+      - QDRANT__SERVICE__GRPC_PORT=6334
+      # Memory optimization for resource-constrained environments
+      - QDRANT__STORAGE__OPTIMIZERS__INDEXING_THRESHOLD=20000
+      # Enable telemetry for development (disable in production)
+      - QDRANT__TELEMETRY_DISABLED=false
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:6333/health"]
+      interval: 30s
+      timeout: 10s
       retries: 5
       start_period: 30s
 

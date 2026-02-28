@@ -1,0 +1,1 @@
+{"type":"convention","content":"Qdrant port 6333, 69MB image, bge-large-en-v1.5 embeddings (1024 dim), chunks 512-768 tokens, 100 overlap.","classification":"tactical","recorded_at":"2026-02-25T23:57:21.757Z","tags":["qdrant","embeddings","chunking"],"id":"mx-5b7463"}

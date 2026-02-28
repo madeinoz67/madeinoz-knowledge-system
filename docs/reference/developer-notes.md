@@ -308,6 +308,128 @@ Since the custom image has all configs and patches baked in, external mounts are
 
 ---
 
+## Development Environment Setup
+
+### Quick Start
+
+For development and testing of server code changes, use `--dev` mode which provides isolated ports and environment files:
+
+```bash
+# Start in development mode
+bun run server-cli start --dev
+
+# Restart in development mode
+bun run server-cli restart --dev
+
+# Stop development containers
+bun run server-cli stop
+```
+
+### Development vs Production Ports
+
+| Service | Production | Development |
+|---------|------------|-------------|
+| MCP Server | 8000 | 8001 |
+| Neo4j Browser | 7474 | 7475 |
+| Neo4j Bolt | 7687 | 7688 |
+| Prometheus Metrics | 9090 | 9091 |
+| Grafana | 3001 | 3002 |
+
+### Creating .env.dev
+
+Development mode uses separate environment files to avoid affecting production data. Create `.env.dev` in the project root:
+
+```bash
+# Copy the example file
+cp .env.example .env.dev
+
+# Edit with your development settings
+nano .env.dev
+```
+
+**Minimal .env.dev example:**
+
+```bash
+# LLM Configuration (use cheaper models for dev)
+MADEINOZ_KNOWLEDGE_LLM_PROVIDER=openai
+MADEINOZ_KNOWLEDGE_MODEL_NAME=openai/gpt-4o-mini
+MADEINOZ_KNOWLEDGE_OPENAI_API_KEY=sk-or-v1-your-key
+MADEINOZ_KNOWLEDGE_OPENAI_BASE_URL=https://openrouter.ai/api/v1
+
+# Embeddings (local Ollama)
+MADEINOZ_KNOWLEDGE_EMBEDDER_PROVIDER=ollama
+MADEINOZ_KNOWLEDGE_EMBEDDER_MODEL=mxbai-embed-large
+MADEINOZ_KNOWLEDGE_EMBEDDER_DIMENSIONS=1024
+MADEINOZ_KNOWLEDGE_EMBEDDER_BASE_URL=http://host.docker.internal:11434/v1
+
+# Database (dev credentials)
+MADEINOZ_KNOWLEDGE_DATABASE_TYPE=neo4j
+MADEINOZ_KNOWLEDGE_NEO4J_PASSWORD=devpassword
+
+# RAG Configuration (Qdrant)
+MADEINOZ_KNOWLEDGE_QDRANT_URL=http://localhost:6333
+MADEINOZ_KNOWLEDGE_QDRANT_COLLECTION=lkap_documents_dev
+
+# Ollama (for RAG embeddings)
+MADEINOZ_KNOWLEDGE_OLLAMA_BASE_URL=http://localhost:11434
+MADEINOZ_KNOWLEDGE_OLLAMA_EMBEDDING_MODEL=bge-large-en-v1.5
+```
+
+### Environment File Location
+
+The server-cli looks for environment files in this order:
+
+1. **Explicit path:** `--env-file /path/to/.env.dev`
+2. **Project root:** `.env.dev` (for development mode)
+3. **PAI config:** `$PAI_DIR/.env` or `~/.claude/.env` (default)
+
+### Testing Container Changes
+
+After modifying `docker/patches/*.py` or other container code:
+
+```bash
+# 1. Rebuild the Docker image
+docker build -f docker/Dockerfile -t madeinoz-knowledge-system:local .
+
+# 2. Stop existing containers
+bun run server-cli stop
+
+# 3. Start in dev mode with local image
+bun run server-cli start --dev
+
+# 4. Verify changes
+bun run server-cli logs --mcp --tail 50
+```
+
+### Development Mode Flags
+
+The `--dev` flag affects:
+
+- **Ports:** All services use alternate ports (see table above)
+- **Env files:** Uses `/tmp/madeinoz-knowledge-*-dev.env` for container config
+- **Data isolation:** Dev containers use separate volumes
+- **Image:** Can use local builds without affecting production
+
+### Debugging MCP Server
+
+To debug MCP server issues:
+
+```bash
+# View MCP server logs
+bun run server-cli logs --mcp
+
+# Follow logs in real-time
+bun run server-cli logs --mcp --tail 100 -f
+
+# Check container health
+docker ps -a | grep knowledge
+
+# Inspect container environment
+docker exec -it madeinoz-knowledge-mcp-dev env | grep MADEINOZ
+```
+
+---
+
 ## Future Improvements
 
 ### When Upstream Issues Are Resolved
